@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2026 Kevin Monaghan
+# SPDX-License-Identifier: MIT-0
+
+[package]
+name = "binance-client"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+description = "An unofficial async, provider-native Rust client for Binance APIs"
+repository = "https://github.com/SharurTrading/binance-rs"
+homepage = "https://github.com/SharurTrading/binance-rs"
+readme = "README.md"
+license = "MIT-0"
+keywords = ["binance", "trading", "spot", "api-client"]
+categories = ["api-bindings", "asynchronous", "network-programming"]
+# Repository bootstrap only. Publishing requires a separately reviewed release.
+publish = false
+include = ["/src/**", "/tests/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/LICENSE", "/README.md", "/CHANGELOG.md", "/SECURITY.md"]
+
+[dependencies]
+
+[lints.rust]
+missing_docs = "deny"
+unsafe_code = "forbid"
+
+[lints.clippy]
+pedantic = { level = "deny", priority = -1 }
+# Capability-qualified public names stay readable when imported from the crate root.
+module_name_repetitions = "allow"
+await_holding_lock = "deny"
+expect_used = "deny"
+unwrap_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"

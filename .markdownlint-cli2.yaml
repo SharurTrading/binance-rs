@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2026 Kevin Monaghan
+# SPDX-License-Identifier: MIT-0
+
+globs:
+  - "**/*.md"
+ignores:
+  - "target/**"
+config:
+  MD013: false

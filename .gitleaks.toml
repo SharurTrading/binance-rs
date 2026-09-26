@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2026 Kevin Monaghan
+# SPDX-License-Identifier: MIT-0
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Ignore local Rust build artifacts"
+paths = ['''^target/''']

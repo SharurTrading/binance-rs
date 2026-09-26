@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2026 Kevin Monaghan
+# SPDX-License-Identifier: MIT-0
+
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+inheritance: true
+knowledge_base:
+  code_guidelines:
+    enabled: true
+reviews:
+  auto_review:
+    enabled: false
+  path_instructions:
+    - path: "**/*"
+      instructions: |
+        Read the full root AGENTS.md as the authoritative review contract.
+        Enforce all applicable BN-* rules, Rust standards, and release gates.
+        This is an independent Binance inner client; reject consuming-platform
+        policy or dependencies. Check Spot asset/quantity/commission semantics,
+        ambiguous mutation handling, rate evidence, lossless event delivery,
+        generation retirement, and credential safety against that contract.
+        Findings use [BLOCKER], [MAJOR], or [MINOR] and cite rule, file, line,
+        risk, and concrete fix. Blocker and major findings require changes.
+        Under BN-FOLLOWUP-01, deferred findings need repository issue links;
+        filing an issue does not waive a blocker. Apply BN-ATTRIBUTION-01 to
+        coding and review agents equally. Do not claim scaffold CI proves
+        unimplemented integration behavior.

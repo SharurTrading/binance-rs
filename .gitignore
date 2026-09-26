@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Kevin Monaghan
+# SPDX-License-Identifier: MIT-0
+
+/target
+
+# Local credentials and operator-specific configuration. Commit only synthetic
+# examples explicitly named `.env.example`.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Local captures and editor/OS state.
+*.har
+*.pcap
+*.pcapng
+.DS_Store
+.idea/
+.vscode/

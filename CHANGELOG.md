@@ -7,8 +7,12 @@ SPDX-License-Identifier: MIT-0
 
 ## Unreleased
 
-- Bootstrap the independent Binance client repository under MIT-0.
-- Define Spot-first provider semantics and Rust coding/review standards.
-- Add cross-platform Rust CI, documentation checks, dependency/advisory/license
-  checks, and full-history secret scanning.
-- Keep the crate empty and unpublished; no Binance API implementation is included.
+- Implement USDⓈ-M Futures first: 95 REST operations, 18 catalog WebSocket API
+  methods plus session logon/status/logout, 20 market streams, and 10 user-data events.
+- Share transport, HMAC/RSA/Ed25519 signing, clocks, deadlines, safe outcome evidence,
+  and scoped venue budgets without unifying product account or settlement models.
+- Preserve exact decimals, validated caller IDs, batch member results, late response
+  attribution, unbounded ingress, generation boundaries, and finite depth continuity.
+- Add deterministic local HTTP/WebSocket fault tests, explicit read-only demo probes,
+  protocol fact snapshots, reproducible bindings, documentation, and freshness CI.
+- Retain MIT-0 licensing, cross-platform gates, human review, and unpublished status.

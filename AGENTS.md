@@ -11,9 +11,9 @@ independent inner client, with the same provider-native boundary as `projectx-rs
 ## Mission and scope
 
 Own Binance protocol and transport. Consumers own trading decisions, canonical
-models, risk, accounting, persistence, and presentation. Spot is the first product
-target. The current repository is a scaffold: do not add product implementation as
-part of setup, or claim that a configured CI gate proves unimplemented behavior.
+models, risk, accounting, persistence, and presentation. USDⓈ-M Futures is the first product
+target. Keep shared infrastructure independent of product-specific wire models.
+Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
 
 ## Non-negotiables
 
@@ -24,7 +24,9 @@ part of setup, or claim that a configured CI gate proves unimplemented behavior.
   decimal wire strings without an intermediate float. Checked arithmetic reports
   overflow and division by zero. Quantity, money, price, and percentage semantics
   remain distinct; never silently round operator inputs.
-- **BN-ASSET-01:** Spot balances retain asset identity and separate free/locked
+- **BN-ASSET-01:** Account fields retain their settlement/margin asset and position
+  mode; never normalize linear and inverse contracts into one wire model.
+  Spot balances retain asset identity and separate free/locked
   amounts. Preserve a commission's asset even when it differs from the pair's base
   or quote asset. Preserve base quantity versus quote spend. Never sum unlike assets,
   select a reporting currency, fabricate positions, or calculate portfolio equity.
@@ -106,7 +108,7 @@ part of setup, or claim that a configured CI gate proves unimplemented behavior.
   Public contract tests live in `tests/`; private unit tests cover parser invariants.
   Property/workload tests use recorded seeds and assert named invariants. Tests must
   prove behavior rather than restate implementation or pin arbitrary performance.
-- Authored text uses the MIT-0 SPDX headers demonstrated here. Generated `Cargo.lock`
+- Authored text uses the MIT-0 SPDX headers demonstrated here. Generated `Cargo.lock`, JSON protocol fact snapshots/coverage manifests,
   and the license text are exceptions. Never copy proprietary platform material.
 
 ## Contribution and review procedure

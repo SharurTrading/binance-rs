@@ -1,0 +1,240 @@
+// SPDX-FileCopyrightText: 2026 Kevin Monaghan
+// SPDX-License-Identifier: MIT-0
+
+use super::{
+    Budgets, Clock, Credentials, Error, Operation, Outcome, RateEvidence, Request, Response,
+    ResponseMeta, Security, request,
+};
+use serde::de::DeserializeOwned;
+use std::{sync::Arc, time::Duration};
+use tokio::time::Instant;
+
+#[derive(Clone)]
+pub(crate) struct HttpClient {
+    client: reqwest::Client,
+    base: url::Url,
+    credentials: Option<Credentials>,
+    clock: Arc<dyn Clock>,
+    budgets: Budgets,
+    timeout: Duration,
+}
+impl HttpClient {
+    pub fn new(
+        base: url::Url,
+        credentials: Option<Credentials>,
+        clock: Arc<dyn Clock>,
+        budgets: Budgets,
+        timeout: Duration,
+        proxy: Option<reqwest::Proxy>,
+    ) -> Result<Self, Error> {
+        let mut builder = reqwest::Client::builder()
+            .use_preconfigured_tls(super::socket::tls_config()?)
+            .no_proxy()
+            .redirect(reqwest::redirect::Policy::none())
+            .retry(reqwest::retry::never())
+            // Hyper may retry an unstarted request on a reused connection independently
+            // of reqwest policy. Fresh HTTP/1 connections eliminate that retry path.
+            .http1_only()
+            .pool_max_idle_per_host(0)
+            .timeout(timeout)
+            .connection_verbose(false);
+        if let Some(proxy) = proxy {
+            builder = builder.proxy(proxy);
+        }
+        let client = builder
+            .build()
+            .map_err(|_| Error::Configuration("HTTP client"))?;
+        Ok(Self {
+            client,
+            base,
+            credentials,
+            clock,
+            budgets,
+            timeout,
+        })
+    }
+    fn prepare<R: Request>(
+        &self,
+        op: Operation,
+        request: &R,
+        deadline: Instant,
+    ) -> Result<reqwest::Request, Error> {
+        let mut params = request::parameters(request)?;
+        let timestamp = self.clock.now_millis()?;
+        (op.validate_time)(&params, timestamp)?;
+        if Instant::now() >= deadline {
+            return Err(Error::Expired(op.name));
+        }
+        let credentials = if op.security == Security::Public {
+            None
+        } else {
+            Some(
+                self.credentials
+                    .as_ref()
+                    .ok_or(Error::CredentialsRequired)?,
+            )
+        };
+        if op.security == Security::Signed {
+            params.insert("timestamp".into(), timestamp.into());
+            let payload = request::encode(&params)?;
+            let signature = credentials
+                .ok_or(Error::CredentialsRequired)?
+                .sign(&payload)?;
+            params.insert("signature".into(), signature.into());
+        }
+        let mut url = self.base.clone();
+        url.set_path(op.path);
+        let query = request::encode(&params)?;
+        // Signature is required last, regardless of alphabetical parameter ordering.
+        let query = if let Some(signature) = params.get("signature").cloned() {
+            params.remove("signature");
+            let mut query = request::encode(&params)?;
+            let mut form = url::form_urlencoded::Serializer::new(String::new());
+            form.append_pair("signature", signature.as_str().ok_or(Error::Signing)?);
+            query.push('&');
+            query.push_str(&form.finish());
+            query
+        } else {
+            query
+        };
+        let method = reqwest::Method::from_bytes(op.method.as_bytes())
+            .map_err(|_| Error::Configuration("HTTP method"))?;
+        let mut builder = self.client.request(method, url);
+        if let Some(credentials) = credentials {
+            builder = builder.header("X-MBX-APIKEY", credentials.header()?);
+        }
+        let mut wire = builder
+            .build()
+            .map_err(|_| Error::Configuration("HTTP request"))?;
+        if op.method == "GET" {
+            wire.url_mut().set_query(Some(&query));
+        } else {
+            wire.headers_mut().insert(
+                reqwest::header::CONTENT_TYPE,
+                reqwest::header::HeaderValue::from_static("application/x-www-form-urlencoded"),
+            );
+            *wire.body_mut() = Some(query.into());
+        }
+        Ok(wire)
+    }
+    pub async fn execute<R: Request>(
+        &self,
+        request: &R,
+        deadline: Instant,
+    ) -> Result<Response<R::Response>, Error> {
+        request.validate()?;
+        let op = R::OP;
+        let wire = self.prepare(op, request, deadline)?;
+        let now = self.clock.now_millis()?;
+        self.budgets.admit(request.cost()?, now)?;
+        (op.validate_time)(&request::parameters(request)?, self.clock.now_millis()?)?;
+        if Instant::now() >= deadline {
+            return Err(Error::Expired(op.name));
+        }
+        let outcome = if op.mutation {
+            Outcome::Unknown
+        } else {
+            Outcome::ReadFailed
+        };
+        let timeout = self
+            .timeout
+            .min(deadline.saturating_duration_since(Instant::now()));
+        let attempt_deadline = Instant::now() + timeout;
+        let response = tokio::time::timeout_at(attempt_deadline, self.client.execute(wire))
+            .await
+            .map_err(|_| Error::Transport {
+                operation: op.name,
+                outcome,
+                meta: None,
+            })?
+            .map_err(|_| Error::Transport {
+                operation: op.name,
+                outcome,
+                meta: None,
+            })?;
+        let status = response.status().as_u16();
+        let rates = header_rates(response.headers());
+        let meta = ResponseMeta {
+            status,
+            operation: op.name,
+            rates,
+        };
+        self.budgets
+            .observe(&meta.rates, self.clock.now_millis().unwrap_or(now), false)
+            .map_err(|_| Error::Transport {
+                operation: op.name,
+                outcome,
+                meta: Some(Box::new(meta.clone())),
+            })?;
+        let body = tokio::time::timeout_at(attempt_deadline, response.bytes())
+            .await
+            .map_err(|_| Error::Transport {
+                operation: op.name,
+                outcome,
+                meta: Some(Box::new(meta.clone())),
+            })?
+            .map_err(|_| Error::Transport {
+                operation: op.name,
+                outcome,
+                meta: Some(Box::new(meta.clone())),
+            })?;
+        let value =
+            serde_json::from_slice::<serde_json::Value>(&body).map_err(|_| Error::Transport {
+                operation: op.name,
+                outcome,
+                meta: Some(Box::new(meta.clone())),
+            })?;
+        decode(op, status, value, meta)
+    }
+}
+
+pub(crate) fn decode<T: DeserializeOwned>(
+    op: Operation,
+    status: u16,
+    value: serde_json::Value,
+    meta: ResponseMeta,
+) -> Result<Response<T>, Error> {
+    if !(200..300).contains(&status)
+        || value
+            .get("code")
+            .and_then(serde_json::Value::as_i64)
+            .is_some_and(|v| v < 0)
+    {
+        return Err(super::error::failure(
+            op.name,
+            op.mutation,
+            status,
+            &value,
+            meta.rates,
+        ));
+    }
+    let data = serde_json::from_value(value).map_err(|_| Error::Transport {
+        operation: op.name,
+        outcome: if op.mutation {
+            Outcome::Unknown
+        } else {
+            Outcome::ReadFailed
+        },
+        meta: Some(Box::new(meta.clone())),
+    })?;
+    Ok(Response { data, meta })
+}
+
+fn header_rates(headers: &reqwest::header::HeaderMap) -> RateEvidence {
+    let mut evidence = RateEvidence::default();
+    for (name, value) in headers {
+        let name = name.as_str();
+        if (name.starts_with("x-mbx-used-weight-") || name.starts_with("x-mbx-order-count-"))
+            && let Ok(value) = value.to_str()
+            && let Ok(value) = value.parse()
+        {
+            evidence.counters.insert(name.to_owned(), value);
+        }
+    }
+    evidence.retry_after = headers
+        .get("retry-after")
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.parse().ok())
+        .map(Duration::from_secs);
+    evidence
+}

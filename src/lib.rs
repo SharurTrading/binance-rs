@@ -1,8 +1,29 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-//! An unofficial, provider-native client for Binance APIs.
+//! Independent Binance inner clients with provider-native product modules.
 //!
-//! This repository currently contains development infrastructure only. It exposes
-//! no client, transport, account model, or trading operations. Spot is the initial
-//! implementation target; see the repository's `AGENTS.md` for the client boundary.
+//! [`usdm`] implements USDⓈ-M Futures. The caller owns the Tokio runtime,
+//! credentials, order IDs, trading policy, and recovery of ambiguous mutations.
+//! Infrastructure is shared without conflating product account or contract models.
+
+/// Read-only demo metadata example; callers own the runtime.
+///
+/// ```no_run
+/// use binance_client::usdm::{Config,Environment,RestClient,rest_requests::CheckServerTime};
+/// # async fn example()->Result<(),binance_client::Error> {
+/// let client=RestClient::new(Config::new(Environment::Demo)?)?;
+/// let response=client.check_server_time(&CheckServerTime::new(),tokio::time::Instant::now()+std::time::Duration::from_secs(10)).await?;
+/// # let _ = response;
+/// # Ok(())
+/// # }
+/// ```
+mod core;
+pub mod usdm;
+
+pub use core::{BudgetLimits, Budgets};
+pub use core::{
+    ClientOrderId, Clock, Credentials, Error, Outcome, RateEvidence, RequestId, Response,
+    ResponseMeta, SensitiveString, Signer, Symbol, SystemClock, VenueFailure,
+};
+pub use rust_decimal::Decimal;

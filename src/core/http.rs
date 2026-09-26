@@ -28,7 +28,7 @@ impl HttpClient {
         proxy: Option<reqwest::Proxy>,
     ) -> Result<Self, Error> {
         let mut builder = reqwest::Client::builder()
-            .use_preconfigured_tls(super::socket::tls_config()?)
+            .tls_backend_preconfigured(super::socket::tls_config()?)
             .no_proxy()
             .redirect(reqwest::redirect::Policy::none())
             .retry(reqwest::retry::never())

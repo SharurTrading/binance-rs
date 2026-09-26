@@ -7,6 +7,9 @@ SPDX-License-Identifier: MIT-0
 
 ## Unreleased
 
+- Refresh all direct Cargo requirements to current stable releases, including
+  reqwest 0.13.5 and base64 0.23.1, and update the dependency lockfile.
+
 - Implement USDⓈ-M Futures first: 95 REST operations, 18 catalog WebSocket API
   methods plus session logon/status/logout, 20 market streams, and 10 user-data events.
 - Share transport, HMAC/RSA/Ed25519 signing, clocks, deadlines, safe outcome evidence,

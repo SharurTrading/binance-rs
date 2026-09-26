@@ -21,6 +21,6 @@ while IFS= read -r -d '' file; do
     status=1
   fi
 done < <(git ls-files --cached --others --exclude-standard -z -- \
-  '*.rs' '*.sh' '*.toml' '*.md' '*.yml' '*.yaml')
+  '*.rs' '*.sh' '*.py' '*.toml' '*.md' '*.yml' '*.yaml')
 
 exit "${status}"

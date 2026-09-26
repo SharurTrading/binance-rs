@@ -1,0 +1,3466 @@
+{
+  "checked": "2026-09-26",
+  "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/1.0.0/schema.yaml",
+  "sha256": "292b7fba3dee87c605109afbb9b371099897e1e35b1107e95803a696e14ac922",
+  "operations": [
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "accountInformation",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "account.status"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "feeTier": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "canTrade": {
+                        "type": "boolean"
+                      },
+                      "canDeposit": {
+                        "type": "boolean"
+                      },
+                      "canWithdraw": {
+                        "type": "boolean"
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "multiAssetsMargin": {
+                        "type": "boolean"
+                      },
+                      "tradeGroupId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "totalInitialMargin": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalMaintMargin": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalWalletBalance": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalUnrealizedProfit": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalMarginBalance": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalPositionInitialMargin": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalOpenOrderInitialMargin": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalCrossWalletBalance": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalCrossUnPnl": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "availableBalance": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "maxWithdrawAmount": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "assets": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "asset": {
+                              "type": "string"
+                            },
+                            "walletBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "unrealizedProfit": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "marginBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maintMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "initialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "positionInitialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "openOrderInitialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "crossWalletBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "crossUnPnl": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "availableBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maxWithdrawAmount": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "marginAvailable": {
+                              "type": "boolean"
+                            },
+                            "updateTime": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "positions": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "initialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maintMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "unrealizedProfit": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "positionInitialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "openOrderInitialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "leverage": {
+                              "type": "string"
+                            },
+                            "isolated": {
+                              "type": "boolean"
+                            },
+                            "entryPrice": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maxNotional": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "bidNotional": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "askNotional": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "positionSide": {
+                              "type": "string"
+                            },
+                            "positionAmt": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "updateTime": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "breakEvenPrice": {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          },
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/account.status",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/account#account-information"
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "accountInformationV2",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "v2/account.status"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "totalInitialMargin": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalMaintMargin": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalWalletBalance": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalUnrealizedProfit": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalMarginBalance": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalPositionInitialMargin": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalOpenOrderInitialMargin": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalCrossWalletBalance": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "totalCrossUnPnl": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "availableBalance": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "maxWithdrawAmount": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "assets": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "asset": {
+                              "type": "string"
+                            },
+                            "walletBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "unrealizedProfit": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "marginBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maintMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "initialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "positionInitialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "openOrderInitialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "crossWalletBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "crossUnPnl": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "availableBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maxWithdrawAmount": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "marginAvailable": {
+                              "type": "boolean"
+                            },
+                            "updateTime": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "positions": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "positionSide": {
+                              "type": "string"
+                            },
+                            "positionAmt": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "unrealizedProfit": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "isolatedMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "notional": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "isolatedWallet": {
+                              "type": "string"
+                            },
+                            "initialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maintMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "updateTime": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/v2/account.status",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/account#account-information-v2"
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "futuresAccountBalance",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "account.balance"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "accountAlias": {
+                          "type": "string"
+                        },
+                        "asset": {
+                          "type": "string"
+                        },
+                        "balance": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "crossWalletBalance": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "crossUnPnl": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "availableBalance": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "maxWithdrawAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "marginAvailable": {
+                          "type": "boolean"
+                        },
+                        "updateTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/account.balance",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/account#futures-account-balance"
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "futuresAccountBalanceV2",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "v2/account.balance"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "accountAlias": {
+                          "type": "string"
+                        },
+                        "asset": {
+                          "type": "string"
+                        },
+                        "balance": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "crossWalletBalance": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "crossUnPnl": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "availableBalance": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "maxWithdrawAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "marginAvailable": {
+                          "type": "boolean"
+                        },
+                        "updateTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/v2/account.balance",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/account#futures-account-balance-v2"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "orderBook",
+      "x-weight": "Adjusted based on the limit:\n\n| Limit         | Weight |\n| ------------- | ------ |\n| 5, 10, 20, 50 | 2      |\n| 100           | 5      |\n| 500           | 10     |\n| 1000          | 20     |",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "depth"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "default": 500,
+                      "maximum": 1000,
+                      "format": "int64"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "symbol"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "lastUpdateId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "bids": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ],
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "asks": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ],
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/depth",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/market-data#order-book"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "symbolOrderBookTicker",
+      "x-weight": "**2** for a single symbol;\n**5** when the symbol parameter is omitted",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "ticker.book"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "symbol": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "result": {
+                        "properties": {
+                          "lastUpdateId": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "symbol": {
+                            "type": "string"
+                          },
+                          "bidPrice": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "bidQty": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "askPrice": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "askQty": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "time": {
+                            "type": "integer",
+                            "format": "int64"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "rateLimits": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "rateLimitType": {
+                              "type": "string"
+                            },
+                            "interval": {
+                              "type": "string"
+                            },
+                            "intervalNum": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "count": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "type": "object"
+                  },
+                  {
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "result": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "lastUpdateId": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "bidPrice": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "bidQty": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "askPrice": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "askQty": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "time": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "rateLimits": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "rateLimitType": {
+                              "type": "string"
+                            },
+                            "interval": {
+                              "type": "string"
+                            },
+                            "intervalNum": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "count": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "type": "object"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/ticker.book",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/market-data#symbol-order-book-ticker"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "symbolPriceTicker",
+      "x-weight": "**1** for a single symbol;\n**2** when the symbol parameter is omitted",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "ticker.price"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "symbol": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "result": {
+                        "properties": {
+                          "symbol": {
+                            "type": "string"
+                          },
+                          "price": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "time": {
+                            "type": "integer",
+                            "format": "int64"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "rateLimits": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "rateLimitType": {
+                              "type": "string"
+                            },
+                            "interval": {
+                              "type": "string"
+                            },
+                            "intervalNum": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "count": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "type": "object"
+                  },
+                  {
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "result": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "price": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "time": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "rateLimits": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "rateLimitType": {
+                              "type": "string"
+                            },
+                            "interval": {
+                              "type": "string"
+                            },
+                            "intervalNum": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "count": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "type": "object"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/ticker.price",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/market-data#symbol-price-ticker"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "cancelAlgoOrder",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "algoOrder.cancel"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "algoId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "clientAlgoId": {
+                      "type": "string"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "algoId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "clientAlgoId": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "msg": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/algoOrder.cancel",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/trade#cancel-algo-order"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "cancelOrder",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "order.cancel"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "origClientOrderId": {
+                      "type": "string"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "symbol",
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "clientOrderId": {
+                        "type": "string"
+                      },
+                      "cumQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "executedQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "orderId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "origQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "origType": {
+                        "type": "string"
+                      },
+                      "price": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "reduceOnly": {
+                        "type": "boolean"
+                      },
+                      "side": {
+                        "type": "string"
+                      },
+                      "positionSide": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "stopPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "closePosition": {
+                        "type": "boolean"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "timeInForce": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "activatePrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "priceRate": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "workingType": {
+                        "type": "string"
+                      },
+                      "priceProtect": {
+                        "type": "boolean"
+                      },
+                      "priceMatch": {
+                        "type": "string"
+                      },
+                      "selfTradePreventionMode": {
+                        "type": "string"
+                      },
+                      "goodTillDate": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/order.cancel",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/trade#cancel-order"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "modifyOrder",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "x-weight": "1 on 10s order rate limit(X-MBX-ORDER-COUNT-10S);\n1 on 1min order rate limit(X-MBX-ORDER-COUNT-1M);\n0 on IP rate limit(x-mbx-used-weight-1m)",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "order.modify"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "origClientOrderId": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "side": {
+                      "type": "string",
+                      "enum": [
+                        "BUY",
+                        "SELL"
+                      ]
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "format": "float",
+                      "x-decimal": true
+                    },
+                    "price": {
+                      "type": "number",
+                      "format": "float",
+                      "x-decimal": true
+                    },
+                    "priceMatch": {
+                      "type": "string",
+                      "enum": [
+                        "OPPONENT",
+                        "OPPONENT_5",
+                        "OPPONENT_10",
+                        "OPPONENT_20",
+                        "QUEUE",
+                        "QUEUE_5",
+                        "QUEUE_10",
+                        "QUEUE_20"
+                      ]
+                    },
+                    "modifyId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "reduceOnly": {
+                      "type": "string",
+                      "default": "false",
+                      "enum": [
+                        "true",
+                        "false"
+                      ]
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "symbol",
+                    "side",
+                    "quantity",
+                    "price",
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "orderId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "clientOrderId": {
+                        "type": "string"
+                      },
+                      "modifyId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "price": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "origQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "executedQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "cumQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "timeInForce": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "reduceOnly": {
+                        "type": "boolean"
+                      },
+                      "closePosition": {
+                        "type": "boolean"
+                      },
+                      "side": {
+                        "type": "string"
+                      },
+                      "positionSide": {
+                        "type": "string"
+                      },
+                      "stopPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "workingType": {
+                        "type": "string"
+                      },
+                      "priceProtect": {
+                        "type": "boolean"
+                      },
+                      "origType": {
+                        "type": "string"
+                      },
+                      "priceMatch": {
+                        "type": "string"
+                      },
+                      "selfTradePreventionMode": {
+                        "type": "string"
+                      },
+                      "goodTillDate": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/order.modify",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/trade#modify-order"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "newAlgoOrder",
+      "x-ip-weight": 0,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "algoOrder.place"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "algoType": {
+                      "type": "string",
+                      "enum": [
+                        "CONDITIONAL"
+                      ]
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "side": {
+                      "type": "string",
+                      "enum": [
+                        "BUY",
+                        "SELL"
+                      ]
+                    },
+                    "positionSide": {
+                      "type": "string",
+                      "enum": [
+                        "BOTH",
+                        "LONG",
+                        "SHORT"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "STOP_MARKET",
+                        "TAKE_PROFIT_MARKET",
+                        "STOP",
+                        "TAKE_PROFIT",
+                        "TRAILING_STOP_MARKET"
+                      ]
+                    },
+                    "timeInForce": {
+                      "type": "string",
+                      "enum": [
+                        "IOC",
+                        "GTC",
+                        "FOK"
+                      ]
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "format": "float",
+                      "x-decimal": true
+                    },
+                    "price": {
+                      "type": "number",
+                      "format": "float",
+                      "x-decimal": true
+                    },
+                    "triggerPrice": {
+                      "type": "number",
+                      "format": "float",
+                      "x-decimal": true
+                    },
+                    "workingType": {
+                      "type": "string",
+                      "default": "CONTRACT_PRICE",
+                      "enum": [
+                        "MARK_PRICE",
+                        "CONTRACT_PRICE"
+                      ]
+                    },
+                    "priceMatch": {
+                      "type": "string",
+                      "enum": [
+                        "OPPONENT",
+                        "OPPONENT_5",
+                        "OPPONENT_10",
+                        "OPPONENT_20",
+                        "QUEUE",
+                        "QUEUE_5",
+                        "QUEUE_10",
+                        "QUEUE_20"
+                      ]
+                    },
+                    "closePosition": {
+                      "type": "string",
+                      "enum": [
+                        "true",
+                        "false"
+                      ]
+                    },
+                    "priceProtect": {
+                      "type": "string",
+                      "default": "false",
+                      "enum": [
+                        "true",
+                        "false"
+                      ]
+                    },
+                    "reduceOnly": {
+                      "type": "string",
+                      "default": "false",
+                      "enum": [
+                        "true",
+                        "false"
+                      ]
+                    },
+                    "activatePrice": {
+                      "type": "number",
+                      "format": "float",
+                      "x-decimal": true
+                    },
+                    "callbackRate": {
+                      "type": "number",
+                      "format": "float",
+                      "minimum": 0.1,
+                      "maximum": 10,
+                      "x-decimal": true
+                    },
+                    "clientAlgoId": {
+                      "type": "string"
+                    },
+                    "newOrderRespType": {
+                      "type": "string",
+                      "enum": [
+                        "ACK",
+                        "RESULT"
+                      ]
+                    },
+                    "selfTradePreventionMode": {
+                      "type": "string",
+                      "enum": [
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_BOTH",
+                        "EXPIRE_MAKER"
+                      ]
+                    },
+                    "goodTillDate": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "algoType",
+                    "symbol",
+                    "side",
+                    "type",
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "algoId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "clientAlgoId": {
+                        "type": "string"
+                      },
+                      "algoType": {
+                        "type": "string"
+                      },
+                      "orderType": {
+                        "type": "string"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "side": {
+                        "type": "string"
+                      },
+                      "positionSide": {
+                        "type": "string"
+                      },
+                      "timeInForce": {
+                        "type": "string"
+                      },
+                      "quantity": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "algoStatus": {
+                        "type": "string"
+                      },
+                      "triggerPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "price": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "icebergQuantity": {
+                        "type": "string"
+                      },
+                      "selfTradePreventionMode": {
+                        "type": "string"
+                      },
+                      "workingType": {
+                        "type": "string"
+                      },
+                      "priceMatch": {
+                        "type": "string"
+                      },
+                      "closePosition": {
+                        "type": "boolean"
+                      },
+                      "priceProtect": {
+                        "type": "boolean"
+                      },
+                      "reduceOnly": {
+                        "type": "boolean"
+                      },
+                      "createTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "triggerTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "goodTillDate": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/algoOrder.place",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/trade#new-algo-order"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "newOrder",
+      "x-ip-weight": 0,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "order.place"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "side": {
+                      "type": "string",
+                      "enum": [
+                        "BUY",
+                        "SELL"
+                      ]
+                    },
+                    "positionSide": {
+                      "type": "string",
+                      "enum": [
+                        "BOTH",
+                        "LONG",
+                        "SHORT"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "LIMIT",
+                        "MARKET"
+                      ]
+                    },
+                    "timeInForce": {
+                      "type": "string",
+                      "enum": [
+                        "GTC",
+                        "IOC",
+                        "FOK",
+                        "GTX",
+                        "GTD",
+                        "RPI"
+                      ]
+                    },
+                    "reduceOnly": {
+                      "type": "string",
+                      "default": "false",
+                      "enum": [
+                        "true",
+                        "false"
+                      ]
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "format": "float",
+                      "x-decimal": true
+                    },
+                    "price": {
+                      "type": "number",
+                      "format": "float",
+                      "x-decimal": true
+                    },
+                    "newClientOrderId": {
+                      "type": "string"
+                    },
+                    "newOrderRespType": {
+                      "type": "string",
+                      "default": "ACK",
+                      "enum": [
+                        "ACK",
+                        "RESULT"
+                      ]
+                    },
+                    "priceMatch": {
+                      "type": "string",
+                      "enum": [
+                        "OPPONENT",
+                        "OPPONENT_5",
+                        "OPPONENT_10",
+                        "OPPONENT_20",
+                        "QUEUE",
+                        "QUEUE_5",
+                        "QUEUE_10",
+                        "QUEUE_20"
+                      ]
+                    },
+                    "selfTradePreventionMode": {
+                      "type": "string",
+                      "default": "NONE",
+                      "enum": [
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_BOTH",
+                        "EXPIRE_MAKER"
+                      ]
+                    },
+                    "goodTillDate": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "symbol",
+                    "side",
+                    "type",
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "orderId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "clientOrderId": {
+                        "type": "string"
+                      },
+                      "price": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "origQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "executedQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "cumQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "timeInForce": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "reduceOnly": {
+                        "type": "boolean"
+                      },
+                      "closePosition": {
+                        "type": "boolean"
+                      },
+                      "side": {
+                        "type": "string"
+                      },
+                      "positionSide": {
+                        "type": "string"
+                      },
+                      "stopPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "workingType": {
+                        "type": "string"
+                      },
+                      "priceProtect": {
+                        "type": "boolean"
+                      },
+                      "origType": {
+                        "type": "string"
+                      },
+                      "priceMatch": {
+                        "type": "string"
+                      },
+                      "selfTradePreventionMode": {
+                        "type": "string"
+                      },
+                      "goodTillDate": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/order.place",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/trade#new-order"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "positionInformation",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "account.position"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "entryPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "breakEvenPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "marginType": {
+                          "type": "string"
+                        },
+                        "isAutoAddMargin": {
+                          "type": "string"
+                        },
+                        "isolatedMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "leverage": {
+                          "type": "string"
+                        },
+                        "liquidationPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "markPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "maxNotionalValue": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "positionAmt": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "notional": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "isolatedWallet": {
+                          "type": "string"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "unRealizedProfit": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "positionSide": {
+                          "type": "string"
+                        },
+                        "updateTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/account.position",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/trade#position-information"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "positionInformationV2",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "v2/account.position"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "positionSide": {
+                          "type": "string"
+                        },
+                        "positionAmt": {
+                          "type": "string"
+                        },
+                        "entryPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "breakEvenPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "markPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "unRealizedProfit": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "liquidationPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "isolatedMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "notional": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "marginAsset": {
+                          "type": "string"
+                        },
+                        "isolatedWallet": {
+                          "type": "string"
+                        },
+                        "initialMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "maintMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "positionInitialMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "openOrderInitialMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "adl": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "bidNotional": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "askNotional": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "updateTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/v2/account.position",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/trade#position-information-v2"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "queryOrder",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "order.status"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "origClientOrderId": {
+                      "type": "string"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "symbol",
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "avgPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "clientOrderId": {
+                        "type": "string"
+                      },
+                      "cumQuote": {
+                        "type": "string"
+                      },
+                      "executedQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "orderId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "origQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "origType": {
+                        "type": "string"
+                      },
+                      "price": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "reduceOnly": {
+                        "type": "boolean"
+                      },
+                      "side": {
+                        "type": "string"
+                      },
+                      "positionSide": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "stopPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "closePosition": {
+                        "type": "boolean"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "time": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "timeInForce": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "activatePrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "priceRate": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "workingType": {
+                        "type": "string"
+                      },
+                      "priceProtect": {
+                        "type": "boolean"
+                      },
+                      "priceMatch": {
+                        "type": "string"
+                      },
+                      "selfTradePreventionMode": {
+                        "type": "string"
+                      },
+                      "goodTillDate": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/order.status",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/trade#query-order"
+    },
+    {
+      "tags": [
+        "user-data-streams"
+      ],
+      "operationId": "closeUserDataStream",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_STREAM",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "userDataStream.stop"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "object"
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/userDataStream.stop",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/user-data-streams#close-user-data-stream"
+    },
+    {
+      "tags": [
+        "user-data-streams"
+      ],
+      "operationId": "keepaliveUserDataStream",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_STREAM",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "userDataStream.ping"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "listenKey": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/userDataStream.ping",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/user-data-streams#keepalive-user-data-stream"
+    },
+    {
+      "tags": [
+        "user-data-streams"
+      ],
+      "operationId": "startUserDataStream",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_STREAM",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "userDataStream.start"
+                  ]
+                },
+                "params": {
+                  "properties": {
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "apiKey"
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "properties": {
+                      "listenKey": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "path": "/userDataStream.start",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/user-data-streams#start-user-data-stream"
+    }
+  ],
+  "components": {}
+}

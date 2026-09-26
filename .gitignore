@@ -18,3 +18,7 @@
 .DS_Store
 .idea/
 .vscode/
+
+# Generator interpreter caches.
+__pycache__/
+*.pyc

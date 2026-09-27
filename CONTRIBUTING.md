@@ -12,6 +12,7 @@ The checked-in toolchain installs Rust, Clippy, and rustfmt. Local checks are:
 
 ```sh
 python3 scripts/codegen/generate.py --check
+python3 -m unittest discover -s tests/ci -p 'test_*.py'
 cargo fmt --all -- --check
 bash scripts/ci/check_spdx_headers.sh
 cargo clippy --all-targets --all-features --locked -- -D warnings

@@ -19,6 +19,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  spot-changelog:
+    name: Spot changelog freshness
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare upstream update date with our last review
+        run: python3 scripts/ci/check_spot_changelog.py
+
   quality:
     name: quality (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -54,6 +65,12 @@ jobs:
           python_cmd=python3
           if [ "$RUNNER_OS" = Windows ]; then python_cmd=python; fi
           "$python_cmd" scripts/codegen/generate.py --check
+
+      - name: Changelog monitor offline tests
+        run: |
+          python_cmd=python3
+          if [ "$RUNNER_OS" = Windows ]; then python_cmd=python; fi
+          "$python_cmd" -m unittest discover -s tests/ci -p 'test_*.py'
 
       - name: Formatting
         run: cargo fmt --all -- --check

@@ -7,9 +7,10 @@ SPDX-License-Identifier: MIT-0
 
 ## Unreleased
 
-- Add a daily, read-only Spot changelog check comparing Binance's last update date
-  with our last review date. Newer updates and unavailable/malformed evidence fail
-  visibly; normal CI exercises the checker offline on all three operating systems.
+- Add a read-only Spot changelog check on every PR, `main` push, and weekly CI run,
+  comparing Binance's last update date with our last review date. Newer updates and
+  unavailable/malformed evidence fail visibly; offline checker tests run on all
+  three operating systems. Exclude generated Python caches from package contents.
 
 - Refresh all direct Cargo requirements to current stable releases, including
   reqwest 0.13.5 and base64 0.23.1, and update the dependency lockfile.

@@ -143,8 +143,8 @@ See [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), and
 Linux/macOS/Windows, generated-binding freshness, documentation, packaging,
 licenses/advisories, and full-history secret scanning. No credentialed CI or publishing.
 
-A separate [Spot changelog workflow](.github/workflows/spot-changelog.yml) checks
-Binance's official changelog daily at 07:23 UTC, with manual dispatch available.
+The [CI workflow](.github/workflows/ci.yml) checks Binance's official Spot changelog
+on every PR and `main` push, weekly on Mondays at 06:17 UTC, and on manual dispatch.
 It compares `Last Updated` with our review date in
 [spot-changelog-review.json](.github/spot-changelog-review.json). A newer update
 fails the run and reports both dates and source links. Fetch/format errors also
@@ -153,9 +153,9 @@ fail; they cannot establish freshness. The check reads Binance's official
 because the [developer page](https://developers.binance.com/en/docs/products/spot/CHANGELOG)
 can return empty responses to scripted reads. Update `last_reviewed` through a PR
 only after reviewing the protocol changes. Date-only comparison cannot distinguish
-multiple edits made on the same day. The workflow becomes active after merging
-into `main`; it does not modify code, review dates, or issues. Ordinary CI tests
-this checker with offline fixtures.
+multiple edits made on the same day. The weekly schedule becomes active after
+merging into `main`. The read-only freshness job uses public network access;
+the checker tests use offline fixtures on Linux, macOS, and Windows.
 
 Read-only demo probes are ignored by default and require explicit invocation:
 

@@ -95,6 +95,11 @@ jobs:
       - name: Package verification
         run: cargo package --locked
 
+      # rust-cache mistakes extracted package tests/ for a build artifact profile.
+      # Keep the ordinary target cache, removing only the verified package copy.
+      - name: Remove verified package artifacts before caching
+        run: cargo clean --target-dir target/package
+
   markdown:
     runs-on: ubuntu-latest
     timeout-minutes: 10

@@ -3,7 +3,7 @@
 
 //! Credential-free read-only demo WebSocket request with caller-owned teardown.
 
-use binance_client::usdm::{Config, Environment, WsClient, ws_requests::OrderBook};
+use binance_client::core_trading::usdm::{Config, Environment, WsClient, ws_requests::OrderBook};
 use binance_client::{Error, RequestId, Symbol};
 use std::time::Duration;
 

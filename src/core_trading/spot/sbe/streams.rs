@@ -6,7 +6,7 @@ use crate::core::{
     Socket, SocketEvent,
     socket::{QueueStats, SocketEvents, SocketPolicy},
 };
-use crate::spot::{Config, ConnectionDriver, Environment};
+use crate::core_trading::spot::{Config, ConnectionDriver, Environment};
 use crate::{Budgets, Clock, Credentials, Error, Symbol, TimeUnit};
 use std::{collections::BTreeSet, sync::Arc, time::Duration};
 
@@ -67,7 +67,11 @@ impl MarketStream {
             return Err(Error::Validation("SBE symbol delimiter"));
         }
         let name = format!("{}@{suffix}", symbol.as_str().to_lowercase());
-        crate::spot::Stream::new(name.clone(), crate::spot::Route::Market, "sbe")?;
+        crate::core_trading::spot::Stream::new(
+            name.clone(),
+            crate::core_trading::spot::Route::Market,
+            "sbe",
+        )?;
         Ok(Self(name))
     }
     /// Raw trades.

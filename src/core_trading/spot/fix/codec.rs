@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 use super::{ClientId, CompId, Timestamp, WireId};
-use crate::spot::sbe::schema::Node;
+use crate::core_trading::spot::sbe::schema::Node;
 use crate::{Asset, Decimal, Error, Outcome, SensitiveString, Symbol};
 use serde::Deserialize;
 use std::{
@@ -183,7 +183,7 @@ impl Message {
             Some(Value::Integer(v)) => Some(*v),
             _ => None,
         };
-        if code.is_some_and(|v| !crate::spot::validation::definitive_code(v)) {
+        if code.is_some_and(|v| !crate::core_trading::spot::validation::definitive_code(v)) {
             return Outcome::Unknown;
         }
         if self.kind.as_str() == "8" {
@@ -280,9 +280,9 @@ static OE: OnceLock<Result<Dictionary, Error>> = OnceLock::new();
 static MD: OnceLock<Result<Dictionary, Error>> = OnceLock::new();
 pub(super) fn dictionary(role: Role) -> Result<&'static Dictionary, Error> {
     let (owner, raw) = if role == Role::MarketData {
-        (&MD, include_str!("../../../schema/spot/fix-md.json"))
+        (&MD, include_str!("../../../../schema/spot/fix-md.json"))
     } else {
-        (&OE, include_str!("../../../schema/spot/fix-oe.json"))
+        (&OE, include_str!("../../../../schema/spot/fix-oe.json"))
     };
     owner
         .get_or_init(|| Dictionary::load(raw))
@@ -642,7 +642,9 @@ pub fn decode_sbe(role: Role, bytes: &[u8]) -> Result<Message, Error> {
     {
         return Err(failure(None, 0, "SOFH length/encoding"));
     }
-    let mut value = BinaryBuffer(crate::spot::sbe::schema::decode_fix_value(&bytes[6..])?);
+    let mut value = BinaryBuffer(crate::core_trading::spot::sbe::schema::decode_fix_value(
+        &bytes[6..],
+    )?);
     let map = value
         .0
         .as_object_mut()
@@ -669,7 +671,7 @@ pub fn decode_sbe(role: Role, bytes: &[u8]) -> Result<Message, Error> {
             .try_into()
             .map_err(|_| failure(None, 8, "FIX SBE template width"))?,
     );
-    let node = crate::spot::sbe::schema::fix_node(template)?;
+    let node = crate::core_trading::spot::sbe::schema::fix_node(template)?;
     let body = project_sbe(role, &node.children, map)?;
     // SBE headers omit component IDs. Their authority comes from the authenticated
     // session; standalone decoding explicitly records this omission as None later.

@@ -143,7 +143,7 @@ fn weight(
 mod tests {
     use super::*;
     use crate::core::{Request, parameters};
-    use crate::usdm::rest_requests::RpiOrderBook;
+    use crate::core_trading::usdm::rest_requests::RpiOrderBook;
     #[test]
     fn rpi_depth_has_only_the_documented_1000_level_request() {
         let request = RpiOrderBook::new().symbol(crate::Symbol::new("BTCUSDT").unwrap());

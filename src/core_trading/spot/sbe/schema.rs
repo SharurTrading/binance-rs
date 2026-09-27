@@ -129,13 +129,13 @@ static API_SCHEMA: OnceLock<Result<Schema, Error>> = OnceLock::new();
 static FIX_SCHEMA: OnceLock<Result<Schema, Error>> = OnceLock::new();
 pub(super) fn api_schema() -> Result<&'static Schema, Error> {
     API_SCHEMA
-        .get_or_init(|| Schema::load(include_str!("../../../schema/spot/api-sbe.json")))
+        .get_or_init(|| Schema::load(include_str!("../../../../schema/spot/api-sbe.json")))
         .as_ref()
         .map_err(|_| Error::Configuration("API binary schema"))
 }
 pub(crate) fn fix_schema() -> Result<&'static Schema, Error> {
     FIX_SCHEMA
-        .get_or_init(|| Schema::load(include_str!("../../../schema/spot/fix-sbe.json")))
+        .get_or_init(|| Schema::load(include_str!("../../../../schema/spot/fix-sbe.json")))
         .as_ref()
         .map_err(|_| Error::Configuration("FIX binary schema"))
 }

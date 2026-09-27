@@ -15,7 +15,7 @@ SharurTrading. This project is not affiliated with or endorsed by Binance.
 > public probes do not establish live trading readiness. `publish = false` remains
 > in force.
 
-Five separate JSON product clients are available:
+Five separate JSON product clients are available under `binance_client::core_trading`:
 
 | Product | REST | WebSocket API | Market streams | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
@@ -45,13 +45,20 @@ Trading decisions, canonical instruments, risk, persistence, and portfolio
 accounting belong to consumers. There is no dependency on a consuming platform.
 
 ```text
-core: identities, credentials, signing, time, HTTP, sockets, rate budgets
-  ├── usdm: linear Futures models, requests, streams, depth bootstrap
-  ├── wallet: native balances, networks, withdrawals, SAPI endpoint scopes
-  ├── convert: native quote/limit amounts, expiry authority, SAPI endpoint scopes
-  ├── spot: asset balances, base quantity/quote spend, Spot depth bootstrap
-  └── coinm: inverse Futures models, requests, streams, depth bootstrap
+src/
+├── core/: shared identities, credentials, time, transport and rate budgets
+└── core_trading/
+    ├── usdm/: linear Futures models, requests, streams, depth bootstrap
+    ├── wallet/: native balances, networks, withdrawals, SAPI endpoint scopes
+    ├── convert/: native quote/limit amounts, expiry authority, SAPI endpoint scopes
+    ├── spot/: balances, base quantity/quote spend, depth bootstrap, FIX and SBE
+    └── coinm/: inverse Futures models, requests, streams, depth bootstrap
 ```
+
+`core_trading` groups the existing products within this single crate. Future API
+sections can sit alongside it, and `core` remains independent shared infrastructure.
+Root imports such as `binance_client::spot` remain compatible re-exports of the
+same modules and types; new code can use `binance_client::core_trading::spot`.
 
 Spot and COIN-M reuse the core through separate product modules. Asset balances,
 linear versus inverse settlement, position modes, and product routes stay native.
@@ -68,8 +75,8 @@ The application owns the Tokio runtime. This example uses Tokio's `macros` and
 
 ```rust,no_run
 use binance_client::Error;
-use binance_client::usdm::rest_requests::{CheckServerTime, ExchangeInformation};
-use binance_client::usdm::{Config, Environment, RestClient};
+use binance_client::core_trading::usdm::rest_requests::{CheckServerTime, ExchangeInformation};
+use binance_client::core_trading::usdm::{Config, Environment, RestClient};
 use std::time::Duration;
 use tokio::time::Instant;
 
@@ -153,7 +160,8 @@ UM and CM share IP/account limits after the current integration. Configure an
 explicit common owner for both products:
 
 ```rust
-use binance_client::{BudgetLimits, Budgets, Error, coinm, usdm};
+use binance_client::core_trading::{coinm, usdm};
+use binance_client::{BudgetLimits, Budgets, Error};
 
 let budgets = Budgets::new(BudgetLimits::coinm())?;
 let um = usdm::Config::new(usdm::Environment::Production)?.budgets(budgets.clone());

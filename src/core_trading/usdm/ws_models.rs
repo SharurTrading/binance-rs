@@ -1809,9 +1809,10 @@ pub struct PositionInformationV2ResponseItem {
     #[serde(
         rename = "positionAmt",
         default,
+        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub position_amt: Option<String>,
+    pub position_amt: Option<Decimal>,
     /// Exact `entryPrice` wire field.
     #[serde(
         rename = "entryPrice",

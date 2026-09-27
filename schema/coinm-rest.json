@@ -117,7 +117,8 @@
                           "x-rust-type": "crate::Symbol"
                         },
                         "positionAmt": {
-                          "type": "string"
+                          "type": "string",
+                          "x-decimal": true
                         },
                         "initialMargin": {
                           "type": "string",
@@ -1123,11 +1124,13 @@
                           },
                           "qtyCap": {
                             "type": "integer",
-                            "format": "int64"
+                            "format": "int64",
+                            "x-decimal": true
                           },
                           "qtylFloor": {
                             "type": "integer",
-                            "format": "int64"
+                            "format": "int64",
+                            "x-decimal": true
                           },
                           "maintMarginRatio": {
                             "type": "number",
@@ -1227,11 +1230,13 @@
                           },
                           "qtyCap": {
                             "type": "integer",
-                            "format": "int64"
+                            "format": "int64",
+                            "x-decimal": true
                           },
                           "qtylFloor": {
                             "type": "integer",
-                            "format": "int64"
+                            "format": "int64",
+                            "x-decimal": true
                           },
                           "maintMarginRatio": {
                             "type": "number",
@@ -1931,7 +1936,8 @@
                         },
                         "contractSize": {
                           "type": "integer",
-                          "format": "int64"
+                          "format": "int64",
+                          "x-decimal": true
                         },
                         "quoteAsset": {
                           "type": "string",
@@ -7011,7 +7017,8 @@
                       "x-rust-type": "crate::Symbol"
                     },
                     "positionAmt": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true
                     },
                     "entryPrice": {
                       "type": "string",

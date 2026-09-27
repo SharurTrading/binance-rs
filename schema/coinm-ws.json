@@ -212,7 +212,8 @@
                               "format": "int64"
                             },
                             "positionAmt": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "breakEvenPrice": {
                               "type": "string",
@@ -1246,7 +1247,8 @@
                           "x-rust-type": "crate::Symbol"
                         },
                         "positionAmt": {
-                          "type": "string"
+                          "type": "string",
+                          "x-decimal": true
                         },
                         "entryPrice": {
                           "type": "string",

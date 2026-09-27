@@ -4,6 +4,7 @@
 //! Independent Binance inner clients with provider-native product modules.
 //!
 //! [`spot`], [`usdm`], and [`coinm`] implement distinct trading products.
+//! [`wallet`] retains native assets, networks, account categories and SAPI quotas.
 //! The caller owns the Tokio runtime,
 //! credentials, order IDs, trading policy, and recovery of ambiguous mutations.
 //! Infrastructure is shared without conflating product account or contract models.
@@ -33,6 +34,7 @@ pub mod coinm;
 mod core;
 pub mod spot;
 pub mod usdm;
+pub mod wallet;
 
 pub use core::{
     Asset, ClientOrderId, Clock, Credentials, Error, OperationLeg, Outcome, PartialOperation,

@@ -1,0 +1,5545 @@
+{
+  "source": "https://developers.binance.info/en/docs/catalog/core-trading-wallet/api/rest-api/1.0.0/schema.yaml",
+  "sha256": "632d21db5cfdda81a16e58ca5c51db041e457de9c6ebca38b3cbcb426d0d7d54",
+  "checked": "2026-09-27",
+  "components": {
+    "schemas": {}
+  },
+  "operations": [
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "accountApiTradingStatus",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "isLocked": {
+                        "type": "boolean"
+                      },
+                      "plannedRecoverTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "triggerCondition": {
+                        "type": "object",
+                        "properties": {
+                          "GCR": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "IFER": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "UFR": {
+                            "type": "integer",
+                            "format": "int64"
+                          }
+                        }
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/account/apiTradingStatus",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#account-api-trading-status",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "accountInfo",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "vipLevel": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "isMarginEnabled": {
+                    "type": "boolean"
+                  },
+                  "isFutureEnabled": {
+                    "type": "boolean"
+                  },
+                  "isOptionsEnabled": {
+                    "type": "boolean"
+                  },
+                  "isPortfolioMarginRetailEnabled": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/account/info",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#account-info",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "accountStatus",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/account/status",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#account-status",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "dailyAccountSnapshot",
+      "x-ip-weight": 2400,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "SPOT",
+              "MARGIN",
+              "FUTURES"
+            ]
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 30,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "msg": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  },
+                  "snapshotVos": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "balances": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "asset": {
+                                    "type": "string",
+                                    "x-rust-type": "crate::Asset"
+                                  },
+                                  "free": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "locked": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  }
+                                }
+                              }
+                            },
+                            "totalAssetOfBtc": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "marginLevel": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "totalLiabilityOfBtc": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "totalNetAssetOfBtc": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "userAssets": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "asset": {
+                                    "type": "string",
+                                    "x-rust-type": "crate::Asset"
+                                  },
+                                  "borrowed": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "free": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "interest": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "locked": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "netAsset": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  }
+                                }
+                              }
+                            },
+                            "assets": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "asset": {
+                                    "type": "string",
+                                    "x-rust-type": "crate::Asset"
+                                  },
+                                  "marginBalance": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "walletBalance": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  }
+                                }
+                              }
+                            },
+                            "position": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "entryPrice": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "markPrice": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "positionAmt": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "symbol": {
+                                    "type": "string"
+                                  },
+                                  "unRealizedProfit": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "updateTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "required": [
+                        "data",
+                        "type",
+                        "updateTime"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "code",
+                  "snapshotVos"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/accountSnapshot",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#daily-account-snapshot",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "disableFastWithdrawSwitch",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {}
+      },
+      "path": "/sapi/v1/account/disableFastWithdrawSwitch",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#disable-fast-withdraw-switch",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "enableFastWithdrawSwitch",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {}
+      },
+      "path": "/sapi/v1/account/enableFastWithdrawSwitch",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#enable-fast-withdraw-switch",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "getApiKeyPermission",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ipRestrict": {
+                    "type": "boolean"
+                  },
+                  "createTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "enableReading": {
+                    "type": "boolean"
+                  },
+                  "enableWithdrawals": {
+                    "type": "boolean"
+                  },
+                  "enableInternalTransfer": {
+                    "type": "boolean"
+                  },
+                  "enableMargin": {
+                    "type": "boolean"
+                  },
+                  "enableFutures": {
+                    "type": "boolean"
+                  },
+                  "permitsUniversalTransfer": {
+                    "type": "boolean"
+                  },
+                  "enableVanillaOptions": {
+                    "type": "boolean"
+                  },
+                  "enableFixApiTrade": {
+                    "type": "boolean"
+                  },
+                  "enableFixReadOnly": {
+                    "type": "boolean"
+                  },
+                  "enableSpotAndMarginTrading": {
+                    "type": "boolean"
+                  },
+                  "enablePortfolioMarginTrading": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/account/apiRestrictions",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#get-api-key-permission",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "assetDetail",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "asset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "minWithdrawAmount": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "depositStatus": {
+                      "type": "boolean"
+                    },
+                    "withdrawFee": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-decimal": true
+                    },
+                    "withdrawStatus": {
+                      "type": "boolean"
+                    },
+                    "depositTip": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "x-rust-key-type": "crate::Asset"
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/assetDetail",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#asset-detail",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "assetDividendRecord",
+      "x-ip-weight": 10,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "asset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "amount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "asset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "divTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "enInfo": {
+                          "type": "string"
+                        },
+                        "tranId": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "direction": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  },
+                  "total": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/assetDividend",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#asset-dividend-record",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "dustConvert",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 10,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "asset",
+                "timestamp"
+              ],
+              "properties": {
+                "asset": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "accountType": {
+                  "type": "string"
+                },
+                "clientId": {
+                  "type": "string",
+                  "x-rust-type": "crate::RequestId"
+                },
+                "targetAsset": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "thirdPartyClientId": {
+                  "type": "string"
+                },
+                "dustQuotaAssetToTargetAssetPrice": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "totalTransfered": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "totalServiceCharge": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "transferResult": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "tranId": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "fromAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "amount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "transferedAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "serviceChargeAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "operateTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/dust-convert/convert",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#dust-convert",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "dustConvertibleAssets",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "targetAsset",
+                "timestamp"
+              ],
+              "properties": {
+                "accountType": {
+                  "type": "string"
+                },
+                "targetAsset": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "dustQuotaAssetToTargetAssetPrice": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dribbletPercentage": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "totalTransferQuotaAssetAmount": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "totalTransferTargetAssetAmount": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "dribbletBase": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "details": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "asset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "assetFullName": {
+                          "type": "string"
+                        },
+                        "amountFree": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "exchange": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "toQuotaAssetAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "toTargetAssetAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "toTargetAssetOffExchange": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/dust-convert/query-convertible-assets",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#dust-convertible-assets",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "dustlog",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "accountType",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "SPOT",
+              "MARGIN"
+            ]
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "userAssetDribblets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "operateTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "totalTransferedAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "totalServiceChargeAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "transId": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "userAssetDribbletDetails": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "transId": {
+                                "type": "integer",
+                                "format": "int64"
+                              },
+                              "serviceChargeAmount": {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              "amount": {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              "operateTime": {
+                                "type": "integer",
+                                "format": "int64"
+                              },
+                              "transferedAmount": {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              "fromAsset": {
+                                "type": "string",
+                                "x-rust-type": "crate::Asset"
+                              },
+                              "targetAsset": {
+                                "type": "string",
+                                "x-rust-type": "crate::Asset"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/dribblet",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#dustlog",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "dustTransfer",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 10,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "asset",
+                "timestamp"
+              ],
+              "properties": {
+                "asset": {
+                  "type": "string",
+                  "x-rust-type": "super::DustAssets"
+                },
+                "accountType": {
+                  "type": "string",
+                  "enum": [
+                    "SPOT",
+                    "MARGIN"
+                  ]
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "totalServiceCharge": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "totalTransfered": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "transferResult": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "amount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "fromAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "operateTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "serviceChargeAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "tranId": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "transferedAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/dust",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#dust-transfer",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "fundingWallet",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "asset": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "needBtcValuation": {
+                  "type": "boolean"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "free": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "locked": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "freeze": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "withdrawing": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "btcValuation": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/get-funding-asset",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#funding-wallet",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "getSpotAssetTags",
+      "x-ip-weight": 100,
+      "x-security-type": "MARKET_DATA",
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tag",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::SensitiveString"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "assetCode": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "assetName": {
+                      "type": "string"
+                    },
+                    "trading": {
+                      "type": "boolean"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/spot/asset/tags",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#get-spot-asset-tags",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "getAssetsThatCanBeConvertedIntoBnb",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "accountType": {
+                  "type": "string",
+                  "enum": [
+                    "SPOT",
+                    "MARGIN"
+                  ]
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "details": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "asset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "assetFullName": {
+                          "type": "string"
+                        },
+                        "amountFree": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "toBTC": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "toBNB": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "toBNBOffExchange": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "exchange": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      }
+                    }
+                  },
+                  "totalTransferBtc": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "totalTransferBNB": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "dribbletPercentage": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/dust-btc",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#get-assets-that-can-be-converted-into-bnb",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "getCloudMiningPaymentAndRefundHistory",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 600,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tranId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "clientTranId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "asset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "current",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "createTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "tranId": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "type": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "asset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "amount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/ledger-transfer/cloud-mining/queryByPage",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#get-cloud-mining-payment-and-refund-history",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "getOpenSymbolList",
+      "x-ip-weight": 100,
+      "x-security-type": "MARKET_DATA",
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "openTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "symbols": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/spot/open-symbol-list",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#get-open-symbol-list",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "queryUserDelegationHistory",
+      "x-ip-weight": 60,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "email",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::SensitiveString"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "DELEGATE",
+              "UNDELEGATE"
+            ]
+          }
+        },
+        {
+          "name": "asset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "current",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "clientTranId": {
+                          "type": "string"
+                        },
+                        "transferType": {
+                          "type": "string"
+                        },
+                        "asset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "amount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "time": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/custody/transfer-history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#query-user-delegation-history",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "queryUserUniversalTransferHistory",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "current",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "fromSymbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "toSymbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "asset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "amount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "tranId": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "timestamp": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/transfer",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#query-user-universal-transfer-history",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "userUniversalTransfer",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 300,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "type",
+                "asset",
+                "amount",
+                "timestamp"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "MAIN_UMFUTURE",
+                    "MAIN_CMFUTURE",
+                    "MAIN_MARGIN",
+                    "UMFUTURE_MAIN",
+                    "UMFUTURE_MARGIN",
+                    "CMFUTURE_MAIN",
+                    "CMFUTURE_MARGIN",
+                    "MARGIN_MAIN",
+                    "MARGIN_UMFUTURE",
+                    "MARGIN_CMFUTURE",
+                    "ISOLATEDMARGIN_MARGIN",
+                    "MARGIN_ISOLATEDMARGIN",
+                    "ISOLATEDMARGIN_ISOLATEDMARGIN",
+                    "MAIN_FUNDING",
+                    "FUNDING_MAIN",
+                    "FUNDING_UMFUTURE",
+                    "UMFUTURE_FUNDING",
+                    "MARGIN_FUNDING",
+                    "FUNDING_MARGIN",
+                    "FUNDING_CMFUTURE",
+                    "CMFUTURE_FUNDING",
+                    "MAIN_OPTION",
+                    "OPTION_MAIN",
+                    "UMFUTURE_OPTION",
+                    "OPTION_UMFUTURE",
+                    "MARGIN_OPTION",
+                    "OPTION_MARGIN",
+                    "FUNDING_OPTION",
+                    "OPTION_FUNDING",
+                    "MAIN_PORTFOLIO_MARGIN",
+                    "PORTFOLIO_MARGIN_MAIN"
+                  ]
+                },
+                "asset": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "amount": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "fromSymbol": {
+                  "type": "string"
+                },
+                "toSymbol": {
+                  "type": "string"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tranId": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "tranId"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/transfer",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#user-universal-transfer",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "queryUserWalletBalance",
+      "x-ip-weight": 60,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "quoteAsset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "needBalanceDetail",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "activate": {
+                      "type": "boolean"
+                    },
+                    "balance": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "walletName": {
+                      "type": "string"
+                    },
+                    "assetBalances": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "asset": {
+                            "type": "string",
+                            "x-rust-type": "crate::Asset"
+                          },
+                          "assetName": {
+                            "type": "string"
+                          },
+                          "free": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "locked": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "freeze": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "withdrawing": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "btcValuation": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "activate",
+                    "balance",
+                    "walletName"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/wallet/balance",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#query-user-wallet-balance",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "toggleBnbBurnOnSpotTradeAndMarginInterest",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "spotBNBBurn": {
+                  "type": "string"
+                },
+                "interestBNBBurn": {
+                  "type": "string"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "spotBNBBurn": {
+                    "type": "boolean"
+                  },
+                  "interestBNBBurn": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/bnbBurn",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#toggle-bnb-burn-on-spot-trade-and-margin-interest",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "tradeFee",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "makerCommission": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "takerCommission": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/asset/tradeFee",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#trade-fee",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "asset"
+      ],
+      "operationId": "userAsset",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "asset": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "needBtcValuation": {
+                  "type": "boolean"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "free": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "locked": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "freeze": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "withdrawing": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "ipoable": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "btcValuation": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v3/asset/getUserAsset",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#user-asset",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "capital"
+      ],
+      "operationId": "allCoinsInformation",
+      "x-ip-weight": 10,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "coin": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "depositAllEnable": {
+                      "type": "boolean"
+                    },
+                    "withdrawAllEnable": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "free": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "locked": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "freeze": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "withdrawing": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "ipoing": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "ipoable": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "storage": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "isLegalMoney": {
+                      "type": "boolean"
+                    },
+                    "trading": {
+                      "type": "boolean"
+                    },
+                    "networkList": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "network": {
+                            "type": "string"
+                          },
+                          "coin": {
+                            "type": "string",
+                            "x-rust-type": "crate::Asset"
+                          },
+                          "withdrawIntegerMultiple": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "isDefault": {
+                            "type": "boolean"
+                          },
+                          "depositEnable": {
+                            "type": "boolean"
+                          },
+                          "withdrawEnable": {
+                            "type": "boolean"
+                          },
+                          "depositDesc": {
+                            "type": "string"
+                          },
+                          "withdrawDesc": {
+                            "type": "string"
+                          },
+                          "specialTips": {
+                            "type": "string"
+                          },
+                          "specialWithdrawTips": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "resetAddressStatus": {
+                            "type": "boolean"
+                          },
+                          "addressRegex": {
+                            "type": "string"
+                          },
+                          "memoRegex": {
+                            "type": "string"
+                          },
+                          "withdrawFee": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "withdrawMin": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "withdrawMax": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "withdrawInternalMin": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "depositDust": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "minConfirm": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "unLockConfirm": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "sameAddress": {
+                            "type": "boolean"
+                          },
+                          "withdrawTag": {
+                            "type": "boolean"
+                          },
+                          "estimatedArrivalTime": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "busy": {
+                            "type": "boolean"
+                          },
+                          "contractAddressUrl": {
+                            "type": "string"
+                          },
+                          "contractAddress": {
+                            "type": "string"
+                          },
+                          "denomination": {
+                            "type": "integer",
+                            "format": "int64"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/capital/config/getall",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#all-coins-information",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "capital"
+      ],
+      "operationId": "depositAddress",
+      "x-ip-weight": 10,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "coin",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "network",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "amount",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "number",
+            "format": "float",
+            "x-decimal": true
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  },
+                  "coin": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "tag": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  },
+                  "url": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/capital/deposit/address",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#deposit-address",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "capital"
+      ],
+      "operationId": "depositHistory",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "includeSource",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "coin",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2,
+              6,
+              7,
+              8
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "txId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::SensitiveString"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "amount": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "coin": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "network": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "address": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "addressTag": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "txId": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "insertTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "completeTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "transferType": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "confirmTimes": {
+                      "type": "string"
+                    },
+                    "unlockConfirm": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "walletType": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "travelRuleStatus": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/capital/deposit/hisrec",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#deposit-history",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "capital"
+      ],
+      "operationId": "fetchDepositAddressListWithNetwork",
+      "x-ip-weight": 10,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "coin",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "network",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "coin": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "address": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "tag": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "isDefault": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/capital/deposit/address/list",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-deposit-address-list-with-network",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "capital"
+      ],
+      "operationId": "fetchWithdrawAddressList",
+      "x-ip-weight": 10,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "addressTag": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "coin": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "network": {
+                      "type": "string"
+                    },
+                    "origin": {
+                      "type": "string"
+                    },
+                    "originType": {
+                      "type": "string"
+                    },
+                    "whiteStatus": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/capital/withdraw/address/list",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-address-list",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "capital"
+      ],
+      "operationId": "fetchWithdrawQuota",
+      "x-ip-weight": 10,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "wdQuota": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "usedWdQuota": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/capital/withdraw/quota",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-quota",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "capital"
+      ],
+      "operationId": "oneClickArrivalDepositApply",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "depositId": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "txId": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "subAccountId": {
+                  "type": "string"
+                },
+                "subUserId": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  },
+                  "data": {
+                    "type": "boolean"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/capital/deposit/credit-apply",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#one-click-arrival-deposit-apply",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "capital"
+      ],
+      "operationId": "withdraw",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 900,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "coin",
+                "address",
+                "amount",
+                "timestamp"
+              ],
+              "properties": {
+                "coin": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "withdrawOrderId": {
+                  "type": "string",
+                  "x-rust-type": "super::WithdrawalId"
+                },
+                "network": {
+                  "type": "string"
+                },
+                "address": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "addressTag": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "amount": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "transactionFeeFlag": {
+                  "type": "boolean"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "walletType": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/capital/withdraw/apply",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "capital"
+      ],
+      "operationId": "withdrawHistory",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 18000,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "coin",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "withdrawOrderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "super::WithdrawalId"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "idList",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "amount": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "transactionFee": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "coin": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "address": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "txId": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "applyTime": {
+                      "type": "string"
+                    },
+                    "network": {
+                      "type": "string"
+                    },
+                    "transferType": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "withdrawOrderId": {
+                      "type": "string",
+                      "x-rust-type": "super::WithdrawalId"
+                    },
+                    "info": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "confirmNo": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "walletType": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "txKey": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "completeTime": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/capital/withdraw/history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw-history",
+      "x-mutation": false,
+      "x-requests-per-second": 10
+    },
+    {
+      "tags": [
+        "others"
+      ],
+      "operationId": "getSymbolsDelistScheduleForSpot",
+      "x-ip-weight": 100,
+      "x-security-type": "MARKET_DATA",
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "delistTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "symbols": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/spot/delist-schedule",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/others#get-symbols-delist-schedule-for-spot",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "others"
+      ],
+      "operationId": "systemStatus",
+      "x-ip-weight": 1,
+      "x-security-type": "System",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "msg": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/system/status",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/others#system-status",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "brokerWithdraw",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 600,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "address",
+                "coin",
+                "amount",
+                "withdrawOrderId",
+                "questionnaire",
+                "originatorPii",
+                "timestamp"
+              ],
+              "properties": {
+                "address": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "addressTag": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "network": {
+                  "type": "string"
+                },
+                "coin": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "addressName": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "amount": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "withdrawOrderId": {
+                  "type": "string",
+                  "x-rust-type": "super::WithdrawalId"
+                },
+                "transactionFeeFlag": {
+                  "type": "boolean"
+                },
+                "walletType": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "questionnaire": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "originatorPii": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "trId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "accepted": {
+                    "type": "boolean"
+                  },
+                  "info": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  }
+                },
+                "required": [
+                  "trId",
+                  "accepted"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/localentity/broker/withdraw/apply",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#broker-withdraw",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "checkQuestionnaireRequirements",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "questionnaireCountryCode": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/localentity/questionnaire-requirements",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#check-questionnaire-requirements",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "getCountryList",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "countries": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "countryCode": {
+                          "type": "string"
+                        },
+                        "countryName": {
+                          "type": "string"
+                        },
+                        "blockType": {
+                          "type": "string"
+                        },
+                        "depositAllowed": {
+                          "type": "boolean"
+                        },
+                        "withdrawalAllowed": {
+                          "type": "boolean"
+                        },
+                        "hasRegionRestrictions": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  },
+                  "lastUpdated": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/localentity/country/list",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#get-country-list",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "depositHistoryTravelRule",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "trId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "txId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::SensitiveString"
+          }
+        },
+        {
+          "name": "tranId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "network",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "coin",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "travelRuleStatus",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "pendingQuestionnaire",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "trId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "tranId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "amount": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "coin": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "network": {
+                      "type": "string"
+                    },
+                    "depositStatus": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "travelRuleStatus": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "travelRuleStatusV2": {
+                      "type": "string"
+                    },
+                    "address": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "addressTag": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "txId": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "insertTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "completeTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "transferType": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "confirmTimes": {
+                      "type": "string"
+                    },
+                    "requireQuestionnaire": {
+                      "type": "boolean"
+                    },
+                    "questionnaire": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/localentity/deposit/history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#deposit-history-travel-rule",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "depositHistoryV2",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "depositId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "txId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::SensitiveString"
+          }
+        },
+        {
+          "name": "network",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "coin",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "retrieveQuestionnaire",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "depositId": {
+                      "type": "string"
+                    },
+                    "amount": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "network": {
+                      "type": "string"
+                    },
+                    "coin": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "depositStatus": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "travelRuleReqStatus": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "address": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "addressTag": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "txId": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "transferType": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "confirmTimes": {
+                      "type": "string"
+                    },
+                    "requireQuestionnaire": {
+                      "type": "boolean"
+                    },
+                    "questionnaire": {
+                      "type": "object",
+                      "properties": {
+                        "vaspName": {
+                          "type": "string"
+                        },
+                        "depositOriginator": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    },
+                    "insertTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v2/localentity/deposit/history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#deposit-history-v2",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "fetchAddressVerificationList",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "network": {
+                      "type": "string"
+                    },
+                    "walletAddress": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "addressQuestionnaire": {
+                      "type": "object",
+                      "properties": {
+                        "sendTo": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "satoshiToken": {
+                          "type": "string"
+                        },
+                        "isAddressOwner": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "verifyMethod": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/addressVerify/list",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#fetch-address-verification-list",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "getRegionList",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "countryCode",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "countryCode": {
+                    "type": "string"
+                  },
+                  "regions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "regionName": {
+                          "type": "string"
+                        },
+                        "blockType": {
+                          "type": "string"
+                        },
+                        "depositAllowed": {
+                          "type": "boolean"
+                        },
+                        "withdrawalAllowed": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  },
+                  "lastUpdated": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/localentity/region/list",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#get-region-list",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "submitDepositQuestionnaire",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 600,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "subAccountId",
+                "depositId",
+                "questionnaire",
+                "beneficiaryPii",
+                "timestamp"
+              ],
+              "properties": {
+                "subAccountId": {
+                  "type": "string"
+                },
+                "depositId": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "questionnaire": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "beneficiaryPii": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "network": {
+                  "type": "string"
+                },
+                "coin": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "amount": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "address": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "addressTag": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "trId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "accepted": {
+                    "type": "boolean"
+                  },
+                  "info": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/localentity/broker/deposit/provide-info",
+      "method": "PUT",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#submit-deposit-questionnaire",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "submitDepositQuestionnaireTravelRule",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 600,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "tranId",
+                "questionnaire",
+                "timestamp"
+              ],
+              "properties": {
+                "tranId": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "questionnaire": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "trId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "accepted": {
+                    "type": "boolean"
+                  },
+                  "info": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/localentity/deposit/provide-info",
+      "method": "PUT",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#submit-deposit-questionnaire-travel-rule",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "submitDepositQuestionnaireV2",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 600,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "depositId",
+                "questionnaire",
+                "timestamp"
+              ],
+              "properties": {
+                "depositId": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "questionnaire": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "trId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "accepted": {
+                    "type": "boolean"
+                  },
+                  "info": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v2/localentity/deposit/provide-info",
+      "method": "PUT",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#submit-deposit-questionnaire-v2",
+      "x-mutation": true
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "vaspList",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "vaspName": {
+                      "type": "string"
+                    },
+                    "vaspCode": {
+                      "type": "string"
+                    },
+                    "identifier": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/localentity/vasp",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#vasp-list",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "withdrawHistoryV1",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "trId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "txId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::SensitiveString"
+          }
+        },
+        {
+          "name": "withdrawOrderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "super::WithdrawalId"
+          }
+        },
+        {
+          "name": "network",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "coin",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "travelRuleStatus",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "trId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "amount": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "transactionFee": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "coin": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "withdrawalStatus": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "travelRuleStatus": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "address": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "txId": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "applyTime": {
+                      "type": "string"
+                    },
+                    "network": {
+                      "type": "string"
+                    },
+                    "transferType": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "withdrawOrderId": {
+                      "type": "string",
+                      "x-rust-type": "super::WithdrawalId"
+                    },
+                    "info": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "confirmNo": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "walletType": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "txKey": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "questionnaire": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "completeTime": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/localentity/withdraw/history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-history-v1",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "withdrawHistoryV2",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "trId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "txId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::SensitiveString"
+          }
+        },
+        {
+          "name": "withdrawOrderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "super::WithdrawalId"
+          }
+        },
+        {
+          "name": "network",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "coin",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "travelRuleStatus",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "trId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "amount": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "transactionFee": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "coin": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "withdrawalStatus": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "travelRuleStatus": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "address": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "txId": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "applyTime": {
+                      "type": "string"
+                    },
+                    "network": {
+                      "type": "string"
+                    },
+                    "transferType": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "withdrawOrderId": {
+                      "type": "string",
+                      "x-rust-type": "super::WithdrawalId"
+                    },
+                    "info": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "confirmNo": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "walletType": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "txKey": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "questionnaire": {
+                      "type": "string",
+                      "x-rust-type": "crate::SensitiveString"
+                    },
+                    "completeTime": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v2/localentity/withdraw/history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-history-v2",
+      "x-mutation": false
+    },
+    {
+      "tags": [
+        "travel-rule"
+      ],
+      "operationId": "withdrawTravelRule",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 600,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "coin",
+                "address",
+                "amount",
+                "questionnaire",
+                "timestamp"
+              ],
+              "properties": {
+                "coin": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "withdrawOrderId": {
+                  "type": "string",
+                  "x-rust-type": "super::WithdrawalId"
+                },
+                "network": {
+                  "type": "string"
+                },
+                "address": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "addressTag": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "amount": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "transactionFeeFlag": {
+                  "type": "boolean"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "walletType": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "questionnaire": {
+                  "type": "string",
+                  "x-rust-type": "crate::SensitiveString"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "trId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "accepted": {
+                    "type": "boolean"
+                  },
+                  "info": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  }
+                },
+                "required": [
+                  "trId",
+                  "accepted"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/sapi/v1/localentity/withdraw/apply",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-travel-rule",
+      "x-mutation": true
+    }
+  ]
+}

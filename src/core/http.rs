@@ -178,7 +178,7 @@ impl HttpClient {
             rates,
         };
         self.budgets
-            .observe(&meta.rates, self.clock.now_millis().unwrap_or(now), false)
+            .observe_cost(cost, &meta.rates, self.clock.now_millis().unwrap_or(now))
             .map_err(|_| Error::Transport {
                 client_order_ids: client_order_ids.clone(),
                 operation: op.name,
@@ -252,7 +252,9 @@ fn header_rates(headers: &reqwest::header::HeaderMap) -> RateEvidence {
     let mut evidence = RateEvidence::default();
     for (name, value) in headers {
         let name = name.as_str();
-        if (name.starts_with("x-mbx-used-weight-") || name.starts_with("x-mbx-order-count-"))
+        if (name.starts_with("x-mbx-used-weight-")
+            || name.starts_with("x-mbx-order-count-")
+            || name.starts_with("x-sapi-used-"))
             && let Ok(value) = value.to_str()
             && let Ok(value) = value.parse()
         {

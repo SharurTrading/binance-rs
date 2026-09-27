@@ -7,6 +7,7 @@ pub(crate) mod http;
 mod identity;
 pub(crate) mod rate;
 pub(crate) mod request;
+pub(crate) mod sapi;
 pub(crate) mod socket;
 mod time;
 

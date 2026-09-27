@@ -15,7 +15,7 @@ keywords = ["binance", "trading", "futures", "api-client"]
 categories = ["api-bindings", "asynchronous", "network-programming"]
 # Publishing requires a separately reviewed release.
 publish = false
-include = ["/src/**", "/tests/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/LICENSE", "/README.md", "/CHANGELOG.md", "/SECURITY.md", "/docs/**", "/schema/**", "/scripts/codegen/*.py", "/clippy.toml", "/rust-toolchain.toml", "/AGENTS.md", "/CONTRIBUTING.md"]
+include = ["/src/**", "/tests/**", "!/tests/**/__pycache__/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/LICENSE", "/README.md", "/SECURITY.md", "/docs/**", "/schema/**", "/scripts/codegen/*.py", "/clippy.toml", "/rust-toolchain.toml", "/AGENTS.md", "/CONTRIBUTING.md"]
 
 [dependencies]
 aws-lc-rs = "1.18.1"

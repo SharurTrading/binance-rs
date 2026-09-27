@@ -108,6 +108,8 @@ impl Streams {
                 },
                 ping_limit: 5,
                 time_unit: config.time_unit,
+                binary_decoder: None,
+                api_key_header: false,
             },
         )
         .await?;

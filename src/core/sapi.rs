@@ -68,12 +68,7 @@ impl Budgets {
         now: u64,
         status: u16,
     ) -> Result<(), Error> {
-        if status == 418 && e.retry_after.is_none() {
-            self.ip
-                .lock()
-                .map_err(|_| Error::Configuration("IP budget poisoned"))?
-                .cooldown_timing_unknown = true;
-        }
+        self.observe_ban(status, e)?;
         let Some(cost) = cost.sapi else {
             return self.observe(e, now, false);
         };
@@ -101,7 +96,7 @@ impl Budgets {
             {
                 let until = now
                     .checked_add(
-                        u64::try_from(delay.as_millis())
+                        u64::try_from(delay.as_nanos().div_ceil(1_000_000))
                             .map_err(|_| Error::Configuration("SAPI cooldown overflow"))?,
                     )
                     .ok_or(Error::Configuration("SAPI cooldown overflow"))?;
@@ -160,10 +155,10 @@ impl Config {
     /// Set the single-attempt transport timeout.
     ///
     /// # Errors
-    /// Refuses a zero timeout.
+    /// Refuses a zero or unrepresentable timeout.
     pub fn timeout(mut self, value: Duration) -> Result<Self, Error> {
-        if value.is_zero() {
-            return Err(Error::Configuration("zero timeout"));
+        if value.is_zero() || tokio::time::Instant::now().checked_add(value).is_none() {
+            return Err(Error::Configuration("zero or unrepresentable timeout"));
         }
         self.timeout = value;
         Ok(self)

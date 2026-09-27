@@ -107,6 +107,30 @@ pub struct OperationLeg {
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
+    /// Malformed FIX evidence, excluding raw sensitive fields.
+    #[error("FIX decode failure: {reason} at byte {offset}")]
+    FixDecode {
+        /// Native tag when known.
+        tag: Option<u32>,
+        /// Source byte offset.
+        offset: usize,
+        /// Static safe diagnostic.
+        reason: &'static str,
+    },
+    /// Invalid binary protocol evidence; no raw sensitive payload is retained.
+    #[error("binary decode failure: {reason} at byte {offset}")]
+    BinaryDecode {
+        /// Schema ID if its header could be read.
+        schema_id: Option<u16>,
+        /// Schema version if its header could be read.
+        version: Option<u16>,
+        /// Native template ID if its header could be read.
+        template_id: Option<u16>,
+        /// Byte offset of the refused field.
+        offset: usize,
+        /// Static safe diagnostic.
+        reason: &'static str,
+    },
     /// Invalid input, rejected before network admission.
     #[error("invalid input: {0}")]
     Validation(&'static str),
@@ -179,7 +203,11 @@ impl Error {
         match self {
             Self::Venue(e) => Some(e.outcome),
             Self::Transport { outcome, .. } => Some(*outcome),
-            Self::Gap(_) | Self::Task | Self::Closed => None,
+            Self::Gap(_)
+            | Self::BinaryDecode { .. }
+            | Self::FixDecode { .. }
+            | Self::Task
+            | Self::Closed => None,
             _ => Some(Outcome::NotSent),
         }
     }

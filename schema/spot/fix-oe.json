@@ -1,0 +1,2524 @@
+{
+  "source": "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/fix/schemas/spot-fix-oe.xml",
+  "sha256": "f0fa25633758f0554150a81b1aa922d4b9303bed546369ff5a1df2cb4ee08df6",
+  "schema": {
+    "kind": "fix",
+    "major": "4",
+    "type": "FIX",
+    "servicepack": "0",
+    "minor": "4",
+    "children": [
+      {
+        "kind": "header",
+        "children": [
+          {
+            "kind": "field",
+            "name": "BeginString",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "BodyLength",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "MsgType",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "SenderCompID",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "TargetCompID",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "MsgSeqNum",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "SendingTime",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "RecvWindow",
+            "required": "N"
+          }
+        ]
+      },
+      {
+        "kind": "messages",
+        "children": [
+          {
+            "kind": "message",
+            "name": "Heartbeat",
+            "msgcat": "admin",
+            "msgtype": "0",
+            "children": [
+              {
+                "kind": "field",
+                "name": "TestReqID",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "TestRequest",
+            "msgcat": "admin",
+            "msgtype": "1",
+            "children": [
+              {
+                "kind": "field",
+                "name": "TestReqID",
+                "required": "Y"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "Reject",
+            "msgcat": "admin",
+            "msgtype": "3",
+            "children": [
+              {
+                "kind": "field",
+                "name": "RefSeqNum",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "RefTagID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "RefMsgType",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "SessionRejectReason",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ErrorCode",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Text",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "Logout",
+            "msgcat": "admin",
+            "msgtype": "5",
+            "children": [
+              {
+                "kind": "field",
+                "name": "Text",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "ExecutionReport",
+            "msgcat": "app",
+            "msgtype": "8",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ExecID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ClOrdID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrigClOrdID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrderID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrderQty",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrdType",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "Side",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "Symbol",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "ExecInst",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Price",
+                "required": "N"
+              },
+              {
+                "kind": "component",
+                "name": "TriggeringInstruction",
+                "required": "N"
+              },
+              {
+                "kind": "component",
+                "name": "PegInstructions",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "PeggedPrice",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TimeInForce",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TransactTime",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrderCreationTime",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "MaxFloor",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ListID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "CashOrderQty",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TargetStrategy",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "StrategyID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "SelfTradePreventionMode",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ExecType",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "CumQty",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "LeavesQty",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "CumQuoteQty",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "AggressorIndicator",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TradeID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "LastPx",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "LastQty",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "OrdStatus",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "AllocID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "MatchType",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "WorkingFloor",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "WorkingIndicator",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "WorkingTime",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TrailingTime",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "PreventedMatchID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "PreventedExecutionPrice",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "PreventedExecutionQty",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TradeGroupID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "CounterSymbol",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "CounterOrderID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "PreventedQty",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "LastPreventedQty",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "SOR",
+                "required": "N"
+              },
+              {
+                "kind": "group",
+                "name": "NoMiscFees",
+                "required": "N",
+                "children": [
+                  {
+                    "kind": "field",
+                    "name": "MiscFeeAmt",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MiscFeeCurr",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MiscFeeType",
+                    "required": "Y"
+                  }
+                ]
+              },
+              {
+                "kind": "field",
+                "name": "OrdRejReason",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ErrorCode",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Text",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ExpiryReason",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "OrderCancelReject",
+            "msgcat": "app",
+            "msgtype": "9",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ClOrdID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "OrigClOrdID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrderID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrigClListID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ListID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Symbol",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "CancelRestrictions",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "CxlRejResponseTo",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "ErrorCode",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "Text",
+                "required": "Y"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "OrderCancelRequestAndNewOrderSingle",
+            "msgcat": "app",
+            "msgtype": "XCN",
+            "children": [
+              {
+                "kind": "field",
+                "name": "OrderCancelRequestAndNewOrderSingleMode",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "OrderRateLimitExceededMode",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrderID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "CancelClOrdID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrigClOrdID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "CancelRestrictions",
+                "required": "N"
+              },
+              {
+                "kind": "component",
+                "name": "NewOrder",
+                "required": "Y"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "Logon",
+            "msgcat": "admin",
+            "msgtype": "A",
+            "children": [
+              {
+                "kind": "field",
+                "name": "EncryptMethod",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "HeartBtInt",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "RawDataLength",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "RawData",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ResetSeqNumFlag",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Username",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "MessageHandling",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ResponseMode",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ExecutionReportType",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "DropCopyFlag",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "UUID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "SBESchemaID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "SBESchemaVersion",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "NewOrderSingle",
+            "msgcat": "app",
+            "msgtype": "D",
+            "children": [
+              {
+                "kind": "component",
+                "name": "NewOrder",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "SOR",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "NewOrderList",
+            "msgcat": "app",
+            "msgtype": "E",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ClListID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "ContingencyType",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "OPO",
+                "required": "N"
+              },
+              {
+                "kind": "group",
+                "name": "NoOrders",
+                "required": "N",
+                "children": [
+                  {
+                    "kind": "component",
+                    "name": "NewOrder",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "component",
+                    "name": "ListTriggeringInstruction",
+                    "required": "N"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "OrderCancelRequest",
+            "msgcat": "app",
+            "msgtype": "F",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ClOrdID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "OrigClOrdID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrderID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrigClListID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ListID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Symbol",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "CancelRestrictions",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "ListStatus",
+            "msgcat": "app",
+            "msgtype": "N",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ListID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ClListID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrigClListID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ContingencyType",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ListStatusType",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "ListOrderStatus",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "ListRejectReason",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TransactTime",
+                "required": "N"
+              },
+              {
+                "kind": "group",
+                "name": "NoOrders",
+                "required": "N",
+                "children": [
+                  {
+                    "kind": "field",
+                    "name": "ClOrdID",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "Symbol",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "OrderID",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "component",
+                    "name": "ListTriggeringInstruction",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "OrdRejReason",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "ErrorCode",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "Text",
+                    "required": "N"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "OrderMassCancelRequest",
+            "msgcat": "app",
+            "msgtype": "q",
+            "children": [
+              {
+                "kind": "field",
+                "name": "Symbol",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "ClOrdID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "MassCancelRequestType",
+                "required": "Y"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "OrderMassCancelReport",
+            "msgcat": "app",
+            "msgtype": "r",
+            "children": [
+              {
+                "kind": "field",
+                "name": "Symbol",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "ClOrdID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "MassCancelRequestType",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "MassCancelResponse",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "MassCancelRejectReason",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TotalAffectedOrders",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ErrorCode",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Text",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "OrderAmendKeepPriorityRequest",
+            "msgcat": "app",
+            "msgtype": "XAK",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ClOrdID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "OrigClOrdID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrderID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Symbol",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "OrderQty",
+                "required": "Y"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "OrderAmendReject",
+            "msgcat": "app",
+            "msgtype": "XAR",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ClOrdID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "OrigClOrdID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrderID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Symbol",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "OrderQty",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "ErrorCode",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "Text",
+                "required": "Y"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "LimitQuery",
+            "msgcat": "app",
+            "msgtype": "XLQ",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ReqID",
+                "required": "Y"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "LimitResponse",
+            "msgcat": "app",
+            "msgtype": "XLR",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ReqID",
+                "required": "Y"
+              },
+              {
+                "kind": "group",
+                "name": "NoLimitIndicators",
+                "required": "Y",
+                "children": [
+                  {
+                    "kind": "field",
+                    "name": "LimitType",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "LimitCount",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "LimitMax",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "LimitResetInterval",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "LimitResetIntervalResolution",
+                    "required": "N"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "News",
+            "msgtype": "B",
+            "msgcat": "app",
+            "children": [
+              {
+                "kind": "field",
+                "name": "Headline",
+                "required": "Y"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "trailer",
+        "children": [
+          {
+            "kind": "field",
+            "name": "CheckSum",
+            "required": "Y"
+          }
+        ]
+      },
+      {
+        "kind": "components",
+        "children": [
+          {
+            "kind": "component",
+            "name": "PegInstructions",
+            "children": [
+              {
+                "kind": "field",
+                "name": "PegOffsetValue",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "PegPriceType",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "PegMoveType",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "PegOffsetType",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "component",
+            "name": "TriggeringInstruction",
+            "children": [
+              {
+                "kind": "field",
+                "name": "TriggerType",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TriggerAction",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TriggerPrice",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TriggerPriceType",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TriggerPriceDirection",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TriggerTrailingDeltaBips",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "component",
+            "name": "ListTriggeringInstruction",
+            "children": [
+              {
+                "kind": "group",
+                "name": "NoListTriggeringInstructions",
+                "required": "N",
+                "children": [
+                  {
+                    "kind": "field",
+                    "name": "ListTriggerType",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "ListTriggerTriggerIndex",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "ListTriggerAction",
+                    "required": "Y"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "component",
+            "name": "NewOrder",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ClOrdID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "OrderQty",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "OrdType",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "ExecInst",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Price",
+                "required": "N"
+              },
+              {
+                "kind": "component",
+                "name": "TriggeringInstruction",
+                "required": "N"
+              },
+              {
+                "kind": "component",
+                "name": "PegInstructions",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Side",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "Symbol",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "TimeInForce",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "MaxFloor",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "CashOrderQty",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "TargetStrategy",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "StrategyID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "SelfTradePreventionMode",
+                "required": "N"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "fields",
+        "children": [
+          {
+            "kind": "field",
+            "number": "8",
+            "name": "BeginString",
+            "type": "STRING",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "FIX.4.4"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "9",
+            "name": "BodyLength",
+            "type": "LENGTH"
+          },
+          {
+            "kind": "field",
+            "number": "10",
+            "name": "CheckSum",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "11",
+            "name": "ClOrdID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "14",
+            "name": "CumQty",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "17",
+            "name": "ExecID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "18",
+            "name": "ExecInst",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "6"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "31",
+            "name": "LastPx",
+            "type": "PRICE"
+          },
+          {
+            "kind": "field",
+            "number": "32",
+            "name": "LastQty",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "34",
+            "name": "MsgSeqNum",
+            "type": "SEQNUM"
+          },
+          {
+            "kind": "field",
+            "number": "35",
+            "name": "MsgType",
+            "type": "STRING",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              },
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              },
+              {
+                "kind": "value",
+                "enum": "8"
+              },
+              {
+                "kind": "value",
+                "enum": "9"
+              },
+              {
+                "kind": "value",
+                "enum": "A"
+              },
+              {
+                "kind": "value",
+                "enum": "B"
+              },
+              {
+                "kind": "value",
+                "enum": "D"
+              },
+              {
+                "kind": "value",
+                "enum": "E"
+              },
+              {
+                "kind": "value",
+                "enum": "F"
+              },
+              {
+                "kind": "value",
+                "enum": "N"
+              },
+              {
+                "kind": "value",
+                "enum": "q"
+              },
+              {
+                "kind": "value",
+                "enum": "r"
+              },
+              {
+                "kind": "value",
+                "enum": "XAK"
+              },
+              {
+                "kind": "value",
+                "enum": "XAR"
+              },
+              {
+                "kind": "value",
+                "enum": "XCN"
+              },
+              {
+                "kind": "value",
+                "enum": "XLQ"
+              },
+              {
+                "kind": "value",
+                "enum": "XLR"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "37",
+            "name": "OrderID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "38",
+            "name": "OrderQty",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "39",
+            "name": "OrdStatus",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              },
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              },
+              {
+                "kind": "value",
+                "enum": "6"
+              },
+              {
+                "kind": "value",
+                "enum": "8"
+              },
+              {
+                "kind": "value",
+                "enum": "A"
+              },
+              {
+                "kind": "value",
+                "enum": "C"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "40",
+            "name": "OrdType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              },
+              {
+                "kind": "value",
+                "enum": "P"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "41",
+            "name": "OrigClOrdID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "44",
+            "name": "Price",
+            "type": "PRICE"
+          },
+          {
+            "kind": "field",
+            "number": "45",
+            "name": "RefSeqNum",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "49",
+            "name": "SenderCompID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "52",
+            "name": "SendingTime",
+            "type": "UTCTIMESTAMP"
+          },
+          {
+            "kind": "field",
+            "number": "54",
+            "name": "Side",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "55",
+            "name": "Symbol",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "56",
+            "name": "TargetCompID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "58",
+            "name": "Text",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "59",
+            "name": "TimeInForce",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "60",
+            "name": "TransactTime",
+            "type": "UTCTIMESTAMP"
+          },
+          {
+            "kind": "field",
+            "number": "66",
+            "name": "ListID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "70",
+            "name": "AllocID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "73",
+            "name": "NoOrders",
+            "type": "NUMINGROUP"
+          },
+          {
+            "kind": "field",
+            "number": "95",
+            "name": "RawDataLength",
+            "type": "LENGTH"
+          },
+          {
+            "kind": "field",
+            "number": "96",
+            "name": "RawData",
+            "type": "DATA"
+          },
+          {
+            "kind": "field",
+            "number": "98",
+            "name": "EncryptMethod",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "103",
+            "name": "OrdRejReason",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "99"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "108",
+            "name": "HeartBtInt",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "111",
+            "name": "MaxFloor",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "112",
+            "name": "TestReqID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "136",
+            "name": "NoMiscFees",
+            "type": "NUMINGROUP"
+          },
+          {
+            "kind": "field",
+            "number": "137",
+            "name": "MiscFeeAmt",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "138",
+            "name": "MiscFeeCurr",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "139",
+            "name": "MiscFeeType",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "4"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "141",
+            "name": "ResetSeqNumFlag",
+            "type": "BOOLEAN",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "Y"
+              },
+              {
+                "kind": "value",
+                "enum": "N"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "148",
+            "name": "Headline",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "150",
+            "name": "ExecType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              },
+              {
+                "kind": "value",
+                "enum": "8"
+              },
+              {
+                "kind": "value",
+                "enum": "F"
+              },
+              {
+                "kind": "value",
+                "enum": "C"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "151",
+            "name": "LeavesQty",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "152",
+            "name": "CashOrderQty",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "211",
+            "name": "PegOffsetValue",
+            "type": "FLOAT"
+          },
+          {
+            "kind": "field",
+            "number": "371",
+            "name": "RefTagID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "372",
+            "name": "RefMsgType",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "373",
+            "name": "SessionRejectReason",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              },
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              },
+              {
+                "kind": "value",
+                "enum": "6"
+              },
+              {
+                "kind": "value",
+                "enum": "8"
+              },
+              {
+                "kind": "value",
+                "enum": "10"
+              },
+              {
+                "kind": "value",
+                "enum": "13"
+              },
+              {
+                "kind": "value",
+                "enum": "14"
+              },
+              {
+                "kind": "value",
+                "enum": "15"
+              },
+              {
+                "kind": "value",
+                "enum": "16"
+              },
+              {
+                "kind": "value",
+                "enum": "99"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "429",
+            "name": "ListStatusType",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              },
+              {
+                "kind": "value",
+                "enum": "100"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "431",
+            "name": "ListOrderStatus",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "6"
+              },
+              {
+                "kind": "value",
+                "enum": "7"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "434",
+            "name": "CxlRejResponseTo",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "530",
+            "name": "MassCancelRequestType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "531",
+            "name": "MassCancelResponse",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              },
+              {
+                "kind": "value",
+                "enum": "1"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "532",
+            "name": "MassCancelRejectReason",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "99"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "533",
+            "name": "TotalAffectedOrders",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "553",
+            "name": "Username",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "574",
+            "name": "MatchType",
+            "type": "STRING",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "636",
+            "name": "WorkingIndicator",
+            "type": "BOOLEAN"
+          },
+          {
+            "kind": "field",
+            "number": "811",
+            "name": "PriceDelta",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "835",
+            "name": "PegMoveType",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "836",
+            "name": "PegOffsetType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "3"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "839",
+            "name": "PeggedPrice",
+            "type": "PRICE"
+          },
+          {
+            "kind": "field",
+            "number": "847",
+            "name": "TargetStrategy",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "1003",
+            "name": "TradeID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "1057",
+            "name": "AggressorIndicator",
+            "type": "BOOLEAN",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "Y"
+              },
+              {
+                "kind": "value",
+                "enum": "N"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "1094",
+            "name": "PegPriceType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "4"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "1100",
+            "name": "TriggerType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "4"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "1101",
+            "name": "TriggerAction",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "1102",
+            "name": "TriggerPrice",
+            "type": "PRICE"
+          },
+          {
+            "kind": "field",
+            "number": "1107",
+            "name": "TriggerPriceType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "1109",
+            "name": "TriggerPriceDirection",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "U"
+              },
+              {
+                "kind": "value",
+                "enum": "D"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "1385",
+            "name": "ContingencyType",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "1386",
+            "name": "ListRejectReason",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "99"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "6136",
+            "name": "ReqID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "7940",
+            "name": "StrategyID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "9406",
+            "name": "DropCopyFlag",
+            "type": "BOOLEAN"
+          },
+          {
+            "kind": "field",
+            "number": "25000",
+            "name": "RecvWindow",
+            "type": "FLOAT"
+          },
+          {
+            "kind": "field",
+            "number": "25001",
+            "name": "SelfTradePreventionMode",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              },
+              {
+                "kind": "value",
+                "enum": "6"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25002",
+            "name": "CancelRestrictions",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25003",
+            "name": "NoLimitIndicators",
+            "type": "NUMINGROUP"
+          },
+          {
+            "kind": "field",
+            "number": "25004",
+            "name": "LimitType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25005",
+            "name": "LimitCount",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25006",
+            "name": "LimitMax",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25007",
+            "name": "LimitResetInterval",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25008",
+            "name": "LimitResetIntervalResolution",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "s"
+              },
+              {
+                "kind": "value",
+                "enum": "m"
+              },
+              {
+                "kind": "value",
+                "enum": "h"
+              },
+              {
+                "kind": "value",
+                "enum": "d"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25009",
+            "name": "TriggerTrailingDeltaBips",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25010",
+            "name": "NoListTriggeringInstructions",
+            "type": "NUMINGROUP"
+          },
+          {
+            "kind": "field",
+            "number": "25011",
+            "name": "ListTriggerType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25012",
+            "name": "ListTriggerTriggerIndex",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25013",
+            "name": "ListTriggerAction",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25014",
+            "name": "ClListID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "25015",
+            "name": "OrigClListID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "25016",
+            "name": "ErrorCode",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25017",
+            "name": "CumQuoteQty",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "25018",
+            "name": "OrderCreationTime",
+            "type": "UTCTIMESTAMP"
+          },
+          {
+            "kind": "field",
+            "number": "25021",
+            "name": "WorkingFloor",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25022",
+            "name": "TrailingTime",
+            "type": "UTCTIMESTAMP"
+          },
+          {
+            "kind": "field",
+            "number": "25023",
+            "name": "WorkingTime",
+            "type": "UTCTIMESTAMP"
+          },
+          {
+            "kind": "field",
+            "number": "25024",
+            "name": "PreventedMatchID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25025",
+            "name": "PreventedExecutionPrice",
+            "type": "PRICE"
+          },
+          {
+            "kind": "field",
+            "number": "25026",
+            "name": "PreventedExecutionQty",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "25027",
+            "name": "TradeGroupID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25028",
+            "name": "CounterSymbol",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "25029",
+            "name": "CounterOrderID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25030",
+            "name": "PreventedQty",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "25031",
+            "name": "LastPreventedQty",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "25032",
+            "name": "SOR",
+            "type": "BOOLEAN"
+          },
+          {
+            "kind": "field",
+            "number": "25033",
+            "name": "OrderCancelRequestAndNewOrderSingleMode",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25034",
+            "name": "CancelClOrdID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "25035",
+            "name": "MessageHandling",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25036",
+            "name": "ResponseMode",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25037",
+            "name": "UUID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "25038",
+            "name": "OrderRateLimitExceededMode",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25045",
+            "name": "ExecutionReportType",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25046",
+            "name": "OPO",
+            "type": "BOOLEAN"
+          },
+          {
+            "kind": "field",
+            "number": "25050",
+            "name": "SBESchemaID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25051",
+            "name": "SBESchemaVersion",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25052",
+            "name": "SBESchemaVersionDeprecated",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25056",
+            "name": "ExpiryReason",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              },
+              {
+                "kind": "value",
+                "enum": "6"
+              },
+              {
+                "kind": "value",
+                "enum": "7"
+              },
+              {
+                "kind": "value",
+                "enum": "8"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

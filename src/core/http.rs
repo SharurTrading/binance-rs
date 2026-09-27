@@ -8,6 +8,7 @@ use super::{
 use serde::de::DeserializeOwned;
 use std::{sync::Arc, time::Duration};
 use tokio::time::Instant;
+type BinaryDecoder = fn(&[u8]) -> Result<serde_json::Value, Error>;
 
 #[derive(Clone)]
 pub(crate) struct HttpClient {
@@ -18,6 +19,7 @@ pub(crate) struct HttpClient {
     clock: Arc<dyn Clock>,
     budgets: Budgets,
     timeout: Duration,
+    binary: Option<(&'static str, BinaryDecoder)>,
 }
 impl HttpClient {
     pub fn new(
@@ -53,11 +55,35 @@ impl HttpClient {
             clock,
             budgets,
             timeout,
+            binary: None,
         })
     }
     pub(crate) fn time_unit(mut self, unit: super::TimeUnit) -> Self {
         self.time_unit = unit;
         self
+    }
+    pub(crate) fn binary_responses(mut self, schema: &'static str, decode: BinaryDecoder) -> Self {
+        self.binary = Some((schema, decode));
+        self
+    }
+    fn decode_body(
+        &self,
+        body: &[u8],
+        status: u16,
+        binary_content: bool,
+    ) -> Result<serde_json::Value, Error> {
+        if let Some((_, decode)) = self.binary {
+            if binary_content {
+                decode(body)
+            } else if !(200..300).contains(&status) {
+                serde_json::from_slice(body)
+                    .map_err(|_| Error::Gap("malformed SBE negotiation error"))
+            } else {
+                Err(Error::Gap("unexpected SBE response content type"))
+            }
+        } else {
+            serde_json::from_slice(body).map_err(|_| Error::Gap("malformed JSON response"))
+        }
     }
     fn prepare<R: Request>(
         &self,
@@ -110,6 +136,11 @@ impl HttpClient {
         let method = reqwest::Method::from_bytes(op.method.as_bytes())
             .map_err(|_| Error::Configuration("HTTP method"))?;
         let mut builder = self.client.request(method, url);
+        if let Some((schema, _)) = self.binary {
+            builder = builder
+                .header("Accept", "application/sbe")
+                .header("X-MBX-SBE", schema);
+        }
         if self.time_unit == super::TimeUnit::Microseconds {
             builder = builder.header("X-MBX-TIME-UNIT", "MICROSECOND");
         }
@@ -172,6 +203,11 @@ impl HttpClient {
                 meta: None,
             })?;
         let status = response.status().as_u16();
+        let binary_content = response
+            .headers()
+            .get(reqwest::header::CONTENT_TYPE)
+            .and_then(|v| v.to_str().ok())
+            .is_some_and(|v| v.split(';').next() == Some("application/sbe"));
         let rates = header_rates(response.headers());
         let meta = ResponseMeta {
             time_unit: self.time_unit,
@@ -207,8 +243,9 @@ impl HttpClient {
                 outcome,
                 meta: Some(Box::new(meta.clone())),
             })?;
-        let value =
-            serde_json::from_slice::<serde_json::Value>(&body).map_err(|_| Error::Transport {
+        let value = self
+            .decode_body(&body, status, binary_content)
+            .map_err(|_| Error::Transport {
                 client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome,

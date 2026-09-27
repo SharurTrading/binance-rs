@@ -22,3 +22,29 @@ fn credentials_debug_is_redacted() {
     assert!(!debug.contains("synthetic-api-key"));
     assert!(!debug.contains("synthetic-secret"));
 }
+
+#[test]
+fn unrepresentable_configured_timeouts_are_refused_before_io() {
+    use binance_client::{coinm, convert, spot, usdm, wallet};
+    let huge = std::time::Duration::MAX;
+    assert!(
+        usdm::Config::new(usdm::Environment::Demo)
+            .unwrap()
+            .timeout(huge)
+            .is_err()
+    );
+    assert!(
+        coinm::Config::new(coinm::Environment::Demo)
+            .unwrap()
+            .timeout(huge)
+            .is_err()
+    );
+    assert!(
+        spot::Config::new(spot::Environment::Demo)
+            .unwrap()
+            .timeout(huge)
+            .is_err()
+    );
+    assert!(wallet::Config::new().unwrap().timeout(huge).is_err());
+    assert!(convert::Config::new().unwrap().timeout(huge).is_err());
+}

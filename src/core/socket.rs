@@ -26,6 +26,7 @@ use tokio_websockets::{
 };
 
 static GENERATION: AtomicU64 = AtomicU64::new(1);
+pub(crate) type BinaryDecoder = fn(&[u8]) -> Result<Value, Error>;
 
 /// Observable ingress lag; no capacity-driven dropping or disconnection.
 #[derive(Clone, Debug, Default)]
@@ -152,6 +153,9 @@ pub(crate) struct SocketDriver {
     lifetime: Instant,
     ping_limit: usize,
     time_unit: super::TimeUnit,
+    binary_decoder: Option<BinaryDecoder>,
+    binary_timestamps: bool,
+    require_binary_success: bool,
     pending: BTreeMap<String, Pending>,
     // IDs are evidence until generation retirement, including completed and timed-out calls.
     used_ids: BTreeSet<String>,
@@ -176,6 +180,8 @@ pub(crate) struct SocketPolicy {
     pub handshake: Cost,
     pub ping_limit: usize,
     pub time_unit: super::TimeUnit,
+    pub binary_decoder: Option<BinaryDecoder>,
+    pub api_key_header: bool,
 }
 
 impl Socket {
@@ -200,6 +206,8 @@ impl Socket {
                 },
                 ping_limit: if api { 5 } else { 10 },
                 time_unit: super::TimeUnit::Milliseconds,
+                binary_decoder: None,
+                api_key_header: false,
             },
         )
         .await
@@ -218,11 +226,25 @@ impl Socket {
         let connector =
             Connector::Rustls(tokio_rustls::TlsConnector::from(Arc::new(tls_config()?)));
         // No library frame/queue ceiling: real socket loss becomes an explicit generation gap.
-        let builder = ClientBuilder::new()
+        let mut builder = ClientBuilder::new()
             .uri(url.as_str())
             .map_err(|_| Error::Configuration("WebSocket URI"))?
             .connector(&connector)
             .limits(Limits::unlimited());
+        if policy.api_key_header {
+            let credentials = credentials.as_ref().ok_or(Error::CredentialsRequired)?;
+            if !credentials.is_ed25519() {
+                return Err(Error::Validation("SBE streams require Ed25519 credentials"));
+            }
+            builder = builder
+                .add_header(
+                    "X-MBX-APIKEY"
+                        .parse()
+                        .map_err(|_| Error::Configuration("API key header name"))?,
+                    credentials.header()?,
+                )
+                .map_err(|_| Error::Configuration("API key handshake header"))?;
+        }
         budgets.admit(policy.handshake, clock.now_millis()?)?;
         let (ws, _) = tokio::time::timeout(timeout, builder.connect())
             .await
@@ -268,6 +290,9 @@ impl Socket {
             lifetime: Instant::now() + Duration::from_hours(24),
             ping_limit: policy.ping_limit,
             time_unit: policy.time_unit,
+            binary_decoder: policy.binary_decoder,
+            binary_timestamps: policy.binary_decoder.is_some(),
+            require_binary_success: policy.binary_decoder.is_some() && !policy.api_key_header,
             pending: BTreeMap::new(),
             used_ids: BTreeSet::new(),
         };
@@ -330,6 +355,12 @@ impl Socket {
 }
 
 impl SocketDriver {
+    fn binary_response(&mut self, bytes: &[u8]) -> Result<(), Error> {
+        let decode = self
+            .binary_decoder
+            .ok_or(Error::Gap("unexpected binary event on JSON connection"))?;
+        self.response(decode(bytes)?)
+    }
     fn emit(&mut self, event: SocketEvent) -> Result<(), Error> {
         let mut metrics = self
             .stats
@@ -423,7 +454,7 @@ impl SocketDriver {
                 );
                 let outcome = tokio::select! {
                     ()=self.stop.cancelled()=>Err(Error::Closed),
-                    value=tokio::time::timeout_at(deadline.min(Instant::now()+self.timeout),self.ws.send(Message::text(body)))=>{
+                    value=tokio::time::timeout_at(deadline.min(Instant::now().checked_add(self.timeout).ok_or(Error::Configuration("socket timeout range"))?),self.ws.send(Message::text(body)))=>{
                         value.map_err(|_|Error::Gap("WebSocket send timeout"))?.map_err(|_|Error::Gap("WebSocket send failure"))
                     }
                 };
@@ -474,7 +505,8 @@ impl SocketDriver {
                 .clock
                 .now_millis()
                 .map_err(|_| Error::Gap("clock unavailable after response"))?;
-            let rates = ws_rates(&value, now);
+            let rates = ws_rates(&value, now, self.binary_timestamps);
+            self.budgets.observe_ban(status, &rates)?;
             self.budgets.observe(&rates, now, true)?;
             let meta = ResponseMeta {
                 time_unit: self.time_unit,
@@ -561,7 +593,8 @@ impl SocketDriver {
                 },
                 frame=self.ws.next()=>match frame {
                     Some(Ok(message)) if message.is_text()=>{
-                        match serde_json::from_slice(message.as_payload()) {
+                        match serde_json::from_slice::<Value>(message.as_payload()) {
+                            Ok(value) if self.require_binary_success && value.get("status").and_then(Value::as_u64).is_none_or(|status|status<400)=>Err(Error::Gap("SBE API successful JSON fallback")),
                             Ok(value)=>self.response(value),
                             Err(_)=>Err(Error::Gap("malformed JSON event")),
                         }
@@ -576,7 +609,7 @@ impl SocketDriver {
                         }
                     },
                     Some(Ok(message)) if message.is_close()=>{failure=Some(Error::Gap("venue closed socket"));break;},
-                    Some(Ok(message)) if message.is_binary()=>Err(Error::Gap("unexpected binary event on JSON connection")),
+                    Some(Ok(message)) if message.is_binary()=>self.binary_response(message.as_payload()),
                     Some(Ok(_))=>Ok(()),
                     Some(Err(_))=>Err(Error::Gap("WebSocket transport loss")),
                     None=>{failure=Some(Error::Gap("WebSocket EOF"));break;},
@@ -633,7 +666,7 @@ impl SocketDriver {
     }
 }
 
-fn ws_rates(v: &Value, now: u64) -> RateEvidence {
+fn ws_rates(v: &Value, now: u64, binary_timestamps: bool) -> RateEvidence {
     let mut e = RateEvidence::default();
     if let Some(limits) = v.get("rateLimits").and_then(Value::as_array) {
         for limit in limits {
@@ -665,7 +698,13 @@ fn ws_rates(v: &Value, now: u64) -> RateEvidence {
                 .or_else(|| e.get("data").and_then(|d| d.get("retryAfter")))
         })
         .and_then(Value::as_u64)
-        .map(|deadline| Duration::from_millis(deadline.saturating_sub(now)));
+        .map(|deadline| {
+            if binary_timestamps {
+                Duration::from_micros(deadline.saturating_sub(now.saturating_mul(1000)))
+            } else {
+                Duration::from_millis(deadline.saturating_sub(now))
+            }
+        });
     e
 }
 

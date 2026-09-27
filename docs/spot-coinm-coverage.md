@@ -114,7 +114,8 @@ WebSocket replies retain the original operation, generation, and caller identity
 
 [Issue #11](https://github.com/SharurTrading/binance-rs/issues/11) still tracks
 COIN-M migrated algo endpoint/request/quota evidence, funding-info quota evidence,
-and separate FIX/SBE implementation. The integration notice names algo endpoints,
+and FIX unsubscribe acknowledgment evidence. [FIX/SBE protocols](core-protocols.md)
+now have separate native implementations and deterministic fixtures. The integration notice names algo endpoints,
 but the checked catalog omits their endpoint-level request and quota contracts.
 Standard COIN-M order builders refuse migrated conditional types before sending.
 These omissions remain blockers for claiming complete product coverage.

@@ -174,40 +174,44 @@ pub(crate) fn definitive(status: u16, value: &serde_json::Value) -> bool {
     if status >= 500 {
         return false;
     }
-    value.get("code").and_then(Value::as_i64).is_some_and(|c| {
-        matches!(
-            c,
-            -1013
-                | -1015
-                | -1021
-                | -1022
-                | -1100
-                | -1101
-                | -1102
-                | -1103
-                | -1104
-                | -1105
-                | -1106
-                | -1111
-                | -1114
-                | -1115
-                | -1116
-                | -1117
-                | -1118
-                | -1119
-                | -1120
-                | -1121
-                | -1127
-                | -1128
-                | -1130
-                | -2010
-                | -2011
-                | -2014
-                | -2015
-        )
-    })
+    value
+        .get("code")
+        .and_then(Value::as_i64)
+        .is_some_and(definitive_code)
 }
 
+pub(crate) fn definitive_code(c: i64) -> bool {
+    matches!(
+        c,
+        -1013
+            | -1015
+            | -1021
+            | -1022
+            | -1100
+            | -1101
+            | -1102
+            | -1103
+            | -1104
+            | -1105
+            | -1106
+            | -1111
+            | -1114
+            | -1115
+            | -1116
+            | -1117
+            | -1118
+            | -1119
+            | -1120
+            | -1121
+            | -1127
+            | -1128
+            | -1130
+            | -2010
+            | -2011
+            | -2014
+            | -2015
+    )
+}
 // Partial response semantics are specific to Spot cancel/replace. Keep the shared
 // transport unaware of product codes and never retain sensitive leg bodies in errors.
 pub(crate) fn partial(status: u16, value: &Value) -> Option<crate::PartialOperation> {

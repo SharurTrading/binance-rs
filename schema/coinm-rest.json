@@ -85,7 +85,8 @@
                           "x-decimal": true
                         },
                         "maxWithdrawAmount": {
-                          "type": "string"
+                          "type": "string",
+                          "x-decimal": true
                         },
                         "crossWalletBalance": {
                           "type": "string",
@@ -1899,7 +1900,8 @@
                           }
                         },
                         "liquidationFee": {
-                          "type": "string"
+                          "type": "string",
+                          "x-decimal": true
                         },
                         "marketTakeBound": {
                           "type": "string",
@@ -2062,7 +2064,8 @@
                       "format": "int64"
                     },
                     "fundingRate": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true
                     }
                   }
                 }
@@ -2129,11 +2132,14 @@
                       "x-decimal": true
                     },
                     "lastFundingRate": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true,
+                      "x-decimal-unavailable": ""
                     },
                     "interestRate": {
                       "type": "string",
-                      "x-decimal": true
+                      "x-decimal": true,
+                      "x-decimal-unavailable": ""
                     },
                     "nextFundingTime": {
                       "type": "integer",
@@ -4498,8 +4504,7 @@
                       "type": "boolean"
                     },
                     "priceMatch": {
-                      "type": "string",
-                      "x-decimal": true
+                      "type": "string"
                     },
                     "selfTradePreventionMode": {
                       "type": "string"
@@ -4819,8 +4824,7 @@
                       "type": "boolean"
                     },
                     "priceMatch": {
-                      "type": "string",
-                      "x-decimal": true
+                      "type": "string"
                     },
                     "selfTradePreventionMode": {
                       "type": "string"
@@ -5023,8 +5027,7 @@
                       "type": "string"
                     },
                     "priceMatch": {
-                      "type": "string",
-                      "x-decimal": true
+                      "type": "string"
                     },
                     "selfTradePreventionMode": {
                       "type": "string"
@@ -5197,8 +5200,7 @@
                           "QUEUE_5",
                           "QUEUE_10",
                           "QUEUE_20"
-                        ],
-                        "x-decimal": true
+                        ]
                       },
                       "selfTradePreventionMode": {
                         "type": "string",
@@ -5313,8 +5315,7 @@
                       "type": "boolean"
                     },
                     "priceMatch": {
-                      "type": "string",
-                      "x-decimal": true
+                      "type": "string"
                     },
                     "selfTradePreventionMode": {
                       "type": "string"
@@ -5485,8 +5486,7 @@
                     "type": "boolean"
                   },
                   "priceMatch": {
-                    "type": "string",
-                    "x-decimal": true
+                    "type": "string"
                   },
                   "selfTradePreventionMode": {
                     "type": "string"
@@ -5573,8 +5573,7 @@
                     "QUEUE_5",
                     "QUEUE_10",
                     "QUEUE_20"
-                  ],
-                  "x-decimal": true
+                  ]
                 },
                 "modifyId": {
                   "type": "integer",
@@ -5672,8 +5671,7 @@
                     "type": "string"
                   },
                   "priceMatch": {
-                    "type": "string",
-                    "x-decimal": true
+                    "type": "string"
                   },
                   "selfTradePreventionMode": {
                     "type": "string"
@@ -5833,8 +5831,7 @@
                     "QUEUE_5",
                     "QUEUE_10",
                     "QUEUE_20"
-                  ],
-                  "x-decimal": true
+                  ]
                 },
                 "selfTradePreventionMode": {
                   "type": "string",
@@ -5945,8 +5942,7 @@
                     "type": "boolean"
                   },
                   "priceMatch": {
-                    "type": "string",
-                    "x-decimal": true
+                    "type": "string"
                   },
                   "selfTradePreventionMode": {
                     "type": "string"
@@ -6123,8 +6119,7 @@
                     "type": "boolean"
                   },
                   "priceMatch": {
-                    "type": "string",
-                    "x-decimal": true
+                    "type": "string"
                   },
                   "selfTradePreventionMode": {
                     "type": "string"
@@ -6453,8 +6448,7 @@
                       "type": "boolean"
                     },
                     "priceMatch": {
-                      "type": "string",
-                      "x-decimal": true
+                      "type": "string"
                     },
                     "selfTradePreventionMode": {
                       "type": "string"
@@ -6730,7 +6724,8 @@
                   "type": "object",
                   "properties": {
                     "amount": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true
                     },
                     "asset": {
                       "type": "string",
@@ -7232,8 +7227,7 @@
                     "type": "boolean"
                   },
                   "priceMatch": {
-                    "type": "string",
-                    "x-decimal": true
+                    "type": "string"
                   },
                   "selfTradePreventionMode": {
                     "type": "string"

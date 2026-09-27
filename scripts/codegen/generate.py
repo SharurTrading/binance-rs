@@ -180,7 +180,9 @@ class Models:
                 if not optional and t == 'Decimal':
                     serde_attr = f'#[serde(rename = {lit(key)}, deserialize_with = "super::wire::decimal")]'
                 elif optional and t == 'Decimal':
-                    serde_attr = f'#[serde(rename = {lit(key)}, default, deserialize_with = "super::wire::decimal_option", skip_serializing_if = "Option::is_none")]'
+                    sentinel = s.get('x-decimal-unavailable')
+                    decoder = {'': 'decimal_option_empty', 'null': 'decimal_option_null_string'}.get(sentinel, 'decimal_option')
+                    serde_attr = f'#[serde(rename = {lit(key)}, default, deserialize_with = "super::wire::{decoder}", skip_serializing_if = "Option::is_none")]'
                 elif optional:
                     serde_attr = f'#[serde(rename = {lit(key)}, default, skip_serializing_if = "Option::is_none")]'
                 else:

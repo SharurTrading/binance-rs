@@ -1893,9 +1893,10 @@ pub struct BasisResponseItem {
     #[serde(
         rename = "annualizedBasisRate",
         default,
+        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub annualized_basis_rate: Option<String>,
+    pub annualized_basis_rate: Option<Decimal>,
     /// Exact `basis` wire field.
     #[serde(
         rename = "basis",
@@ -4223,11 +4224,21 @@ pub struct AllOrdersResponseItem {
     )]
     pub client_order_id: Option<ClientOrderId>,
     /// Exact `cumQuote` wire field.
-    #[serde(rename = "cumQuote", default, skip_serializing_if = "Option::is_none")]
-    pub cum_quote: Option<String>,
+    #[serde(
+        rename = "cumQuote",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub cum_quote: Option<Decimal>,
     /// Exact `cumBase` wire field.
-    #[serde(rename = "cumBase", default, skip_serializing_if = "Option::is_none")]
-    pub cum_base: Option<String>,
+    #[serde(
+        rename = "cumBase",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub cum_base: Option<Decimal>,
     /// Exact `executedQty` wire field.
     #[serde(
         rename = "executedQty",
@@ -4497,9 +4508,10 @@ pub struct NewAlgoOrderResponse {
     #[serde(
         rename = "icebergQuantity",
         default,
+        deserialize_with = "super::wire::decimal_option_null_string",
         skip_serializing_if = "Option::is_none"
     )]
-    pub iceberg_quantity: Option<String>,
+    pub iceberg_quantity: Option<Decimal>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -4546,16 +4558,18 @@ pub struct NewAlgoOrderResponse {
     #[serde(
         rename = "activatePrice",
         default,
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
-    pub activate_price: Option<String>,
+    pub activate_price: Option<Decimal>,
     /// Exact `callbackRate` wire field.
     #[serde(
         rename = "callbackRate",
         default,
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
-    pub callback_rate: Option<String>,
+    pub callback_rate: Option<Decimal>,
     /// Exact `createTime` wire field.
     #[serde(
         rename = "createTime",
@@ -4694,9 +4708,10 @@ pub struct QueryAlgoOrderResponse {
     #[serde(
         rename = "icebergQuantity",
         default,
+        deserialize_with = "super::wire::decimal_option_null_string",
         skip_serializing_if = "Option::is_none"
     )]
-    pub iceberg_quantity: Option<String>,
+    pub iceberg_quantity: Option<Decimal>,
     /// Exact `tpOrderType` wire field.
     #[serde(
         rename = "tpOrderType",
@@ -5984,8 +5999,13 @@ pub struct QueryOrderResponse {
     )]
     pub client_order_id: Option<ClientOrderId>,
     /// Exact `cumQuote` wire field.
-    #[serde(rename = "cumQuote", default, skip_serializing_if = "Option::is_none")]
-    pub cum_quote: Option<String>,
+    #[serde(
+        rename = "cumQuote",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub cum_quote: Option<Decimal>,
     /// Exact `executedQty` wire field.
     #[serde(
         rename = "executedQty",
@@ -6258,9 +6278,10 @@ pub struct CurrentAllAlgoOpenOrdersResponseItem {
     #[serde(
         rename = "icebergQuantity",
         default,
+        deserialize_with = "super::wire::decimal_option_null_string",
         skip_serializing_if = "Option::is_none"
     )]
-    pub iceberg_quantity: Option<String>,
+    pub iceberg_quantity: Option<Decimal>,
     /// Exact `tpTriggerPrice` wire field.
     #[serde(
         rename = "tpTriggerPrice",
@@ -6398,8 +6419,13 @@ pub struct CurrentAllOpenOrdersResponseItem {
     )]
     pub client_order_id: Option<ClientOrderId>,
     /// Exact `cumQuote` wire field.
-    #[serde(rename = "cumQuote", default, skip_serializing_if = "Option::is_none")]
-    pub cum_quote: Option<String>,
+    #[serde(
+        rename = "cumQuote",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub cum_quote: Option<Decimal>,
     /// Exact `executedQty` wire field.
     #[serde(
         rename = "executedQty",
@@ -7143,9 +7169,10 @@ pub struct QueryAllAlgoOrdersResponseItem {
     #[serde(
         rename = "icebergQuantity",
         default,
+        deserialize_with = "super::wire::decimal_option_null_string",
         skip_serializing_if = "Option::is_none"
     )]
-    pub iceberg_quantity: Option<String>,
+    pub iceberg_quantity: Option<Decimal>,
     /// Exact `tpTriggerPrice` wire field.
     #[serde(
         rename = "tpTriggerPrice",
@@ -7283,8 +7310,13 @@ pub struct QueryCurrentOpenOrderResponse {
     )]
     pub client_order_id: Option<ClientOrderId>,
     /// Exact `cumQuote` wire field.
-    #[serde(rename = "cumQuote", default, skip_serializing_if = "Option::is_none")]
-    pub cum_quote: Option<String>,
+    #[serde(
+        rename = "cumQuote",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub cum_quote: Option<Decimal>,
     /// Exact `executedQty` wire field.
     #[serde(
         rename = "executedQty",
@@ -7449,8 +7481,13 @@ pub struct TestOrderResponse {
     )]
     pub cum_qty: Option<Decimal>,
     /// Exact `cumQuote` wire field.
-    #[serde(rename = "cumQuote", default, skip_serializing_if = "Option::is_none")]
-    pub cum_quote: Option<String>,
+    #[serde(
+        rename = "cumQuote",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub cum_quote: Option<Decimal>,
     /// Exact `executedQty` wire field.
     #[serde(
         rename = "executedQty",

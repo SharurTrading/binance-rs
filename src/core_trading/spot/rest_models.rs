@@ -388,10 +388,9 @@ pub struct AllOrdersResponseItem {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",
@@ -773,10 +772,9 @@ pub struct GetOpenOrdersResponseItem {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",
@@ -1099,10 +1097,9 @@ pub struct GetOrderResponse {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",
@@ -1307,10 +1304,9 @@ pub struct DeleteOrderResponse {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",

@@ -588,10 +588,9 @@ pub struct AllOrdersResponseItem {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",
@@ -892,10 +891,9 @@ pub struct OpenOrdersStatusResponseItem {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",
@@ -1109,10 +1107,9 @@ pub struct OrderStatusResponse {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",
@@ -3367,10 +3364,9 @@ pub struct OpenOrdersCancelAllResponseItem {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",
@@ -3601,10 +3597,9 @@ pub struct OpenOrdersCancelAllResponseItemOrderReportsItem {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",
@@ -3643,10 +3638,21 @@ pub struct OpenOrdersCancelAllResponseItemOrderReportsItem {
 pub type OpenOrdersCancelAllResponse =
     Vec<super::wire::BatchResult<OpenOrdersCancelAllResponseItem>>;
 
-/// Provider-native `OrderCancelResponse` payload.
+/// Provider alternatives for `OrderCancelResponse`; no member is discarded.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct OrderCancelResponse {
+#[serde(untagged)]
+pub enum OrderCancelResponse {
+    /// Wire alternative 1.
+    Variant1(Box<OrderCancelResponseVariant1>),
+    /// Wire alternative 2.
+    Variant2(Box<OrderCancelResponseVariant2>),
+}
+
+/// Provider-native `OrderCancelResponseVariant1` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct OrderCancelResponseVariant1 {
     /// Exact `symbol` wire field.
     #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
     pub symbol: Option<crate::Symbol>,
@@ -3661,8 +3667,12 @@ pub struct OrderCancelResponse {
     #[serde(rename = "orderId")]
     pub order_id: i64,
     /// Exact `orderListId` wire field.
-    #[serde(rename = "orderListId")]
-    pub order_list_id: i64,
+    #[serde(
+        rename = "orderListId",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub order_list_id: Option<i64>,
     /// Exact `clientOrderId` wire field.
     #[serde(rename = "clientOrderId")]
     pub client_order_id: ClientOrderId,
@@ -3809,10 +3819,9 @@ pub struct OrderCancelResponse {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",
@@ -3842,6 +3851,21 @@ pub struct OrderCancelResponse {
         skip_serializing_if = "Option::is_none"
     )]
     pub expiry_reason: Option<String>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `OrderCancelResponseVariant2` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct OrderCancelResponseVariant2 {
+    /// Exact `symbol` wire field.
+    #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<crate::Symbol>,
+    /// Exact `orderListId` wire field.
+    #[serde(rename = "orderListId")]
+    pub order_list_id: i64,
     /// Exact `contingencyType` wire field.
     #[serde(
         rename = "contingencyType",
@@ -3864,12 +3888,8 @@ pub struct OrderCancelResponse {
     )]
     pub list_order_status: Option<String>,
     /// Exact `listClientOrderId` wire field.
-    #[serde(
-        rename = "listClientOrderId",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub list_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "listClientOrderId")]
+    pub list_client_order_id: ClientOrderId,
     /// Exact `transactionTime` wire field.
     #[serde(
         rename = "transactionTime",
@@ -3879,23 +3899,19 @@ pub struct OrderCancelResponse {
     pub transaction_time: Option<i64>,
     /// Exact `orders` wire field.
     #[serde(rename = "orders")]
-    pub orders: Vec<OrderCancelResponseOrdersItem>,
+    pub orders: Vec<OrderCancelResponseVariant2OrdersItem>,
     /// Exact `orderReports` wire field.
-    #[serde(
-        rename = "orderReports",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub order_reports: Option<Vec<OrderCancelResponseOrderReportsItem>>,
+    #[serde(rename = "orderReports")]
+    pub order_reports: Vec<OrderCancelResponseVariant2OrderReportsItem>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
 }
 
-/// Provider-native `OrderCancelResponseOrdersItem` payload.
+/// Provider-native `OrderCancelResponseVariant2OrdersItem` payload.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct OrderCancelResponseOrdersItem {
+pub struct OrderCancelResponseVariant2OrdersItem {
     /// Exact `symbol` wire field.
     #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
     pub symbol: Option<crate::Symbol>,
@@ -3914,10 +3930,10 @@ pub struct OrderCancelResponseOrdersItem {
     pub extra: super::event_payloads::UnknownMessage,
 }
 
-/// Provider-native `OrderCancelResponseOrderReportsItem` payload.
+/// Provider-native `OrderCancelResponseVariant2OrderReportsItem` payload.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct OrderCancelResponseOrderReportsItem {
+pub struct OrderCancelResponseVariant2OrderReportsItem {
     /// Exact `symbol` wire field.
     #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
     pub symbol: Option<crate::Symbol>,
@@ -4088,10 +4104,9 @@ pub struct OrderCancelResponseOrderReportsItem {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",
@@ -4296,10 +4311,9 @@ pub struct OrderPlaceResponse {
     #[serde(
         rename = "pegPriceType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub peg_price_type: Option<Decimal>,
+    pub peg_price_type: Option<String>,
     /// Exact `pegOffsetType` wire field.
     #[serde(
         rename = "pegOffsetType",

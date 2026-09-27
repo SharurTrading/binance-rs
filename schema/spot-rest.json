@@ -335,8 +335,7 @@
                       "type": "string"
                     },
                     "pegPriceType": {
-                      "type": "string",
-                      "x-decimal": true
+                      "type": "string"
                     },
                     "pegOffsetType": {
                       "type": "string"
@@ -683,8 +682,7 @@
                       "type": "string"
                     },
                     "pegPriceType": {
-                      "type": "string",
-                      "x-decimal": true
+                      "type": "string"
                     },
                     "pegOffsetType": {
                       "type": "string"
@@ -1011,8 +1009,7 @@
                     "type": "string"
                   },
                   "pegPriceType": {
-                    "type": "string",
-                    "x-decimal": true
+                    "type": "string"
                   },
                   "pegOffsetType": {
                     "type": "string"
@@ -1230,8 +1227,7 @@
                     "type": "string"
                   },
                   "pegPriceType": {
-                    "type": "string",
-                    "x-decimal": true
+                    "type": "string"
                   },
                   "pegOffsetType": {
                     "type": "string"
@@ -1383,8 +1379,7 @@
                   "enum": [
                     "PRIMARY_PEG",
                     "MARKET_PEG"
-                  ],
-                  "x-decimal": true
+                  ]
                 },
                 "pegOffsetValue": {
                   "type": "integer",
@@ -4662,8 +4657,7 @@
                   "enum": [
                     "PRIMARY_PEG",
                     "MARKET_PEG"
-                  ],
-                  "x-decimal": true
+                  ]
                 },
                 "pegOffsetValue": {
                   "type": "integer"

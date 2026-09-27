@@ -121,9 +121,10 @@ pub struct AccountInformationResponseAssetsItem {
     #[serde(
         rename = "maxWithdrawAmount",
         default,
+        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub max_withdraw_amount: Option<String>,
+    pub max_withdraw_amount: Option<Decimal>,
     /// Exact `crossWalletBalance` wire field.
     #[serde(
         rename = "crossWalletBalance",
@@ -951,9 +952,10 @@ pub struct ExchangeInformationResponseSymbolsItem {
     #[serde(
         rename = "liquidationFee",
         default,
+        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub liquidation_fee: Option<String>,
+    pub liquidation_fee: Option<Decimal>,
     /// Exact `marketTakeBound` wire field.
     #[serde(
         rename = "marketTakeBound",
@@ -1207,9 +1209,10 @@ pub struct GetFundingRateHistoryOfPerpetualFuturesResponseItem {
     #[serde(
         rename = "fundingRate",
         default,
+        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub funding_rate: Option<String>,
+    pub funding_rate: Option<Decimal>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -1257,14 +1260,15 @@ pub struct IndexPriceAndMarkPriceResponseItem {
     #[serde(
         rename = "lastFundingRate",
         default,
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
-    pub last_funding_rate: Option<String>,
+    pub last_funding_rate: Option<Decimal>,
     /// Exact `interestRate` wire field.
     #[serde(
         rename = "interestRate",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub interest_rate: Option<Decimal>,
@@ -2211,10 +2215,9 @@ pub struct AllOrdersResponseItem {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -2405,10 +2408,9 @@ pub struct CancelMultipleOrdersResponseItemSuccess {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -2553,10 +2555,9 @@ pub struct ModifyMultipleOrdersResponseItemSuccess {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -2813,10 +2814,9 @@ pub struct PlaceMultipleOrdersResponseItemSuccess {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -3129,10 +3129,9 @@ pub struct CancelOrderResponse {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -3262,10 +3261,9 @@ pub struct ModifyOrderResponse {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -3422,10 +3420,9 @@ pub struct NewOrderResponse {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -3586,10 +3583,9 @@ pub struct QueryOrderResponse {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -3792,10 +3788,9 @@ pub struct CurrentAllOpenOrdersResponseItem {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -3908,8 +3903,13 @@ pub type GetOrderModifyHistoryResponse = Vec<GetOrderModifyHistoryResponseItem>;
 #[non_exhaustive]
 pub struct GetPositionMarginChangeHistoryResponseItem {
     /// Exact `amount` wire field.
-    #[serde(rename = "amount", default, skip_serializing_if = "Option::is_none")]
-    pub amount: Option<String>,
+    #[serde(
+        rename = "amount",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub amount: Option<Decimal>,
     /// Exact `asset` wire field.
     #[serde(rename = "asset", default, skip_serializing_if = "Option::is_none")]
     pub asset: Option<crate::Asset>,
@@ -4269,10 +4269,9 @@ pub struct QueryCurrentOpenOrderResponse {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",

@@ -751,8 +751,7 @@
                           "type": "string"
                         },
                         "pegPriceType": {
-                          "type": "string",
-                          "x-decimal": true
+                          "type": "string"
                         },
                         "pegOffsetType": {
                           "type": "string"
@@ -1179,8 +1178,7 @@
                           "type": "string"
                         },
                         "pegPriceType": {
-                          "type": "string",
-                          "x-decimal": true
+                          "type": "string"
                         },
                         "pegOffsetType": {
                           "type": "string"
@@ -1428,8 +1426,7 @@
                         "type": "string"
                       },
                       "pegPriceType": {
-                        "type": "string",
-                        "x-decimal": true
+                        "type": "string"
                       },
                       "pegOffsetType": {
                         "type": "string"
@@ -4984,8 +4981,7 @@
                                 "type": "string"
                               },
                               "pegPriceType": {
-                                "type": "string",
-                                "x-decimal": true
+                                "type": "string"
                               },
                               "pegOffsetType": {
                                 "type": "string"
@@ -5094,8 +5090,7 @@
                           "type": "string"
                         },
                         "pegPriceType": {
-                          "type": "string",
-                          "x-decimal": true
+                          "type": "string"
                         },
                         "pegOffsetType": {
                           "type": "string"
@@ -5247,287 +5242,308 @@
                     "format": "int64"
                   },
                   "result": {
-                    "type": "object",
-                    "properties": {
-                      "symbol": {
-                        "type": "string",
-                        "x-rust-type": "crate::Symbol"
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "symbol": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "origClientOrderId": {
+                            "type": "string",
+                            "x-rust-type": "ClientOrderId"
+                          },
+                          "orderId": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "orderListId": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "clientOrderId": {
+                            "type": "string",
+                            "x-rust-type": "ClientOrderId"
+                          },
+                          "transactTime": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "price": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "origQty": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "executedQty": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "origQuoteOrderQty": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "cummulativeQuoteQty": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "timeInForce": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "side": {
+                            "type": "string"
+                          },
+                          "stopPrice": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "trailingDelta": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "icebergQty": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "strategyId": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "strategyType": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "selfTradePreventionMode": {
+                            "type": "string"
+                          },
+                          "preventedMatchId": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "preventedQuantity": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "trailingTime": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "usedSor": {
+                            "type": "boolean"
+                          },
+                          "workingFloor": {
+                            "type": "string"
+                          },
+                          "pegPriceType": {
+                            "type": "string"
+                          },
+                          "pegOffsetType": {
+                            "type": "string"
+                          },
+                          "pegOffsetValue": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "peggedPrice": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "expiryReason": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "orderId",
+                          "clientOrderId"
+                        ]
                       },
-                      "origClientOrderId": {
-                        "type": "string",
-                        "x-rust-type": "ClientOrderId"
-                      },
-                      "orderId": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "orderListId": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "clientOrderId": {
-                        "type": "string",
-                        "x-rust-type": "ClientOrderId"
-                      },
-                      "transactTime": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "price": {
-                        "type": "string",
-                        "x-decimal": true
-                      },
-                      "origQty": {
-                        "type": "string",
-                        "x-decimal": true
-                      },
-                      "executedQty": {
-                        "type": "string",
-                        "x-decimal": true
-                      },
-                      "origQuoteOrderQty": {
-                        "type": "string",
-                        "x-decimal": true
-                      },
-                      "cummulativeQuoteQty": {
-                        "type": "string",
-                        "x-decimal": true
-                      },
-                      "status": {
-                        "type": "string"
-                      },
-                      "timeInForce": {
-                        "type": "string"
-                      },
-                      "type": {
-                        "type": "string"
-                      },
-                      "side": {
-                        "type": "string"
-                      },
-                      "stopPrice": {
-                        "type": "string",
-                        "x-decimal": true
-                      },
-                      "trailingDelta": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "icebergQty": {
-                        "type": "string",
-                        "x-decimal": true
-                      },
-                      "strategyId": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "strategyType": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "selfTradePreventionMode": {
-                        "type": "string"
-                      },
-                      "preventedMatchId": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "preventedQuantity": {
-                        "type": "string",
-                        "x-decimal": true
-                      },
-                      "trailingTime": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "usedSor": {
-                        "type": "boolean"
-                      },
-                      "workingFloor": {
-                        "type": "string"
-                      },
-                      "pegPriceType": {
-                        "type": "string",
-                        "x-decimal": true
-                      },
-                      "pegOffsetType": {
-                        "type": "string"
-                      },
-                      "pegOffsetValue": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "peggedPrice": {
-                        "type": "string",
-                        "x-decimal": true
-                      },
-                      "expiryReason": {
-                        "type": "string"
-                      },
-                      "contingencyType": {
-                        "type": "string"
-                      },
-                      "listStatusType": {
-                        "type": "string"
-                      },
-                      "listOrderStatus": {
-                        "type": "string"
-                      },
-                      "listClientOrderId": {
-                        "type": "string",
-                        "x-rust-type": "ClientOrderId"
-                      },
-                      "transactionTime": {
-                        "type": "integer",
-                        "format": "int64"
-                      },
-                      "orders": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "symbol": {
-                              "type": "string",
-                              "x-rust-type": "crate::Symbol"
-                            },
-                            "orderId": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "clientOrderId": {
-                              "type": "string",
-                              "x-rust-type": "ClientOrderId"
+                      {
+                        "type": "object",
+                        "properties": {
+                          "symbol": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "orderListId": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "contingencyType": {
+                            "type": "string"
+                          },
+                          "listStatusType": {
+                            "type": "string"
+                          },
+                          "listOrderStatus": {
+                            "type": "string"
+                          },
+                          "listClientOrderId": {
+                            "type": "string",
+                            "x-rust-type": "ClientOrderId"
+                          },
+                          "transactionTime": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "orders": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "symbol": {
+                                  "type": "string",
+                                  "x-rust-type": "crate::Symbol"
+                                },
+                                "orderId": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "clientOrderId": {
+                                  "type": "string",
+                                  "x-rust-type": "ClientOrderId"
+                                }
+                              }
+                            }
+                          },
+                          "orderReports": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "symbol": {
+                                  "type": "string",
+                                  "x-rust-type": "crate::Symbol"
+                                },
+                                "origClientOrderId": {
+                                  "type": "string",
+                                  "x-rust-type": "ClientOrderId"
+                                },
+                                "orderId": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "orderListId": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "clientOrderId": {
+                                  "type": "string",
+                                  "x-rust-type": "ClientOrderId"
+                                },
+                                "transactTime": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "price": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "origQty": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "executedQty": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "origQuoteOrderQty": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "cummulativeQuoteQty": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "status": {
+                                  "type": "string"
+                                },
+                                "timeInForce": {
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "type": "string"
+                                },
+                                "side": {
+                                  "type": "string"
+                                },
+                                "selfTradePreventionMode": {
+                                  "type": "string"
+                                },
+                                "icebergQty": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "preventedMatchId": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "preventedQuantity": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "stopPrice": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "strategyId": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "strategyType": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "trailingDelta": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "trailingTime": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "usedSor": {
+                                  "type": "boolean"
+                                },
+                                "workingFloor": {
+                                  "type": "string"
+                                },
+                                "pegPriceType": {
+                                  "type": "string"
+                                },
+                                "pegOffsetType": {
+                                  "type": "string"
+                                },
+                                "pegOffsetValue": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "peggedPrice": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "expiryReason": {
+                                  "type": "string"
+                                }
+                              }
                             }
                           }
-                        }
-                      },
-                      "orderReports": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "symbol": {
-                              "type": "string",
-                              "x-rust-type": "crate::Symbol"
-                            },
-                            "origClientOrderId": {
-                              "type": "string",
-                              "x-rust-type": "ClientOrderId"
-                            },
-                            "orderId": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "orderListId": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "clientOrderId": {
-                              "type": "string",
-                              "x-rust-type": "ClientOrderId"
-                            },
-                            "transactTime": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "price": {
-                              "type": "string",
-                              "x-decimal": true
-                            },
-                            "origQty": {
-                              "type": "string",
-                              "x-decimal": true
-                            },
-                            "executedQty": {
-                              "type": "string",
-                              "x-decimal": true
-                            },
-                            "origQuoteOrderQty": {
-                              "type": "string",
-                              "x-decimal": true
-                            },
-                            "cummulativeQuoteQty": {
-                              "type": "string",
-                              "x-decimal": true
-                            },
-                            "status": {
-                              "type": "string"
-                            },
-                            "timeInForce": {
-                              "type": "string"
-                            },
-                            "type": {
-                              "type": "string"
-                            },
-                            "side": {
-                              "type": "string"
-                            },
-                            "selfTradePreventionMode": {
-                              "type": "string"
-                            },
-                            "icebergQty": {
-                              "type": "string",
-                              "x-decimal": true
-                            },
-                            "preventedMatchId": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "preventedQuantity": {
-                              "type": "string",
-                              "x-decimal": true
-                            },
-                            "stopPrice": {
-                              "type": "string",
-                              "x-decimal": true
-                            },
-                            "strategyId": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "strategyType": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "trailingDelta": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "trailingTime": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "usedSor": {
-                              "type": "boolean"
-                            },
-                            "workingFloor": {
-                              "type": "string"
-                            },
-                            "pegPriceType": {
-                              "type": "string",
-                              "x-decimal": true
-                            },
-                            "pegOffsetType": {
-                              "type": "string"
-                            },
-                            "pegOffsetValue": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "peggedPrice": {
-                              "type": "string",
-                              "x-decimal": true
-                            },
-                            "expiryReason": {
-                              "type": "string"
-                            }
-                          }
-                        }
+                        },
+                        "required": [
+                          "orderListId",
+                          "listClientOrderId",
+                          "orders",
+                          "orderReports"
+                        ]
                       }
-                    },
-                    "required": [
-                      "orderId",
-                      "clientOrderId"
                     ]
                   },
                   "rateLimits": {
@@ -5683,8 +5699,7 @@
                       "enum": [
                         "PRIMARY_PEG",
                         "MARKET_PEG"
-                      ],
-                      "x-decimal": true
+                      ]
                     },
                     "pegOffsetValue": {
                       "type": "integer",
@@ -5844,8 +5859,7 @@
                         "type": "string"
                       },
                       "pegPriceType": {
-                        "type": "string",
-                        "x-decimal": true
+                        "type": "string"
                       },
                       "pegOffsetType": {
                         "type": "string"
@@ -6050,8 +6064,7 @@
                       "enum": [
                         "PRIMARY_PEG",
                         "MARKET_PEG"
-                      ],
-                      "x-decimal": true
+                      ]
                     },
                     "pegOffsetValue": {
                       "type": "integer",

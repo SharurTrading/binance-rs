@@ -7,7 +7,15 @@ SPDX-License-Identifier: MIT-0
 
 Checked **2026-09-27**. These are initial JSON implementations, with working
 transport and deterministic fixtures. Catalog bindings do not establish complete
-product coverage or live execution readiness. No Spot/COIN-M live probe was run.
+product coverage or live execution readiness. Separately authorized demo probes on
+2026-09-27 passed signed REST account/balance and WebSocket account/balance reads
+for both products. One post-only order was placed and canceled over each product's
+REST and WebSocket API; final reads confirmed canceled status and zero fills.
+An initial COIN-M response decode failure was reconciled after correcting the
+`priceMatch` field: that owned order was also canceled with zero fills and no owned
+open order remained. No secrets or raw account payloads were retained as fixtures.
+These checks cover basic demo order lifecycles; fills, private execution streams,
+advanced order/list families and account-mode changes were not exercised.
 
 | Product | REST | Catalog WebSocket API | Market definitions | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
@@ -54,6 +62,13 @@ inputs. Financial values parse directly into Decimal without floats. Spot order
 IDs preserve printable Unicode; Futures IDs retain their documented grammar.
 Missing required identities/financial evidence fail decoding; future event/filter
 kinds remain accessible through redacted unknown payloads.
+`priceMatch` and `pegPriceType` preserve categorical strings rather than parsing
+prices. Spot WebSocket cancellation has distinct single-order and complete
+order-list receipt alternatives; list members and reports remain present.
+Corrections and regression evidence are tracked in
+[wire corrections #23](https://github.com/SharurTrading/binance-rs/issues/23).
+See [Spot cancellation](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#cancel-order)
+and [COIN-M order modes](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#new-order).
 
 Spot timestamps default to milliseconds. `Config::time_unit(TimeUnit::Microseconds)`
 sets the REST header, WebSocket URL, signing clock, and response/event provenance

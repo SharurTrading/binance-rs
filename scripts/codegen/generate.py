@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+CORE_TRADING = ROOT/'src'/'core_trading'
 PRODUCT = 'usdm'
 
 def write(path, text):
@@ -331,7 +332,7 @@ def generate(kind):
     imports=[]
     for line,token in [('use std::collections::BTreeMap;','BTreeMap'),('use serde::{Serialize, Deserialize};','derive'),('use crate::Decimal;','Decimal'),('use crate::Symbol;','Symbol'),('use crate::ClientOrderId;','ClientOrderId'),('use crate::SensitiveString;','SensitiveString'),('use super::wire::PriceLevel;','PriceLevel'),('use super::wire::Kline;','Kline')]:
         if re.search(r'(?<!::)\b'+re.escape(token)+r'\b',model_text):imports.append('use super::ClientOrderId;' if PRODUCT == 'spot' and token == 'ClientOrderId' else line)
-    write((ROOT/'src'/PRODUCT/f'{kind}_models.rs'), HEADER+f'//! Generated {kind} response DTOs; regenerate with scripts/codegen/generate.py.\n\n'+'\n'.join(imports)+'\n\n'+model_text+'\n')
+    write((CORE_TRADING/PRODUCT/f'{kind}_models.rs'), HEADER+f'//! Generated {kind} response DTOs; regenerate with scripts/codegen/generate.py.\n\n'+'\n'.join(imports)+'\n\n'+model_text+'\n')
     request_text='\n\n'.join(requests)
     imports=['use serde::Serialize;','use crate::Error;','use crate::core::{Request, Operation, Security, parameters, validate_parameters};']
     for token in ['Symbol','ClientOrderId','SensitiveString','Decimal']:
@@ -340,7 +341,7 @@ def generate(kind):
     nested=[n for n in models.defs if 'Input' in n and re.search(r'\b'+n+r'\b',request_text)]
     if nested: imports.append(f'use super::{kind}_models::{{'+', '.join(nested)+'};')
     client='RestClient' if kind=='rest' else 'WsClient'
-    write((ROOT/'src'/PRODUCT/f'{kind}_requests.rs'), HEADER+f'//! Generated {kind} request builders.\n\n'+'\n'.join(imports)+'\n\n'+request_text+'\n\n'+f'impl super::{client} {{\n'+'\n\n'.join(methods)+'\n}\n')
+    write((CORE_TRADING/PRODUCT/f'{kind}_requests.rs'), HEADER+f'//! Generated {kind} request builders.\n\n'+'\n'.join(imports)+'\n\n'+request_text+'\n\n'+f'impl super::{client} {{\n'+'\n\n'.join(methods)+'\n}\n')
     return coverage
 
 
@@ -379,8 +380,8 @@ def generate_streams():
     imports=['use serde::{Serialize, Deserialize};']
     for line,token in [('use std::collections::BTreeMap;','BTreeMap'),('use crate::Decimal;','Decimal'),('use crate::Symbol;','Symbol'),('use crate::ClientOrderId;','ClientOrderId'),('use crate::SensitiveString;','SensitiveString'),('use super::wire::PriceLevel;','PriceLevel'),('use super::wire::Kline;','Kline')]:
         if re.search(r'(?<!::)\b'+re.escape(token)+r'\b',text):imports.append('use super::ClientOrderId;' if PRODUCT == 'spot' and token == 'ClientOrderId' else line)
-    write((ROOT/'src'/PRODUCT/'stream_models.rs'), HEADER+'//! Generated market and user-data event payloads.\n\n'+'\n'.join(imports)+'\n\n'+text+'\n')
-    write((ROOT/'src'/PRODUCT/'stream_names.rs'), HEADER+'//! Generated constructors for every documented market stream.\n\nuse crate::{Error, Symbol};\nuse super::streams::{Stream, Route};\n\nimpl Stream {\n'+'\n\n'.join(methods)+'\n}\n')
+    write((CORE_TRADING/PRODUCT/'stream_models.rs'), HEADER+'//! Generated market and user-data event payloads.\n\n'+'\n'.join(imports)+'\n\n'+text+'\n')
+    write((CORE_TRADING/PRODUCT/'stream_names.rs'), HEADER+'//! Generated constructors for every documented market stream.\n\nuse crate::{Error, Symbol};\nuse super::streams::{Stream, Route};\n\nimpl Stream {\n'+'\n\n'.join(methods)+'\n}\n')
     return [{'name':n,'path':p,'route':r,'type':t} for n,p,r,t in names]
 
 
@@ -503,21 +504,21 @@ def generate_events(coverage):
         }.map_err(|_|Error::Gap("malformed execution/account event"))
     }
     '''
-    write((ROOT/'src'/PRODUCT/'event_payloads.rs'), HEADER+text)
+    write((CORE_TRADING/PRODUCT/'event_payloads.rs'), HEADER+text)
 
 def main():
     global PRODUCT
     check='--check' in sys.argv
     files=['rest_models.rs','rest_requests.rs','ws_models.rs','ws_requests.rs','stream_models.rs','stream_names.rs','event_payloads.rs']
-    paths=[*(ROOT/'src'/p/f for p in ['usdm','spot','coinm'] for f in files), ROOT/'schema/coverage.json', ROOT/'schema/spot-coverage.json', ROOT/'schema/coinm-coverage.json']
+    paths=[*(CORE_TRADING/p/f for p in ['usdm','spot','coinm'] for f in files), ROOT/'schema/coverage.json', ROOT/'schema/spot-coverage.json', ROOT/'schema/coinm-coverage.json']
     before={p:p.read_bytes() if p.exists() else None for p in paths}
-    paths += [*(ROOT/'src'/p/f for p in ['wallet','convert'] for f in ['rest_models.rs','rest_requests.rs']),*(ROOT/'schema'/f'{p}-coverage.json' for p in ['wallet','convert'])]
+    paths += [*(CORE_TRADING/p/f for p in ['wallet','convert'] for f in ['rest_models.rs','rest_requests.rs']),*(ROOT/'schema'/f'{p}-coverage.json' for p in ['wallet','convert'])]
     before.update({p:p.read_bytes() if p.exists() else None for p in paths if p not in before})
     for PRODUCT in ['usdm','spot','coinm','wallet','convert']:
         if PRODUCT in ['wallet','convert']:
             coverage={'rest':generate('rest')}
             write(ROOT/'schema'/f'{PRODUCT}-coverage.json',json.dumps(coverage,indent=2)+'\n')
-            subprocess.run(['rustfmt','--edition','2024',*[str(ROOT/'src'/PRODUCT/f) for f in ['rest_models.rs','rest_requests.rs']]],check=True)
+            subprocess.run(['rustfmt','--edition','2024',*[str(CORE_TRADING/PRODUCT/f) for f in ['rest_models.rs','rest_requests.rs']]],check=True)
             print(PRODUCT+': '+str(len(coverage['rest']))+' rest.')
             continue
         coverage={kind:generate(kind) for kind in ['rest','ws']}
@@ -525,7 +526,7 @@ def main():
         filename='coverage.json' if PRODUCT == 'usdm' else f'{PRODUCT}-coverage.json'
         write((ROOT/'schema'/filename), json.dumps(coverage,indent=2)+'\n')
         generate_events(coverage)
-        subprocess.run(['rustfmt','--edition','2024',*[str(ROOT/'src'/PRODUCT/f) for f in files]],check=True)
+        subprocess.run(['rustfmt','--edition','2024',*[str(CORE_TRADING/PRODUCT/f) for f in files]],check=True)
         print(PRODUCT+': '+', '.join(f'{len(v)} {k}' for k,v in coverage.items())+'.')
     if check:
         changed=[p for p,v in before.items() if p.read_bytes()!=v]

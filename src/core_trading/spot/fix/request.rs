@@ -5,7 +5,7 @@ use super::{
     Fields, Header, Role, Value,
     codec::{Dictionary, dictionary, validate_required, validate_value, wire_value},
 };
-use crate::spot::sbe::schema::Node;
+use crate::core_trading::spot::sbe::schema::Node;
 use crate::{Decimal, Error};
 use std::{
     collections::{BTreeMap, BTreeSet},

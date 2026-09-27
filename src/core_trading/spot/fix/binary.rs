@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 use super::{Fields, Header, Request, Value, codec::wire_value};
-use crate::spot::sbe::schema::{Node, Schema, fix_schema};
+use crate::core_trading::spot::sbe::schema::{Node, Schema, fix_schema};
 use crate::{Decimal, Error, Symbol};
 use zeroize::Zeroizing;
 

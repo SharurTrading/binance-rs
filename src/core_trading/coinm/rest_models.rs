@@ -172,9 +172,10 @@ pub struct AccountInformationResponsePositionsItem {
     #[serde(
         rename = "positionAmt",
         default,
+        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub position_amt: Option<String>,
+    pub position_amt: Option<Decimal>,
     /// Exact `initialMargin` wire field.
     #[serde(
         rename = "initialMargin",
@@ -611,11 +612,21 @@ pub struct NotionalBracketForPairResponseItemBracketsItem {
     )]
     pub initial_leverage: Option<i64>,
     /// Exact `qtyCap` wire field.
-    #[serde(rename = "qtyCap", default, skip_serializing_if = "Option::is_none")]
-    pub qty_cap: Option<i64>,
+    #[serde(
+        rename = "qtyCap",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub qty_cap: Option<Decimal>,
     /// Exact `qtylFloor` wire field.
-    #[serde(rename = "qtylFloor", default, skip_serializing_if = "Option::is_none")]
-    pub qtyl_floor: Option<i64>,
+    #[serde(
+        rename = "qtylFloor",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub qtyl_floor: Option<Decimal>,
     /// Exact `maintMarginRatio` wire field.
     #[serde(
         rename = "maintMarginRatio",
@@ -678,11 +689,21 @@ pub struct NotionalBracketForSymbolResponseItemBracketsItem {
     )]
     pub initial_leverage: Option<i64>,
     /// Exact `qtyCap` wire field.
-    #[serde(rename = "qtyCap", default, skip_serializing_if = "Option::is_none")]
-    pub qty_cap: Option<i64>,
+    #[serde(
+        rename = "qtyCap",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub qty_cap: Option<Decimal>,
     /// Exact `qtylFloor` wire field.
-    #[serde(rename = "qtylFloor", default, skip_serializing_if = "Option::is_none")]
-    pub qtyl_floor: Option<i64>,
+    #[serde(
+        rename = "qtylFloor",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub qtyl_floor: Option<Decimal>,
     /// Exact `maintMarginRatio` wire field.
     #[serde(
         rename = "maintMarginRatio",
@@ -1002,9 +1023,10 @@ pub struct ExchangeInformationResponseSymbolsItem {
     #[serde(
         rename = "contractSize",
         default,
+        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub contract_size: Option<i64>,
+    pub contract_size: Option<Decimal>,
     /// Exact `quoteAsset` wire field.
     #[serde(
         rename = "quoteAsset",
@@ -4017,9 +4039,10 @@ pub struct PositionInformationResponseItem {
     #[serde(
         rename = "positionAmt",
         default,
+        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub position_amt: Option<String>,
+    pub position_amt: Option<Decimal>,
     /// Exact `entryPrice` wire field.
     #[serde(
         rename = "entryPrice",

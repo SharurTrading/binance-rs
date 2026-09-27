@@ -39,6 +39,14 @@ standard-library Python script `scripts/codegen/generate.py`. `--check` verifies
 all three products offline. Handwritten validation, signing, quotas, and lifecycle
 code implement protocol rules beyond the schemas.
 
+COIN-M account and position `positionAmt`, bracket `qtyCap`/`qtylFloor`, and
+symbol `contractSize` use exact `Decimal` fields, including amounts encoded as JSON
+integers. Native symbols, position sides and base/quote/margin assets remain
+separate evidence; these amounts do not become settlement-asset balances.
+Malformed or unrepresentable position amounts fail decoding, and absent optional
+amounts remain absent. USD-M WebSocket position V2 applies the same exact parsing
+to its own native `positionAmt` field.
+
 Authoritative behavior references:
 
 - [Spot changelog](https://developers.binance.com/en/docs/products/spot/CHANGELOG)

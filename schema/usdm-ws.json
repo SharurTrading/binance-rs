@@ -2862,7 +2862,8 @@
                           "type": "string"
                         },
                         "positionAmt": {
-                          "type": "string"
+                          "type": "string",
+                          "x-decimal": true
                         },
                         "entryPrice": {
                           "type": "string",

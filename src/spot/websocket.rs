@@ -38,12 +38,7 @@ impl WsClient {
     /// # Errors
     /// Refuses invalid transport configuration or failed handshake/rate admission.
     pub async fn connect(mut config: Config) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
-        if config.time_unit == crate::TimeUnit::Microseconds {
-            config
-                .websocket
-                .query_pairs_mut()
-                .append_pair("timeUnit", "MICROSECOND");
-        }
+        super::config::apply_time_unit(&mut config.websocket, config.time_unit);
         let (socket, events, driver) = Socket::connect_with_policy(
             config.websocket,
             config.credentials,

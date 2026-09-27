@@ -14,7 +14,7 @@ use binance_client::usdm::{
     streams::StreamPayload, ws_requests::NewOrder,
 };
 use binance_client::{ClientOrderId, Decimal, Error, Outcome, RequestId, SensitiveString, Symbol};
-use futures_util::{SinkExt, StreamExt};
+use futures_util::{FutureExt, SinkExt, StreamExt};
 use serde_json::{Value, json};
 #[cfg(test)]
 mod tests {
@@ -34,6 +34,14 @@ mod tests {
             .type_value("MARKET")
             .quantity(Decimal::new(1, 3))
             .new_client_order_id(ClientOrderId::new("fixture/order:1").unwrap())
+    }
+    fn rest_order(id: &str) -> binance_client::usdm::rest_requests::NewOrder {
+        binance_client::usdm::rest_requests::NewOrder::new()
+            .symbol(Symbol::new("BTCUSDT").unwrap())
+            .side("BUY")
+            .type_value("MARKET")
+            .quantity(Decimal::ONE)
+            .new_client_order_id(ClientOrderId::new(id).unwrap())
     }
     async fn listener() -> (TcpListener, String) {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -71,6 +79,206 @@ mod tests {
         assert!(matches!(events.recv().await,Some(ApiEvent::Retired(g)) if g==client.generation()));
         assert!(events.recv().await.is_none());
         driver.await.unwrap().unwrap();
+    }
+
+    #[tokio::test]
+    async fn websocket_weight_includes_handshake_and_uses_every_remaining_request_slot() {
+        // Official handshake cost and independent REST/WS IP scopes, checked 2026-09-27:
+        // https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/websocket-api-general-info
+        let (listener, url) = listener().await;
+        let server = tokio::spawn(async move {
+            let mut ws = accept(listener).await;
+            for i in 0..2 {
+                let frame = next_json(&mut ws).await;
+                assert_eq!(frame["method"], "depth");
+                assert_eq!(frame["id"], format!("depth-{i}"));
+                ws.send(Message::text(
+                    json!({"id": frame["id"], "status": 200,
+                    "result": {"lastUpdateId": 1, "bids": [], "asks": []}})
+                    .to_string(),
+                ))
+                .await
+                .unwrap();
+            }
+            // After exhaustion the next outbound frame must be caller shutdown.
+            assert!(ws.next().await.unwrap().unwrap().is_close());
+            ws.flush().await.unwrap();
+        });
+        let budgets = binance_client::Budgets::new(
+            binance_client::BudgetLimits::usdm()
+                .weight_per_minute(2)
+                .ws_weight_per_minute(9),
+        )
+        .unwrap();
+        let base = config()
+            .budgets(budgets)
+            .clock(std::sync::Arc::new(support::FixedClock(1000)));
+        let (client, mut events, driver) =
+            WsClient::connect(base.clone().websocket_url(&url).unwrap())
+                .await
+                .unwrap();
+        let driver = tokio::spawn(driver.run());
+        assert!(matches!(
+            events.recv().await,
+            Some(ApiEvent::Established(_))
+        ));
+        let depth = binance_client::usdm::ws_requests::OrderBook::new()
+            .symbol(Symbol::new("BTCUSDT").unwrap())
+            .limit(5);
+        // Five handshake units plus two depth reads at two units each fills nine.
+        for i in 0..2 {
+            client
+                .order_book(
+                    &depth,
+                    RequestId::new(format!("depth-{i}")).unwrap(),
+                    deadline(),
+                )
+                .await
+                .unwrap();
+        }
+        let error = client
+            .clone()
+            .order_book(&depth, RequestId::new("exhausted").unwrap(), deadline())
+            .await
+            .unwrap_err();
+        assert_eq!(error.outcome(), Some(Outcome::NotSent));
+        assert!(
+            matches!(error, Error::Admission { retry_after } if retry_after == Duration::from_secs(59))
+        );
+
+        // A refused handshake must never reach another local listener.
+        let (unused_listener, unused_url) = self::listener().await;
+        assert!(matches!(
+            WsClient::connect(base.clone().websocket_url(&unused_url).unwrap()).await,
+            Err(Error::Admission { .. })
+        ));
+        assert!(unused_listener.accept().now_or_never().is_none());
+
+        // Exhausted WebSocket IP weight must leave ordinary REST weight available.
+        let fixture =
+            support::HttpFixture::new(200, "", "{\"serverTime\":1000}", None, false).await;
+        let rest =
+            binance_client::usdm::RestClient::new(base.rest_url(&fixture.url).unwrap()).unwrap();
+        rest.check_server_time(
+            &binance_client::usdm::rest_requests::CheckServerTime::new(),
+            deadline(),
+        )
+        .await
+        .unwrap();
+        // REST cancellation also charges the WebSocket IP scope. Its refusal must
+        // consume neither the remaining REST unit nor a network attempt.
+        let cancel = binance_client::usdm::rest_requests::CancelOrder::new()
+            .symbol(Symbol::new("BTCUSDT").unwrap())
+            .orig_client_order_id(ClientOrderId::new("cross-transport-refused").unwrap());
+        assert!(matches!(
+            rest.cancel_order(&cancel, deadline()).await,
+            Err(Error::Admission { .. })
+        ));
+        rest.check_server_time(
+            &binance_client::usdm::rest_requests::CheckServerTime::new(),
+            deadline(),
+        )
+        .await
+        .unwrap();
+        assert!(matches!(
+            rest.check_server_time(
+                &binance_client::usdm::rest_requests::CheckServerTime::new(),
+                deadline()
+            )
+            .await,
+            Err(Error::Admission { .. })
+        ));
+        assert_eq!(fixture.attempts(), 2);
+        retire(&client, &mut events, driver).await;
+        server.await.unwrap();
+        fixture.finish().await;
+    }
+
+    #[tokio::test]
+    async fn rest_and_websocket_orders_use_the_full_shared_account_allowance() {
+        let (listener, url) = listener().await;
+        let server = tokio::spawn(async move {
+            let mut ws = accept(listener).await;
+            for _ in 0..2 {
+                let frame = next_json(&mut ws).await;
+                assert_eq!(frame["method"], "order.place");
+                ws.send(Message::text(
+                    json!({"id": frame["id"], "status": 200,
+                    "result": {"orderId": 7}})
+                    .to_string(),
+                ))
+                .await
+                .unwrap();
+            }
+            assert!(ws.next().await.unwrap().unwrap().is_close());
+            ws.flush().await.unwrap();
+        });
+        let fixture = support::HttpFixture::new(200, "", "{\"orderId\":7}", None, false).await;
+        let budgets =
+            binance_client::Budgets::new(binance_client::BudgetLimits::usdm().orders(4, 4))
+                .unwrap();
+        let base = config().budgets(budgets.clone());
+        let rest =
+            binance_client::usdm::RestClient::new(base.clone().rest_url(&fixture.url).unwrap())
+                .unwrap();
+        let (client, mut events, driver) =
+            WsClient::connect(base.clone().websocket_url(&url).unwrap())
+                .await
+                .unwrap();
+        let driver = tokio::spawn(driver.run());
+        assert!(matches!(
+            events.recv().await,
+            Some(ApiEvent::Established(_))
+        ));
+        for i in 0..2 {
+            rest.new_order(&rest_order(&format!("rest-{i}")), deadline())
+                .await
+                .unwrap();
+            client
+                .new_order(
+                    &order().new_client_order_id(ClientOrderId::new(format!("ws-{i}")).unwrap()),
+                    RequestId::new(format!("ws-{i}")).unwrap(),
+                    deadline(),
+                )
+                .await
+                .unwrap();
+        }
+        assert!(matches!(
+            rest.new_order(&rest_order("rest-refused"), deadline())
+                .await,
+            Err(Error::Admission { .. })
+        ));
+        let error = client
+            .new_order(&order(), RequestId::new("ws-refused").unwrap(), deadline())
+            .await
+            .unwrap_err();
+        assert_eq!(error.outcome(), Some(Outcome::NotSent));
+        assert!(matches!(error, Error::Admission { .. }));
+        assert_eq!(fixture.attempts(), 2);
+
+        // A distinct account has its own full order allowance under the same IP owner.
+        let other = binance_client::usdm::RestClient::new(
+            base.budgets(budgets.for_account())
+                .rest_url(&fixture.url)
+                .unwrap(),
+        )
+        .unwrap();
+        for i in 0..4 {
+            other
+                .new_order(&rest_order(&format!("other-{i}")), deadline())
+                .await
+                .unwrap();
+        }
+        assert!(matches!(
+            other
+                .new_order(&rest_order("other-refused"), deadline())
+                .await,
+            Err(Error::Admission { .. })
+        ));
+        assert_eq!(fixture.attempts(), 6);
+        retire(&client, &mut events, driver).await;
+        server.await.unwrap();
+        fixture.finish().await;
     }
 
     #[tokio::test]

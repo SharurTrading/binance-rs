@@ -48,6 +48,13 @@ body truncation/stall, safe error classification, shared budgets, calendar quota
 reset, late replies, caller cancellation, transport loss, ping payloads, authentication
 revocation, route admission, unbounded ingress, and depth snapshot/sequence rules.
 
+Rate-capacity tests admit the full configured allowance before refusing excess
+attempts, including concurrent clones/accounts, weighted REST requests, WebSocket
+handshakes, and shared REST/WebSocket order limits. Injected clocks check exact
+interval boundaries and cooldown expiry; local fixtures count outbound attempts.
+Additional quotas cover funding, history, hourly/daily conversion, and calendar-month
+downloads. These checks prove local admission invariants, not live venue throughput.
+
 The separately invoked credential-free Futures demo probes passed on 2026-09-26:
 REST ping/server time/exchange metadata, WebSocket API depth, and routed Public depth
 stream. No authenticated endpoint or market mutation was exercised. Live execution,

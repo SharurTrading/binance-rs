@@ -1,0 +1,237 @@
+// SPDX-FileCopyrightText: 2026 Kevin Monaghan
+// SPDX-License-Identifier: MIT-0
+
+use super::*;
+
+fn assert_refused(budgets: &Budgets, cost: Cost, now: u64, delay: u64) {
+    assert!(
+        matches!(budgets.admit(cost, now), Err(Error::Admission { retry_after })
+        if retry_after == Duration::from_millis(delay))
+    );
+}
+
+#[test]
+fn every_interval_budget_admits_its_full_allowance_and_resets_only_at_its_boundary() {
+    // Production baseline and additional endpoint quotas; these exercise admission,
+    // not live venue throughput. Official sources are recorded in docs/coverage.md.
+    let cases = [
+        (
+            Cost {
+                weight: 1,
+                ..Cost::default()
+            },
+            2400,
+            60_000,
+        ),
+        (
+            Cost {
+                ws_weight: 1,
+                ..Cost::default()
+            },
+            2400,
+            60_000,
+        ),
+        (
+            Cost {
+                orders10: 1,
+                ..Cost::default()
+            },
+            300,
+            10_000,
+        ),
+        (
+            Cost {
+                orders60: 1,
+                ..Cost::default()
+            },
+            1200,
+            60_000,
+        ),
+        (
+            Cost {
+                funding: true,
+                ..Cost::default()
+            },
+            500,
+            300_000,
+        ),
+        (
+            Cost {
+                history: true,
+                ..Cost::default()
+            },
+            1000,
+            300_000,
+        ),
+        (
+            Cost {
+                quote: true,
+                ..Cost::default()
+            },
+            360,
+            3_600_000,
+        ),
+    ];
+    for (cost, capacity, window) in cases {
+        let budgets = Budgets::new(BudgetLimits::usdm()).unwrap();
+        for _ in 0..capacity {
+            budgets.admit(cost, 1000).unwrap();
+        }
+        assert_refused(&budgets, cost, 1000, window - 1000);
+        assert_refused(&budgets, cost, window - 1, 1);
+        budgets.admit(cost, window).unwrap();
+        // Conversion also has a daily quota, so its remaining allowance is tested
+        // separately below rather than assuming the hourly reset clears both.
+        if !cost.quote {
+            for _ in 1..capacity {
+                budgets.admit(cost, window).unwrap();
+            }
+            assert_refused(&budgets, cost, window, window);
+        }
+    }
+}
+
+#[test]
+fn conversion_hourly_reset_preserves_daily_usage_and_allows_every_remaining_quote() {
+    let budgets = Budgets::new(BudgetLimits::usdm()).unwrap();
+    let cost = Cost {
+        quote: true,
+        ..Cost::default()
+    };
+    for _ in 0..360 {
+        budgets.admit(cost, 1000).unwrap();
+    }
+    assert_refused(&budgets, cost, 1000, 3_599_000);
+    for _ in 0..140 {
+        budgets.admit(cost, 3_600_000).unwrap();
+    }
+    assert_refused(&budgets, cost, 3_600_000, 82_800_000);
+    assert_refused(&budgets, cost, 86_399_999, 1);
+    for _ in 0..360 {
+        budgets.admit(cost, 86_400_000).unwrap();
+    }
+    assert_refused(&budgets, cost, 86_400_000, 3_600_000);
+}
+
+#[test]
+fn refusal_in_any_scope_consumes_no_capacity_in_other_scopes() {
+    let scopes = [
+        Cost {
+            weight: 1,
+            ..Cost::default()
+        },
+        Cost {
+            ws_weight: 1,
+            ..Cost::default()
+        },
+        Cost {
+            orders10: 1,
+            ..Cost::default()
+        },
+        Cost {
+            orders60: 1,
+            ..Cost::default()
+        },
+    ];
+    for (full_scope, cost) in scopes.iter().enumerate() {
+        let budgets = Budgets::new(
+            BudgetLimits::usdm()
+                .weight_per_minute(4)
+                .ws_weight_per_minute(4)
+                .orders(4, 4),
+        )
+        .unwrap();
+        for _ in 0..4 {
+            budgets.admit(*cost, 1000).unwrap();
+        }
+        assert!(matches!(
+            budgets.admit(
+                Cost {
+                    weight: 1,
+                    ws_weight: 1,
+                    orders10: 1,
+                    orders60: 1,
+                    ..Cost::default()
+                },
+                1000
+            ),
+            Err(Error::Admission { .. })
+        ));
+        for (scope, cost) in scopes.iter().enumerate() {
+            if scope != full_scope {
+                for _ in 0..4 {
+                    budgets.admit(*cost, 1000).unwrap();
+                }
+                assert!(matches!(
+                    budgets.admit(*cost, 1000),
+                    Err(Error::Admission { .. })
+                ));
+            }
+        }
+    }
+}
+
+#[test]
+fn counter_overflow_is_refused_without_spending_other_budgets() {
+    let budgets = Budgets::new(BudgetLimits::usdm().weight_per_minute(u64::MAX)).unwrap();
+    budgets
+        .admit(
+            Cost {
+                weight: u64::MAX,
+                ..Cost::default()
+            },
+            1000,
+        )
+        .unwrap();
+    assert_refused(
+        &budgets,
+        Cost {
+            weight: 1,
+            orders10: 1,
+            ..Cost::default()
+        },
+        1000,
+        59_000,
+    );
+    budgets
+        .admit(
+            Cost {
+                orders10: 300,
+                ..Cost::default()
+            },
+            1000,
+        )
+        .unwrap();
+}
+
+#[test]
+fn all_download_kinds_admit_the_full_calendar_quota_and_reset_together() {
+    let january = u64::try_from(
+        time::Date::from_calendar_date(2026, time::Month::January, 31)
+            .unwrap()
+            .midnight()
+            .assume_utc()
+            .unix_timestamp(),
+    )
+    .unwrap()
+        * 1000;
+    let february = january + 86_400_000;
+    let budgets = Budgets::new(BudgetLimits::usdm()).unwrap();
+    for (kind, capacity) in [(1, 10), (2, 5), (3, 5)] {
+        let cost = Cost {
+            download: kind,
+            ..Cost::default()
+        };
+        for _ in 0..capacity {
+            budgets.admit(cost, january).unwrap();
+        }
+        assert_refused(&budgets, cost, january, 86_400_000);
+        for _ in 0..capacity {
+            budgets.admit(cost, february).unwrap();
+        }
+        assert!(matches!(
+            budgets.admit(cost, february),
+            Err(Error::Admission { .. })
+        ));
+    }
+}

@@ -1526,7 +1526,7 @@ pub struct AllCoinsInformationResponseItem {
 pub struct AllCoinsInformationResponseItemNetworkListItem {
     /// Exact `network` wire field.
     #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<String>,
+    pub network: Option<super::Network>,
     /// Exact `coin` wire field.
     #[serde(rename = "coin")]
     pub coin: crate::Asset,
@@ -1746,7 +1746,7 @@ pub struct DepositHistoryResponseItem {
     pub coin: crate::Asset,
     /// Exact `network` wire field.
     #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<String>,
+    pub network: Option<super::Network>,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
     pub status: Option<i64>,
@@ -1867,7 +1867,7 @@ pub struct FetchWithdrawAddressListResponseItem {
     pub name: Option<String>,
     /// Exact `network` wire field.
     #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<String>,
+    pub network: Option<super::Network>,
     /// Exact `origin` wire field.
     #[serde(rename = "origin", default, skip_serializing_if = "Option::is_none")]
     pub origin: Option<String>,
@@ -1986,7 +1986,7 @@ pub struct WithdrawHistoryResponseItem {
     pub apply_time: Option<String>,
     /// Exact `network` wire field.
     #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<String>,
+    pub network: Option<super::Network>,
     /// Exact `transferType` wire field.
     #[serde(
         rename = "transferType",
@@ -2187,7 +2187,7 @@ pub struct DepositHistoryTravelRuleResponseItem {
     pub coin: crate::Asset,
     /// Exact `network` wire field.
     #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<String>,
+    pub network: Option<super::Network>,
     /// Exact `depositStatus` wire field.
     #[serde(
         rename = "depositStatus",
@@ -2284,7 +2284,7 @@ pub struct DepositHistoryV2ResponseItem {
     pub amount: Decimal,
     /// Exact `network` wire field.
     #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<String>,
+    pub network: Option<super::Network>,
     /// Exact `coin` wire field.
     #[serde(rename = "coin")]
     pub coin: crate::Asset,
@@ -2389,7 +2389,7 @@ pub struct FetchAddressVerificationListResponseItem {
     pub token: Option<String>,
     /// Exact `network` wire field.
     #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<String>,
+    pub network: Option<super::Network>,
     /// Exact `walletAddress` wire field.
     #[serde(
         rename = "walletAddress",
@@ -2632,7 +2632,7 @@ pub struct WithdrawHistoryV1ResponseItem {
     pub apply_time: Option<String>,
     /// Exact `network` wire field.
     #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<String>,
+    pub network: Option<super::Network>,
     /// Exact `transferType` wire field.
     #[serde(
         rename = "transferType",
@@ -2734,7 +2734,7 @@ pub struct WithdrawHistoryV2ResponseItem {
     pub apply_time: Option<String>,
     /// Exact `network` wire field.
     #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<String>,
+    pub network: Option<super::Network>,
     /// Exact `transferType` wire field.
     #[serde(
         rename = "transferType",

@@ -39,6 +39,7 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
     {
         return Err(Error::Validation("Wallet time range"));
     }
+    validate_history(op, p)?;
     match op {
         "withdraw" | "withdrawTravelRule" | "brokerWithdraw" => required(p, &["withdrawOrderId"]),
         "dustConvert" => required(p, &["clientId", "targetAsset"]),
@@ -101,4 +102,32 @@ pub(crate) fn definitive(status: u16, value: &Value) -> bool {
                         | -3026
                 )
             })
+}
+
+fn validate_history(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> {
+    let span = p
+        .get("endTime")
+        .and_then(Value::as_i64)
+        .zip(p.get("startTime").and_then(Value::as_i64))
+        .and_then(|(end, start)| end.checked_sub(start));
+    let limit = match op {
+        "depositHistory" | "withdrawHistory" => Some(if p.contains_key("withdrawOrderId") {
+            604_800_000
+        } else {
+            7_776_000_000
+        }),
+        "assetDividendRecord" => Some(15_552_000_000),
+        _ => None,
+    };
+    if let (Some(span), Some(limit)) = (span, limit)
+        && (span > limit || (span == limit && op != "assetDividendRecord"))
+    {
+        return Err(Error::Validation("Wallet history interval"));
+    }
+    if let Some(ids) = p.get("idList").and_then(Value::as_str)
+        && (ids.split(',').count() > 45 || ids.split(',').any(str::is_empty))
+    {
+        return Err(Error::Validation("withdrawal history id list"));
+    }
+    Ok(())
 }

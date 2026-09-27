@@ -68,6 +68,7 @@ impl HttpClient {
         let mut params = request::parameters(request)?;
         let timestamp = self.clock.now_millis()?;
         (op.validate_time)(&params, timestamp)?;
+        request.validate_authority(timestamp)?;
         if Instant::now() >= deadline {
             return Err(Error::Expired(op.name));
         }
@@ -141,7 +142,9 @@ impl HttpClient {
         let now = self.clock.now_millis()?;
         let cost = request.cost()?;
         self.budgets.admit(cost, now)?;
-        (op.validate_time)(&request::parameters(request)?, self.clock.now_millis()?)?;
+        let authority_time = self.clock.now_millis()?;
+        (op.validate_time)(&request::parameters(request)?, authority_time)?;
+        request.validate_authority(authority_time)?;
         if Instant::now() >= deadline {
             return Err(Error::Expired(op.name));
         }
@@ -178,7 +181,12 @@ impl HttpClient {
             rates,
         };
         self.budgets
-            .observe_cost(cost, &meta.rates, self.clock.now_millis().unwrap_or(now))
+            .observe_cost(
+                cost,
+                &meta.rates,
+                self.clock.now_millis().unwrap_or(now),
+                status,
+            )
             .map_err(|_| Error::Transport {
                 client_order_ids: client_order_ids.clone(),
                 operation: op.name,

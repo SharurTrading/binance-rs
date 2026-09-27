@@ -37,7 +37,8 @@ pub struct RateEvidence {
 pub struct ResponseMeta {
     /// Units selected for the provider timestamps in this response.
     pub time_unit: super::TimeUnit,
-    /// Caller-supplied order identities keyed by parameter paths, including batch indices.
+    /// Caller-supplied reconciliation identities keyed by parameter paths, including
+    /// client, native order, quote and withdrawal IDs; numbers retain exact decimal text.
     pub client_order_ids: BTreeMap<String, String>,
     /// HTTP-equivalent status.
     pub status: u16,

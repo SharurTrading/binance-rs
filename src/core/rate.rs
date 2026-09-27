@@ -109,7 +109,7 @@ pub(crate) struct Cost {
 pub(super) struct State {
     // Each counter is re-derivable: release it at the end of its aligned venue interval.
     counts: BTreeMap<&'static str, (u64, u64)>,
-    cooldown: u64,
+    pub(super) cooldown: u64,
     observed_weight: (u64, u64),
     pub(super) endpoints: BTreeMap<(&'static str, u64), (u64, u64)>,
     pub(super) endpoint_cooldown: BTreeMap<&'static str, u64>,

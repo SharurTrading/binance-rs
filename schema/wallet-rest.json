@@ -2743,7 +2743,8 @@
                         "type": "object",
                         "properties": {
                           "network": {
-                            "type": "string"
+                            "type": "string",
+                            "x-rust-type": "super::Network"
                           },
                           "coin": {
                             "type": "string",
@@ -2883,7 +2884,8 @@
           "in": "query",
           "required": false,
           "schema": {
-            "type": "string"
+            "type": "string",
+            "x-rust-type": "super::Network"
           }
         },
         {
@@ -3088,7 +3090,8 @@
                       "x-rust-type": "crate::Asset"
                     },
                     "network": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "super::Network"
                     },
                     "status": {
                       "type": "integer",
@@ -3176,7 +3179,8 @@
           "in": "query",
           "required": false,
           "schema": {
-            "type": "string"
+            "type": "string",
+            "x-rust-type": "super::Network"
           }
         },
         {
@@ -3278,7 +3282,8 @@
                       "type": "string"
                     },
                     "network": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "super::Network"
                     },
                     "origin": {
                       "type": "string"
@@ -3477,7 +3482,8 @@
                   "x-rust-type": "super::WithdrawalId"
                 },
                 "network": {
-                  "type": "string"
+                  "type": "string",
+                  "x-rust-type": "super::Network"
                 },
                 "address": {
                   "type": "string",
@@ -3689,7 +3695,8 @@
                       "type": "string"
                     },
                     "network": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "super::Network"
                     },
                     "transferType": {
                       "type": "integer",
@@ -3865,7 +3872,8 @@
                   "x-rust-type": "crate::SensitiveString"
                 },
                 "network": {
-                  "type": "string"
+                  "type": "string",
+                  "x-rust-type": "super::Network"
                 },
                 "coin": {
                   "type": "string",
@@ -4131,7 +4139,8 @@
           "in": "query",
           "required": false,
           "schema": {
-            "type": "string"
+            "type": "string",
+            "x-rust-type": "super::Network"
           }
         },
         {
@@ -4233,7 +4242,8 @@
                       "x-rust-type": "crate::Asset"
                     },
                     "network": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "super::Network"
                     },
                     "depositStatus": {
                       "type": "integer",
@@ -4332,7 +4342,8 @@
           "in": "query",
           "required": false,
           "schema": {
-            "type": "string"
+            "type": "string",
+            "x-rust-type": "super::Network"
           }
         },
         {
@@ -4416,7 +4427,8 @@
                       "x-decimal": true
                     },
                     "network": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "super::Network"
                     },
                     "coin": {
                       "type": "string",
@@ -4533,7 +4545,8 @@
                       "type": "string"
                     },
                     "network": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "super::Network"
                     },
                     "walletAddress": {
                       "type": "string",
@@ -4709,7 +4722,8 @@
                   "x-rust-type": "crate::SensitiveString"
                 },
                 "network": {
-                  "type": "string"
+                  "type": "string",
+                  "x-rust-type": "super::Network"
                 },
                 "coin": {
                   "type": "string",
@@ -5034,7 +5048,8 @@
           "in": "query",
           "required": false,
           "schema": {
-            "type": "string"
+            "type": "string",
+            "x-rust-type": "super::Network"
           }
         },
         {
@@ -5160,7 +5175,8 @@
                       "type": "string"
                     },
                     "network": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "super::Network"
                     },
                     "transferType": {
                       "type": "integer",
@@ -5253,7 +5269,8 @@
           "in": "query",
           "required": false,
           "schema": {
-            "type": "string"
+            "type": "string",
+            "x-rust-type": "super::Network"
           }
         },
         {
@@ -5379,7 +5396,8 @@
                       "type": "string"
                     },
                     "network": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "super::Network"
                     },
                     "transferType": {
                       "type": "integer",
@@ -5465,7 +5483,8 @@
                   "x-rust-type": "super::WithdrawalId"
                 },
                 "network": {
-                  "type": "string"
+                  "type": "string",
+                  "x-rust-type": "super::Network"
                 },
                 "address": {
                   "type": "string",

@@ -31,6 +31,9 @@ pub(crate) trait Request: Serialize + Send + Sync {
     type Response: DeserializeOwned + Send + 'static;
     const OP: Operation;
     fn validate(&self) -> Result<(), Error>;
+    fn validate_authority(&self, _now: u64) -> Result<(), Error> {
+        Ok(())
+    }
     fn cost(&self) -> Result<Cost, Error>;
 }
 
@@ -71,10 +74,15 @@ pub(crate) fn order_ids(p: &BTreeMap<String, Value>) -> BTreeMap<String, String>
                     || field == "clientAlgoId"
                     || field == "withdrawOrderId"
                     || field == "clientId"
+                    || field == "quoteId"
+                    || field == "orderId"
                     || field.starts_with("origClientOrderIdList[")
                 {
                     ids.insert(path.to_owned(), id.clone());
                 }
+            }
+            Value::Number(id) if path.rsplit('.').next() == Some("orderId") => {
+                ids.insert(path.to_owned(), id.to_string());
             }
             _ => (),
         }

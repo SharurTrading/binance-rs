@@ -1,0 +1,58 @@
+{
+  "rest": [
+    {
+      "name": "listAllConvertPairs",
+      "method": "GET",
+      "path": "/sapi/v1/convert/exchangeInfo",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/market-data#list-all-convert-pairs"
+    },
+    {
+      "name": "queryOrderQuantityPrecisionPerAsset",
+      "method": "GET",
+      "path": "/sapi/v1/convert/assetInfo",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/market-data#query-order-quantity-precision-per-asset"
+    },
+    {
+      "name": "acceptQuote",
+      "method": "POST",
+      "path": "/sapi/v1/convert/acceptQuote",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#accept-quote"
+    },
+    {
+      "name": "cancelLimitOrder",
+      "method": "POST",
+      "path": "/sapi/v1/convert/limit/cancelOrder",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#cancel-limit-order"
+    },
+    {
+      "name": "getConvertTradeHistory",
+      "method": "GET",
+      "path": "/sapi/v1/convert/tradeFlow",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#get-convert-trade-history"
+    },
+    {
+      "name": "orderStatus",
+      "method": "GET",
+      "path": "/sapi/v1/convert/orderStatus",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#order-status"
+    },
+    {
+      "name": "placeLimitOrder",
+      "method": "POST",
+      "path": "/sapi/v1/convert/limit/placeOrder",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#place-limit-order"
+    },
+    {
+      "name": "queryLimitOpenOrders",
+      "method": "GET",
+      "path": "/sapi/v1/convert/limit/queryOpenOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#query-limit-open-orders"
+    },
+    {
+      "name": "sendQuoteRequest",
+      "method": "POST",
+      "path": "/sapi/v1/convert/getQuote",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#send-quote-request"
+    }
+  ]
+}

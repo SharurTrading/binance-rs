@@ -10,7 +10,8 @@ Bindings and synthetic transport tests establish the described JSON contracts;
 no credentialed or live mutation probe was run.
 
 The product owns provider-native asset, capital, account, and Travel Rule DTOs.
-Balances preserve free/locked and asset identities. Network metadata and separate
+Balances preserve free/locked and asset identities. Networks use validated native
+identities without asset/address inference. Network metadata and separate
 Spot/Funding/Margin/Futures account categories remain visible. No balances are
 added, no reporting currency is chosen, and no withdrawal destination or
 jurisdictional questionnaire is selected by the library. Financial strings and
@@ -40,6 +41,10 @@ owner while creating a distinct UID owner. Wallet and Convert can receive the sa
 owners. SAPI admissions do not charge Spot/Futures aggregate counters. Response
 `X-SAPI-USED-IP-WEIGHT-1M`, `X-SAPI-USED-UID-WEIGHT-1M`, and `Retry-After` evidence
 updates the originating endpoint scope before attempting to read its body.
+A documented `418` IP ban additionally blocks every shared endpoint/account owner.
+Missing/malformed ban retry timing produces `CooldownTimingUnknown` on subsequent
+admission; no expiry is invented. The caller verifies restored venue authority
+before supplying a fresh explicit owner.
 Admission refuses immediately; it never queues or retries.
 
 Configuration uses the documented production SAPI host, milliseconds, caller
@@ -64,7 +69,8 @@ receipt evidence. `schema/wallet-coverage.json` and bindings regenerate offline.
 `tests/wallet_contract.rs` covers precision, malformed/missing asset evidence,
 withdrawal caller IDs and redaction, truncated mutations without retry, quota
 headers, independent endpoints, read-only POST failure, isolated transfer symbols,
-comma-separated dust assets, and requested quote/target asset provenance.
+comma-separated dust assets, requested quote/target asset provenance, and native
+capital/dividend history range and withdrawal ID-list bounds.
 Human execution review is required before merge. [Issue #16](https://github.com/SharurTrading/binance-rs/issues/16)
 tracks this implementation; Margin and Options trading remain separate products.
 

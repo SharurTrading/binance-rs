@@ -68,3 +68,31 @@ impl Serialize for DustAssets {
         )
     }
 }
+
+/// A provider-native network identity; never inferred from an asset or address.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(transparent)]
+pub struct Network(String);
+impl Network {
+    /// Retain a nonempty provider identity without transforming it.
+    ///
+    /// # Errors
+    /// Refuses empty strings and control characters.
+    pub fn new(value: impl Into<String>) -> Result<Self, Error> {
+        let value = value.into();
+        if value.is_empty() || value.chars().any(char::is_control) {
+            return Err(Error::Validation("network identity"));
+        }
+        Ok(Self(value))
+    }
+    /// The exact caller identity.
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+impl<'de> Deserialize<'de> for Network {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        Self::new(String::deserialize(d)?).map_err(serde::de::Error::custom)
+    }
+}

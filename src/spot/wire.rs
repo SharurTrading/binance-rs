@@ -77,7 +77,7 @@ impl Serialize for PriceLevel {
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub struct Kline {
-    /// UTC opening timestamp in milliseconds.
+    /// UTC opening timestamp in the configured Spot response time unit.
     pub open_time: i64,
     /// Opening price.
     pub open: Decimal,
@@ -89,7 +89,7 @@ pub struct Kline {
     pub close: Decimal,
     /// Base-asset volume.
     pub volume: Decimal,
-    /// UTC closing timestamp in milliseconds.
+    /// UTC closing timestamp in the configured Spot response time unit.
     pub close_time: i64,
     /// Quote-asset volume.
     pub quote_volume: Decimal,

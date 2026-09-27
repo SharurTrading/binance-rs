@@ -137,3 +137,42 @@ impl Config {
         self
     }
 }
+
+pub(super) fn apply_time_unit(url: &mut url::Url, unit: crate::TimeUnit) {
+    let parameters: Vec<_> = url
+        .query_pairs()
+        .filter(|(key, _)| key != "timeUnit")
+        .map(|(key, value)| (key.into_owned(), value.into_owned()))
+        .collect();
+    url.set_query(None);
+    if !parameters.is_empty() {
+        url.query_pairs_mut().extend_pairs(parameters);
+    }
+    if unit == crate::TimeUnit::Microseconds {
+        url.query_pairs_mut().append_pair("timeUnit", "MICROSECOND");
+    }
+}
+#[cfg(test)]
+#[allow(clippy::unwrap_used, reason = "synthetic endpoint assertions")]
+mod tests {
+    #[test]
+    fn configured_timestamp_provenance_overrides_endpoint_query() {
+        let mut url = url::Url::parse("ws://127.0.0.1/?timeUnit=MICROSECOND&other=a").unwrap();
+        super::apply_time_unit(&mut url, crate::TimeUnit::Milliseconds);
+        assert!(!url.query_pairs().any(|(key, _)| key == "timeUnit"));
+        let mut url =
+            url::Url::parse("ws://127.0.0.1/?timeUnit=MICROSECOND&timeUnit=microsecond&other=a")
+                .unwrap();
+        super::apply_time_unit(&mut url, crate::TimeUnit::Microseconds);
+        assert_eq!(
+            url.query_pairs()
+                .filter(|(key, _)| key == "timeUnit")
+                .count(),
+            1
+        );
+        assert!(
+            url.query_pairs()
+                .any(|(key, value)| key == "other" && value == "a")
+        );
+    }
+}

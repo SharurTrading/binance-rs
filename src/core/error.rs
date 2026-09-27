@@ -37,7 +37,8 @@ pub struct RateEvidence {
 pub struct ResponseMeta {
     /// Units selected for the provider timestamps in this response.
     pub time_unit: super::TimeUnit,
-    /// Caller-supplied order identities keyed by parameter paths, including batch indices.
+    /// Caller-supplied reconciliation identities keyed by parameter paths, including
+    /// client, native order, quote and withdrawal IDs; numbers retain exact decimal text.
     pub client_order_ids: BTreeMap<String, String>,
     /// HTTP-equivalent status.
     pub status: u16,
@@ -124,6 +125,11 @@ pub enum Error {
         /// Earliest estimated delay for a new attempt; no automatic retry is performed.
         retry_after: Duration,
     },
+    /// A venue IP ban supplied no valid retry timing. No expiry is invented;
+    /// all clients sharing this owner refuse sends until the caller verifies
+    /// restored venue authority and supplies a fresh explicit budget owner.
+    #[error("venue IP cooldown timing is unknown")]
+    CooldownTimingUnknown,
     /// An unsent command expired.
     #[error("deadline expired before sending {0}")]
     Expired(&'static str),

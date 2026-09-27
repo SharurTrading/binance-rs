@@ -290,16 +290,19 @@ def generate(kind):
         op_expr = f'Operation {{ name: {lit(op["operationId"])}, path: {lit(op["path"])}, method: {lit(op["method"])}, security: Security::{security}, mutation: {str(mutation).lower()}, weight: {op.get("x-ip-weight",op.get("x-uid-weight",0))}, validate_time: super::validation::validate_time, definitive: super::validation::definitive, success_weight: {success_weight}, partial: {partial} }}'
         required_rust='&['+', '.join(lit(v) for v in sorted(required))+']'
         validation=f'let p = parameters(self)?; validate_parameters(&p, {required_rust}, &[{", ".join(enums)}], &[{", ".join(bounds)}])?; super::validation::validate({lit(op["operationId"])}, &p)'
-        requests.append('\n'.join([f'/// Validated request builder for [`{op["operationId"]}`]({op["source"]}).',
-            '#[derive(Clone, Debug, Default, Serialize)]',f'pub struct {name} {{',*fields,'}',
-            f'impl {name} {{','    /// Start a request builder. Required inputs are checked by `build` and by dispatch.',
-            '    #[must_use]', '    pub fn new() -> Self { Self::default() }',*setters,
-            '    /// Validate this request before dispatch.', '    ///', '    /// # Errors',
-            '    /// Refuses missing, invalid, or contradictory provider parameters.',
-            '    pub fn build(self) -> Result<Self, Error> { self.validate()?; Ok(self) }','}',
-            f'impl Request for {name} {{', f'    type Response = super::{kind}_models::{response_type};',
-            f'    const OP: Operation = {op_expr};',f'    fn validate(&self) -> Result<(), Error> {{ {validation} }}',
-            '    fn cost(&self) -> Result<crate::core::Cost, Error> { super::rate::cost(Self::OP, &parameters(self)?) }','}']))
+        if PRODUCT == 'convert' and op['operationId']=='acceptQuote':
+            requests.append(f'/// Canonical quote acceptance operation facts.\npub(crate) const ACCEPT_QUOTE_OPERATION:Operation={op_expr};\npub use super::quote::AcceptQuote;')
+        else:
+            requests.append('\n'.join([f'/// Validated request builder for [`{op["operationId"]}`]({op["source"]}).',
+                '#[derive(Clone, Debug, Default, Serialize)]',f'pub struct {name} {{',*fields,'}',
+                f'impl {name} {{','    /// Start a request builder. Required inputs are checked by `build` and by dispatch.',
+                '    #[must_use]', '    pub fn new() -> Self { Self::default() }',*setters,
+                '    /// Validate this request before dispatch.', '    ///', '    /// # Errors',
+                '    /// Refuses missing, invalid, or contradictory provider parameters.',
+                '    pub fn build(self) -> Result<Self, Error> { self.validate()?; Ok(self) }','}',
+                f'impl Request for {name} {{', f'    type Response = super::{kind}_models::{response_type};',
+                f'    const OP: Operation = {op_expr};',f'    fn validate(&self) -> Result<(), Error> {{ {validation} }}',
+                '    fn cost(&self) -> Result<crate::core::Cost, Error> { super::rate::cost(Self::OP, &parameters(self)?) }','}']))
         method=snake(op['operationId'])
         if kind=='rest':
             args=f'&self, request: &{name}, deadline: tokio::time::Instant'
@@ -312,6 +315,12 @@ def generate(kind):
             context,field,wrapper = {'queryUserWalletBalance':('quote_asset','wallets','QuotedWalletBalance'), 'dustConvert':('target_asset','receipt','DustConversion'), 'dustConvertibleAssets':('target_asset','assets','ConvertibleDust')}[op['operationId']]
             return_type='super::'+wrapper
             call=f'let {context}=request.{context}.clone().ok_or(Error::Validation("asset provenance required"))?; let response=self.inner.execute(request,deadline).await?; Ok(crate::Response{{data:super::{wrapper}{{{context},{field}:response.data}},meta:response.meta}})'
+        if PRODUCT == 'convert' and op['operationId'] == 'sendQuoteRequest':
+            return_type='super::Quotation'
+            call='let from_asset=request.from_asset.clone().ok_or(Error::Validation("source asset required"))?;let to_asset=request.to_asset.clone().ok_or(Error::Validation("target asset required"))?;let response=self.inner.execute(request,deadline).await?;Ok(crate::Response{data:super::Quotation{from_asset,to_asset,wallet_type:request.wallet_type.clone(),receipt:response.data},meta:response.meta})'
+        if PRODUCT == 'convert' and op['operationId'] == 'acceptQuote':
+            return_type='super::Acceptance'
+            call='let response=self.inner.execute(request,deadline).await?;Ok(crate::Response{data:super::Acceptance{quotation:request.quotation().clone(),receipt:response.data},meta:response.meta})'
         methods.append('\n'.join([f'    /// [{op["operationId"]}]({op["source"]}).',
             '    ///', '    /// # Errors', '    /// Returns input/admission errors before sending, or typed venue/transport evidence.',
             f'    pub async fn {method}({args}) -> Result<crate::Response<{return_type}>, Error> {{ {call} }}']))
@@ -502,10 +511,10 @@ def main():
     files=['rest_models.rs','rest_requests.rs','ws_models.rs','ws_requests.rs','stream_models.rs','stream_names.rs','event_payloads.rs']
     paths=[*(ROOT/'src'/p/f for p in ['usdm','spot','coinm'] for f in files), ROOT/'schema/coverage.json', ROOT/'schema/spot-coverage.json', ROOT/'schema/coinm-coverage.json']
     before={p:p.read_bytes() if p.exists() else None for p in paths}
-    paths += [*(ROOT/'src'/'wallet'/f for f in ['rest_models.rs','rest_requests.rs']),ROOT/'schema/wallet-coverage.json']
+    paths += [*(ROOT/'src'/p/f for p in ['wallet','convert'] for f in ['rest_models.rs','rest_requests.rs']),*(ROOT/'schema'/f'{p}-coverage.json' for p in ['wallet','convert'])]
     before.update({p:p.read_bytes() if p.exists() else None for p in paths if p not in before})
-    for PRODUCT in ['usdm','spot','coinm','wallet']:
-        if PRODUCT == 'wallet':
+    for PRODUCT in ['usdm','spot','coinm','wallet','convert']:
+        if PRODUCT in ['wallet','convert']:
             coverage={'rest':generate('rest')}
             write(ROOT/'schema'/f'{PRODUCT}-coverage.json',json.dumps(coverage,indent=2)+'\n')
             subprocess.run(['rustfmt','--edition','2024',*[str(ROOT/'src'/PRODUCT/f) for f in ['rest_models.rs','rest_requests.rs']]],check=True)

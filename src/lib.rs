@@ -5,11 +5,13 @@
 //!
 //! [`spot`], [`usdm`], and [`coinm`] implement distinct trading products.
 //! [`wallet`] retains native assets, networks, account categories and SAPI quotas.
+//! [`convert`] retains native quote/limit amounts and venue expiry authority.
 //! The caller owns the Tokio runtime,
 //! credentials, order IDs, trading policy, and recovery of ambiguous mutations.
 //! Infrastructure is shared without conflating product account or contract models.
 
 pub mod coinm;
+pub mod convert;
 /// Read-only demo metadata example; callers own the runtime.
 ///
 /// ```no_run

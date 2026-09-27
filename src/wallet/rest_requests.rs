@@ -1948,7 +1948,7 @@ pub struct DepositAddress {
     #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
     coin: Option<crate::Asset>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<String>,
+    network: Option<super::Network>,
     #[serde(rename = "amount", skip_serializing_if = "Option::is_none")]
     amount: Option<Decimal>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
@@ -1968,8 +1968,8 @@ impl DepositAddress {
     }
     /// Set the provider `network` parameter.
     #[must_use]
-    pub fn network(mut self, value: impl Into<String>) -> Self {
-        self.network = Some(value.into());
+    pub fn network(mut self, value: super::Network) -> Self {
+        self.network = Some(value);
         self
     }
     /// Set the provider `amount` parameter.
@@ -2151,7 +2151,7 @@ pub struct FetchDepositAddressListWithNetwork {
     #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
     coin: Option<crate::Asset>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<String>,
+    network: Option<super::Network>,
 }
 impl FetchDepositAddressListWithNetwork {
     /// Start a request builder. Required inputs are checked by `build` and by dispatch.
@@ -2167,8 +2167,8 @@ impl FetchDepositAddressListWithNetwork {
     }
     /// Set the provider `network` parameter.
     #[must_use]
-    pub fn network(mut self, value: impl Into<String>) -> Self {
-        self.network = Some(value.into());
+    pub fn network(mut self, value: super::Network) -> Self {
+        self.network = Some(value);
         self
     }
     /// Validate this request before dispatch.
@@ -2371,7 +2371,7 @@ pub struct Withdraw {
     #[serde(rename = "withdrawOrderId", skip_serializing_if = "Option::is_none")]
     caller_id: Option<super::WithdrawalId>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<String>,
+    network: Option<super::Network>,
     #[serde(rename = "address", skip_serializing_if = "Option::is_none")]
     address: Option<crate::SensitiveString>,
     #[serde(rename = "addressTag", skip_serializing_if = "Option::is_none")]
@@ -2407,8 +2407,8 @@ impl Withdraw {
     }
     /// Set the provider `network` parameter.
     #[must_use]
-    pub fn network(mut self, value: impl Into<String>) -> Self {
-        self.network = Some(value.into());
+    pub fn network(mut self, value: super::Network) -> Self {
+        self.network = Some(value);
         self
     }
     /// Set the provider `address` parameter.
@@ -2720,7 +2720,7 @@ pub struct BrokerWithdraw {
     #[serde(rename = "addressTag", skip_serializing_if = "Option::is_none")]
     address_tag: Option<crate::SensitiveString>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<String>,
+    network: Option<super::Network>,
     #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
     coin: Option<crate::Asset>,
     #[serde(rename = "addressName", skip_serializing_if = "Option::is_none")]
@@ -2758,8 +2758,8 @@ impl BrokerWithdraw {
     }
     /// Set the provider `network` parameter.
     #[must_use]
-    pub fn network(mut self, value: impl Into<String>) -> Self {
-        self.network = Some(value.into());
+    pub fn network(mut self, value: super::Network) -> Self {
+        self.network = Some(value);
         self
     }
     /// Set the provider `coin` parameter.
@@ -2977,7 +2977,7 @@ pub struct DepositHistoryTravelRule {
     #[serde(rename = "tranId", skip_serializing_if = "Option::is_none")]
     tran_id: Option<String>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<String>,
+    network: Option<super::Network>,
     #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
     coin: Option<crate::Asset>,
     #[serde(rename = "travelRuleStatus", skip_serializing_if = "Option::is_none")]
@@ -3022,8 +3022,8 @@ impl DepositHistoryTravelRule {
     }
     /// Set the provider `network` parameter.
     #[must_use]
-    pub fn network(mut self, value: impl Into<String>) -> Self {
-        self.network = Some(value.into());
+    pub fn network(mut self, value: super::Network) -> Self {
+        self.network = Some(value);
         self
     }
     /// Set the provider `coin` parameter.
@@ -3114,7 +3114,7 @@ pub struct DepositHistoryV2 {
     #[serde(rename = "txId", skip_serializing_if = "Option::is_none")]
     tx_id: Option<crate::SensitiveString>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<String>,
+    network: Option<super::Network>,
     #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
     coin: Option<crate::Asset>,
     #[serde(
@@ -3151,8 +3151,8 @@ impl DepositHistoryV2 {
     }
     /// Set the provider `network` parameter.
     #[must_use]
-    pub fn network(mut self, value: impl Into<String>) -> Self {
-        self.network = Some(value.into());
+    pub fn network(mut self, value: super::Network) -> Self {
+        self.network = Some(value);
         self
     }
     /// Set the provider `coin` parameter.
@@ -3361,7 +3361,7 @@ pub struct SubmitDepositQuestionnaire {
     #[serde(rename = "beneficiaryPii", skip_serializing_if = "Option::is_none")]
     beneficiary_pii: Option<crate::SensitiveString>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<String>,
+    network: Option<super::Network>,
     #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
     coin: Option<crate::Asset>,
     #[serde(rename = "amount", skip_serializing_if = "Option::is_none")]
@@ -3403,8 +3403,8 @@ impl SubmitDepositQuestionnaire {
     }
     /// Set the provider `network` parameter.
     #[must_use]
-    pub fn network(mut self, value: impl Into<String>) -> Self {
-        self.network = Some(value.into());
+    pub fn network(mut self, value: super::Network) -> Self {
+        self.network = Some(value);
         self
     }
     /// Set the provider `coin` parameter.
@@ -3658,7 +3658,7 @@ pub struct WithdrawHistoryV1 {
     #[serde(rename = "withdrawOrderId", skip_serializing_if = "Option::is_none")]
     withdraw_order_id: Option<super::WithdrawalId>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<String>,
+    network: Option<super::Network>,
     #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
     coin: Option<crate::Asset>,
     #[serde(rename = "travelRuleStatus", skip_serializing_if = "Option::is_none")]
@@ -3700,8 +3700,8 @@ impl WithdrawHistoryV1 {
     }
     /// Set the provider `network` parameter.
     #[must_use]
-    pub fn network(mut self, value: impl Into<String>) -> Self {
-        self.network = Some(value.into());
+    pub fn network(mut self, value: super::Network) -> Self {
+        self.network = Some(value);
         self
     }
     /// Set the provider `coin` parameter.
@@ -3797,7 +3797,7 @@ pub struct WithdrawHistoryV2 {
     #[serde(rename = "withdrawOrderId", skip_serializing_if = "Option::is_none")]
     withdraw_order_id: Option<super::WithdrawalId>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<String>,
+    network: Option<super::Network>,
     #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
     coin: Option<crate::Asset>,
     #[serde(rename = "travelRuleStatus", skip_serializing_if = "Option::is_none")]
@@ -3839,8 +3839,8 @@ impl WithdrawHistoryV2 {
     }
     /// Set the provider `network` parameter.
     #[must_use]
-    pub fn network(mut self, value: impl Into<String>) -> Self {
-        self.network = Some(value.into());
+    pub fn network(mut self, value: super::Network) -> Self {
+        self.network = Some(value);
         self
     }
     /// Set the provider `coin` parameter.
@@ -3934,7 +3934,7 @@ pub struct WithdrawTravelRule {
     #[serde(rename = "withdrawOrderId", skip_serializing_if = "Option::is_none")]
     withdraw_order_id: Option<super::WithdrawalId>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<String>,
+    network: Option<super::Network>,
     #[serde(rename = "address", skip_serializing_if = "Option::is_none")]
     address: Option<crate::SensitiveString>,
     #[serde(rename = "addressTag", skip_serializing_if = "Option::is_none")]
@@ -3972,8 +3972,8 @@ impl WithdrawTravelRule {
     }
     /// Set the provider `network` parameter.
     #[must_use]
-    pub fn network(mut self, value: impl Into<String>) -> Self {
-        self.network = Some(value.into());
+    pub fn network(mut self, value: super::Network) -> Self {
+        self.network = Some(value);
         self
     }
     /// Set the provider `address` parameter.

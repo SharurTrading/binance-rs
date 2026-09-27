@@ -86,9 +86,7 @@ impl Streams {
         }
         let mut url = config.streams.clone();
         url.set_path("/stream");
-        if config.time_unit == crate::TimeUnit::Microseconds {
-            url.query_pairs_mut().append_pair("timeUnit", "MICROSECOND");
-        }
+        super::config::apply_time_unit(&mut url, config.time_unit);
         url.query_pairs_mut().append_pair(
             "streams",
             &streams

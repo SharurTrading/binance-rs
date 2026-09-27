@@ -15,18 +15,20 @@ SharurTrading. This project is not affiliated with or endorsed by Binance.
 > public probes do not establish live trading readiness. `publish = false` remains
 > in force.
 
-Four separate JSON product clients are available:
+Five separate JSON product clients are available:
 
 | Product | REST | WebSocket API | Market streams | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
 | USDⓈ-M | 95 | 18 + 3 session methods | 20 | 10 |
 | Spot (JSON catalog) | 48 | 52 + 3 session methods | 15 | 6 |
 | Wallet | 50 | — | — | — |
+| Convert | 9 | — | — | — |
 | COIN-M (initial coverage) | 63 | 10 + 3 session methods | 19 | 7 |
 
 [USDⓈ-M coverage](docs/coverage.md) and
 [Spot/COIN-M coverage](docs/spot-coinm-coverage.md), and
-[Wallet coverage](docs/wallet-coverage.md) record official sources and
+[Wallet coverage](docs/wallet-coverage.md), and
+[Convert coverage](docs/convert-coverage.md) record official sources and
 verification limits. Advanced Spot JSON bindings include order lists, SOR, amend,
 cancel/replace partial evidence, and explicit microsecond units. COIN-M migrated
 algo evidence and Spot FIX/SBE remain tracked in
@@ -43,6 +45,8 @@ accounting belong to consumers. There is no dependency on a consuming platform.
 ```text
 core: identities, credentials, signing, time, HTTP, sockets, rate budgets
   ├── usdm: linear Futures models, requests, streams, depth bootstrap
+  ├── wallet: native balances, networks, withdrawals, SAPI endpoint scopes
+  ├── convert: native quote/limit amounts, expiry authority, SAPI endpoint scopes
   ├── spot: asset balances, base quantity/quote spend, Spot depth bootstrap
   └── coinm: inverse Futures models, requests, streams, depth bootstrap
 ```

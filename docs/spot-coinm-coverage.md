@@ -57,7 +57,8 @@ kinds remain accessible through redacted unknown payloads.
 
 Spot timestamps default to milliseconds. `Config::time_unit(TimeUnit::Microseconds)`
 sets the REST header, WebSocket URL, signing clock, and response/event provenance
-explicitly. Input timestamp fields remain caller-supplied provider units; a custom
+explicitly. The selected mode overrides conflicting socket endpoint query values.
+Input timestamp fields remain caller-supplied provider units; a custom
 clock may override `now_micros` for finer resolution. Spot `recvWindow` permits exactly
 up to three fractional decimal places. Futures receive windows remain integer
 milliseconds. REST percent-encodes before signing; WebSocket signing uses sorted

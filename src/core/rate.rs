@@ -91,6 +91,7 @@ impl BudgetLimits {
 
 #[derive(Clone, Copy, Default)]
 pub(crate) struct Cost {
+    pub sapi: Option<super::sapi::SapiCost>,
     pub weight: u64,
     pub orders10: u64,
     pub orders60: u64,
@@ -105,11 +106,13 @@ pub(crate) struct Cost {
 }
 
 #[derive(Default)]
-struct State {
+pub(super) struct State {
     // Each counter is re-derivable: release it at the end of its aligned venue interval.
     counts: BTreeMap<&'static str, (u64, u64)>,
     cooldown: u64,
     observed_weight: (u64, u64),
+    pub(super) endpoints: BTreeMap<(&'static str, u64), (u64, u64)>,
+    pub(super) endpoint_cooldown: BTreeMap<&'static str, u64>,
 }
 
 /// Shared venue budgets. Clones share both IP and account evidence.
@@ -118,9 +121,9 @@ struct State {
 /// `for_account`; constructing independent budgets on the same IP undercounts traffic.
 #[derive(Clone)]
 pub struct Budgets {
-    ip: Arc<Mutex<State>>,
+    pub(super) ip: Arc<Mutex<State>>,
     ws_ip: Arc<Mutex<State>>,
-    account: Arc<Mutex<State>>,
+    pub(super) account: Arc<Mutex<State>>,
     limits: Arc<BudgetLimits>,
 }
 impl std::fmt::Debug for Budgets {
@@ -184,6 +187,9 @@ impl Budgets {
         ip_cost
     }
     pub(crate) fn admit(&self, c: Cost, now: u64) -> Result<(), Error> {
+        if let Some(cost) = c.sapi {
+            return self.admit_sapi(cost, now);
+        }
         let mut ip = self
             .ip
             .lock()

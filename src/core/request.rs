@@ -69,6 +69,8 @@ pub(crate) fn order_ids(p: &BTreeMap<String, Value>) -> BTreeMap<String, String>
                 if field.ends_with("ClientOrderId")
                     || field.ends_with("ClientAlgoId")
                     || field == "clientAlgoId"
+                    || field == "withdrawOrderId"
+                    || field == "clientId"
                     || field.starts_with("origClientOrderIdList[")
                 {
                     ids.insert(path.to_owned(), id.clone());
@@ -156,7 +158,7 @@ pub(crate) fn validate_parameters(
                 .parse::<rust_decimal::Decimal>()
                 .map_err(|_| Error::Validation("decimal parameter"))?;
             if value <= rust_decimal::Decimal::ZERO {
-                return Err(Error::Validation("positive Futures magnitude"));
+                return Err(Error::Validation("positive financial magnitude"));
             }
         }
     }

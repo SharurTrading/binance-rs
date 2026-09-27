@@ -15,16 +15,18 @@ SharurTrading. This project is not affiliated with or endorsed by Binance.
 > public probes do not establish live trading readiness. `publish = false` remains
 > in force.
 
-Three separate JSON product clients are available:
+Four separate JSON product clients are available:
 
 | Product | REST | WebSocket API | Market streams | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
 | USDⓈ-M | 95 | 18 + 3 session methods | 20 | 10 |
 | Spot (JSON catalog) | 48 | 52 + 3 session methods | 15 | 6 |
+| Wallet | 50 | — | — | — |
 | COIN-M (initial coverage) | 63 | 10 + 3 session methods | 19 | 7 |
 
 [USDⓈ-M coverage](docs/coverage.md) and
-[Spot/COIN-M coverage](docs/spot-coinm-coverage.md) record official sources and
+[Spot/COIN-M coverage](docs/spot-coinm-coverage.md), and
+[Wallet coverage](docs/wallet-coverage.md) record official sources and
 verification limits. Advanced Spot JSON bindings include order lists, SOR, amend,
 cancel/replace partial evidence, and explicit microsecond units. COIN-M migrated
 algo evidence and Spot FIX/SBE remain tracked in

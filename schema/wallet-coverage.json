@@ -1,0 +1,304 @@
+{
+  "rest": [
+    {
+      "name": "accountApiTradingStatus",
+      "method": "GET",
+      "path": "/sapi/v1/account/apiTradingStatus",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#account-api-trading-status"
+    },
+    {
+      "name": "accountInfo",
+      "method": "GET",
+      "path": "/sapi/v1/account/info",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#account-info"
+    },
+    {
+      "name": "accountStatus",
+      "method": "GET",
+      "path": "/sapi/v1/account/status",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#account-status"
+    },
+    {
+      "name": "dailyAccountSnapshot",
+      "method": "GET",
+      "path": "/sapi/v1/accountSnapshot",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#daily-account-snapshot"
+    },
+    {
+      "name": "disableFastWithdrawSwitch",
+      "method": "POST",
+      "path": "/sapi/v1/account/disableFastWithdrawSwitch",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#disable-fast-withdraw-switch"
+    },
+    {
+      "name": "enableFastWithdrawSwitch",
+      "method": "POST",
+      "path": "/sapi/v1/account/enableFastWithdrawSwitch",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#enable-fast-withdraw-switch"
+    },
+    {
+      "name": "getApiKeyPermission",
+      "method": "GET",
+      "path": "/sapi/v1/account/apiRestrictions",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#get-api-key-permission"
+    },
+    {
+      "name": "assetDetail",
+      "method": "GET",
+      "path": "/sapi/v1/asset/assetDetail",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#asset-detail"
+    },
+    {
+      "name": "assetDividendRecord",
+      "method": "GET",
+      "path": "/sapi/v1/asset/assetDividend",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#asset-dividend-record"
+    },
+    {
+      "name": "dustConvert",
+      "method": "POST",
+      "path": "/sapi/v1/asset/dust-convert/convert",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#dust-convert"
+    },
+    {
+      "name": "dustConvertibleAssets",
+      "method": "POST",
+      "path": "/sapi/v1/asset/dust-convert/query-convertible-assets",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#dust-convertible-assets"
+    },
+    {
+      "name": "dustlog",
+      "method": "GET",
+      "path": "/sapi/v1/asset/dribblet",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#dustlog"
+    },
+    {
+      "name": "dustTransfer",
+      "method": "POST",
+      "path": "/sapi/v1/asset/dust",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#dust-transfer"
+    },
+    {
+      "name": "fundingWallet",
+      "method": "POST",
+      "path": "/sapi/v1/asset/get-funding-asset",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#funding-wallet"
+    },
+    {
+      "name": "getSpotAssetTags",
+      "method": "GET",
+      "path": "/sapi/v1/spot/asset/tags",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#get-spot-asset-tags"
+    },
+    {
+      "name": "getAssetsThatCanBeConvertedIntoBnb",
+      "method": "POST",
+      "path": "/sapi/v1/asset/dust-btc",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#get-assets-that-can-be-converted-into-bnb"
+    },
+    {
+      "name": "getCloudMiningPaymentAndRefundHistory",
+      "method": "GET",
+      "path": "/sapi/v1/asset/ledger-transfer/cloud-mining/queryByPage",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#get-cloud-mining-payment-and-refund-history"
+    },
+    {
+      "name": "getOpenSymbolList",
+      "method": "GET",
+      "path": "/sapi/v1/spot/open-symbol-list",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#get-open-symbol-list"
+    },
+    {
+      "name": "queryUserDelegationHistory",
+      "method": "GET",
+      "path": "/sapi/v1/asset/custody/transfer-history",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#query-user-delegation-history"
+    },
+    {
+      "name": "queryUserUniversalTransferHistory",
+      "method": "GET",
+      "path": "/sapi/v1/asset/transfer",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#query-user-universal-transfer-history"
+    },
+    {
+      "name": "userUniversalTransfer",
+      "method": "POST",
+      "path": "/sapi/v1/asset/transfer",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#user-universal-transfer"
+    },
+    {
+      "name": "queryUserWalletBalance",
+      "method": "GET",
+      "path": "/sapi/v1/asset/wallet/balance",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#query-user-wallet-balance"
+    },
+    {
+      "name": "toggleBnbBurnOnSpotTradeAndMarginInterest",
+      "method": "POST",
+      "path": "/sapi/v1/bnbBurn",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#toggle-bnb-burn-on-spot-trade-and-margin-interest"
+    },
+    {
+      "name": "tradeFee",
+      "method": "GET",
+      "path": "/sapi/v1/asset/tradeFee",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#trade-fee"
+    },
+    {
+      "name": "userAsset",
+      "method": "POST",
+      "path": "/sapi/v3/asset/getUserAsset",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#user-asset"
+    },
+    {
+      "name": "allCoinsInformation",
+      "method": "GET",
+      "path": "/sapi/v1/capital/config/getall",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#all-coins-information"
+    },
+    {
+      "name": "depositAddress",
+      "method": "GET",
+      "path": "/sapi/v1/capital/deposit/address",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#deposit-address"
+    },
+    {
+      "name": "depositHistory",
+      "method": "GET",
+      "path": "/sapi/v1/capital/deposit/hisrec",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#deposit-history"
+    },
+    {
+      "name": "fetchDepositAddressListWithNetwork",
+      "method": "GET",
+      "path": "/sapi/v1/capital/deposit/address/list",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-deposit-address-list-with-network"
+    },
+    {
+      "name": "fetchWithdrawAddressList",
+      "method": "GET",
+      "path": "/sapi/v1/capital/withdraw/address/list",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-address-list"
+    },
+    {
+      "name": "fetchWithdrawQuota",
+      "method": "GET",
+      "path": "/sapi/v1/capital/withdraw/quota",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-quota"
+    },
+    {
+      "name": "oneClickArrivalDepositApply",
+      "method": "POST",
+      "path": "/sapi/v1/capital/deposit/credit-apply",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#one-click-arrival-deposit-apply"
+    },
+    {
+      "name": "withdraw",
+      "method": "POST",
+      "path": "/sapi/v1/capital/withdraw/apply",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw"
+    },
+    {
+      "name": "withdrawHistory",
+      "method": "GET",
+      "path": "/sapi/v1/capital/withdraw/history",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw-history"
+    },
+    {
+      "name": "getSymbolsDelistScheduleForSpot",
+      "method": "GET",
+      "path": "/sapi/v1/spot/delist-schedule",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/others#get-symbols-delist-schedule-for-spot"
+    },
+    {
+      "name": "systemStatus",
+      "method": "GET",
+      "path": "/sapi/v1/system/status",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/others#system-status"
+    },
+    {
+      "name": "brokerWithdraw",
+      "method": "POST",
+      "path": "/sapi/v1/localentity/broker/withdraw/apply",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#broker-withdraw"
+    },
+    {
+      "name": "checkQuestionnaireRequirements",
+      "method": "GET",
+      "path": "/sapi/v1/localentity/questionnaire-requirements",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#check-questionnaire-requirements"
+    },
+    {
+      "name": "getCountryList",
+      "method": "GET",
+      "path": "/sapi/v1/localentity/country/list",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#get-country-list"
+    },
+    {
+      "name": "depositHistoryTravelRule",
+      "method": "GET",
+      "path": "/sapi/v1/localentity/deposit/history",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#deposit-history-travel-rule"
+    },
+    {
+      "name": "depositHistoryV2",
+      "method": "GET",
+      "path": "/sapi/v2/localentity/deposit/history",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#deposit-history-v2"
+    },
+    {
+      "name": "fetchAddressVerificationList",
+      "method": "GET",
+      "path": "/sapi/v1/addressVerify/list",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#fetch-address-verification-list"
+    },
+    {
+      "name": "getRegionList",
+      "method": "GET",
+      "path": "/sapi/v1/localentity/region/list",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#get-region-list"
+    },
+    {
+      "name": "submitDepositQuestionnaire",
+      "method": "PUT",
+      "path": "/sapi/v1/localentity/broker/deposit/provide-info",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#submit-deposit-questionnaire"
+    },
+    {
+      "name": "submitDepositQuestionnaireTravelRule",
+      "method": "PUT",
+      "path": "/sapi/v1/localentity/deposit/provide-info",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#submit-deposit-questionnaire-travel-rule"
+    },
+    {
+      "name": "submitDepositQuestionnaireV2",
+      "method": "PUT",
+      "path": "/sapi/v2/localentity/deposit/provide-info",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#submit-deposit-questionnaire-v2"
+    },
+    {
+      "name": "vaspList",
+      "method": "GET",
+      "path": "/sapi/v1/localentity/vasp",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#vasp-list"
+    },
+    {
+      "name": "withdrawHistoryV1",
+      "method": "GET",
+      "path": "/sapi/v1/localentity/withdraw/history",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-history-v1"
+    },
+    {
+      "name": "withdrawHistoryV2",
+      "method": "GET",
+      "path": "/sapi/v2/localentity/withdraw/history",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-history-v2"
+    },
+    {
+      "name": "withdrawTravelRule",
+      "method": "POST",
+      "path": "/sapi/v1/localentity/withdraw/apply",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-travel-rule"
+    }
+  ]
+}

@@ -11,6 +11,7 @@ use tokio::time::Instant;
 
 #[derive(Clone)]
 pub(crate) struct HttpClient {
+    time_unit: super::TimeUnit,
     client: reqwest::Client,
     base: url::Url,
     credentials: Option<Credentials>,
@@ -45,6 +46,7 @@ impl HttpClient {
             .build()
             .map_err(|_| Error::Configuration("HTTP client"))?;
         Ok(Self {
+            time_unit: super::TimeUnit::Milliseconds,
             client,
             base,
             credentials,
@@ -52,6 +54,10 @@ impl HttpClient {
             budgets,
             timeout,
         })
+    }
+    pub(crate) fn time_unit(mut self, unit: super::TimeUnit) -> Self {
+        self.time_unit = unit;
+        self
     }
     fn prepare<R: Request>(
         &self,
@@ -75,7 +81,10 @@ impl HttpClient {
             )
         };
         if op.security == Security::Signed {
-            params.insert("timestamp".into(), timestamp.into());
+            params.insert(
+                "timestamp".into(),
+                self.time_unit.timestamp(self.clock.as_ref())?.into(),
+            );
             let payload = request::encode(&params)?;
             let signature = credentials
                 .ok_or(Error::CredentialsRequired)?
@@ -100,6 +109,9 @@ impl HttpClient {
         let method = reqwest::Method::from_bytes(op.method.as_bytes())
             .map_err(|_| Error::Configuration("HTTP method"))?;
         let mut builder = self.client.request(method, url);
+        if self.time_unit == super::TimeUnit::Microseconds {
+            builder = builder.header("X-MBX-TIME-UNIT", "MICROSECOND");
+        }
         if let Some(credentials) = credentials {
             builder = builder.header("X-MBX-APIKEY", credentials.header()?);
         }
@@ -159,6 +171,7 @@ impl HttpClient {
         let status = response.status().as_u16();
         let rates = header_rates(response.headers());
         let meta = ResponseMeta {
+            time_unit: self.time_unit,
             client_order_ids: client_order_ids.clone(),
             status,
             operation: op.name,

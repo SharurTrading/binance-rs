@@ -102,6 +102,42 @@ pub enum ApiPayload {
     ),
     /// `userDataStreamUnsubscribe` response.
     UserDataStreamUnsubscribe(Box<super::ws_models::UserDataStreamUnsubscribeResponse>),
+    /// `allOrderLists` response.
+    AllOrderLists(Box<super::ws_models::AllOrderListsResponse>),
+    /// `myAllocations` response.
+    MyAllocations(Box<super::ws_models::MyAllocationsResponse>),
+    /// `myFilters` response.
+    MyFilters(Box<super::ws_models::MyFiltersResponse>),
+    /// `myPreventedMatches` response.
+    MyPreventedMatches(Box<super::ws_models::MyPreventedMatchesResponse>),
+    /// `openOrderListsStatus` response.
+    OpenOrderListsStatus(Box<super::ws_models::OpenOrderListsStatusResponse>),
+    /// `orderAmendments` response.
+    OrderAmendments(Box<super::ws_models::OrderAmendmentsResponse>),
+    /// `orderListStatus` response.
+    OrderListStatus(Box<super::ws_models::OrderListStatusResponse>),
+    /// `orderAmendKeepPriority` response.
+    OrderAmendKeepPriority(Box<super::ws_models::OrderAmendKeepPriorityResponse>),
+    /// `orderCancelReplace` response.
+    OrderCancelReplace(Box<super::ws_models::OrderCancelReplaceResponse>),
+    /// `orderListCancel` response.
+    OrderListCancel(Box<super::ws_models::OrderListCancelResponse>),
+    /// `orderListPlace` response.
+    OrderListPlace(Box<super::ws_models::OrderListPlaceResponse>),
+    /// `orderListPlaceOco` response.
+    OrderListPlaceOco(Box<super::ws_models::OrderListPlaceOcoResponse>),
+    /// `orderListPlaceOpo` response.
+    OrderListPlaceOpo(Box<super::ws_models::OrderListPlaceOpoResponse>),
+    /// `orderListPlaceOpoco` response.
+    OrderListPlaceOpoco(Box<super::ws_models::OrderListPlaceOpocoResponse>),
+    /// `orderListPlaceOto` response.
+    OrderListPlaceOto(Box<super::ws_models::OrderListPlaceOtoResponse>),
+    /// `orderListPlaceOtoco` response.
+    OrderListPlaceOtoco(Box<super::ws_models::OrderListPlaceOtocoResponse>),
+    /// `sorOrderPlace` response.
+    SorOrderPlace(Box<super::ws_models::SorOrderPlaceResponse>),
+    /// `sorOrderTest` response.
+    SorOrderTest(Box<super::ws_models::SorOrderTestResponse>),
     /// Session authentication/status response.
     Session(SessionStatus),
 }
@@ -128,6 +164,68 @@ pub struct SessionStatus {
 }
 
 pub(crate) fn api_payload(operation: &str, value: Value) -> Result<ApiPayload, Error> {
+    match operation {
+        "accountCommission"
+        | "accountRateLimitsOrders"
+        | "accountStatus"
+        | "allOrders"
+        | "myTrades"
+        | "openOrdersStatus"
+        | "orderStatus"
+        | "exchangeInfo"
+        | "executionRules"
+        | "ping"
+        | "time"
+        | "avgPrice"
+        | "depth"
+        | "klines"
+        | "ticker"
+        | "ticker24hr"
+        | "tickerBook"
+        | "tickerPrice"
+        | "tickerTradingDay"
+        | "tradesAggregate" => return api_payload_0(operation, value),
+        "tradesHistorical"
+        | "blockTradesHistorical"
+        | "tradesRecent"
+        | "uiKlines"
+        | "referencePrice"
+        | "referencePriceCalculation"
+        | "openOrdersCancelAll"
+        | "orderCancel"
+        | "orderPlace"
+        | "orderTest"
+        | "sessionSubscriptions"
+        | "userDataStreamSubscribe"
+        | "userDataStreamSubscribeSignature"
+        | "userDataStreamUnsubscribe"
+        | "allOrderLists"
+        | "myAllocations"
+        | "myFilters"
+        | "myPreventedMatches"
+        | "openOrderListsStatus"
+        | "orderAmendments" => return api_payload_1(operation, value),
+        "orderListStatus"
+        | "orderAmendKeepPriority"
+        | "orderCancelReplace"
+        | "orderListCancel"
+        | "orderListPlace"
+        | "orderListPlaceOco"
+        | "orderListPlaceOpo"
+        | "orderListPlaceOpoco"
+        | "orderListPlaceOto"
+        | "orderListPlaceOtoco"
+        | "sorOrderPlace"
+        | "sorOrderTest" => return api_payload_2(operation, value),
+        "sessionLogon" | "sessionStatus" | "sessionLogout" => {
+            serde_json::from_value(value).map(ApiPayload::Session)
+        }
+        _ => return Err(Error::Gap("unrecognized correlated API operation")),
+    }
+    .map_err(|_| Error::Gap("malformed correlated API response"))
+}
+
+fn api_payload_0(operation: &str, value: Value) -> Result<ApiPayload, Error> {
     match operation {
         "accountCommission" => {
             serde_json::from_value(value).map(|v| ApiPayload::AccountCommission(Box::new(v)))
@@ -169,6 +267,12 @@ pub(crate) fn api_payload(operation: &str, value: Value) -> Result<ApiPayload, E
         "tradesAggregate" => {
             serde_json::from_value(value).map(|v| ApiPayload::TradesAggregate(Box::new(v)))
         }
+        _ => return Err(Error::Gap("unrecognized correlated API operation")),
+    }
+    .map_err(|_| Error::Gap("malformed correlated API response"))
+}
+fn api_payload_1(operation: &str, value: Value) -> Result<ApiPayload, Error> {
+    match operation {
         "tradesHistorical" => {
             serde_json::from_value(value).map(|v| ApiPayload::TradesHistorical(Box::new(v)))
         }
@@ -202,14 +306,68 @@ pub(crate) fn api_payload(operation: &str, value: Value) -> Result<ApiPayload, E
             .map(|v| ApiPayload::UserDataStreamSubscribeSignature(Box::new(v))),
         "userDataStreamUnsubscribe" => serde_json::from_value(value)
             .map(|v| ApiPayload::UserDataStreamUnsubscribe(Box::new(v))),
-        "sessionLogon" | "sessionStatus" | "sessionLogout" => {
-            serde_json::from_value(value).map(ApiPayload::Session)
+        "allOrderLists" => {
+            serde_json::from_value(value).map(|v| ApiPayload::AllOrderLists(Box::new(v)))
+        }
+        "myAllocations" => {
+            serde_json::from_value(value).map(|v| ApiPayload::MyAllocations(Box::new(v)))
+        }
+        "myFilters" => serde_json::from_value(value).map(|v| ApiPayload::MyFilters(Box::new(v))),
+        "myPreventedMatches" => {
+            serde_json::from_value(value).map(|v| ApiPayload::MyPreventedMatches(Box::new(v)))
+        }
+        "openOrderListsStatus" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OpenOrderListsStatus(Box::new(v)))
+        }
+        "orderAmendments" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderAmendments(Box::new(v)))
         }
         _ => return Err(Error::Gap("unrecognized correlated API operation")),
     }
     .map_err(|_| Error::Gap("malformed correlated API response"))
 }
-
+fn api_payload_2(operation: &str, value: Value) -> Result<ApiPayload, Error> {
+    match operation {
+        "orderListStatus" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderListStatus(Box::new(v)))
+        }
+        "orderAmendKeepPriority" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderAmendKeepPriority(Box::new(v)))
+        }
+        "orderCancelReplace" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderCancelReplace(Box::new(v)))
+        }
+        "orderListCancel" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderListCancel(Box::new(v)))
+        }
+        "orderListPlace" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderListPlace(Box::new(v)))
+        }
+        "orderListPlaceOco" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderListPlaceOco(Box::new(v)))
+        }
+        "orderListPlaceOpo" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderListPlaceOpo(Box::new(v)))
+        }
+        "orderListPlaceOpoco" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderListPlaceOpoco(Box::new(v)))
+        }
+        "orderListPlaceOto" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderListPlaceOto(Box::new(v)))
+        }
+        "orderListPlaceOtoco" => {
+            serde_json::from_value(value).map(|v| ApiPayload::OrderListPlaceOtoco(Box::new(v)))
+        }
+        "sorOrderPlace" => {
+            serde_json::from_value(value).map(|v| ApiPayload::SorOrderPlace(Box::new(v)))
+        }
+        "sorOrderTest" => {
+            serde_json::from_value(value).map(|v| ApiPayload::SorOrderTest(Box::new(v)))
+        }
+        _ => return Err(Error::Gap("unrecognized correlated API operation")),
+    }
+    .map_err(|_| Error::Gap("malformed correlated API response"))
+}
 /// Every documented market-stream payload, with provider distinctions intact.
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]

@@ -3,7 +3,8 @@
 
 //! Spot Trading: asset balances, order amounts, and transport semantics.
 //!
-//! Initial JSON coverage; advanced operations remain tracked in
+//! JSON catalog coverage includes advanced order lists and partial cancel/replace.
+//! Separate FIX/SBE and remaining COIN-M evidence are tracked in
 //! [issue #11](https://github.com/SharurTrading/binance-rs/issues/11).
 //!
 //! All operations use caller deadlines. The library never retries a mutation.
@@ -51,7 +52,8 @@ impl RestClient {
                 config.budgets,
                 config.timeout,
                 config.proxy,
-            )?,
+            )?
+            .time_unit(config.time_unit),
         })
     }
 }

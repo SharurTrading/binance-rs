@@ -179,6 +179,114 @@
       "method": "POST",
       "path": "/api/v3/order/test",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade"
+    },
+    {
+      "name": "allOrderList",
+      "method": "GET",
+      "path": "/api/v3/allOrderList",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#all-order-list"
+    },
+    {
+      "name": "getOrderList",
+      "method": "GET",
+      "path": "/api/v3/orderList",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#get-order-list"
+    },
+    {
+      "name": "deleteOrderList",
+      "method": "DELETE",
+      "path": "/api/v3/orderList",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#delete-order-list"
+    },
+    {
+      "name": "myAllocations",
+      "method": "GET",
+      "path": "/api/v3/myAllocations",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-allocations"
+    },
+    {
+      "name": "myFilters",
+      "method": "GET",
+      "path": "/api/v3/myFilters",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-filters"
+    },
+    {
+      "name": "myPreventedMatches",
+      "method": "GET",
+      "path": "/api/v3/myPreventedMatches",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-prevented-matches"
+    },
+    {
+      "name": "openOrderList",
+      "method": "GET",
+      "path": "/api/v3/openOrderList",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#open-order-list"
+    },
+    {
+      "name": "orderAmendments",
+      "method": "GET",
+      "path": "/api/v3/order/amendments",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#order-amendments"
+    },
+    {
+      "name": "orderAmendKeepPriority",
+      "method": "PUT",
+      "path": "/api/v3/order/amend/keepPriority",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-amend-keep-priority"
+    },
+    {
+      "name": "orderCancelReplace",
+      "method": "POST",
+      "path": "/api/v3/order/cancelReplace",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-cancel-replace"
+    },
+    {
+      "name": "orderListOco",
+      "method": "POST",
+      "path": "/api/v3/orderList/oco",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-oco"
+    },
+    {
+      "name": "orderListOpo",
+      "method": "POST",
+      "path": "/api/v3/orderList/opo",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-opo"
+    },
+    {
+      "name": "orderListOpoco",
+      "method": "POST",
+      "path": "/api/v3/orderList/opoco",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-opoco"
+    },
+    {
+      "name": "orderListOto",
+      "method": "POST",
+      "path": "/api/v3/orderList/oto",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-oto"
+    },
+    {
+      "name": "orderListOtoco",
+      "method": "POST",
+      "path": "/api/v3/orderList/otoco",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-otoco"
+    },
+    {
+      "name": "orderOco",
+      "method": "POST",
+      "path": "/api/v3/order/oco",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-oco"
+    },
+    {
+      "name": "sorOrder",
+      "method": "POST",
+      "path": "/api/v3/sor/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#sor-order"
+    },
+    {
+      "name": "sorOrderTest",
+      "method": "POST",
+      "path": "/api/v3/sor/order/test",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#sor-order-test"
     }
   ],
   "ws": [
@@ -385,6 +493,114 @@
       "method": "POST",
       "path": "/userDataStream.unsubscribe",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/user-data-stream"
+    },
+    {
+      "name": "allOrderLists",
+      "method": "POST",
+      "path": "/allOrderLists",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#all-order-lists"
+    },
+    {
+      "name": "myAllocations",
+      "method": "POST",
+      "path": "/myAllocations",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#my-allocations"
+    },
+    {
+      "name": "myFilters",
+      "method": "POST",
+      "path": "/myFilters",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#my-filters"
+    },
+    {
+      "name": "myPreventedMatches",
+      "method": "POST",
+      "path": "/myPreventedMatches",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#my-prevented-matches"
+    },
+    {
+      "name": "openOrderListsStatus",
+      "method": "POST",
+      "path": "/openOrderLists.status",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#open-order-lists-status"
+    },
+    {
+      "name": "orderAmendments",
+      "method": "POST",
+      "path": "/order.amendments",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#order-amendments"
+    },
+    {
+      "name": "orderListStatus",
+      "method": "POST",
+      "path": "/orderList.status",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#order-list-status"
+    },
+    {
+      "name": "orderAmendKeepPriority",
+      "method": "POST",
+      "path": "/order.amend.keepPriority",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-amend-keep-priority"
+    },
+    {
+      "name": "orderCancelReplace",
+      "method": "POST",
+      "path": "/order.cancelReplace",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-cancel-replace"
+    },
+    {
+      "name": "orderListCancel",
+      "method": "POST",
+      "path": "/orderList.cancel",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-cancel"
+    },
+    {
+      "name": "orderListPlace",
+      "method": "POST",
+      "path": "/orderList.place",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place"
+    },
+    {
+      "name": "orderListPlaceOco",
+      "method": "POST",
+      "path": "/orderList.place.oco",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place-oco"
+    },
+    {
+      "name": "orderListPlaceOpo",
+      "method": "POST",
+      "path": "/orderList.place.opo",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place-opo"
+    },
+    {
+      "name": "orderListPlaceOpoco",
+      "method": "POST",
+      "path": "/orderList.place.opoco",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place-opoco"
+    },
+    {
+      "name": "orderListPlaceOto",
+      "method": "POST",
+      "path": "/orderList.place.oto",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place-oto"
+    },
+    {
+      "name": "orderListPlaceOtoco",
+      "method": "POST",
+      "path": "/orderList.place.otoco",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place-otoco"
+    },
+    {
+      "name": "sorOrderPlace",
+      "method": "POST",
+      "path": "/sor.order.place",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#sor-order-place"
+    },
+    {
+      "name": "sorOrderTest",
+      "method": "POST",
+      "path": "/sor.order.test",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#sor-order-test"
     }
   ],
   "streams": [

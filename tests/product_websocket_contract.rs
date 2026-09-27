@@ -18,6 +18,8 @@ use tokio::{
     sync::oneshot,
     time::Instant,
 };
+#[allow(dead_code, reason = "shared synthetic fixture helpers")]
+mod support;
 use tokio_websockets::{Limits, Message, ServerBuilder, WebSocketStream};
 
 async fn listener() -> (TcpListener, String) {
@@ -229,6 +231,94 @@ async fn coinm_market_stream_uses_plain_combined_path_and_joins_retirement() {
     );
     events.close().await.unwrap();
     assert!(matches!(events.recv().await,Some(coinm::StreamEvent::Retired(g)) if g==generation));
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+#[tokio::test]
+async fn spot_late_cancel_replace_preserves_both_legs_and_microsecond_generation() {
+    let (l, url) = listener().await;
+    let (sent_tx, sent_rx) = oneshot::channel();
+    let (release_tx, release_rx) = oneshot::channel();
+    let server = tokio::spawn(async move {
+        let mut peer = accept(l).await;
+        let request: Value =
+            serde_json::from_slice(peer.next().await.unwrap().unwrap().as_payload()).unwrap();
+        assert_eq!(request["method"], "order.cancelReplace");
+        assert_eq!(request["params"]["timestamp"], 1_700_000_001_000_000_u64);
+        assert_eq!(request["params"]["newClientOrderId"], "caller &/订单");
+        sent_tx.send(()).unwrap();
+        release_rx.await.unwrap();
+        peer.send(Message::text(json!({"id":request["id"],"status":409,"error":{"code":-2021,"data":{"cancelResult":"SUCCESS","newOrderResult":"FAILURE","cancelResponse":{"orderId":9,"clientOrderId":"cancel"},"newOrderResponse":{"code":-2010}}}}).to_string())).await.unwrap();
+        finish(peer).await;
+    });
+    let config = spot::Config::new(spot::Environment::Demo)
+        .unwrap()
+        .time_unit(binance_client::TimeUnit::Microseconds)
+        .clock(std::sync::Arc::new(support::FixedClock(1_700_000_001_000)))
+        .websocket_url(&url)
+        .unwrap()
+        .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap());
+    let (client, mut events, driver) = spot::WsClient::connect(config).await.unwrap();
+    assert_eq!(events.time_unit(), binance_client::TimeUnit::Microseconds);
+    let driver = tokio::spawn(driver.run());
+    events.recv().await.unwrap();
+    let c = client.clone();
+    let request = tokio::spawn(async move {
+        c.order_cancel_replace(
+            &spot::ws_requests::OrderCancelReplace::new()
+                .symbol(Symbol::new("BTCUSDT").unwrap())
+                .side("BUY")
+                .type_value("LIMIT")
+                .time_in_force("GTC")
+                .quantity(Decimal::ONE)
+                .price(Decimal::from(10))
+                .cancel_replace_mode("ALLOW_FAILURE")
+                .cancel_order_id(9)
+                .cancel_new_client_order_id(spot::ClientOrderId::new("cancel").unwrap())
+                .new_client_order_id(spot::ClientOrderId::new("caller &/订单").unwrap()),
+            RequestId::new("original-request").unwrap(),
+            Instant::now() + Duration::from_secs(1),
+        )
+        .await
+    });
+    sent_rx.await.unwrap();
+    tokio::time::pause();
+    tokio::time::advance(Duration::from_secs(1)).await;
+    let error = request.await.unwrap().unwrap_err();
+    assert_eq!(error.outcome(), Some(Outcome::Unknown));
+    let Error::Transport {
+        client_order_ids, ..
+    } = error
+    else {
+        panic!("missing caller ID")
+    };
+    assert_eq!(client_order_ids["newClientOrderId"], "caller &/订单");
+    tokio::time::resume();
+    release_tx.send(()).unwrap();
+    match events.recv().await.unwrap() {
+        spot::ApiEvent::LateResponse {
+            generation,
+            id,
+            result: Err(Error::Venue(response)),
+        } => {
+            assert_eq!(response.outcome, Outcome::Partial);
+            let partial = response.partial.unwrap();
+            assert_eq!(partial.legs["cancel"].order_id, Some(9));
+            assert_eq!(partial.legs["newOrder"].code, Some(-2010));
+            assert_eq!(generation, client.generation());
+            assert_eq!(id.as_str(), "original-request");
+            assert_eq!(
+                response.client_order_ids["newClientOrderId"],
+                "caller &/订单"
+            );
+        }
+        other => panic!("unexpected event {other:?}"),
+    }
+    client.close().await.unwrap();
+    assert!(matches!(
+        events.recv().await,
+        Some(spot::ApiEvent::Retired(_))
+    ));
     driver.await.unwrap().unwrap();
     server.await.unwrap();
 }

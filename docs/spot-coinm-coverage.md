@@ -11,7 +11,7 @@ product coverage or live execution readiness. No Spot/COIN-M live probe was run.
 
 | Product | REST | Catalog WebSocket API | Market definitions | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
-| Spot | 30 | 34 | 15 | 6 |
+| Spot | 48 | 52 | 15 | 6 |
 | COIN-M | 63 | 10 | 19 | 7 |
 
 Each WebSocket client additionally exposes session logon/status/logout. Clients
@@ -55,7 +55,10 @@ IDs preserve printable Unicode; Futures IDs retain their documented grammar.
 Missing required identities/financial evidence fail decoding; future event/filter
 kinds remain accessible through redacted unknown payloads.
 
-JSON timestamps use the default milliseconds; Spot `recvWindow` permits exactly
+Spot timestamps default to milliseconds. `Config::time_unit(TimeUnit::Microseconds)`
+sets the REST header, WebSocket URL, signing clock, and response/event provenance
+explicitly. Input timestamp fields remain caller-supplied provider units; a custom
+clock may override `now_micros` for finer resolution. Spot `recvWindow` permits exactly
 up to three fractional decimal places. Futures receive windows remain integer
 milliseconds. REST percent-encodes before signing; WebSocket signing uses sorted
 unencoded parameters. Spot 5xx failures remain ambiguous and cannot borrow the
@@ -98,15 +101,26 @@ and refunds across interval boundaries. Existing shared transport tests also cov
 cancellation, ping/pong, unbounded backlog, and reconnect overlap. Fixtures are
 synthetic, local, and credential-free; this change adds no dependency.
 
-[Issue #11](https://github.com/SharurTrading/binance-rs/issues/11) tracks advanced
-Spot order lists (including OCO/OTO/OTOCO/OPO/OPOCO), SOR, amend/cancelReplace with
-both-leg partial outcomes, remaining ancillary queries, explicit microsecond mode,
-listen-token subscriptions, COIN-M migrated algo endpoints and funding-info quota
-evidence, and separate FIX/SBE implementation. Standard COIN-M order builders
-refuse migrated conditional types before sending. These omissions remain blockers
-for claiming complete product coverage. Portfolio Margin/Pro, Options, and Margin
-are separate products outside this implementation. Human execution review and
-separate operator-authorized mutation probes are required before live trading.
+Advanced Spot lists, SOR, amend/keep-priority, cancel/replace, and ancillary
+queries now have catalog bindings. List and leg IDs are caller-owned; list
+admission reserves every order slot. Non-success cancel/replace responses retain
+both leg outcomes, venue codes, order IDs, caller IDs, HTTP status, and quota
+headers. Errors expose safe reconciliation evidence rather than sensitive leg
+bodies. A known accepted leg requires valid financial evidence; unknown codes,
+contradictory statuses, malformed bodies, and timeouts remain ambiguous. Late
+WebSocket replies retain the original operation, generation, and caller identity.
+`tests/advanced_spot_contract.rs` reproduces these outcomes and truncated responses.
+
+[Issue #11](https://github.com/SharurTrading/binance-rs/issues/11) still tracks
+COIN-M migrated algo endpoint/request/quota evidence, funding-info quota evidence,
+and separate FIX/SBE implementation. The integration notice names algo endpoints,
+but the checked catalog omits their endpoint-level request and quota contracts.
+Standard COIN-M order builders refuse migrated conditional types before sending.
+These omissions remain blockers for claiming complete product coverage.
+[Listen tokens](https://developers.binance.com/en/docs/products/margin-trading/listen-token-data-stream)
+belong to Margin, rather than Spot. Portfolio Margin/Pro, Options, and Margin are
+separate products outside this implementation. Human execution review and separate
+operator-authorized mutation probes are required before live trading.
 
 ## Spot REST operations
 
@@ -142,6 +156,24 @@ separate operator-authorized mutation probes are required before live trading.
 | [referencePrice](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market) | GET | `/api/v3/referencePrice` |
 | [referencePriceCalculation](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market) | GET | `/api/v3/referencePrice/calculation` |
 | [orderTest](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade) | POST | `/api/v3/order/test` |
+| [allOrderList](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#all-order-list) | GET | `/api/v3/allOrderList` |
+| [getOrderList](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#get-order-list) | GET | `/api/v3/orderList` |
+| [deleteOrderList](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#delete-order-list) | DELETE | `/api/v3/orderList` |
+| [myAllocations](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-allocations) | GET | `/api/v3/myAllocations` |
+| [myFilters](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-filters) | GET | `/api/v3/myFilters` |
+| [myPreventedMatches](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-prevented-matches) | GET | `/api/v3/myPreventedMatches` |
+| [openOrderList](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#open-order-list) | GET | `/api/v3/openOrderList` |
+| [orderAmendments](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#order-amendments) | GET | `/api/v3/order/amendments` |
+| [orderAmendKeepPriority](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-amend-keep-priority) | PUT | `/api/v3/order/amend/keepPriority` |
+| [orderCancelReplace](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-cancel-replace) | POST | `/api/v3/order/cancelReplace` |
+| [orderListOco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-oco) | POST | `/api/v3/orderList/oco` |
+| [orderListOpo](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-opo) | POST | `/api/v3/orderList/opo` |
+| [orderListOpoco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-opoco) | POST | `/api/v3/orderList/opoco` |
+| [orderListOto](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-oto) | POST | `/api/v3/orderList/oto` |
+| [orderListOtoco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-otoco) | POST | `/api/v3/orderList/otoco` |
+| [orderOco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-oco) | POST | `/api/v3/order/oco` |
+| [sorOrder](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#sor-order) | POST | `/api/v3/sor/order` |
+| [sorOrderTest](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#sor-order-test) | POST | `/api/v3/sor/order/test` |
 
 ## Spot WebSocket API
 
@@ -181,6 +213,24 @@ separate operator-authorized mutation probes are required before live trading.
 | [userDataStreamSubscribe](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/user-data-stream) | `/userDataStream.subscribe` |
 | [userDataStreamSubscribeSignature](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/user-data-stream) | `/userDataStream.subscribe.signature` |
 | [userDataStreamUnsubscribe](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/user-data-stream) | `/userDataStream.unsubscribe` |
+| [allOrderLists](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#all-order-lists) | `/allOrderLists` |
+| [myAllocations](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#my-allocations) | `/myAllocations` |
+| [myFilters](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#my-filters) | `/myFilters` |
+| [myPreventedMatches](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#my-prevented-matches) | `/myPreventedMatches` |
+| [openOrderListsStatus](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#open-order-lists-status) | `/openOrderLists.status` |
+| [orderAmendments](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#order-amendments) | `/order.amendments` |
+| [orderListStatus](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account#order-list-status) | `/orderList.status` |
+| [orderAmendKeepPriority](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-amend-keep-priority) | `/order.amend.keepPriority` |
+| [orderCancelReplace](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-cancel-replace) | `/order.cancelReplace` |
+| [orderListCancel](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-cancel) | `/orderList.cancel` |
+| [orderListPlace](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place) | `/orderList.place` |
+| [orderListPlaceOco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place-oco) | `/orderList.place.oco` |
+| [orderListPlaceOpo](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place-opo) | `/orderList.place.opo` |
+| [orderListPlaceOpoco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place-opoco) | `/orderList.place.opoco` |
+| [orderListPlaceOto](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place-oto) | `/orderList.place.oto` |
+| [orderListPlaceOtoco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#order-list-place-otoco) | `/orderList.place.otoco` |
+| [sorOrderPlace](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#sor-order-place) | `/sor.order.place` |
+| [sorOrderTest](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade#sor-order-test) | `/sor.order.test` |
 
 ## Spot market streams
 

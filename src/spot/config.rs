@@ -18,6 +18,7 @@ pub enum Environment {
 #[derive(Clone)]
 pub struct Config {
     pub(crate) rest: url::Url,
+    pub(crate) time_unit: crate::TimeUnit,
     pub(crate) websocket: url::Url,
     pub(crate) streams: url::Url,
     pub(crate) credentials: Option<Credentials>,
@@ -57,6 +58,7 @@ impl Config {
         };
         Ok(Self {
             rest: crate::core::validate_url(rest, false)?,
+            time_unit: crate::TimeUnit::Milliseconds,
             websocket: crate::core::validate_url(websocket, true)?,
             streams: crate::core::validate_url(streams, true)?,
             credentials: None,
@@ -65,6 +67,13 @@ impl Config {
             timeout: Duration::from_secs(10),
             proxy: None,
         })
+    }
+    /// Select explicit timestamp units for REST responses, API replies, and streams.
+    /// Signing uses the same units; `recvWindow` always remains milliseconds.
+    #[must_use]
+    pub fn time_unit(mut self, unit: crate::TimeUnit) -> Self {
+        self.time_unit = unit;
+        self
     }
     /// Attach caller-acquired credentials.
     #[must_use]

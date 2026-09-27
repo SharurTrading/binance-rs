@@ -151,6 +151,7 @@ pub(crate) struct SocketDriver {
     generation: u64,
     lifetime: Instant,
     ping_limit: usize,
+    time_unit: super::TimeUnit,
     pending: BTreeMap<String, Pending>,
     // IDs are evidence until generation retirement, including completed and timed-out calls.
     used_ids: BTreeSet<String>,
@@ -174,6 +175,7 @@ pub(crate) fn tls_config() -> Result<rustls::ClientConfig, Error> {
 pub(crate) struct SocketPolicy {
     pub handshake: Cost,
     pub ping_limit: usize,
+    pub time_unit: super::TimeUnit,
 }
 
 impl Socket {
@@ -197,6 +199,7 @@ impl Socket {
                     ..Cost::default()
                 },
                 ping_limit: if api { 5 } else { 10 },
+                time_unit: super::TimeUnit::Milliseconds,
             },
         )
         .await
@@ -264,6 +267,7 @@ impl Socket {
             generation,
             lifetime: Instant::now() + Duration::from_hours(24),
             ping_limit: policy.ping_limit,
+            time_unit: policy.time_unit,
             pending: BTreeMap::new(),
             used_ids: BTreeSet::new(),
         };
@@ -376,7 +380,10 @@ impl SocketDriver {
                         }
                         params.insert("apiKey".into(), credentials.api_key().into());
                         if op.security == Security::Signed {
-                            params.insert("timestamp".into(), now.into());
+                            params.insert(
+                                "timestamp".into(),
+                                self.time_unit.timestamp(self.clock.as_ref())?.into(),
+                            );
                             // WS signing sorts params; unlike HTTP the payload is NOT percent encoded.
                             let payload = params
                                 .iter()
@@ -470,6 +477,7 @@ impl SocketDriver {
             let rates = ws_rates(&value, now);
             self.budgets.observe(&rates, now, true)?;
             let meta = ResponseMeta {
+                time_unit: self.time_unit,
                 client_order_ids: p.client_order_ids.clone(),
                 status,
                 operation: p.op.name,

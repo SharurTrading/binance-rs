@@ -1,0 +1,449 @@
+{
+  "source": "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/sbe/schemas/stream_1_0.xml",
+  "sha256": "6ea328467e144311b1f1efff38e9fe613829997f041dd02a3b7077885d10a1f7",
+  "schema": {
+    "kind": "messageSchema",
+    "package": "spot_stream",
+    "id": "1",
+    "version": "0",
+    "semanticVersion": "5.2",
+    "byteOrder": "littleEndian",
+    "children": [
+      {
+        "kind": "types",
+        "children": [
+          {
+            "kind": "composite",
+            "name": "messageHeader",
+            "children": [
+              {
+                "kind": "type",
+                "name": "blockLength",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "templateId",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "schemaId",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "version",
+                "primitiveType": "uint16"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "groupSizeEncoding",
+            "children": [
+              {
+                "kind": "type",
+                "name": "blockLength",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "numInGroup",
+                "primitiveType": "uint32",
+                "maxValue": "2147483647"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "groupSize16Encoding",
+            "children": [
+              {
+                "kind": "type",
+                "name": "blockLength",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "numInGroup",
+                "primitiveType": "uint16"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "varString8",
+            "children": [
+              {
+                "kind": "type",
+                "name": "length",
+                "primitiveType": "uint8"
+              },
+              {
+                "kind": "type",
+                "name": "varData",
+                "length": "0",
+                "primitiveType": "uint8",
+                "characterEncoding": "UTF-8"
+              }
+            ]
+          },
+          {
+            "kind": "type",
+            "name": "mantissa64",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "exponent8",
+            "primitiveType": "int8"
+          },
+          {
+            "kind": "type",
+            "name": "tradeId",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "updateId",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "utcTimestampUs",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "enum",
+            "name": "boolEnum",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "False",
+                "value": "0"
+              },
+              {
+                "kind": "validValue",
+                "name": "True",
+                "value": "1"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "TradesStreamEvent",
+        "id": "10000",
+        "children": [
+          {
+            "kind": "field",
+            "id": "1",
+            "name": "eventTime",
+            "type": "utcTimestampUs"
+          },
+          {
+            "kind": "field",
+            "id": "2",
+            "name": "transactTime",
+            "type": "utcTimestampUs"
+          },
+          {
+            "kind": "field",
+            "id": "3",
+            "name": "priceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "4",
+            "name": "qtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "group",
+            "id": "100",
+            "name": "trades",
+            "children": [
+              {
+                "kind": "field",
+                "id": "1",
+                "name": "id",
+                "type": "tradeId"
+              },
+              {
+                "kind": "field",
+                "id": "2",
+                "name": "price",
+                "type": "mantissa64",
+                "exponent": "priceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "3",
+                "name": "qty",
+                "type": "mantissa64",
+                "exponent": "qtyExponent"
+              },
+              {
+                "kind": "field",
+                "id": "4",
+                "name": "isBuyerMaker",
+                "type": "boolEnum"
+              },
+              {
+                "kind": "field",
+                "id": "5",
+                "name": "isBestMatch",
+                "type": "boolEnum",
+                "presence": "constant",
+                "valueRef": "boolEnum.True"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "200",
+            "name": "symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "BestBidAskStreamEvent",
+        "id": "10001",
+        "children": [
+          {
+            "kind": "field",
+            "id": "1",
+            "name": "eventTime",
+            "type": "utcTimestampUs"
+          },
+          {
+            "kind": "field",
+            "id": "2",
+            "name": "bookUpdateId",
+            "type": "updateId"
+          },
+          {
+            "kind": "field",
+            "id": "3",
+            "name": "priceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "4",
+            "name": "qtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "5",
+            "name": "bidPrice",
+            "type": "mantissa64",
+            "exponent": "priceExponent"
+          },
+          {
+            "kind": "field",
+            "id": "6",
+            "name": "bidQty",
+            "type": "mantissa64",
+            "exponent": "qtyExponent"
+          },
+          {
+            "kind": "field",
+            "id": "7",
+            "name": "askPrice",
+            "type": "mantissa64",
+            "exponent": "priceExponent"
+          },
+          {
+            "kind": "field",
+            "id": "8",
+            "name": "askQty",
+            "type": "mantissa64",
+            "exponent": "qtyExponent"
+          },
+          {
+            "kind": "data",
+            "id": "200",
+            "name": "symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "DepthSnapshotStreamEvent",
+        "id": "10002",
+        "children": [
+          {
+            "kind": "field",
+            "id": "1",
+            "name": "eventTime",
+            "type": "utcTimestampUs"
+          },
+          {
+            "kind": "field",
+            "id": "2",
+            "name": "bookUpdateId",
+            "type": "updateId"
+          },
+          {
+            "kind": "field",
+            "id": "3",
+            "name": "priceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "4",
+            "name": "qtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "group",
+            "id": "100",
+            "name": "bids",
+            "dimensionType": "groupSize16Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "1",
+                "name": "price",
+                "type": "mantissa64",
+                "exponent": "priceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "2",
+                "name": "qty",
+                "type": "mantissa64",
+                "exponent": "qtyExponent"
+              }
+            ]
+          },
+          {
+            "kind": "group",
+            "id": "101",
+            "name": "asks",
+            "dimensionType": "groupSize16Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "1",
+                "name": "price",
+                "type": "mantissa64",
+                "exponent": "priceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "2",
+                "name": "qty",
+                "type": "mantissa64",
+                "exponent": "qtyExponent"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "200",
+            "name": "symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "DepthDiffStreamEvent",
+        "id": "10003",
+        "children": [
+          {
+            "kind": "field",
+            "id": "1",
+            "name": "eventTime",
+            "type": "utcTimestampUs"
+          },
+          {
+            "kind": "field",
+            "id": "2",
+            "name": "firstBookUpdateId",
+            "type": "updateId"
+          },
+          {
+            "kind": "field",
+            "id": "3",
+            "name": "lastBookUpdateId",
+            "type": "updateId"
+          },
+          {
+            "kind": "field",
+            "id": "4",
+            "name": "priceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "5",
+            "name": "qtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "group",
+            "id": "100",
+            "name": "bids",
+            "dimensionType": "groupSize16Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "1",
+                "name": "price",
+                "type": "mantissa64",
+                "exponent": "priceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "2",
+                "name": "qty",
+                "type": "mantissa64",
+                "exponent": "qtyExponent"
+              }
+            ]
+          },
+          {
+            "kind": "group",
+            "id": "101",
+            "name": "asks",
+            "dimensionType": "groupSize16Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "1",
+                "name": "price",
+                "type": "mantissa64",
+                "exponent": "priceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "2",
+                "name": "qty",
+                "type": "mantissa64",
+                "exponent": "qtyExponent"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "200",
+            "name": "symbol",
+            "type": "varString8"
+          }
+        ]
+      }
+    ]
+  }
+}

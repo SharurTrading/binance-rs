@@ -31,8 +31,10 @@ Five separate JSON product clients are available:
 [Convert coverage](docs/convert-coverage.md) record official sources and
 verification limits. Advanced Spot JSON bindings include order lists, SOR, amend,
 cancel/replace partial evidence, and explicit microsecond units. COIN-M migrated
-algo evidence and Spot FIX/SBE remain tracked in
+algo evidence remains tracked in
 [issue #11](https://github.com/SharurTrading/binance-rs/issues/11).
+[Spot FIX/SBE protocols](docs/core-protocols.md) add native ASCII/binary sessions,
+SBE API responses and four binary market streams, with explicit fixture limits.
 
 ## Boundary and architecture
 

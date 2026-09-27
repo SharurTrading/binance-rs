@@ -1,0 +1,3897 @@
+{
+  "source": "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/sbe/schemas/spot-fixsbe-1_1.xml",
+  "sha256": "6b44afe558d439ddc94323fd6ff026a949184ddd79a2cf033f610194c2537e70",
+  "schema": {
+    "kind": "messageSchema",
+    "package": "fix_sbe",
+    "id": "1",
+    "version": "1",
+    "semanticVersion": "5.2",
+    "byteOrder": "littleEndian",
+    "children": [
+      {
+        "kind": "types",
+        "children": [
+          {
+            "kind": "composite",
+            "name": "sofh",
+            "children": [
+              {
+                "kind": "type",
+                "name": "messageLength",
+                "primitiveType": "uint32"
+              },
+              {
+                "kind": "type",
+                "name": "encodingType",
+                "primitiveType": "uint16"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "messageHeader",
+            "children": [
+              {
+                "kind": "type",
+                "name": "blockLength",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "templateId",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "schemaId",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "version",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "seqNum",
+                "primitiveType": "uint32"
+              },
+              {
+                "kind": "ref",
+                "name": "sendingTime",
+                "type": "utcTimestampUs"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "groupSize32Encoding",
+            "children": [
+              {
+                "kind": "type",
+                "name": "blockLength",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "numInGroup",
+                "primitiveType": "uint32",
+                "maxValue": "2147483647"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "smallGroupSize16Encoding",
+            "children": [
+              {
+                "kind": "type",
+                "name": "blockLength",
+                "primitiveType": "uint8"
+              },
+              {
+                "kind": "type",
+                "name": "numInGroup",
+                "primitiveType": "uint16"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "groupSize16Encoding",
+            "children": [
+              {
+                "kind": "type",
+                "name": "blockLength",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "numInGroup",
+                "primitiveType": "uint16"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "smallGroupSize8Encoding",
+            "children": [
+              {
+                "kind": "type",
+                "name": "blockLength",
+                "primitiveType": "uint8"
+              },
+              {
+                "kind": "type",
+                "name": "numInGroup",
+                "primitiveType": "uint8"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "groupSize8Encoding",
+            "children": [
+              {
+                "kind": "type",
+                "name": "blockLength",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "numInGroup",
+                "primitiveType": "uint8"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "varString",
+            "children": [
+              {
+                "kind": "type",
+                "name": "length",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "varData",
+                "length": "0",
+                "primitiveType": "uint8",
+                "characterEncoding": "UTF-8"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "varString8",
+            "children": [
+              {
+                "kind": "type",
+                "name": "length",
+                "primitiveType": "uint8"
+              },
+              {
+                "kind": "type",
+                "name": "varData",
+                "length": "0",
+                "primitiveType": "uint8",
+                "characterEncoding": "UTF-8"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "optionalVarString",
+            "children": [
+              {
+                "kind": "type",
+                "name": "length",
+                "primitiveType": "uint16"
+              },
+              {
+                "kind": "type",
+                "name": "varData",
+                "length": "0",
+                "primitiveType": "uint8",
+                "characterEncoding": "UTF-8"
+              }
+            ]
+          },
+          {
+            "kind": "composite",
+            "name": "optionalVarString8",
+            "children": [
+              {
+                "kind": "type",
+                "name": "length",
+                "primitiveType": "uint8"
+              },
+              {
+                "kind": "type",
+                "name": "varData",
+                "length": "0",
+                "primitiveType": "uint8",
+                "characterEncoding": "UTF-8"
+              }
+            ]
+          },
+          {
+            "kind": "type",
+            "name": "mantissa64",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "exponent8",
+            "primitiveType": "int8"
+          },
+          {
+            "kind": "type",
+            "name": "allocId",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "durationUs",
+            "primitiveType": "uint32"
+          },
+          {
+            "kind": "type",
+            "name": "executionId",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "ordId",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "ordListId",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "preventedMatchId",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "tradeId",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "tradeGroupId",
+            "primitiveType": "int64"
+          },
+          {
+            "kind": "type",
+            "name": "utcTimestampUs",
+            "primitiveType": "int64",
+            "semanticType": "UTCTimestamp"
+          },
+          {
+            "kind": "enum",
+            "name": "boolEnum",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "False",
+                "value": "0"
+              },
+              {
+                "kind": "validValue",
+                "name": "True",
+                "value": "1"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "cancelRestrictions",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "OnlyNew",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "OnlyPartiallyFilled",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "contingencyType",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "OneCancelsTheOther",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "OneTriggersTheOther",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "cxlRejResponseTo",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "OrderCancelRequest",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "execInst",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "ParticipateDontInitiate",
+                "value": "6"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "executionReportType",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Full",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "Mini",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "execType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "New",
+                "value": "0"
+              },
+              {
+                "kind": "validValue",
+                "name": "Canceled",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "Replaced",
+                "value": "5"
+              },
+              {
+                "kind": "validValue",
+                "name": "Rejected",
+                "value": "8"
+              },
+              {
+                "kind": "validValue",
+                "name": "Trade",
+                "value": "F"
+              },
+              {
+                "kind": "validValue",
+                "name": "Expired",
+                "value": "C"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "expiryReason",
+            "encodingType": "uint8",
+            "sinceVersion": "1",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Rejected",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "ExchangeCanceled",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "OcoTrigger",
+                "value": "3"
+              },
+              {
+                "kind": "validValue",
+                "name": "OtoPhaseOneExpired",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "UnfilledIocQuantityExpired",
+                "value": "5"
+              },
+              {
+                "kind": "validValue",
+                "name": "UnfilledFokOrderExpired",
+                "value": "6"
+              },
+              {
+                "kind": "validValue",
+                "name": "InsufficientLiquidity",
+                "value": "7"
+              },
+              {
+                "kind": "validValue",
+                "name": "ExecutionRulePriceRangeExceeded",
+                "value": "8"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "instrumentListRequestType",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "SingleInstrument",
+                "value": "0"
+              },
+              {
+                "kind": "validValue",
+                "name": "AllInstruments",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "limitResetIntervalResolution",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Second",
+                "value": "s"
+              },
+              {
+                "kind": "validValue",
+                "name": "Minute",
+                "value": "m"
+              },
+              {
+                "kind": "validValue",
+                "name": "Hour",
+                "value": "h"
+              },
+              {
+                "kind": "validValue",
+                "name": "Day",
+                "value": "d"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "limitType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "OrderLimit",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "MessageLimit",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "SubscriptionLimit",
+                "value": "3"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "listOrderStatus",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Executing",
+                "value": "3"
+              },
+              {
+                "kind": "validValue",
+                "name": "AllDone",
+                "value": "6"
+              },
+              {
+                "kind": "validValue",
+                "name": "Reject",
+                "value": "7"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "listRejectReason",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Other",
+                "value": "99"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "listStatusType",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Response",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "ExecStarted",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "AllDone",
+                "value": "5"
+              },
+              {
+                "kind": "validValue",
+                "name": "Updated",
+                "value": "100"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "listTriggerAction",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Release",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "Cancel",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "listTriggerType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Activated",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "PartiallyFilled",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "Filled",
+                "value": "3"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "massCancelRejectReason",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Other",
+                "value": "99"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "massCancelRequestType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "CancelSymbolOrders",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "massCancelResponse",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "CancelRequestRejected",
+                "value": "0"
+              },
+              {
+                "kind": "validValue",
+                "name": "CancelSymbolOrders",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "matchType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "OnePartyTradeReport",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "AutoMatch",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "mdEntryType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Bid",
+                "value": "0"
+              },
+              {
+                "kind": "validValue",
+                "name": "Offer",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "Trade",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "mdReqRejReason",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "DuplicateMdReqID",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "TooManySubscriptions",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "messageHandling",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Unordered",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "Sequential",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "miscFeeType",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "ExchangeFees",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "orderCapacity",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Agency",
+                "value": "A"
+              },
+              {
+                "kind": "validValue",
+                "name": "Principal",
+                "value": "P"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "ordRejReason",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Other",
+                "value": "99"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "ordStatus",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "New",
+                "value": "0"
+              },
+              {
+                "kind": "validValue",
+                "name": "PartiallyFilled",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "Filled",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "Canceled",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "PendingCancel",
+                "value": "6"
+              },
+              {
+                "kind": "validValue",
+                "name": "Rejected",
+                "value": "8"
+              },
+              {
+                "kind": "validValue",
+                "name": "PendingNew",
+                "value": "A"
+              },
+              {
+                "kind": "validValue",
+                "name": "Expired",
+                "value": "C"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "ordType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Market",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "Limit",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "Stop",
+                "value": "3"
+              },
+              {
+                "kind": "validValue",
+                "name": "StopLimit",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "Pegged",
+                "value": "P"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "orderCancelRequestAndNewOrderSingleMode",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "StopOnFailure",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "AllowFailure",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "orderRateLimitExceededMode",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "DoNothing",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "CancelOnly",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "pegMoveType",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Fixed",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "pegOffsetType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "PriceTier",
+                "value": "3"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "pegPriceType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "MarketPeg",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "PrimaryPeg",
+                "value": "5"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "responseMode",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Everything",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "OnlyAcks",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "selfTradePreventionMode",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "None",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "ExpireTaker",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "ExpireMaker",
+                "value": "3"
+              },
+              {
+                "kind": "validValue",
+                "name": "ExpireBoth",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "Decrement",
+                "value": "5"
+              },
+              {
+                "kind": "validValue",
+                "name": "Transfer",
+                "value": "6"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "sessionRejectReason",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "InvalidTagNumber",
+                "value": "0"
+              },
+              {
+                "kind": "validValue",
+                "name": "RequiredTagMissing",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "TagNotDefinedForThisMessageType",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "UndefinedTag",
+                "value": "3"
+              },
+              {
+                "kind": "validValue",
+                "name": "ValueIsIncorrect",
+                "value": "5"
+              },
+              {
+                "kind": "validValue",
+                "name": "IncorrectDataFormatForValue",
+                "value": "6"
+              },
+              {
+                "kind": "validValue",
+                "name": "SignatureProblem",
+                "value": "8"
+              },
+              {
+                "kind": "validValue",
+                "name": "SendingTimeAccuracyProblem",
+                "value": "10"
+              },
+              {
+                "kind": "validValue",
+                "name": "TagAppearsMoreThanOnce",
+                "value": "13"
+              },
+              {
+                "kind": "validValue",
+                "name": "TagSpecifiedOutOfRequiredOrder",
+                "value": "14"
+              },
+              {
+                "kind": "validValue",
+                "name": "RepeatingGroupFieldsOutOfOrder",
+                "value": "15"
+              },
+              {
+                "kind": "validValue",
+                "name": "IncorrectNumInGroupCountForRepeatingGroup",
+                "value": "16"
+              },
+              {
+                "kind": "validValue",
+                "name": "Other",
+                "value": "99"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "side",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Buy",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "Sell",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "subscriptionRequestType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Subscribe",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "Unsubscribe",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "timeInForce",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "GoodTillCancel",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "ImmediateOrCancel",
+                "value": "3"
+              },
+              {
+                "kind": "validValue",
+                "name": "FillOrKill",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "triggerAction",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Activate",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "triggerPriceDirection",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Up",
+                "value": "U"
+              },
+              {
+                "kind": "validValue",
+                "name": "Down",
+                "value": "D"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "triggerPriceType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "LastTrade",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "triggerType",
+            "encodingType": "char",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "PriceMovement",
+                "value": "4"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "~"
+              }
+            ]
+          },
+          {
+            "kind": "enum",
+            "name": "workingFloor",
+            "encodingType": "uint8",
+            "children": [
+              {
+                "kind": "validValue",
+                "name": "Exchange",
+                "value": "1"
+              },
+              {
+                "kind": "validValue",
+                "name": "Broker",
+                "value": "2"
+              },
+              {
+                "kind": "validValue",
+                "name": "Sor",
+                "value": "3"
+              },
+              {
+                "kind": "validValue",
+                "name": "NonRepresentable",
+                "value": "254"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "Heartbeat",
+        "id": "20001",
+        "semanticType": "0",
+        "children": [
+          {
+            "kind": "data",
+            "id": "112",
+            "name": "TestReqID",
+            "type": "optionalVarString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "TestRequest",
+        "id": "20002",
+        "semanticType": "1",
+        "children": [
+          {
+            "kind": "data",
+            "id": "112",
+            "name": "TestReqID",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "Reject",
+        "id": "20003",
+        "semanticType": "3",
+        "children": [
+          {
+            "kind": "field",
+            "id": "45",
+            "name": "RefSeqNum",
+            "type": "uint32",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "371",
+            "name": "RefTagID",
+            "type": "uint32",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "373",
+            "name": "SessionRejectReason",
+            "type": "sessionRejectReason",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25016",
+            "name": "ErrorCode",
+            "type": "int32",
+            "presence": "optional"
+          },
+          {
+            "kind": "data",
+            "id": "372",
+            "name": "RefMsgType",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "58",
+            "name": "Text",
+            "type": "optionalVarString"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "Logout",
+        "id": "20004",
+        "semanticType": "5",
+        "children": [
+          {
+            "kind": "data",
+            "id": "58",
+            "name": "Text",
+            "type": "optionalVarString"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "ExecutionReportAck",
+        "id": "198",
+        "semanticType": "8",
+        "children": [
+          {
+            "kind": "field",
+            "id": "37",
+            "name": "OrderID",
+            "type": "ordId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "66",
+            "name": "ListID",
+            "type": "ordListId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "60",
+            "name": "TransactTime",
+            "type": "utcTimestampUs",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "150",
+            "name": "ExecType",
+            "type": "execType"
+          },
+          {
+            "kind": "field",
+            "id": "39",
+            "name": "OrdStatus",
+            "type": "ordStatus"
+          },
+          {
+            "kind": "field",
+            "id": "103",
+            "name": "OrdRejReason",
+            "type": "ordRejReason",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25016",
+            "name": "ErrorCode",
+            "type": "int32",
+            "presence": "optional"
+          },
+          {
+            "kind": "data",
+            "id": "11",
+            "name": "ClOrdID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "58",
+            "name": "ErrorText",
+            "type": "optionalVarString"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "ExecutionReport",
+        "id": "98",
+        "semanticType": "8",
+        "children": [
+          {
+            "kind": "field",
+            "id": "25054",
+            "name": "PriceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "25055",
+            "name": "QtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "17",
+            "name": "ExecID",
+            "type": "executionId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "37",
+            "name": "OrderID",
+            "type": "ordId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "38",
+            "name": "OrderQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "40",
+            "name": "OrdType",
+            "type": "ordType"
+          },
+          {
+            "kind": "field",
+            "id": "54",
+            "name": "Side",
+            "type": "side"
+          },
+          {
+            "kind": "field",
+            "id": "18",
+            "name": "ExecInst",
+            "type": "execInst",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "44",
+            "name": "Price",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1100",
+            "name": "TriggerType",
+            "type": "triggerType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1101",
+            "name": "TriggerAction",
+            "type": "triggerAction",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1102",
+            "name": "TriggerPrice",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1107",
+            "name": "TriggerPriceType",
+            "type": "triggerPriceType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1109",
+            "name": "TriggerPriceDirection",
+            "type": "triggerPriceDirection",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25009",
+            "name": "TriggerTrailingDeltaBips",
+            "type": "uint64",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "211",
+            "name": "PegOffsetValue",
+            "type": "uint8",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1094",
+            "name": "PegPriceType",
+            "type": "pegPriceType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "835",
+            "name": "PegMoveType",
+            "type": "pegMoveType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "836",
+            "name": "PegOffsetType",
+            "type": "pegOffsetType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "839",
+            "name": "PeggedPrice",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "59",
+            "name": "TimeInForce",
+            "type": "timeInForce",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "60",
+            "name": "TransactTime",
+            "type": "utcTimestampUs",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25018",
+            "name": "OrderCreationTime",
+            "type": "utcTimestampUs",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "111",
+            "name": "MaxFloor",
+            "type": "mantissa64",
+            "exponent": "QtyExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "66",
+            "name": "ListID",
+            "type": "ordListId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "152",
+            "name": "CashOrderQty",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "847",
+            "name": "TargetStrategy",
+            "type": "int32",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "7940",
+            "name": "StrategyID",
+            "type": "int64",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "528",
+            "name": "OrderCapacity",
+            "type": "orderCapacity",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25001",
+            "name": "SelfTradePreventionMode",
+            "type": "selfTradePreventionMode",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "150",
+            "name": "ExecType",
+            "type": "execType"
+          },
+          {
+            "kind": "field",
+            "id": "14",
+            "name": "CumQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent"
+          },
+          {
+            "kind": "field",
+            "id": "151",
+            "name": "LeavesQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25017",
+            "name": "CumQuoteQty",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1057",
+            "name": "AggressorIndicator",
+            "type": "boolEnum",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1003",
+            "name": "TradeID",
+            "type": "tradeId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "31",
+            "name": "LastPx",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "32",
+            "name": "LastQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent"
+          },
+          {
+            "kind": "field",
+            "id": "39",
+            "name": "OrdStatus",
+            "type": "ordStatus"
+          },
+          {
+            "kind": "field",
+            "id": "198",
+            "name": "SecondaryOrderID",
+            "type": "ordId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25020",
+            "name": "SecondaryExternalAccountID",
+            "type": "int64",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "70",
+            "name": "AllocID",
+            "type": "allocId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "574",
+            "name": "MatchType",
+            "type": "matchType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25021",
+            "name": "WorkingFloor",
+            "type": "workingFloor",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "636",
+            "name": "WorkingIndicator",
+            "type": "boolEnum",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25023",
+            "name": "WorkingTime",
+            "type": "utcTimestampUs",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25022",
+            "name": "TrailingTime",
+            "type": "utcTimestampUs",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25024",
+            "name": "PreventedMatchID",
+            "type": "preventedMatchId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25025",
+            "name": "PreventedExecutionPrice",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25026",
+            "name": "PreventedExecutionQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25027",
+            "name": "TradeGroupID",
+            "type": "tradeGroupId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25029",
+            "name": "CounterOrderID",
+            "type": "ordId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25030",
+            "name": "PreventedQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25031",
+            "name": "LastPreventedQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25032",
+            "name": "SOR",
+            "type": "boolEnum",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "103",
+            "name": "OrdRejReason",
+            "type": "ordRejReason",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25016",
+            "name": "ErrorCode",
+            "type": "int32",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25056",
+            "name": "ExpiryReason",
+            "type": "expiryReason",
+            "presence": "optional",
+            "sinceVersion": "1"
+          },
+          {
+            "kind": "group",
+            "id": "136",
+            "name": "MiscFees",
+            "dimensionType": "smallGroupSize16Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "25053",
+                "name": "Exponent",
+                "type": "exponent8"
+              },
+              {
+                "kind": "field",
+                "id": "137",
+                "name": "MiscFeeAmt",
+                "type": "mantissa64",
+                "exponent": "Exponent"
+              },
+              {
+                "kind": "field",
+                "id": "139",
+                "name": "MiscFeeType",
+                "type": "miscFeeType"
+              },
+              {
+                "kind": "data",
+                "id": "138",
+                "name": "MiscFeeCurr",
+                "type": "varString8"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "11",
+            "name": "ClOrdID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "41",
+            "name": "OrigClOrdID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "25019",
+            "name": "SecondarySymbol",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "25028",
+            "name": "CounterSymbol",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "58",
+            "name": "ErrorText",
+            "type": "optionalVarString"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "OrderCancelReject",
+        "id": "96",
+        "semanticType": "9",
+        "children": [
+          {
+            "kind": "field",
+            "id": "37",
+            "name": "OrderID",
+            "type": "ordId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "66",
+            "name": "ListID",
+            "type": "ordListId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25002",
+            "name": "CancelRestrictions",
+            "type": "cancelRestrictions",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "434",
+            "name": "CxlRejResponseTo",
+            "type": "cxlRejResponseTo"
+          },
+          {
+            "kind": "field",
+            "id": "25016",
+            "name": "ErrorCode",
+            "type": "int32"
+          },
+          {
+            "kind": "data",
+            "id": "11",
+            "name": "ClOrdID",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "41",
+            "name": "OrigClOrdID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "25015",
+            "name": "OrigClListID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "58",
+            "name": "ErrorText",
+            "type": "varString"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "OrderCancelRequestAndNewOrderSingle",
+        "id": "97",
+        "semanticType": "XCN",
+        "children": [
+          {
+            "kind": "field",
+            "id": "25033",
+            "name": "OrderCancelRequestAndNewOrderSingleMode",
+            "type": "orderCancelRequestAndNewOrderSingleMode"
+          },
+          {
+            "kind": "field",
+            "id": "25038",
+            "name": "OrderRateLimitExceededMode",
+            "type": "orderRateLimitExceededMode",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "37",
+            "name": "OrderID",
+            "type": "ordId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25002",
+            "name": "CancelRestrictions",
+            "type": "cancelRestrictions",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25054",
+            "name": "PriceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "25055",
+            "name": "QtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "38",
+            "name": "OrderQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "40",
+            "name": "OrdType",
+            "type": "ordType"
+          },
+          {
+            "kind": "field",
+            "id": "18",
+            "name": "ExecInst",
+            "type": "execInst",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "44",
+            "name": "Price",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1100",
+            "name": "TriggerType",
+            "type": "triggerType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1101",
+            "name": "TriggerAction",
+            "type": "triggerAction",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1102",
+            "name": "TriggerPrice",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1107",
+            "name": "TriggerPriceType",
+            "type": "triggerPriceType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1109",
+            "name": "TriggerPriceDirection",
+            "type": "triggerPriceDirection",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25009",
+            "name": "TriggerTrailingDeltaBips",
+            "type": "uint64",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "211",
+            "name": "PegOffsetValue",
+            "type": "uint8",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1094",
+            "name": "PegPriceType",
+            "type": "pegPriceType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "835",
+            "name": "PegMoveType",
+            "type": "pegMoveType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "836",
+            "name": "PegOffsetType",
+            "type": "pegOffsetType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "54",
+            "name": "Side",
+            "type": "side"
+          },
+          {
+            "kind": "field",
+            "id": "59",
+            "name": "TimeInForce",
+            "type": "timeInForce",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "111",
+            "name": "MaxFloor",
+            "type": "mantissa64",
+            "exponent": "QtyExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "152",
+            "name": "CashOrderQty",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "847",
+            "name": "TargetStrategy",
+            "type": "int32",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "7940",
+            "name": "StrategyID",
+            "type": "int64",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25001",
+            "name": "SelfTradePreventionMode",
+            "type": "selfTradePreventionMode",
+            "presence": "optional"
+          },
+          {
+            "kind": "data",
+            "id": "25034",
+            "name": "CancelClOrdID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "41",
+            "name": "OrigClOrdID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "11",
+            "name": "ClOrdID",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "Logon",
+        "id": "20008",
+        "semanticType": "A",
+        "children": [
+          {
+            "kind": "field",
+            "id": "98",
+            "name": "EncryptMethod",
+            "type": "uint8",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "108",
+            "name": "HeartBtInt",
+            "type": "uint32"
+          },
+          {
+            "kind": "field",
+            "id": "141",
+            "name": "ResetSeqNumFlag",
+            "type": "boolEnum",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25035",
+            "name": "MessageHandling",
+            "type": "messageHandling",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25036",
+            "name": "ResponseMode",
+            "type": "responseMode",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25045",
+            "name": "ExecutionReportType",
+            "type": "executionReportType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "9406",
+            "name": "DropCopyFlag",
+            "type": "boolEnum",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25000",
+            "name": "RecvWindow",
+            "type": "durationUs",
+            "presence": "optional"
+          },
+          {
+            "kind": "data",
+            "id": "49",
+            "name": "SenderCompId",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "56",
+            "name": "TargetCompId",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "96",
+            "name": "RawData",
+            "type": "varString"
+          },
+          {
+            "kind": "data",
+            "id": "553",
+            "name": "Username",
+            "type": "varString"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "LogonAck",
+        "id": "20009",
+        "semanticType": "A",
+        "children": [
+          {
+            "kind": "field",
+            "id": "98",
+            "name": "EncryptMethod",
+            "type": "uint8",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "108",
+            "name": "HeartBtInt",
+            "type": "uint32"
+          },
+          {
+            "kind": "field",
+            "id": "25052",
+            "name": "SbeSchemaIdVersionDeprecated",
+            "type": "boolEnum"
+          },
+          {
+            "kind": "data",
+            "id": "25037",
+            "name": "UUID",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "NewOrderSingle",
+        "id": "99",
+        "semanticType": "D",
+        "children": [
+          {
+            "kind": "field",
+            "id": "25054",
+            "name": "PriceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "25055",
+            "name": "QtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "38",
+            "name": "OrderQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "40",
+            "name": "OrdType",
+            "type": "ordType"
+          },
+          {
+            "kind": "field",
+            "id": "18",
+            "name": "ExecInst",
+            "type": "execInst",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "44",
+            "name": "Price",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1100",
+            "name": "TriggerType",
+            "type": "triggerType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1101",
+            "name": "TriggerAction",
+            "type": "triggerAction",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1102",
+            "name": "TriggerPrice",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1107",
+            "name": "TriggerPriceType",
+            "type": "triggerPriceType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1109",
+            "name": "TriggerPriceDirection",
+            "type": "triggerPriceDirection",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25009",
+            "name": "TriggerTrailingDeltaBips",
+            "type": "uint64",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "211",
+            "name": "PegOffsetValue",
+            "type": "uint8",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1094",
+            "name": "PegPriceType",
+            "type": "pegPriceType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "835",
+            "name": "PegMoveType",
+            "type": "pegMoveType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "836",
+            "name": "PegOffsetType",
+            "type": "pegOffsetType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "54",
+            "name": "Side",
+            "type": "side"
+          },
+          {
+            "kind": "field",
+            "id": "59",
+            "name": "TimeInForce",
+            "type": "timeInForce",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "111",
+            "name": "MaxFloor",
+            "type": "mantissa64",
+            "exponent": "QtyExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "152",
+            "name": "CashOrderQty",
+            "type": "mantissa64",
+            "exponent": "PriceExponent",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "847",
+            "name": "TargetStrategy",
+            "type": "int32",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "7940",
+            "name": "StrategyID",
+            "type": "int64",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25001",
+            "name": "SelfTradePreventionMode",
+            "type": "selfTradePreventionMode",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25032",
+            "name": "SOR",
+            "type": "boolEnum",
+            "presence": "optional"
+          },
+          {
+            "kind": "data",
+            "id": "11",
+            "name": "ClOrdID",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "NewOrderList",
+        "id": "100",
+        "semanticType": "E",
+        "children": [
+          {
+            "kind": "field",
+            "id": "1385",
+            "name": "ContingencyType",
+            "type": "contingencyType"
+          },
+          {
+            "kind": "field",
+            "id": "25046",
+            "name": "OPO",
+            "type": "boolEnum",
+            "presence": "optional"
+          },
+          {
+            "kind": "group",
+            "id": "73",
+            "name": "Orders",
+            "dimensionType": "groupSize8Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "25054",
+                "name": "PriceExponent",
+                "type": "exponent8"
+              },
+              {
+                "kind": "field",
+                "id": "25055",
+                "name": "QtyExponent",
+                "type": "exponent8"
+              },
+              {
+                "kind": "field",
+                "id": "38",
+                "name": "OrderQty",
+                "type": "mantissa64",
+                "exponent": "QtyExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "40",
+                "name": "OrdType",
+                "type": "ordType"
+              },
+              {
+                "kind": "field",
+                "id": "18",
+                "name": "ExecInst",
+                "type": "execInst",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "44",
+                "name": "Price",
+                "type": "mantissa64",
+                "exponent": "PriceExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "1100",
+                "name": "TriggerType",
+                "type": "triggerType",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "1101",
+                "name": "TriggerAction",
+                "type": "triggerAction",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "1102",
+                "name": "TriggerPrice",
+                "type": "mantissa64",
+                "exponent": "PriceExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "1107",
+                "name": "TriggerPriceType",
+                "type": "triggerPriceType",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "1109",
+                "name": "TriggerPriceDirection",
+                "type": "triggerPriceDirection",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "25009",
+                "name": "TriggerTrailingDeltaBips",
+                "type": "uint64",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "211",
+                "name": "PegOffsetValue",
+                "type": "uint8",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "1094",
+                "name": "PegPriceType",
+                "type": "pegPriceType",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "835",
+                "name": "PegMoveType",
+                "type": "pegMoveType",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "836",
+                "name": "PegOffsetType",
+                "type": "pegOffsetType",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "54",
+                "name": "Side",
+                "type": "side"
+              },
+              {
+                "kind": "field",
+                "id": "59",
+                "name": "TimeInForce",
+                "type": "timeInForce",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "111",
+                "name": "MaxFloor",
+                "type": "mantissa64",
+                "exponent": "QtyExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "152",
+                "name": "CashOrderQty",
+                "type": "mantissa64",
+                "exponent": "PriceExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "847",
+                "name": "TargetStrategy",
+                "type": "int32",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "7940",
+                "name": "StrategyID",
+                "type": "int64",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "25001",
+                "name": "SelfTradePreventionMode",
+                "type": "selfTradePreventionMode",
+                "presence": "optional"
+              },
+              {
+                "kind": "group",
+                "id": "25010",
+                "name": "ListTriggeringInstructions",
+                "dimensionType": "smallGroupSize8Encoding",
+                "children": [
+                  {
+                    "kind": "field",
+                    "id": "25011",
+                    "name": "ListTriggerType",
+                    "type": "listTriggerType"
+                  },
+                  {
+                    "kind": "field",
+                    "id": "25012",
+                    "name": "ListTriggerTriggerIndex",
+                    "type": "uint8"
+                  },
+                  {
+                    "kind": "field",
+                    "id": "25013",
+                    "name": "ListTriggerAction",
+                    "type": "listTriggerAction"
+                  }
+                ]
+              },
+              {
+                "kind": "data",
+                "id": "11",
+                "name": "ClOrdID",
+                "type": "varString8"
+              },
+              {
+                "kind": "data",
+                "id": "55",
+                "name": "Symbol",
+                "type": "varString8"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "25014",
+            "name": "ClListID",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "OrderCancelRequest",
+        "id": "101",
+        "semanticType": "F",
+        "children": [
+          {
+            "kind": "field",
+            "id": "37",
+            "name": "OrderID",
+            "type": "ordId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "66",
+            "name": "ListID",
+            "type": "ordListId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25002",
+            "name": "CancelRestrictions",
+            "type": "cancelRestrictions",
+            "presence": "optional"
+          },
+          {
+            "kind": "data",
+            "id": "11",
+            "name": "ClOrdID",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "41",
+            "name": "OrigClOrdID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "25015",
+            "name": "OrigClListID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "ListStatus",
+        "id": "102",
+        "semanticType": "N",
+        "children": [
+          {
+            "kind": "field",
+            "id": "66",
+            "name": "ListID",
+            "type": "ordListId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "1385",
+            "name": "ContingencyType",
+            "type": "contingencyType",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "429",
+            "name": "ListStatusType",
+            "type": "listStatusType"
+          },
+          {
+            "kind": "field",
+            "id": "431",
+            "name": "ListOrderStatus",
+            "type": "listOrderStatus"
+          },
+          {
+            "kind": "field",
+            "id": "1386",
+            "name": "ListRejectReason",
+            "type": "listRejectReason",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "60",
+            "name": "TransactTime",
+            "type": "utcTimestampUs",
+            "presence": "optional"
+          },
+          {
+            "kind": "group",
+            "id": "73",
+            "name": "Orders",
+            "dimensionType": "smallGroupSize8Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "37",
+                "name": "OrderID",
+                "type": "ordId",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "103",
+                "name": "OrdRejReason",
+                "type": "ordRejReason",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "25016",
+                "name": "ErrorCode",
+                "type": "int32",
+                "presence": "optional"
+              },
+              {
+                "kind": "group",
+                "id": "25010",
+                "name": "ListTriggeringInstructions",
+                "dimensionType": "smallGroupSize8Encoding",
+                "children": [
+                  {
+                    "kind": "field",
+                    "id": "25011",
+                    "name": "ListTriggerType",
+                    "type": "listTriggerType"
+                  },
+                  {
+                    "kind": "field",
+                    "id": "25012",
+                    "name": "ListTriggerTriggerIndex",
+                    "type": "uint8"
+                  },
+                  {
+                    "kind": "field",
+                    "id": "25013",
+                    "name": "ListTriggerAction",
+                    "type": "listTriggerAction"
+                  }
+                ]
+              },
+              {
+                "kind": "data",
+                "id": "11",
+                "name": "ClOrdID",
+                "type": "varString8"
+              },
+              {
+                "kind": "data",
+                "id": "55",
+                "name": "Symbol",
+                "type": "varString8"
+              },
+              {
+                "kind": "data",
+                "id": "58",
+                "name": "ErrorText",
+                "type": "optionalVarString"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "25014",
+            "name": "ClListID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "25015",
+            "name": "OrigClListID",
+            "type": "optionalVarString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "OrderMassCancelRequest",
+        "id": "103",
+        "semanticType": "q",
+        "children": [
+          {
+            "kind": "field",
+            "id": "530",
+            "name": "MassCancelRequestType",
+            "type": "massCancelRequestType"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "11",
+            "name": "ClOrdID",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "OrderMassCancelReport",
+        "id": "104",
+        "semanticType": "r",
+        "children": [
+          {
+            "kind": "field",
+            "id": "530",
+            "name": "MassCancelRequestType",
+            "type": "massCancelRequestType"
+          },
+          {
+            "kind": "field",
+            "id": "531",
+            "name": "MassCancelResponse",
+            "type": "massCancelResponse"
+          },
+          {
+            "kind": "field",
+            "id": "532",
+            "name": "MassCancelRejectReason",
+            "type": "massCancelRejectReason",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "533",
+            "name": "TotalAffectedOrders",
+            "type": "int64",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25016",
+            "name": "ErrorCode",
+            "type": "int32",
+            "presence": "optional"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "11",
+            "name": "ClOrdID",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "58",
+            "name": "ErrorText",
+            "type": "optionalVarString"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "OrderAmendKeepPriorityRequest",
+        "id": "105",
+        "semanticType": "XAK",
+        "children": [
+          {
+            "kind": "field",
+            "id": "37",
+            "name": "OrderID",
+            "type": "ordId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25055",
+            "name": "QtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "38",
+            "name": "OrderQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent"
+          },
+          {
+            "kind": "data",
+            "id": "11",
+            "name": "ClOrdID",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "41",
+            "name": "OrigClOrdID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "OrderAmendReject",
+        "id": "106",
+        "semanticType": "XAR",
+        "children": [
+          {
+            "kind": "field",
+            "id": "37",
+            "name": "OrderID",
+            "type": "ordId",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25055",
+            "name": "QtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "38",
+            "name": "OrderQty",
+            "type": "mantissa64",
+            "exponent": "QtyExponent"
+          },
+          {
+            "kind": "field",
+            "id": "25016",
+            "name": "ErrorCode",
+            "type": "int32"
+          },
+          {
+            "kind": "data",
+            "id": "11",
+            "name": "ClOrdID",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "41",
+            "name": "OrigClOrdID",
+            "type": "optionalVarString8"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "58",
+            "name": "ErrorText",
+            "type": "varString"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "LimitQuery",
+        "id": "120",
+        "semanticType": "XLQ",
+        "children": [
+          {
+            "kind": "data",
+            "id": "6136",
+            "name": "ReqID",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "LimitResponse",
+        "id": "121",
+        "semanticType": "XLR",
+        "children": [
+          {
+            "kind": "group",
+            "id": "25003",
+            "name": "LimitIndicators",
+            "dimensionType": "smallGroupSize8Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "25004",
+                "name": "LimitType",
+                "type": "limitType"
+              },
+              {
+                "kind": "field",
+                "id": "25005",
+                "name": "LimitCount",
+                "type": "uint64"
+              },
+              {
+                "kind": "field",
+                "id": "25006",
+                "name": "LimitMax",
+                "type": "uint64"
+              },
+              {
+                "kind": "field",
+                "id": "25007",
+                "name": "LimitResetInterval",
+                "type": "uint32",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "25008",
+                "name": "LimitResetIntervalResolution",
+                "type": "limitResetIntervalResolution",
+                "presence": "optional"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "6136",
+            "name": "ReqID",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "InstrumentListRequest",
+        "id": "200",
+        "semanticType": "x",
+        "children": [
+          {
+            "kind": "field",
+            "id": "559",
+            "name": "InstrumentListRequestType",
+            "type": "instrumentListRequestType"
+          },
+          {
+            "kind": "data",
+            "id": "320",
+            "name": "InstrumentReqID",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "optionalVarString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "InstrumentList",
+        "id": "201",
+        "semanticType": "y",
+        "children": [
+          {
+            "kind": "group",
+            "id": "146",
+            "name": "RelatedSym",
+            "dimensionType": "groupSize16Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "25054",
+                "name": "PriceExponent",
+                "type": "exponent8"
+              },
+              {
+                "kind": "field",
+                "id": "25055",
+                "name": "QtyExponent",
+                "type": "exponent8"
+              },
+              {
+                "kind": "field",
+                "id": "562",
+                "name": "MinTradeVol",
+                "type": "mantissa64",
+                "exponent": "QtyExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "1140",
+                "name": "MaxTradeVol",
+                "type": "mantissa64",
+                "exponent": "QtyExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "25039",
+                "name": "MinQtyIncrement",
+                "type": "mantissa64",
+                "exponent": "QtyExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "25040",
+                "name": "MarketMinTradeVol",
+                "type": "mantissa64",
+                "exponent": "QtyExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "25041",
+                "name": "MarketMaxTradeVol",
+                "type": "mantissa64",
+                "exponent": "QtyExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "25042",
+                "name": "MarketMinQtyIncrement",
+                "type": "mantissa64",
+                "exponent": "QtyExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "2551",
+                "name": "StartPriceRange",
+                "type": "mantissa64",
+                "exponent": "PriceExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "2552",
+                "name": "EndPriceRange",
+                "type": "mantissa64",
+                "exponent": "PriceExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "field",
+                "id": "969",
+                "name": "MinPriceIncrement",
+                "type": "mantissa64",
+                "exponent": "PriceExponent",
+                "presence": "optional"
+              },
+              {
+                "kind": "data",
+                "id": "55",
+                "name": "Symbol",
+                "type": "varString8"
+              },
+              {
+                "kind": "data",
+                "id": "15",
+                "name": "Currency",
+                "type": "varString8"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "320",
+            "name": "InstrumentReqID",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "MarketDataRequest",
+        "id": "202",
+        "semanticType": "V",
+        "children": [
+          {
+            "kind": "field",
+            "id": "263",
+            "name": "SubscriptionRequestType",
+            "type": "subscriptionRequestType"
+          },
+          {
+            "kind": "field",
+            "id": "264",
+            "name": "MarketDepth",
+            "type": "uint16",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "266",
+            "name": "AggregatedBook",
+            "type": "boolEnum",
+            "presence": "optional"
+          },
+          {
+            "kind": "group",
+            "id": "146",
+            "name": "RelatedSym",
+            "dimensionType": "groupSize16Encoding",
+            "children": [
+              {
+                "kind": "data",
+                "id": "55",
+                "name": "Symbol",
+                "type": "varString8"
+              }
+            ]
+          },
+          {
+            "kind": "group",
+            "id": "267",
+            "name": "MDEntryTypes",
+            "dimensionType": "smallGroupSize8Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "269",
+                "name": "MDEntryType",
+                "type": "mdEntryType"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "262",
+            "name": "MDReqID",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "MarketDataRequestReject",
+        "id": "203",
+        "semanticType": "Y",
+        "children": [
+          {
+            "kind": "field",
+            "id": "281",
+            "name": "MDReqRejReason",
+            "type": "mdReqRejReason",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25016",
+            "name": "ErrorCode",
+            "type": "int32",
+            "presence": "optional"
+          },
+          {
+            "kind": "data",
+            "id": "262",
+            "name": "MDReqID",
+            "type": "varString8"
+          },
+          {
+            "kind": "data",
+            "id": "58",
+            "name": "Text",
+            "type": "optionalVarString"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "MarketDataSnapshot",
+        "id": "204",
+        "semanticType": "W",
+        "children": [
+          {
+            "kind": "field",
+            "id": "25044",
+            "name": "LastBookUpdateID",
+            "type": "int64",
+            "presence": "optional"
+          },
+          {
+            "kind": "field",
+            "id": "25054",
+            "name": "PriceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "25055",
+            "name": "QtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "group",
+            "id": "25047",
+            "name": "MDEntriesBids",
+            "dimensionType": "smallGroupSize16Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "270",
+                "name": "MDEntryPx",
+                "type": "mantissa64",
+                "exponent": "PriceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "271",
+                "name": "MDEntrySize",
+                "type": "mantissa64",
+                "exponent": "QtyExponent"
+              }
+            ]
+          },
+          {
+            "kind": "group",
+            "id": "25048",
+            "name": "MDEntriesAsks",
+            "dimensionType": "smallGroupSize16Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "270",
+                "name": "MDEntryPx",
+                "type": "mantissa64",
+                "exponent": "PriceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "271",
+                "name": "MDEntrySize",
+                "type": "mantissa64",
+                "exponent": "QtyExponent"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "MarketDataIncrementalTrade",
+        "id": "205",
+        "semanticType": "X",
+        "children": [
+          {
+            "kind": "field",
+            "id": "60",
+            "name": "TransactTime",
+            "type": "utcTimestampUs"
+          },
+          {
+            "kind": "field",
+            "id": "25054",
+            "name": "PriceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "25055",
+            "name": "QtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "group",
+            "id": "268",
+            "name": "MDEntries",
+            "dimensionType": "groupSize32Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "1003",
+                "name": "TradeID",
+                "type": "tradeId"
+              },
+              {
+                "kind": "field",
+                "id": "270",
+                "name": "MDEntryPx",
+                "type": "mantissa64",
+                "exponent": "PriceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "271",
+                "name": "MDEntrySize",
+                "type": "mantissa64",
+                "exponent": "QtyExponent"
+              },
+              {
+                "kind": "field",
+                "id": "2446",
+                "name": "AggressorSide",
+                "type": "side",
+                "presence": "optional"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "MarketDataIncrementalBookTicker",
+        "id": "206",
+        "semanticType": "X",
+        "children": [
+          {
+            "kind": "field",
+            "id": "25044",
+            "name": "LastBookUpdateID",
+            "type": "int64"
+          },
+          {
+            "kind": "field",
+            "id": "25054",
+            "name": "PriceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "25055",
+            "name": "QtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "group",
+            "id": "25047",
+            "name": "MDEntriesBids",
+            "dimensionType": "smallGroupSize8Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "270",
+                "name": "MDEntryPx",
+                "type": "mantissa64",
+                "exponent": "PriceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "271",
+                "name": "MDEntrySize",
+                "type": "mantissa64",
+                "presence": "optional",
+                "exponent": "QtyExponent"
+              }
+            ]
+          },
+          {
+            "kind": "group",
+            "id": "25048",
+            "name": "MDEntriesAsks",
+            "dimensionType": "smallGroupSize8Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "270",
+                "name": "MDEntryPx",
+                "type": "mantissa64",
+                "exponent": "PriceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "271",
+                "name": "MDEntrySize",
+                "type": "mantissa64",
+                "presence": "optional",
+                "exponent": "QtyExponent"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "MarketDataIncrementalDepth",
+        "id": "207",
+        "semanticType": "X",
+        "children": [
+          {
+            "kind": "field",
+            "id": "25043",
+            "name": "FirstBookUpdateID",
+            "type": "int64"
+          },
+          {
+            "kind": "field",
+            "id": "25044",
+            "name": "LastBookUpdateID",
+            "type": "int64"
+          },
+          {
+            "kind": "field",
+            "id": "25054",
+            "name": "PriceExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "field",
+            "id": "25055",
+            "name": "QtyExponent",
+            "type": "exponent8"
+          },
+          {
+            "kind": "group",
+            "id": "25047",
+            "name": "MDEntriesBids",
+            "dimensionType": "smallGroupSize16Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "270",
+                "name": "MDEntryPx",
+                "type": "mantissa64",
+                "exponent": "PriceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "271",
+                "name": "MDEntrySize",
+                "type": "mantissa64",
+                "presence": "optional",
+                "exponent": "QtyExponent"
+              }
+            ]
+          },
+          {
+            "kind": "group",
+            "id": "25048",
+            "name": "MDEntriesAsks",
+            "dimensionType": "smallGroupSize16Encoding",
+            "children": [
+              {
+                "kind": "field",
+                "id": "270",
+                "name": "MDEntryPx",
+                "type": "mantissa64",
+                "exponent": "PriceExponent"
+              },
+              {
+                "kind": "field",
+                "id": "271",
+                "name": "MDEntrySize",
+                "type": "mantissa64",
+                "presence": "optional",
+                "exponent": "QtyExponent"
+              }
+            ]
+          },
+          {
+            "kind": "data",
+            "id": "55",
+            "name": "Symbol",
+            "type": "varString8"
+          }
+        ]
+      },
+      {
+        "kind": "message",
+        "name": "News",
+        "id": "20100",
+        "semanticType": "B",
+        "children": [
+          {
+            "kind": "data",
+            "id": "148",
+            "name": "Headline",
+            "type": "varString"
+          }
+        ]
+      }
+    ]
+  }
+}

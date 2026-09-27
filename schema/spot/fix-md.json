@@ -1,0 +1,1256 @@
+{
+  "source": "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/fix/schemas/spot-fix-md.xml",
+  "sha256": "1da0b3d618f72c2c9a3634d6fafc92cda5866a7642d9daf228b4391f71c83bfc",
+  "schema": {
+    "kind": "fix",
+    "major": "4",
+    "type": "FIX",
+    "servicepack": "0",
+    "minor": "4",
+    "children": [
+      {
+        "kind": "header",
+        "children": [
+          {
+            "kind": "field",
+            "name": "BeginString",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "BodyLength",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "MsgType",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "SenderCompID",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "TargetCompID",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "MsgSeqNum",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "SendingTime",
+            "required": "Y"
+          },
+          {
+            "kind": "field",
+            "name": "RecvWindow",
+            "required": "N"
+          }
+        ]
+      },
+      {
+        "kind": "messages",
+        "children": [
+          {
+            "kind": "message",
+            "name": "Heartbeat",
+            "msgcat": "admin",
+            "msgtype": "0",
+            "children": [
+              {
+                "kind": "field",
+                "name": "TestReqID",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "TestRequest",
+            "msgcat": "admin",
+            "msgtype": "1",
+            "children": [
+              {
+                "kind": "field",
+                "name": "TestReqID",
+                "required": "Y"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "Reject",
+            "msgcat": "admin",
+            "msgtype": "3",
+            "children": [
+              {
+                "kind": "field",
+                "name": "RefSeqNum",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "RefTagID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "RefMsgType",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "SessionRejectReason",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ErrorCode",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Text",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "Logout",
+            "msgcat": "admin",
+            "msgtype": "5",
+            "children": [
+              {
+                "kind": "field",
+                "name": "Text",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "Logon",
+            "msgcat": "admin",
+            "msgtype": "A",
+            "children": [
+              {
+                "kind": "field",
+                "name": "EncryptMethod",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "HeartBtInt",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "RawDataLength",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "RawData",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ResetSeqNumFlag",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Username",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "MessageHandling",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "UUID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "SBESchemaID",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "SBESchemaVersion",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "LimitQuery",
+            "msgcat": "app",
+            "msgtype": "XLQ",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ReqID",
+                "required": "Y"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "LimitResponse",
+            "msgcat": "app",
+            "msgtype": "XLR",
+            "children": [
+              {
+                "kind": "field",
+                "name": "ReqID",
+                "required": "Y"
+              },
+              {
+                "kind": "group",
+                "name": "NoLimitIndicators",
+                "required": "Y",
+                "children": [
+                  {
+                    "kind": "field",
+                    "name": "LimitType",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "LimitCount",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "LimitMax",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "LimitResetInterval",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "LimitResetIntervalResolution",
+                    "required": "N"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "InstrumentListRequest",
+            "msgcat": "app",
+            "msgtype": "x",
+            "children": [
+              {
+                "kind": "field",
+                "name": "InstrumentReqID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "InstrumentListRequestType",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "Symbol",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "InstrumentList",
+            "msgcat": "app",
+            "msgtype": "y",
+            "children": [
+              {
+                "kind": "field",
+                "name": "InstrumentReqID",
+                "required": "Y"
+              },
+              {
+                "kind": "group",
+                "name": "NoRelatedSym",
+                "required": "Y",
+                "children": [
+                  {
+                    "kind": "field",
+                    "name": "Symbol",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "Currency",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MinTradeVol",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MaxTradeVol",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MinQtyIncrement",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MarketMinTradeVol",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MarketMaxTradeVol",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MarketMinQtyIncrement",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "StartPriceRange",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "EndPriceRange",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MinPriceIncrement",
+                    "required": "N"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "MarketDataRequest",
+            "msgcat": "app",
+            "msgtype": "V",
+            "children": [
+              {
+                "kind": "field",
+                "name": "MDReqID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "SubscriptionRequestType",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "MarketDepth",
+                "required": "N"
+              },
+              {
+                "kind": "group",
+                "name": "NoRelatedSym",
+                "required": "N",
+                "children": [
+                  {
+                    "kind": "field",
+                    "name": "Symbol",
+                    "required": "Y"
+                  }
+                ]
+              },
+              {
+                "kind": "group",
+                "name": "NoMDEntryTypes",
+                "required": "N",
+                "children": [
+                  {
+                    "kind": "field",
+                    "name": "MDEntryType",
+                    "required": "Y"
+                  }
+                ]
+              },
+              {
+                "kind": "field",
+                "name": "AggregatedBook",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "MarketDataRequestReject",
+            "msgcat": "app",
+            "msgtype": "Y",
+            "children": [
+              {
+                "kind": "field",
+                "name": "MDReqID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "MDReqRejReason",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "ErrorCode",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "Text",
+                "required": "N"
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "MarketDataSnapshot",
+            "msgcat": "app",
+            "msgtype": "W",
+            "children": [
+              {
+                "kind": "field",
+                "name": "MDReqID",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "Symbol",
+                "required": "Y"
+              },
+              {
+                "kind": "field",
+                "name": "LastBookUpdateID",
+                "required": "N"
+              },
+              {
+                "kind": "group",
+                "name": "NoMDEntries",
+                "required": "Y",
+                "children": [
+                  {
+                    "kind": "field",
+                    "name": "MDEntryType",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MDEntryPx",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MDEntrySize",
+                    "required": "Y"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "MarketDataIncrementalRefresh",
+            "msgcat": "app",
+            "msgtype": "X",
+            "children": [
+              {
+                "kind": "field",
+                "name": "MDReqID",
+                "required": "Y"
+              },
+              {
+                "kind": "group",
+                "name": "NoMDEntries",
+                "required": "Y",
+                "children": [
+                  {
+                    "kind": "field",
+                    "name": "MDUpdateAction",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MDEntryPx",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MDEntrySize",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "MDEntryType",
+                    "required": "Y"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "Symbol",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "TransactTime",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "TradeID",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "AggressorSide",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "FirstBookUpdateID",
+                    "required": "N"
+                  },
+                  {
+                    "kind": "field",
+                    "name": "LastBookUpdateID",
+                    "required": "N"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "message",
+            "name": "News",
+            "msgtype": "B",
+            "msgcat": "app",
+            "children": [
+              {
+                "kind": "field",
+                "name": "Headline",
+                "required": "Y"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "trailer",
+        "children": [
+          {
+            "kind": "field",
+            "name": "CheckSum",
+            "required": "Y"
+          }
+        ]
+      },
+      {
+        "kind": "components"
+      },
+      {
+        "kind": "fields",
+        "children": [
+          {
+            "kind": "field",
+            "number": "8",
+            "name": "BeginString",
+            "type": "STRING",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "FIX.4.4"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "9",
+            "name": "BodyLength",
+            "type": "LENGTH"
+          },
+          {
+            "kind": "field",
+            "number": "10",
+            "name": "CheckSum",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "15",
+            "name": "Currency",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "34",
+            "name": "MsgSeqNum",
+            "type": "SEQNUM"
+          },
+          {
+            "kind": "field",
+            "number": "35",
+            "name": "MsgType",
+            "type": "STRING",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              },
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              },
+              {
+                "kind": "value",
+                "enum": "A"
+              },
+              {
+                "kind": "value",
+                "enum": "B"
+              },
+              {
+                "kind": "value",
+                "enum": "V"
+              },
+              {
+                "kind": "value",
+                "enum": "W"
+              },
+              {
+                "kind": "value",
+                "enum": "X"
+              },
+              {
+                "kind": "value",
+                "enum": "Y"
+              },
+              {
+                "kind": "value",
+                "enum": "x"
+              },
+              {
+                "kind": "value",
+                "enum": "y"
+              },
+              {
+                "kind": "value",
+                "enum": "XLQ"
+              },
+              {
+                "kind": "value",
+                "enum": "XLR"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "45",
+            "name": "RefSeqNum",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "49",
+            "name": "SenderCompID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "52",
+            "name": "SendingTime",
+            "type": "UTCTIMESTAMP"
+          },
+          {
+            "kind": "field",
+            "number": "55",
+            "name": "Symbol",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "56",
+            "name": "TargetCompID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "58",
+            "name": "Text",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "60",
+            "name": "TransactTime",
+            "type": "UTCTIMESTAMP"
+          },
+          {
+            "kind": "field",
+            "number": "95",
+            "name": "RawDataLength",
+            "type": "LENGTH"
+          },
+          {
+            "kind": "field",
+            "number": "96",
+            "name": "RawData",
+            "type": "DATA"
+          },
+          {
+            "kind": "field",
+            "number": "98",
+            "name": "EncryptMethod",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "108",
+            "name": "HeartBtInt",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "112",
+            "name": "TestReqID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "141",
+            "name": "ResetSeqNumFlag",
+            "type": "BOOLEAN",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "Y"
+              },
+              {
+                "kind": "value",
+                "enum": "N"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "146",
+            "name": "NoRelatedSym",
+            "type": "NUMINGROUP"
+          },
+          {
+            "kind": "field",
+            "number": "148",
+            "name": "Headline",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "262",
+            "name": "MDReqID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "263",
+            "name": "SubscriptionRequestType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "264",
+            "name": "MarketDepth",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "266",
+            "name": "AggregatedBook",
+            "type": "BOOLEAN",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "Y"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "267",
+            "name": "NoMDEntryTypes",
+            "type": "NUMINGROUP"
+          },
+          {
+            "kind": "field",
+            "number": "268",
+            "name": "NoMDEntries",
+            "type": "NUMINGROUP"
+          },
+          {
+            "kind": "field",
+            "number": "269",
+            "name": "MDEntryType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              },
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "270",
+            "name": "MDEntryPx",
+            "type": "PRICE"
+          },
+          {
+            "kind": "field",
+            "number": "271",
+            "name": "MDEntrySize",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "279",
+            "name": "MDUpdateAction",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              },
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "281",
+            "name": "MDReqRejReason",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "320",
+            "name": "InstrumentReqID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "371",
+            "name": "RefTagID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "372",
+            "name": "RefMsgType",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "373",
+            "name": "SessionRejectReason",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              },
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              },
+              {
+                "kind": "value",
+                "enum": "6"
+              },
+              {
+                "kind": "value",
+                "enum": "8"
+              },
+              {
+                "kind": "value",
+                "enum": "10"
+              },
+              {
+                "kind": "value",
+                "enum": "13"
+              },
+              {
+                "kind": "value",
+                "enum": "14"
+              },
+              {
+                "kind": "value",
+                "enum": "15"
+              },
+              {
+                "kind": "value",
+                "enum": "16"
+              },
+              {
+                "kind": "value",
+                "enum": "99"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "553",
+            "name": "Username",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "559",
+            "name": "InstrumentListRequestType",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "0"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "562",
+            "name": "MinTradeVol",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "969",
+            "name": "MinPriceIncrement",
+            "type": "PRICE"
+          },
+          {
+            "kind": "field",
+            "number": "1003",
+            "name": "TradeID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "1140",
+            "name": "MaxTradeVol",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "2446",
+            "name": "AggressorSide",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "2551",
+            "name": "StartPriceRange",
+            "type": "PRICE"
+          },
+          {
+            "kind": "field",
+            "number": "2552",
+            "name": "EndPriceRange",
+            "type": "PRICE"
+          },
+          {
+            "kind": "field",
+            "number": "6136",
+            "name": "ReqID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "25000",
+            "name": "RecvWindow",
+            "type": "FLOAT"
+          },
+          {
+            "kind": "field",
+            "number": "25003",
+            "name": "NoLimitIndicators",
+            "type": "NUMINGROUP"
+          },
+          {
+            "kind": "field",
+            "number": "25004",
+            "name": "LimitType",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25005",
+            "name": "LimitCount",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25006",
+            "name": "LimitMax",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25007",
+            "name": "LimitResetInterval",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25008",
+            "name": "LimitResetIntervalResolution",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "s"
+              },
+              {
+                "kind": "value",
+                "enum": "m"
+              },
+              {
+                "kind": "value",
+                "enum": "h"
+              },
+              {
+                "kind": "value",
+                "enum": "d"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25016",
+            "name": "ErrorCode",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25035",
+            "name": "MessageHandling",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25037",
+            "name": "UUID",
+            "type": "STRING"
+          },
+          {
+            "kind": "field",
+            "number": "25039",
+            "name": "MinQtyIncrement",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "25040",
+            "name": "MarketMinTradeVol",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "25041",
+            "name": "MarketMaxTradeVol",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "25042",
+            "name": "MarketMinQtyIncrement",
+            "type": "QTY"
+          },
+          {
+            "kind": "field",
+            "number": "25043",
+            "name": "FirstBookUpdateID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25044",
+            "name": "LastBookUpdateID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25050",
+            "name": "SBESchemaID",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25051",
+            "name": "SBESchemaVersion",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25052",
+            "name": "SBESchemaVersionDeprecated",
+            "type": "INT"
+          },
+          {
+            "kind": "field",
+            "number": "25056",
+            "name": "ExpiryReason",
+            "type": "INT",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "1"
+              },
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              },
+              {
+                "kind": "value",
+                "enum": "6"
+              },
+              {
+                "kind": "value",
+                "enum": "7"
+              },
+              {
+                "kind": "value",
+                "enum": "8"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

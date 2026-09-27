@@ -112,6 +112,7 @@ pub(super) struct State {
     pub(super) cooldown: u64,
     pub(super) cooldown_timing_unknown: bool,
     observed_weight: (u64, u64),
+    order_windows: BTreeMap<u64, (u64, u64, u64)>,
     pub(super) endpoints: BTreeMap<(&'static str, u64), (u64, u64)>,
     pub(super) endpoint_cooldown: BTreeMap<&'static str, u64>,
 }
@@ -251,6 +252,8 @@ impl Budgets {
                 ("quoteDay", 86_400_000, 500, 1),
             ]);
         }
+        let placements = c.orders10.max(c.orders60).max(c.orders_day);
+        order_windows(&mut account, placements, now, false)?;
         let monthly = monthly_download(&account, c.download, now)?;
         for (state, costs) in [
             (&ip, &ip_cost),
@@ -284,6 +287,7 @@ impl Budgets {
                     .ok_or(Error::Configuration("budget overflow"))?;
             }
         }
+        order_windows(&mut account, placements, now, true)?;
         if let Some((key, bucket)) = monthly {
             let current = account.counts.entry(key).or_default();
             if current.0 != bucket {
@@ -294,6 +298,35 @@ impl Budgets {
                 .checked_add(1)
                 .ok_or(Error::Configuration("budget overflow"))?;
         }
+        Ok(())
+    }
+    // FIX LimitResponse uses explicit interval/count/max, independently of HTTP headers.
+    // Hold a counter floor for a full interval after observation: no reset origin is guessed.
+    pub(crate) fn observe_order_window(
+        &self,
+        window: u64,
+        count: u64,
+        limit: u64,
+        now: u64,
+    ) -> Result<(), Error> {
+        if window == 0 {
+            return Err(Error::Gap("FIX order limit interval missing"));
+        }
+        let until = now
+            .checked_add(window)
+            .ok_or(Error::Configuration("FIX order limit overflow"))?;
+        let mut account = self
+            .account
+            .lock()
+            .map_err(|_| Error::Configuration("account budget poisoned"))?;
+        let previous = account
+            .order_windows
+            .get(&window)
+            .filter(|(expiry, _, _)| *expiry > now)
+            .map_or(0, |(_, count, _)| *count);
+        account
+            .order_windows
+            .insert(window, (until, count.max(previous), limit));
         Ok(())
     }
     // Refund only venue-documented successful zero-weight operations, never below evidence.
@@ -324,6 +357,15 @@ impl Budgets {
         }
         Ok(())
     }
+    pub(crate) fn observe_ban(&self, status: u16, evidence: &RateEvidence) -> Result<(), Error> {
+        if status == 418 && evidence.retry_after.is_none() {
+            self.ip
+                .lock()
+                .map_err(|_| Error::Configuration("IP budget poisoned"))?
+                .cooldown_timing_unknown = true;
+        }
+        Ok(())
+    }
     pub(crate) fn observe(&self, e: &RateEvidence, now: u64, websocket: bool) -> Result<(), Error> {
         let mut ip = self
             .ip
@@ -338,7 +380,7 @@ impl Budgets {
             .lock()
             .map_err(|_| Error::Configuration("account budget poisoned"))?;
         if let Some(delay) = e.retry_after {
-            let delay = u64::try_from(delay.as_millis())
+            let delay = u64::try_from(delay.as_nanos().div_ceil(1_000_000))
                 .map_err(|_| Error::Configuration("cooldown overflow"))?;
             ip.cooldown = ip.cooldown.max(
                 now.checked_add(delay)
@@ -375,6 +417,32 @@ impl Budgets {
         }
         Ok(())
     }
+}
+
+fn order_windows(account: &mut State, amount: u64, now: u64, apply: bool) -> Result<(), Error> {
+    for (&window, counter) in &mut account.order_windows {
+        if counter.0 <= now {
+            *counter = (
+                now.checked_add(window)
+                    .ok_or(Error::Configuration("order window overflow"))?,
+                0,
+                counter.2,
+            );
+        }
+        let next = counter
+            .1
+            .checked_add(amount)
+            .ok_or(Error::Configuration("order window overflow"))?;
+        if next > counter.2 && amount != 0 {
+            return Err(Error::Admission {
+                retry_after: Duration::from_millis(counter.0 - now),
+            });
+        }
+        if apply {
+            counter.1 = next;
+        }
+    }
+    Ok(())
 }
 
 fn monthly_download(
@@ -442,6 +510,43 @@ mod capacity_tests;
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn fix_order_floor_is_shared_and_does_not_guess_the_venue_reset_origin() {
+        let budgets = Budgets::new(BudgetLimits::spot()).unwrap();
+        budgets.observe_order_window(10_000, 2, 2, 9000).unwrap();
+        let order = Cost {
+            orders10: 1,
+            orders60: 1,
+            orders_day: 1,
+            ..Cost::default()
+        };
+        assert!(matches!(
+            budgets.clone().admit(order, 10_001),
+            Err(Error::Admission { .. })
+        ));
+        budgets.admit(order, 19_000).unwrap();
+        budgets.admit(order, 19_000).unwrap();
+        assert!(matches!(
+            budgets.admit(order, 19_000),
+            Err(Error::Admission { .. })
+        ));
+    }
+
+    #[test]
+    fn sub_millisecond_cooldown_cannot_authorize_an_early_attempt() {
+        let budgets = Budgets::new(BudgetLimits::spot()).unwrap();
+        let evidence = RateEvidence {
+            retry_after: Some(Duration::from_micros(1)),
+            ..RateEvidence::default()
+        };
+        budgets.observe(&evidence, 1000, true).unwrap();
+        assert!(matches!(
+            budgets.admit(Cost::default(), 1000),
+            Err(Error::Admission { .. })
+        ));
+        budgets.admit(Cost::default(), 1001).unwrap();
+    }
 
     #[test]
     fn rest_ws_ip_scopes_are_distinct_but_account_orders_are_shared() {

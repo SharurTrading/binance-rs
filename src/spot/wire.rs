@@ -99,7 +99,7 @@ pub struct Kline {
     pub taker_buy_volume: Decimal,
     /// Taker buy quote-asset volume.
     pub taker_buy_quote_volume: Decimal,
-    /// Provider's reserved final column, not interpreted as financial truth.
+    /// Provider's reserved final JSON column. Null for SBE, which omits this column.
     pub reserved: Value,
 }
 impl Serialize for Kline {

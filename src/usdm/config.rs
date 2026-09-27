@@ -87,10 +87,10 @@ impl Config {
     /// Set the per-attempt transport timeout. No automatic retry is performed.
     ///
     /// # Errors
-    /// Refuses a zero timeout.
+    /// Refuses a zero or unrepresentable timeout.
     pub fn timeout(mut self, timeout: Duration) -> Result<Self, Error> {
-        if timeout.is_zero() {
-            return Err(Error::Configuration("zero timeout"));
+        if timeout.is_zero() || tokio::time::Instant::now().checked_add(timeout).is_none() {
+            return Err(Error::Configuration("zero or unrepresentable timeout"));
         }
         self.timeout = timeout;
         Ok(self)

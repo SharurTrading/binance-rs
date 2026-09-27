@@ -96,10 +96,10 @@ impl Config {
     /// Set the per-attempt transport timeout. No automatic retry is performed.
     ///
     /// # Errors
-    /// Refuses a zero timeout.
+    /// Refuses a zero or unrepresentable timeout.
     pub fn timeout(mut self, timeout: Duration) -> Result<Self, Error> {
-        if timeout.is_zero() {
-            return Err(Error::Configuration("zero timeout"));
+        if timeout.is_zero() || tokio::time::Instant::now().checked_add(timeout).is_none() {
+            return Err(Error::Configuration("zero or unrepresentable timeout"));
         }
         self.timeout = timeout;
         Ok(self)
@@ -152,9 +152,50 @@ pub(super) fn apply_time_unit(url: &mut url::Url, unit: crate::TimeUnit) {
         url.query_pairs_mut().append_pair("timeUnit", "MICROSECOND");
     }
 }
+pub(super) fn apply_response_format(url: &mut url::Url, sbe: bool) {
+    let parameters: Vec<_> = url
+        .query_pairs()
+        .filter(|(key, _)| {
+            !matches!(
+                key.as_ref(),
+                "responseFormat" | "sbeSchemaId" | "sbeSchemaVersion"
+            )
+        })
+        .map(|(key, value)| (key.into_owned(), value.into_owned()))
+        .collect();
+    url.set_query(None);
+    url.query_pairs_mut()
+        .extend_pairs(parameters)
+        .append_pair("responseFormat", if sbe { "sbe" } else { "json" });
+    if sbe {
+        url.query_pairs_mut()
+            .append_pair("sbeSchemaId", "3")
+            .append_pair("sbeSchemaVersion", "4");
+    }
+}
 #[cfg(test)]
 #[allow(clippy::unwrap_used, reason = "synthetic endpoint assertions")]
 mod tests {
+    #[test]
+    fn explicit_binary_format_overrides_stale_schema_parameters() {
+        let mut url=url::Url::parse("ws://127.0.0.1/?responseFormat=json&sbeSchemaId=99&sbeSchemaVersion=99&responseFormat=sbe").unwrap();
+        super::apply_response_format(&mut url, true);
+        assert_eq!(
+            url.query_pairs()
+                .filter(|(k, _)| k == "responseFormat")
+                .count(),
+            1
+        );
+        assert!(
+            url.query_pairs()
+                .any(|(k, v)| k == "sbeSchemaId" && v == "3")
+        );
+        super::apply_response_format(&mut url, false);
+        assert!(
+            !url.query_pairs()
+                .any(|(k, _)| k == "sbeSchemaId" || k == "sbeSchemaVersion")
+        );
+    }
     #[test]
     fn configured_timestamp_provenance_overrides_endpoint_query() {
         let mut url = url::Url::parse("ws://127.0.0.1/?timeUnit=MICROSECOND&other=a").unwrap();

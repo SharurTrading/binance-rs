@@ -33,11 +33,30 @@ pub struct WsClient {
     pub(crate) socket: Socket,
 }
 impl WsClient {
+    /// Connect with production SBE schema 3:4 responses and JSON requests.
+    /// Timestamps retain microseconds. Run and join the returned caller-owned driver.
+    ///
+    /// # Errors
+    /// Refuses configuration, connection admission or failed SBE negotiation.
+    pub async fn connect_sbe(
+        mut config: Config,
+    ) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
+        config.time_unit = crate::TimeUnit::Microseconds;
+        super::config::apply_response_format(&mut config.websocket, true);
+        Self::connect_format(config, Some(super::sbe::schema::decode_api_value)).await
+    }
     /// Connect the API socket without spawning a task.
     ///
     /// # Errors
     /// Refuses invalid transport configuration or failed handshake/rate admission.
     pub async fn connect(mut config: Config) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
+        super::config::apply_response_format(&mut config.websocket, false);
+        Self::connect_format(config, None).await
+    }
+    async fn connect_format(
+        mut config: Config,
+        binary_decoder: Option<crate::core::socket::BinaryDecoder>,
+    ) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
         super::config::apply_time_unit(&mut config.websocket, config.time_unit);
         let (socket, events, driver) = Socket::connect_with_policy(
             config.websocket,
@@ -53,6 +72,8 @@ impl WsClient {
                 },
                 ping_limit: 5,
                 time_unit: config.time_unit,
+                binary_decoder,
+                api_key_header: false,
             },
         )
         .await?;

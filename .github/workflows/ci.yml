@@ -59,6 +59,9 @@ jobs:
           components: clippy, rustfmt
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          # Discard caches containing extracted sources and exercise post-job cleanup.
+          key: package-sources-excluded
 
       - name: Generated bindings are current
         run: |

@@ -37,7 +37,13 @@ impl WsClient {
     ///
     /// # Errors
     /// Refuses invalid transport configuration or failed handshake/rate admission.
-    pub async fn connect(config: Config) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
+    pub async fn connect(mut config: Config) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
+        if config.time_unit == crate::TimeUnit::Microseconds {
+            config
+                .websocket
+                .query_pairs_mut()
+                .append_pair("timeUnit", "MICROSECOND");
+        }
         let (socket, events, driver) = Socket::connect_with_policy(
             config.websocket,
             config.credentials,
@@ -51,12 +57,16 @@ impl WsClient {
                     ..Default::default()
                 },
                 ping_limit: 5,
+                time_unit: config.time_unit,
             },
         )
         .await?;
         Ok((
             Self { socket },
-            ApiEvents { inner: events },
+            ApiEvents {
+                inner: events,
+                time_unit: config.time_unit,
+            },
             ConnectionDriver { inner: driver },
         ))
     }
@@ -172,6 +182,7 @@ impl WsClient {
             mutation,
             weight: 2,
             success_weight: None,
+            partial: None,
             validate_time: super::validation::validate_time,
             definitive: super::validation::definitive,
         };
@@ -243,9 +254,16 @@ pub enum ApiEvent {
 
 /// Single consumer for API lifecycle/late-response evidence.
 pub struct ApiEvents {
+    time_unit: crate::TimeUnit,
     inner: SocketEvents,
 }
 impl ApiEvents {
+    /// Timestamp units for all payloads and notices in this socket generation.
+    #[must_use]
+    pub fn time_unit(&self) -> crate::TimeUnit {
+        self.time_unit
+    }
+
     /// Drain the next event. Keep draining after close to receive the accepted prefix.
     pub async fn recv(&mut self) -> Option<ApiEvent> {
         Some(match self.inner.recv().await? {

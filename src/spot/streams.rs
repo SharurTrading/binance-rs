@@ -50,11 +50,18 @@ impl Stream {
 
 /// Lossless, single-consumer ingress for one routed socket generation.
 pub struct Streams {
+    time_unit: crate::TimeUnit,
     socket: Socket,
     events: SocketEvents,
     kinds: BTreeMap<String, &'static str>,
 }
 impl Streams {
+    /// Timestamp units for every data payload and shutdown notice in this generation.
+    #[must_use]
+    pub fn time_unit(&self) -> crate::TimeUnit {
+        self.time_unit
+    }
+
     /// Connect a set of market subscriptions without spawning a task.
     ///
     /// # Errors
@@ -79,6 +86,9 @@ impl Streams {
         }
         let mut url = config.streams.clone();
         url.set_path("/stream");
+        if config.time_unit == crate::TimeUnit::Microseconds {
+            url.query_pairs_mut().append_pair("timeUnit", "MICROSECOND");
+        }
         url.query_pairs_mut().append_pair(
             "streams",
             &streams
@@ -99,11 +109,13 @@ impl Streams {
                     ..Default::default()
                 },
                 ping_limit: 5,
+                time_unit: config.time_unit,
             },
         )
         .await?;
         Ok((
             Self {
+                time_unit: config.time_unit,
                 socket,
                 events,
                 kinds,
@@ -224,7 +236,7 @@ pub enum StreamEvent {
     ServerShutdown {
         /// Source socket generation.
         generation: u64,
-        /// Provider event timestamp in milliseconds.
+        /// Provider event timestamp in this generation's `Streams::time_unit`.
         event_time: i64,
     },
     /// Terminal boundary after the generation's accepted prefix.

@@ -92,7 +92,7 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
             return Err(Error::Validation("timeZone"));
         }
     }
-    Ok(())
+    validate_advanced(op, p)
 }
 fn validate_order(p: &BTreeMap<String, Value>) -> Result<(), Error> {
     required(p, &["symbol", "side", "type", "newClientOrderId"])?;
@@ -206,4 +206,251 @@ pub(crate) fn definitive(status: u16, value: &serde_json::Value) -> bool {
                 | -2015
         )
     })
+}
+
+// Partial response semantics are specific to Spot cancel/replace. Keep the shared
+// transport unaware of product codes and never retain sensitive leg bodies in errors.
+pub(crate) fn partial(status: u16, value: &Value) -> Option<crate::PartialOperation> {
+    use crate::{OperationLeg, Outcome, PartialOperation};
+    let data = value.get("data").unwrap_or(value);
+    let leg = |name: &str| -> Option<OperationLeg> {
+        let result = data.get(format!("{name}Result"))?.as_str()?;
+        let response = data.get(format!("{name}Response"));
+        let code = response.and_then(|v| v.get("code")).and_then(Value::as_i64);
+        let order_id = response
+            .and_then(|v| v.get("orderId"))
+            .and_then(Value::as_i64);
+        let client_order_id = response
+            .and_then(|v| v.get("clientOrderId"))
+            .and_then(Value::as_str)
+            .map(str::to_owned);
+        let valid_ack = response.is_some_and(|v| {
+            if name == "cancel" {
+                serde_json::from_value::<
+                        super::rest_models::OrderCancelReplaceResponseCancelResponse,
+                    >(v.clone())
+                    .is_ok()
+            } else {
+                serde_json::from_value::<
+                    super::rest_models::OrderCancelReplaceResponseNewOrderResponse,
+                >(v.clone())
+                .is_ok()
+            }
+        });
+        let outcome = match result {
+            "SUCCESS"
+                if order_id.is_some()
+                    && client_order_id.is_some()
+                    && code.is_none()
+                    && valid_ack =>
+            {
+                Outcome::Accepted
+            }
+            "FAILURE" if response.is_some_and(|v| definitive(status, v)) => Outcome::Rejected,
+            "NOT_ATTEMPTED" if name == "newOrder" && response.is_none_or(Value::is_null) => {
+                Outcome::NotSent
+            }
+            _ => Outcome::Unknown,
+        };
+        Some(OperationLeg {
+            outcome,
+            code,
+            order_id,
+            client_order_id,
+        })
+    };
+    let cancel = leg("cancel")?;
+    let new_order = leg("newOrder")?;
+    let known_status = matches!(status, 400 | 409 | 429);
+    let outcome =
+        if !known_status || [cancel.outcome, new_order.outcome].contains(&Outcome::Unknown) {
+            Outcome::Unknown
+        } else {
+            match (cancel.outcome, new_order.outcome) {
+                (Outcome::Accepted, Outcome::Rejected) | (Outcome::Rejected, Outcome::Accepted) => {
+                    Outcome::Partial
+                }
+                (Outcome::Rejected, Outcome::Rejected | Outcome::NotSent) => Outcome::Rejected,
+                _ => Outcome::Unknown,
+            }
+        };
+    Some(PartialOperation {
+        legs: BTreeMap::from([("cancel".into(), cancel), ("newOrder".into(), new_order)]),
+        outcome,
+    })
+}
+
+fn validate_advanced(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> {
+    for (name, value) in p {
+        if name.to_ascii_lowercase().ends_with("clientorderid") {
+            super::ClientOrderId::new(
+                value
+                    .as_str()
+                    .ok_or(Error::Validation("Spot caller identity"))?,
+            )?;
+        }
+        if ["Qty", "Quantity", "Price"]
+            .iter()
+            .any(|suffix| name.ends_with(suffix))
+        {
+            let amount = super::wire::parse_decimal(value)
+                .map_err(|_| Error::Validation("Spot magnitude"))?;
+            if amount <= Decimal::ZERO {
+                return Err(Error::Validation("positive Spot magnitude"));
+            }
+        }
+    }
+    match op {
+        "orderCancelReplace" => {
+            required(p, &["cancelNewClientOrderId"])?;
+            if !p.contains_key("cancelOrderId") && !p.contains_key("cancelOrigClientOrderId") {
+                return Err(Error::Validation("cancel identity required"));
+            }
+            validate_order(p)?;
+        }
+        "orderAmendKeepPriority" => {
+            required(p, &["newClientOrderId"])?;
+            if !p.contains_key("orderId") && !p.contains_key("origClientOrderId") {
+                return Err(Error::Validation("amend identity required"));
+            }
+        }
+        "getOrderList" | "orderListStatus"
+            if !p.contains_key("orderListId") && !p.contains_key("origClientOrderId") =>
+        {
+            return Err(Error::Validation("list identity required"));
+        }
+        "deleteOrderList" | "orderListCancel" => {
+            required(p, &["newClientOrderId"])?;
+            if !p.contains_key("orderListId") && !p.contains_key("listClientOrderId") {
+                return Err(Error::Validation("list identity required"));
+            }
+        }
+        "sorOrder" | "sorOrderPlace" | "sorOrderTest" => {
+            validate_order(p)?;
+            if !matches!(text(p, "type"), Some("LIMIT" | "MARKET"))
+                || p.contains_key("quoteOrderQty")
+            {
+                return Err(Error::Validation("SOR order type/amount"));
+            }
+        }
+        "orderOco" | "orderListPlace" => {
+            required(
+                p,
+                &[
+                    "listClientOrderId",
+                    "limitClientOrderId",
+                    "stopClientOrderId",
+                ],
+            )?;
+            if p.contains_key("stopLimitPrice") {
+                required(p, &["stopLimitTimeInForce"])?;
+            }
+        }
+        name if name.starts_with("orderListO") || name.starts_with("orderListPlaceO") => {
+            validate_list(p)?;
+        }
+        "myPreventedMatches"
+            if !p.contains_key("orderId") && !p.contains_key("preventedMatchId") =>
+        {
+            return Err(Error::Validation("prevented match identity required"));
+        }
+        "allOrderList" | "allOrderLists"
+            if p.contains_key("fromId")
+                && (p.contains_key("startTime") || p.contains_key("endTime")) =>
+        {
+            return Err(Error::Validation("fromId conflicts with time range"));
+        }
+        _ => (),
+    }
+    Ok(())
+}
+
+fn validate_list(p: &BTreeMap<String, Value>) -> Result<(), Error> {
+    required(p, &["listClientOrderId"])?;
+    if p.contains_key("workingType") {
+        required(p, &["workingClientOrderId"])?;
+        validate_leg(p, "working", "workingSide", "workingQuantity")?;
+        if p.contains_key("pendingAboveType") {
+            required(
+                p,
+                &[
+                    "pendingAboveClientOrderId",
+                    "pendingBelowClientOrderId",
+                    "pendingBelowType",
+                ],
+            )?;
+            validate_leg(
+                p,
+                "pendingAbove",
+                "pendingSide",
+                if p.contains_key("pendingQuantity") {
+                    "pendingQuantity"
+                } else {
+                    "workingQuantity"
+                },
+            )?;
+            validate_leg(
+                p,
+                "pendingBelow",
+                "pendingSide",
+                if p.contains_key("pendingQuantity") {
+                    "pendingQuantity"
+                } else {
+                    "workingQuantity"
+                },
+            )?;
+        } else {
+            required(p, &["pendingClientOrderId"])?;
+            validate_leg(
+                p,
+                "pending",
+                "pendingSide",
+                if p.contains_key("pendingQuantity") {
+                    "pendingQuantity"
+                } else {
+                    "workingQuantity"
+                },
+            )?;
+        }
+    } else {
+        required(p, &["aboveClientOrderId", "belowClientOrderId"])?;
+        validate_leg(p, "above", "side", "quantity")?;
+        validate_leg(p, "below", "side", "quantity")?;
+    }
+    Ok(())
+}
+fn validate_leg(
+    p: &BTreeMap<String, Value>,
+    prefix: &str,
+    side: &str,
+    quantity: &str,
+) -> Result<(), Error> {
+    let mut leg = BTreeMap::new();
+    for key in ["symbol", "quantity", "side"] {
+        let source = match key {
+            "quantity" => quantity,
+            "side" => side,
+            _ => key,
+        };
+        if let Some(v) = p.get(source) {
+            leg.insert(key.into(), v.clone());
+        }
+    }
+    for (key, value) in p {
+        if let Some(suffix) = key.strip_prefix(prefix)
+            && !suffix.is_empty()
+        {
+            let mut chars = suffix.chars();
+            if let Some(first) = chars.next() {
+                let name = format!("{}{}", first.to_ascii_lowercase(), chars.as_str());
+                let name = if name == "clientOrderId" {
+                    "newClientOrderId".into()
+                } else {
+                    name
+                };
+                leg.insert(name, value.clone());
+            }
+        }
+    }
+    validate_order(&leg)
 }

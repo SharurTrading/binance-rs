@@ -49,6 +49,7 @@ impl Request for AccountCommission {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -139,6 +140,7 @@ impl Request for AllOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -202,6 +204,7 @@ impl Request for GetAccount {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -260,6 +263,7 @@ impl Request for GetOpenOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -318,6 +322,7 @@ impl Request for DeleteOpenOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: Some(0),
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -392,6 +397,7 @@ impl Request for GetOrder {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -482,6 +488,7 @@ impl Request for DeleteOrder {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: Some(0),
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -684,6 +691,7 @@ impl Request for NewOrder {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: Some(0),
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -819,6 +827,7 @@ impl Request for MyTrades {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -874,6 +883,7 @@ impl Request for RateLimitOrder {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -956,6 +966,7 @@ impl Request for ExchangeInfo {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1027,6 +1038,7 @@ impl Request for ExecutionRules {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1073,6 +1085,7 @@ impl Request for Ping {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1114,6 +1127,7 @@ impl Request for Time {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1196,6 +1210,7 @@ impl Request for AggTrades {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1251,6 +1266,7 @@ impl Request for AvgPrice {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1317,6 +1333,7 @@ impl Request for Depth {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1380,6 +1397,7 @@ impl Request for GetTrades {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1451,6 +1469,7 @@ impl Request for HistoricalTrades {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1522,6 +1541,7 @@ impl Request for HistoricalBlockTrades {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1617,6 +1637,7 @@ impl Request for Klines {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1710,6 +1731,7 @@ impl Request for Ticker {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1806,6 +1828,7 @@ impl Request for Ticker24hr {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1880,6 +1903,7 @@ impl Request for TickerBookTicker {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1951,6 +1975,7 @@ impl Request for TickerPrice {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2038,6 +2063,7 @@ impl Request for TickerTradingDay {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2136,6 +2162,7 @@ impl Request for UiKlines {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2197,6 +2224,7 @@ impl Request for ReferencePrice {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2255,6 +2283,7 @@ impl Request for ReferencePriceCalculation {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2468,6 +2497,7 @@ impl Request for OrderTest {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2507,6 +2537,3732 @@ impl Request for OrderTest {
             &[],
         )?;
         super::validation::validate("orderTest", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`allOrderList`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#all-order-list).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AllOrderList {
+    #[serde(rename = "fromId", skip_serializing_if = "Option::is_none")]
+    from_id: Option<i64>,
+    #[serde(rename = "startTime", skip_serializing_if = "Option::is_none")]
+    start_time: Option<i64>,
+    #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
+    end_time: Option<i64>,
+    #[serde(rename = "limit", skip_serializing_if = "Option::is_none")]
+    limit: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl AllOrderList {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `fromId` parameter.
+    #[must_use]
+    pub fn from_id(mut self, value: i64) -> Self {
+        self.from_id = Some(value);
+        self
+    }
+    /// Set the provider `startTime` parameter.
+    #[must_use]
+    pub fn start_time(mut self, value: i64) -> Self {
+        self.start_time = Some(value);
+        self
+    }
+    /// Set the provider `endTime` parameter.
+    #[must_use]
+    pub fn end_time(mut self, value: i64) -> Self {
+        self.end_time = Some(value);
+        self
+    }
+    /// Set the provider `limit` parameter.
+    #[must_use]
+    pub fn limit(mut self, value: i64) -> Self {
+        self.limit = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for AllOrderList {
+    type Response = super::rest_models::AllOrderListResponse;
+    const OP: Operation = Operation {
+        name: "allOrderList",
+        path: "/api/v3/allOrderList",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 20,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[],
+            &[],
+            &[("limit", -9_223_372_036_854_775_808, 1_000)],
+        )?;
+        super::validation::validate("allOrderList", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`getOrderList`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#get-order-list).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct GetOrderList {
+    #[serde(rename = "orderListId", skip_serializing_if = "Option::is_none")]
+    order_list_id: Option<i64>,
+    #[serde(rename = "origClientOrderId", skip_serializing_if = "Option::is_none")]
+    orig_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl GetOrderList {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `orderListId` parameter.
+    #[must_use]
+    pub fn order_list_id(mut self, value: i64) -> Self {
+        self.order_list_id = Some(value);
+        self
+    }
+    /// Set the provider `origClientOrderId` parameter.
+    #[must_use]
+    pub fn orig_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.orig_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for GetOrderList {
+    type Response = super::rest_models::GetOrderListResponse;
+    const OP: Operation = Operation {
+        name: "getOrderList",
+        path: "/api/v3/orderList",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 4,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("getOrderList", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`deleteOrderList`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#delete-order-list).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct DeleteOrderList {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "orderListId", skip_serializing_if = "Option::is_none")]
+    order_list_id: Option<i64>,
+    #[serde(rename = "listClientOrderId", skip_serializing_if = "Option::is_none")]
+    list_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "newClientOrderId", skip_serializing_if = "Option::is_none")]
+    new_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl DeleteOrderList {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `orderListId` parameter.
+    #[must_use]
+    pub fn order_list_id(mut self, value: i64) -> Self {
+        self.order_list_id = Some(value);
+        self
+    }
+    /// Set the provider `listClientOrderId` parameter.
+    #[must_use]
+    pub fn list_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.list_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `newClientOrderId` parameter.
+    #[must_use]
+    pub fn new_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.new_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for DeleteOrderList {
+    type Response = super::rest_models::DeleteOrderListResponse;
+    const OP: Operation = Operation {
+        name: "deleteOrderList",
+        path: "/api/v3/orderList",
+        method: "DELETE",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &["symbol"], &[], &[])?;
+        super::validation::validate("deleteOrderList", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`myAllocations`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-allocations).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct MyAllocations {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "startTime", skip_serializing_if = "Option::is_none")]
+    start_time: Option<i64>,
+    #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
+    end_time: Option<i64>,
+    #[serde(rename = "fromAllocationId", skip_serializing_if = "Option::is_none")]
+    from_allocation_id: Option<i64>,
+    #[serde(rename = "limit", skip_serializing_if = "Option::is_none")]
+    limit: Option<i64>,
+    #[serde(rename = "orderId", skip_serializing_if = "Option::is_none")]
+    order_id: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl MyAllocations {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `startTime` parameter.
+    #[must_use]
+    pub fn start_time(mut self, value: i64) -> Self {
+        self.start_time = Some(value);
+        self
+    }
+    /// Set the provider `endTime` parameter.
+    #[must_use]
+    pub fn end_time(mut self, value: i64) -> Self {
+        self.end_time = Some(value);
+        self
+    }
+    /// Set the provider `fromAllocationId` parameter.
+    #[must_use]
+    pub fn from_allocation_id(mut self, value: i64) -> Self {
+        self.from_allocation_id = Some(value);
+        self
+    }
+    /// Set the provider `limit` parameter.
+    #[must_use]
+    pub fn limit(mut self, value: i64) -> Self {
+        self.limit = Some(value);
+        self
+    }
+    /// Set the provider `orderId` parameter.
+    #[must_use]
+    pub fn order_id(mut self, value: i64) -> Self {
+        self.order_id = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for MyAllocations {
+    type Response = super::rest_models::MyAllocationsResponse;
+    const OP: Operation = Operation {
+        name: "myAllocations",
+        path: "/api/v3/myAllocations",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 20,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["symbol"],
+            &[],
+            &[("limit", -9_223_372_036_854_775_808, 1_000)],
+        )?;
+        super::validation::validate("myAllocations", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`myFilters`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-filters).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct MyFilters {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl MyFilters {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for MyFilters {
+    type Response = super::rest_models::MyFiltersResponse;
+    const OP: Operation = Operation {
+        name: "myFilters",
+        path: "/api/v3/myFilters",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 40,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &["symbol"], &[], &[])?;
+        super::validation::validate("myFilters", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`myPreventedMatches`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-prevented-matches).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct MyPreventedMatches {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "preventedMatchId", skip_serializing_if = "Option::is_none")]
+    prevented_match_id: Option<i64>,
+    #[serde(rename = "orderId", skip_serializing_if = "Option::is_none")]
+    order_id: Option<i64>,
+    #[serde(
+        rename = "fromPreventedMatchId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    from_prevented_match_id: Option<i64>,
+    #[serde(rename = "limit", skip_serializing_if = "Option::is_none")]
+    limit: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl MyPreventedMatches {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `preventedMatchId` parameter.
+    #[must_use]
+    pub fn prevented_match_id(mut self, value: i64) -> Self {
+        self.prevented_match_id = Some(value);
+        self
+    }
+    /// Set the provider `orderId` parameter.
+    #[must_use]
+    pub fn order_id(mut self, value: i64) -> Self {
+        self.order_id = Some(value);
+        self
+    }
+    /// Set the provider `fromPreventedMatchId` parameter.
+    #[must_use]
+    pub fn from_prevented_match_id(mut self, value: i64) -> Self {
+        self.from_prevented_match_id = Some(value);
+        self
+    }
+    /// Set the provider `limit` parameter.
+    #[must_use]
+    pub fn limit(mut self, value: i64) -> Self {
+        self.limit = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for MyPreventedMatches {
+    type Response = super::rest_models::MyPreventedMatchesResponse;
+    const OP: Operation = Operation {
+        name: "myPreventedMatches",
+        path: "/api/v3/myPreventedMatches",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 0,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["symbol"],
+            &[],
+            &[("limit", -9_223_372_036_854_775_808, 1_000)],
+        )?;
+        super::validation::validate("myPreventedMatches", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`openOrderList`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#open-order-list).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OpenOrderList {
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl OpenOrderList {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OpenOrderList {
+    type Response = super::rest_models::OpenOrderListResponse;
+    const OP: Operation = Operation {
+        name: "openOrderList",
+        path: "/api/v3/openOrderList",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 6,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("openOrderList", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`orderAmendments`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#order-amendments).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OrderAmendments {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "orderId", skip_serializing_if = "Option::is_none")]
+    order_id: Option<i64>,
+    #[serde(rename = "fromExecutionId", skip_serializing_if = "Option::is_none")]
+    from_execution_id: Option<i64>,
+    #[serde(rename = "limit", skip_serializing_if = "Option::is_none")]
+    limit: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl OrderAmendments {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `orderId` parameter.
+    #[must_use]
+    pub fn order_id(mut self, value: i64) -> Self {
+        self.order_id = Some(value);
+        self
+    }
+    /// Set the provider `fromExecutionId` parameter.
+    #[must_use]
+    pub fn from_execution_id(mut self, value: i64) -> Self {
+        self.from_execution_id = Some(value);
+        self
+    }
+    /// Set the provider `limit` parameter.
+    #[must_use]
+    pub fn limit(mut self, value: i64) -> Self {
+        self.limit = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OrderAmendments {
+    type Response = super::rest_models::OrderAmendmentsResponse;
+    const OP: Operation = Operation {
+        name: "orderAmendments",
+        path: "/api/v3/order/amendments",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 4,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["orderId", "symbol"],
+            &[],
+            &[("limit", -9_223_372_036_854_775_808, 1_000)],
+        )?;
+        super::validation::validate("orderAmendments", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`orderAmendKeepPriority`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-amend-keep-priority).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OrderAmendKeepPriority {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "orderId", skip_serializing_if = "Option::is_none")]
+    order_id: Option<i64>,
+    #[serde(rename = "origClientOrderId", skip_serializing_if = "Option::is_none")]
+    orig_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "newClientOrderId", skip_serializing_if = "Option::is_none")]
+    new_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "newQty", skip_serializing_if = "Option::is_none")]
+    new_qty: Option<Decimal>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl OrderAmendKeepPriority {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `orderId` parameter.
+    #[must_use]
+    pub fn order_id(mut self, value: i64) -> Self {
+        self.order_id = Some(value);
+        self
+    }
+    /// Set the provider `origClientOrderId` parameter.
+    #[must_use]
+    pub fn orig_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.orig_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `newClientOrderId` parameter.
+    #[must_use]
+    pub fn new_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.new_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `newQty` parameter.
+    #[must_use]
+    pub fn new_qty(mut self, value: Decimal) -> Self {
+        self.new_qty = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OrderAmendKeepPriority {
+    type Response = super::rest_models::OrderAmendKeepPriorityResponse;
+    const OP: Operation = Operation {
+        name: "orderAmendKeepPriority",
+        path: "/api/v3/order/amend/keepPriority",
+        method: "PUT",
+        security: Security::Signed,
+        mutation: true,
+        weight: 4,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &["newQty", "symbol"], &[], &[])?;
+        super::validation::validate("orderAmendKeepPriority", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`orderCancelReplace`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-cancel-replace).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OrderCancelReplace {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    type_value: Option<String>,
+    #[serde(rename = "cancelReplaceMode", skip_serializing_if = "Option::is_none")]
+    cancel_replace_mode: Option<String>,
+    #[serde(rename = "timeInForce", skip_serializing_if = "Option::is_none")]
+    time_in_force: Option<String>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "quoteOrderQty", skip_serializing_if = "Option::is_none")]
+    quote_order_qty: Option<Decimal>,
+    #[serde(rename = "price", skip_serializing_if = "Option::is_none")]
+    price: Option<Decimal>,
+    #[serde(
+        rename = "cancelNewClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    cancel_new_client_order_id: Option<ClientOrderId>,
+    #[serde(
+        rename = "cancelOrigClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    cancel_orig_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "cancelOrderId", skip_serializing_if = "Option::is_none")]
+    cancel_order_id: Option<i64>,
+    #[serde(rename = "newClientOrderId", skip_serializing_if = "Option::is_none")]
+    new_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "strategyId", skip_serializing_if = "Option::is_none")]
+    strategy_id: Option<i64>,
+    #[serde(rename = "strategyType", skip_serializing_if = "Option::is_none")]
+    strategy_type: Option<i64>,
+    #[serde(rename = "stopPrice", skip_serializing_if = "Option::is_none")]
+    stop_price: Option<Decimal>,
+    #[serde(rename = "trailingDelta", skip_serializing_if = "Option::is_none")]
+    trailing_delta: Option<i64>,
+    #[serde(rename = "icebergQty", skip_serializing_if = "Option::is_none")]
+    iceberg_qty: Option<Decimal>,
+    #[serde(rename = "newOrderRespType", skip_serializing_if = "Option::is_none")]
+    response_type: Option<String>,
+    #[serde(
+        rename = "selfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    self_trade_prevention_mode: Option<String>,
+    #[serde(rename = "cancelRestrictions", skip_serializing_if = "Option::is_none")]
+    cancel_restrictions: Option<String>,
+    #[serde(
+        rename = "orderRateLimitExceededMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    order_rate_limit_exceeded_mode: Option<String>,
+    #[serde(rename = "pegPriceType", skip_serializing_if = "Option::is_none")]
+    peg_price_type: Option<String>,
+    #[serde(rename = "pegOffsetValue", skip_serializing_if = "Option::is_none")]
+    peg_offset_value: Option<i64>,
+    #[serde(rename = "pegOffsetType", skip_serializing_if = "Option::is_none")]
+    peg_offset_type: Option<String>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl OrderCancelReplace {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `type` parameter.
+    #[must_use]
+    pub fn type_value(mut self, value: impl Into<String>) -> Self {
+        self.type_value = Some(value.into());
+        self
+    }
+    /// Set the provider `cancelReplaceMode` parameter.
+    #[must_use]
+    pub fn cancel_replace_mode(mut self, value: impl Into<String>) -> Self {
+        self.cancel_replace_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `timeInForce` parameter.
+    #[must_use]
+    pub fn time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `quoteOrderQty` parameter.
+    #[must_use]
+    pub fn quote_order_qty(mut self, value: Decimal) -> Self {
+        self.quote_order_qty = Some(value);
+        self
+    }
+    /// Set the provider `price` parameter.
+    #[must_use]
+    pub fn price(mut self, value: Decimal) -> Self {
+        self.price = Some(value);
+        self
+    }
+    /// Set the provider `cancelNewClientOrderId` parameter.
+    #[must_use]
+    pub fn cancel_new_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.cancel_new_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `cancelOrigClientOrderId` parameter.
+    #[must_use]
+    pub fn cancel_orig_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.cancel_orig_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `cancelOrderId` parameter.
+    #[must_use]
+    pub fn cancel_order_id(mut self, value: i64) -> Self {
+        self.cancel_order_id = Some(value);
+        self
+    }
+    /// Set the provider `newClientOrderId` parameter.
+    #[must_use]
+    pub fn new_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.new_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `strategyId` parameter.
+    #[must_use]
+    pub fn strategy_id(mut self, value: i64) -> Self {
+        self.strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `strategyType` parameter.
+    #[must_use]
+    pub fn strategy_type(mut self, value: i64) -> Self {
+        self.strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `stopPrice` parameter.
+    #[must_use]
+    pub fn stop_price(mut self, value: Decimal) -> Self {
+        self.stop_price = Some(value);
+        self
+    }
+    /// Set the provider `trailingDelta` parameter.
+    #[must_use]
+    pub fn trailing_delta(mut self, value: i64) -> Self {
+        self.trailing_delta = Some(value);
+        self
+    }
+    /// Set the provider `icebergQty` parameter.
+    #[must_use]
+    pub fn iceberg_qty(mut self, value: Decimal) -> Self {
+        self.iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `newOrderRespType` parameter.
+    #[must_use]
+    pub fn response_type(mut self, value: impl Into<String>) -> Self {
+        self.response_type = Some(value.into());
+        self
+    }
+    /// Set the provider `selfTradePreventionMode` parameter.
+    #[must_use]
+    pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
+        self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `cancelRestrictions` parameter.
+    #[must_use]
+    pub fn cancel_restrictions(mut self, value: impl Into<String>) -> Self {
+        self.cancel_restrictions = Some(value.into());
+        self
+    }
+    /// Set the provider `orderRateLimitExceededMode` parameter.
+    #[must_use]
+    pub fn order_rate_limit_exceeded_mode(mut self, value: impl Into<String>) -> Self {
+        self.order_rate_limit_exceeded_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `pegPriceType` parameter.
+    #[must_use]
+    pub fn peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pegOffsetValue` parameter.
+    #[must_use]
+    pub fn peg_offset_value(mut self, value: i64) -> Self {
+        self.peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `pegOffsetType` parameter.
+    #[must_use]
+    pub fn peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OrderCancelReplace {
+    type Response = super::rest_models::OrderCancelReplaceResponse;
+    const OP: Operation = Operation {
+        name: "orderCancelReplace",
+        path: "/api/v3/order/cancelReplace",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: Some(super::validation::partial),
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["cancelReplaceMode", "side", "symbol", "type"],
+            &[
+                ("side", &["BUY", "SELL"]),
+                (
+                    "type",
+                    &[
+                        "MARKET",
+                        "LIMIT",
+                        "STOP_LOSS",
+                        "STOP_LOSS_LIMIT",
+                        "TAKE_PROFIT",
+                        "TAKE_PROFIT_LIMIT",
+                        "LIMIT_MAKER",
+                    ],
+                ),
+                ("cancelReplaceMode", &["STOP_ON_FAILURE", "ALLOW_FAILURE"]),
+                ("timeInForce", &["GTC", "IOC", "FOK"]),
+                ("newOrderRespType", &["ACK", "RESULT", "FULL"]),
+                (
+                    "selfTradePreventionMode",
+                    &[
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_MAKER",
+                        "EXPIRE_BOTH",
+                        "DECREMENT",
+                        "TRANSFER",
+                    ],
+                ),
+                ("cancelRestrictions", &["ONLY_NEW", "ONLY_PARTIALLY_FILLED"]),
+                ("orderRateLimitExceededMode", &["DO_NOTHING", "CANCEL_ONLY"]),
+                ("pegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("pegOffsetType", &["PRICE_LEVEL"]),
+            ],
+            &[],
+        )?;
+        super::validation::validate("orderCancelReplace", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`orderListOco`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-oco).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OrderListOco {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "listClientOrderId", skip_serializing_if = "Option::is_none")]
+    list_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "aboveType", skip_serializing_if = "Option::is_none")]
+    above_type: Option<String>,
+    #[serde(rename = "aboveClientOrderId", skip_serializing_if = "Option::is_none")]
+    above_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "aboveIcebergQty", skip_serializing_if = "Option::is_none")]
+    above_iceberg_qty: Option<i64>,
+    #[serde(rename = "abovePrice", skip_serializing_if = "Option::is_none")]
+    above_price: Option<Decimal>,
+    #[serde(rename = "aboveStopPrice", skip_serializing_if = "Option::is_none")]
+    above_stop_price: Option<Decimal>,
+    #[serde(rename = "aboveTrailingDelta", skip_serializing_if = "Option::is_none")]
+    above_trailing_delta: Option<i64>,
+    #[serde(rename = "aboveTimeInForce", skip_serializing_if = "Option::is_none")]
+    above_time_in_force: Option<String>,
+    #[serde(rename = "aboveStrategyId", skip_serializing_if = "Option::is_none")]
+    above_strategy_id: Option<i64>,
+    #[serde(rename = "aboveStrategyType", skip_serializing_if = "Option::is_none")]
+    above_strategy_type: Option<i64>,
+    #[serde(rename = "abovePegPriceType", skip_serializing_if = "Option::is_none")]
+    above_peg_price_type: Option<String>,
+    #[serde(rename = "abovePegOffsetType", skip_serializing_if = "Option::is_none")]
+    above_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "abovePegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    above_peg_offset_value: Option<i64>,
+    #[serde(rename = "belowType", skip_serializing_if = "Option::is_none")]
+    below_type: Option<String>,
+    #[serde(rename = "belowClientOrderId", skip_serializing_if = "Option::is_none")]
+    below_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "belowIcebergQty", skip_serializing_if = "Option::is_none")]
+    below_iceberg_qty: Option<i64>,
+    #[serde(rename = "belowPrice", skip_serializing_if = "Option::is_none")]
+    below_price: Option<Decimal>,
+    #[serde(rename = "belowStopPrice", skip_serializing_if = "Option::is_none")]
+    below_stop_price: Option<Decimal>,
+    #[serde(rename = "belowTrailingDelta", skip_serializing_if = "Option::is_none")]
+    below_trailing_delta: Option<i64>,
+    #[serde(rename = "belowTimeInForce", skip_serializing_if = "Option::is_none")]
+    below_time_in_force: Option<String>,
+    #[serde(rename = "belowStrategyId", skip_serializing_if = "Option::is_none")]
+    below_strategy_id: Option<i64>,
+    #[serde(rename = "belowStrategyType", skip_serializing_if = "Option::is_none")]
+    below_strategy_type: Option<i64>,
+    #[serde(rename = "belowPegPriceType", skip_serializing_if = "Option::is_none")]
+    below_peg_price_type: Option<String>,
+    #[serde(rename = "belowPegOffsetType", skip_serializing_if = "Option::is_none")]
+    below_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "belowPegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    below_peg_offset_value: Option<i64>,
+    #[serde(rename = "newOrderRespType", skip_serializing_if = "Option::is_none")]
+    response_type: Option<String>,
+    #[serde(
+        rename = "selfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    self_trade_prevention_mode: Option<String>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl OrderListOco {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `listClientOrderId` parameter.
+    #[must_use]
+    pub fn list_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.list_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `aboveType` parameter.
+    #[must_use]
+    pub fn above_type(mut self, value: impl Into<String>) -> Self {
+        self.above_type = Some(value.into());
+        self
+    }
+    /// Set the provider `aboveClientOrderId` parameter.
+    #[must_use]
+    pub fn above_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.above_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `aboveIcebergQty` parameter.
+    #[must_use]
+    pub fn above_iceberg_qty(mut self, value: i64) -> Self {
+        self.above_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `abovePrice` parameter.
+    #[must_use]
+    pub fn above_price(mut self, value: Decimal) -> Self {
+        self.above_price = Some(value);
+        self
+    }
+    /// Set the provider `aboveStopPrice` parameter.
+    #[must_use]
+    pub fn above_stop_price(mut self, value: Decimal) -> Self {
+        self.above_stop_price = Some(value);
+        self
+    }
+    /// Set the provider `aboveTrailingDelta` parameter.
+    #[must_use]
+    pub fn above_trailing_delta(mut self, value: i64) -> Self {
+        self.above_trailing_delta = Some(value);
+        self
+    }
+    /// Set the provider `aboveTimeInForce` parameter.
+    #[must_use]
+    pub fn above_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.above_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `aboveStrategyId` parameter.
+    #[must_use]
+    pub fn above_strategy_id(mut self, value: i64) -> Self {
+        self.above_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `aboveStrategyType` parameter.
+    #[must_use]
+    pub fn above_strategy_type(mut self, value: i64) -> Self {
+        self.above_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `abovePegPriceType` parameter.
+    #[must_use]
+    pub fn above_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.above_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `abovePegOffsetType` parameter.
+    #[must_use]
+    pub fn above_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.above_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `abovePegOffsetValue` parameter.
+    #[must_use]
+    pub fn above_peg_offset_value(mut self, value: i64) -> Self {
+        self.above_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `belowType` parameter.
+    #[must_use]
+    pub fn below_type(mut self, value: impl Into<String>) -> Self {
+        self.below_type = Some(value.into());
+        self
+    }
+    /// Set the provider `belowClientOrderId` parameter.
+    #[must_use]
+    pub fn below_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.below_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `belowIcebergQty` parameter.
+    #[must_use]
+    pub fn below_iceberg_qty(mut self, value: i64) -> Self {
+        self.below_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `belowPrice` parameter.
+    #[must_use]
+    pub fn below_price(mut self, value: Decimal) -> Self {
+        self.below_price = Some(value);
+        self
+    }
+    /// Set the provider `belowStopPrice` parameter.
+    #[must_use]
+    pub fn below_stop_price(mut self, value: Decimal) -> Self {
+        self.below_stop_price = Some(value);
+        self
+    }
+    /// Set the provider `belowTrailingDelta` parameter.
+    #[must_use]
+    pub fn below_trailing_delta(mut self, value: i64) -> Self {
+        self.below_trailing_delta = Some(value);
+        self
+    }
+    /// Set the provider `belowTimeInForce` parameter.
+    #[must_use]
+    pub fn below_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.below_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `belowStrategyId` parameter.
+    #[must_use]
+    pub fn below_strategy_id(mut self, value: i64) -> Self {
+        self.below_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `belowStrategyType` parameter.
+    #[must_use]
+    pub fn below_strategy_type(mut self, value: i64) -> Self {
+        self.below_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `belowPegPriceType` parameter.
+    #[must_use]
+    pub fn below_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.below_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `belowPegOffsetType` parameter.
+    #[must_use]
+    pub fn below_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.below_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `belowPegOffsetValue` parameter.
+    #[must_use]
+    pub fn below_peg_offset_value(mut self, value: i64) -> Self {
+        self.below_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `newOrderRespType` parameter.
+    #[must_use]
+    pub fn response_type(mut self, value: impl Into<String>) -> Self {
+        self.response_type = Some(value.into());
+        self
+    }
+    /// Set the provider `selfTradePreventionMode` parameter.
+    #[must_use]
+    pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
+        self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OrderListOco {
+    type Response = super::rest_models::OrderListOcoResponse;
+    const OP: Operation = Operation {
+        name: "orderListOco",
+        path: "/api/v3/orderList/oco",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["aboveType", "belowType", "quantity", "side", "symbol"],
+            &[
+                ("side", &["BUY", "SELL"]),
+                (
+                    "aboveType",
+                    &[
+                        "STOP_LOSS_LIMIT",
+                        "STOP_LOSS",
+                        "LIMIT_MAKER",
+                        "TAKE_PROFIT",
+                        "TAKE_PROFIT_LIMIT",
+                    ],
+                ),
+                ("aboveTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("abovePegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("abovePegOffsetType", &["PRICE_LEVEL"]),
+                (
+                    "belowType",
+                    &[
+                        "STOP_LOSS",
+                        "STOP_LOSS_LIMIT",
+                        "TAKE_PROFIT",
+                        "TAKE_PROFIT_LIMIT",
+                    ],
+                ),
+                ("belowTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("belowPegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("belowPegOffsetType", &["PRICE_LEVEL"]),
+                ("newOrderRespType", &["ACK", "RESULT", "FULL"]),
+                (
+                    "selfTradePreventionMode",
+                    &[
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_MAKER",
+                        "EXPIRE_BOTH",
+                        "DECREMENT",
+                        "TRANSFER",
+                    ],
+                ),
+            ],
+            &[],
+        )?;
+        super::validation::validate("orderListOco", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`orderListOpo`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-opo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OrderListOpo {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "listClientOrderId", skip_serializing_if = "Option::is_none")]
+    list_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "newOrderRespType", skip_serializing_if = "Option::is_none")]
+    response_type: Option<String>,
+    #[serde(
+        rename = "selfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    self_trade_prevention_mode: Option<String>,
+    #[serde(rename = "workingType", skip_serializing_if = "Option::is_none")]
+    working_type: Option<String>,
+    #[serde(rename = "workingSide", skip_serializing_if = "Option::is_none")]
+    working_side: Option<String>,
+    #[serde(
+        rename = "workingClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "workingPrice", skip_serializing_if = "Option::is_none")]
+    working_price: Option<Decimal>,
+    #[serde(rename = "workingQuantity", skip_serializing_if = "Option::is_none")]
+    working_quantity: Option<Decimal>,
+    #[serde(rename = "workingIcebergQty", skip_serializing_if = "Option::is_none")]
+    working_iceberg_qty: Option<Decimal>,
+    #[serde(rename = "workingTimeInForce", skip_serializing_if = "Option::is_none")]
+    working_time_in_force: Option<String>,
+    #[serde(rename = "workingStrategyId", skip_serializing_if = "Option::is_none")]
+    working_strategy_id: Option<i64>,
+    #[serde(
+        rename = "workingStrategyType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_strategy_type: Option<i64>,
+    #[serde(
+        rename = "workingPegPriceType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_price_type: Option<String>,
+    #[serde(
+        rename = "workingPegOffsetType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "workingPegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_offset_value: Option<i64>,
+    #[serde(rename = "pendingType", skip_serializing_if = "Option::is_none")]
+    pending_type: Option<String>,
+    #[serde(rename = "pendingSide", skip_serializing_if = "Option::is_none")]
+    pending_side: Option<String>,
+    #[serde(
+        rename = "pendingClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "pendingPrice", skip_serializing_if = "Option::is_none")]
+    pending_price: Option<Decimal>,
+    #[serde(rename = "pendingStopPrice", skip_serializing_if = "Option::is_none")]
+    pending_stop_price: Option<Decimal>,
+    #[serde(
+        rename = "pendingTrailingDelta",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_trailing_delta: Option<Decimal>,
+    #[serde(rename = "pendingIcebergQty", skip_serializing_if = "Option::is_none")]
+    pending_iceberg_qty: Option<Decimal>,
+    #[serde(rename = "pendingTimeInForce", skip_serializing_if = "Option::is_none")]
+    pending_time_in_force: Option<String>,
+    #[serde(rename = "pendingStrategyId", skip_serializing_if = "Option::is_none")]
+    pending_strategy_id: Option<i64>,
+    #[serde(
+        rename = "pendingStrategyType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_strategy_type: Option<i64>,
+    #[serde(
+        rename = "pendingPegPriceType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_peg_price_type: Option<String>,
+    #[serde(
+        rename = "pendingPegOffsetType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "pendingPegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_peg_offset_value: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl OrderListOpo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `listClientOrderId` parameter.
+    #[must_use]
+    pub fn list_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.list_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `newOrderRespType` parameter.
+    #[must_use]
+    pub fn response_type(mut self, value: impl Into<String>) -> Self {
+        self.response_type = Some(value.into());
+        self
+    }
+    /// Set the provider `selfTradePreventionMode` parameter.
+    #[must_use]
+    pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
+        self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `workingType` parameter.
+    #[must_use]
+    pub fn working_type(mut self, value: impl Into<String>) -> Self {
+        self.working_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingSide` parameter.
+    #[must_use]
+    pub fn working_side(mut self, value: impl Into<String>) -> Self {
+        self.working_side = Some(value.into());
+        self
+    }
+    /// Set the provider `workingClientOrderId` parameter.
+    #[must_use]
+    pub fn working_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.working_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `workingPrice` parameter.
+    #[must_use]
+    pub fn working_price(mut self, value: Decimal) -> Self {
+        self.working_price = Some(value);
+        self
+    }
+    /// Set the provider `workingQuantity` parameter.
+    #[must_use]
+    pub fn working_quantity(mut self, value: Decimal) -> Self {
+        self.working_quantity = Some(value);
+        self
+    }
+    /// Set the provider `workingIcebergQty` parameter.
+    #[must_use]
+    pub fn working_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.working_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `workingTimeInForce` parameter.
+    #[must_use]
+    pub fn working_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.working_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `workingStrategyId` parameter.
+    #[must_use]
+    pub fn working_strategy_id(mut self, value: i64) -> Self {
+        self.working_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `workingStrategyType` parameter.
+    #[must_use]
+    pub fn working_strategy_type(mut self, value: i64) -> Self {
+        self.working_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `workingPegPriceType` parameter.
+    #[must_use]
+    pub fn working_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.working_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingPegOffsetType` parameter.
+    #[must_use]
+    pub fn working_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.working_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingPegOffsetValue` parameter.
+    #[must_use]
+    pub fn working_peg_offset_value(mut self, value: i64) -> Self {
+        self.working_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `pendingType` parameter.
+    #[must_use]
+    pub fn pending_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingSide` parameter.
+    #[must_use]
+    pub fn pending_side(mut self, value: impl Into<String>) -> Self {
+        self.pending_side = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingClientOrderId` parameter.
+    #[must_use]
+    pub fn pending_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.pending_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingPrice` parameter.
+    #[must_use]
+    pub fn pending_price(mut self, value: Decimal) -> Self {
+        self.pending_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingStopPrice` parameter.
+    #[must_use]
+    pub fn pending_stop_price(mut self, value: Decimal) -> Self {
+        self.pending_stop_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingTrailingDelta` parameter.
+    #[must_use]
+    pub fn pending_trailing_delta(mut self, value: Decimal) -> Self {
+        self.pending_trailing_delta = Some(value);
+        self
+    }
+    /// Set the provider `pendingIcebergQty` parameter.
+    #[must_use]
+    pub fn pending_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.pending_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `pendingTimeInForce` parameter.
+    #[must_use]
+    pub fn pending_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.pending_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingStrategyId` parameter.
+    #[must_use]
+    pub fn pending_strategy_id(mut self, value: i64) -> Self {
+        self.pending_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingStrategyType` parameter.
+    #[must_use]
+    pub fn pending_strategy_type(mut self, value: i64) -> Self {
+        self.pending_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `pendingPegPriceType` parameter.
+    #[must_use]
+    pub fn pending_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingPegOffsetType` parameter.
+    #[must_use]
+    pub fn pending_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingPegOffsetValue` parameter.
+    #[must_use]
+    pub fn pending_peg_offset_value(mut self, value: i64) -> Self {
+        self.pending_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OrderListOpo {
+    type Response = super::rest_models::OrderListOpoResponse;
+    const OP: Operation = Operation {
+        name: "orderListOpo",
+        path: "/api/v3/orderList/opo",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[
+                "pendingSide",
+                "pendingType",
+                "symbol",
+                "workingPrice",
+                "workingQuantity",
+                "workingSide",
+                "workingType",
+            ],
+            &[
+                ("newOrderRespType", &["ACK", "RESULT", "FULL"]),
+                (
+                    "selfTradePreventionMode",
+                    &[
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_MAKER",
+                        "EXPIRE_BOTH",
+                        "DECREMENT",
+                        "TRANSFER",
+                    ],
+                ),
+                ("workingType", &["LIMIT", "LIMIT_MAKER"]),
+                ("workingSide", &["BUY", "SELL"]),
+                ("workingTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("workingPegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("workingPegOffsetType", &["PRICE_LEVEL"]),
+                (
+                    "pendingType",
+                    &[
+                        "LIMIT",
+                        "MARKET",
+                        "STOP_LOSS",
+                        "STOP_LOSS_LIMIT",
+                        "TAKE_PROFIT",
+                        "TAKE_PROFIT_LIMIT",
+                        "LIMIT_MAKER",
+                    ],
+                ),
+                ("pendingSide", &["BUY", "SELL"]),
+                ("pendingTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("pendingPegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("pendingPegOffsetType", &["PRICE_LEVEL"]),
+            ],
+            &[],
+        )?;
+        super::validation::validate("orderListOpo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`orderListOpoco`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-opoco).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OrderListOpoco {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "listClientOrderId", skip_serializing_if = "Option::is_none")]
+    list_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "newOrderRespType", skip_serializing_if = "Option::is_none")]
+    response_type: Option<String>,
+    #[serde(
+        rename = "selfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    self_trade_prevention_mode: Option<String>,
+    #[serde(rename = "workingType", skip_serializing_if = "Option::is_none")]
+    working_type: Option<String>,
+    #[serde(rename = "workingSide", skip_serializing_if = "Option::is_none")]
+    working_side: Option<String>,
+    #[serde(
+        rename = "workingClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "workingPrice", skip_serializing_if = "Option::is_none")]
+    working_price: Option<Decimal>,
+    #[serde(rename = "workingQuantity", skip_serializing_if = "Option::is_none")]
+    working_quantity: Option<Decimal>,
+    #[serde(rename = "workingIcebergQty", skip_serializing_if = "Option::is_none")]
+    working_iceberg_qty: Option<Decimal>,
+    #[serde(rename = "workingTimeInForce", skip_serializing_if = "Option::is_none")]
+    working_time_in_force: Option<String>,
+    #[serde(rename = "workingStrategyId", skip_serializing_if = "Option::is_none")]
+    working_strategy_id: Option<i64>,
+    #[serde(
+        rename = "workingStrategyType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_strategy_type: Option<i64>,
+    #[serde(
+        rename = "workingPegPriceType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_price_type: Option<String>,
+    #[serde(
+        rename = "workingPegOffsetType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "workingPegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_offset_value: Option<i64>,
+    #[serde(rename = "pendingSide", skip_serializing_if = "Option::is_none")]
+    pending_side: Option<String>,
+    #[serde(rename = "pendingAboveType", skip_serializing_if = "Option::is_none")]
+    pending_above_type: Option<String>,
+    #[serde(
+        rename = "pendingAboveClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "pendingAbovePrice", skip_serializing_if = "Option::is_none")]
+    pending_above_price: Option<Decimal>,
+    #[serde(
+        rename = "pendingAboveStopPrice",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_stop_price: Option<Decimal>,
+    #[serde(
+        rename = "pendingAboveTrailingDelta",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_trailing_delta: Option<Decimal>,
+    #[serde(
+        rename = "pendingAboveIcebergQty",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_iceberg_qty: Option<Decimal>,
+    #[serde(
+        rename = "pendingAboveTimeInForce",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_time_in_force: Option<String>,
+    #[serde(
+        rename = "pendingAboveStrategyId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_strategy_id: Option<i64>,
+    #[serde(
+        rename = "pendingAboveStrategyType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_strategy_type: Option<i64>,
+    #[serde(
+        rename = "pendingAbovePegPriceType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_peg_price_type: Option<String>,
+    #[serde(
+        rename = "pendingAbovePegOffsetType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "pendingAbovePegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_peg_offset_value: Option<i64>,
+    #[serde(rename = "pendingBelowType", skip_serializing_if = "Option::is_none")]
+    pending_below_type: Option<String>,
+    #[serde(
+        rename = "pendingBelowClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "pendingBelowPrice", skip_serializing_if = "Option::is_none")]
+    pending_below_price: Option<Decimal>,
+    #[serde(
+        rename = "pendingBelowStopPrice",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_stop_price: Option<Decimal>,
+    #[serde(
+        rename = "pendingBelowTrailingDelta",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_trailing_delta: Option<Decimal>,
+    #[serde(
+        rename = "pendingBelowIcebergQty",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_iceberg_qty: Option<Decimal>,
+    #[serde(
+        rename = "pendingBelowTimeInForce",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_time_in_force: Option<String>,
+    #[serde(
+        rename = "pendingBelowStrategyId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_strategy_id: Option<i64>,
+    #[serde(
+        rename = "pendingBelowStrategyType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_strategy_type: Option<i64>,
+    #[serde(
+        rename = "pendingBelowPegPriceType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_peg_price_type: Option<String>,
+    #[serde(
+        rename = "pendingBelowPegOffsetType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "pendingBelowPegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_peg_offset_value: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl OrderListOpoco {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `listClientOrderId` parameter.
+    #[must_use]
+    pub fn list_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.list_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `newOrderRespType` parameter.
+    #[must_use]
+    pub fn response_type(mut self, value: impl Into<String>) -> Self {
+        self.response_type = Some(value.into());
+        self
+    }
+    /// Set the provider `selfTradePreventionMode` parameter.
+    #[must_use]
+    pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
+        self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `workingType` parameter.
+    #[must_use]
+    pub fn working_type(mut self, value: impl Into<String>) -> Self {
+        self.working_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingSide` parameter.
+    #[must_use]
+    pub fn working_side(mut self, value: impl Into<String>) -> Self {
+        self.working_side = Some(value.into());
+        self
+    }
+    /// Set the provider `workingClientOrderId` parameter.
+    #[must_use]
+    pub fn working_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.working_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `workingPrice` parameter.
+    #[must_use]
+    pub fn working_price(mut self, value: Decimal) -> Self {
+        self.working_price = Some(value);
+        self
+    }
+    /// Set the provider `workingQuantity` parameter.
+    #[must_use]
+    pub fn working_quantity(mut self, value: Decimal) -> Self {
+        self.working_quantity = Some(value);
+        self
+    }
+    /// Set the provider `workingIcebergQty` parameter.
+    #[must_use]
+    pub fn working_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.working_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `workingTimeInForce` parameter.
+    #[must_use]
+    pub fn working_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.working_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `workingStrategyId` parameter.
+    #[must_use]
+    pub fn working_strategy_id(mut self, value: i64) -> Self {
+        self.working_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `workingStrategyType` parameter.
+    #[must_use]
+    pub fn working_strategy_type(mut self, value: i64) -> Self {
+        self.working_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `workingPegPriceType` parameter.
+    #[must_use]
+    pub fn working_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.working_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingPegOffsetType` parameter.
+    #[must_use]
+    pub fn working_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.working_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingPegOffsetValue` parameter.
+    #[must_use]
+    pub fn working_peg_offset_value(mut self, value: i64) -> Self {
+        self.working_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `pendingSide` parameter.
+    #[must_use]
+    pub fn pending_side(mut self, value: impl Into<String>) -> Self {
+        self.pending_side = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingAboveType` parameter.
+    #[must_use]
+    pub fn pending_above_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_above_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingAboveClientOrderId` parameter.
+    #[must_use]
+    pub fn pending_above_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.pending_above_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingAbovePrice` parameter.
+    #[must_use]
+    pub fn pending_above_price(mut self, value: Decimal) -> Self {
+        self.pending_above_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveStopPrice` parameter.
+    #[must_use]
+    pub fn pending_above_stop_price(mut self, value: Decimal) -> Self {
+        self.pending_above_stop_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveTrailingDelta` parameter.
+    #[must_use]
+    pub fn pending_above_trailing_delta(mut self, value: Decimal) -> Self {
+        self.pending_above_trailing_delta = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveIcebergQty` parameter.
+    #[must_use]
+    pub fn pending_above_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.pending_above_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveTimeInForce` parameter.
+    #[must_use]
+    pub fn pending_above_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.pending_above_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingAboveStrategyId` parameter.
+    #[must_use]
+    pub fn pending_above_strategy_id(mut self, value: i64) -> Self {
+        self.pending_above_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveStrategyType` parameter.
+    #[must_use]
+    pub fn pending_above_strategy_type(mut self, value: i64) -> Self {
+        self.pending_above_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `pendingAbovePegPriceType` parameter.
+    #[must_use]
+    pub fn pending_above_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_above_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingAbovePegOffsetType` parameter.
+    #[must_use]
+    pub fn pending_above_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_above_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingAbovePegOffsetValue` parameter.
+    #[must_use]
+    pub fn pending_above_peg_offset_value(mut self, value: i64) -> Self {
+        self.pending_above_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowType` parameter.
+    #[must_use]
+    pub fn pending_below_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_below_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingBelowClientOrderId` parameter.
+    #[must_use]
+    pub fn pending_below_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.pending_below_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowPrice` parameter.
+    #[must_use]
+    pub fn pending_below_price(mut self, value: Decimal) -> Self {
+        self.pending_below_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowStopPrice` parameter.
+    #[must_use]
+    pub fn pending_below_stop_price(mut self, value: Decimal) -> Self {
+        self.pending_below_stop_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowTrailingDelta` parameter.
+    #[must_use]
+    pub fn pending_below_trailing_delta(mut self, value: Decimal) -> Self {
+        self.pending_below_trailing_delta = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowIcebergQty` parameter.
+    #[must_use]
+    pub fn pending_below_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.pending_below_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowTimeInForce` parameter.
+    #[must_use]
+    pub fn pending_below_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.pending_below_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingBelowStrategyId` parameter.
+    #[must_use]
+    pub fn pending_below_strategy_id(mut self, value: i64) -> Self {
+        self.pending_below_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowStrategyType` parameter.
+    #[must_use]
+    pub fn pending_below_strategy_type(mut self, value: i64) -> Self {
+        self.pending_below_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowPegPriceType` parameter.
+    #[must_use]
+    pub fn pending_below_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_below_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingBelowPegOffsetType` parameter.
+    #[must_use]
+    pub fn pending_below_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_below_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingBelowPegOffsetValue` parameter.
+    #[must_use]
+    pub fn pending_below_peg_offset_value(mut self, value: i64) -> Self {
+        self.pending_below_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OrderListOpoco {
+    type Response = super::rest_models::OrderListOpocoResponse;
+    const OP: Operation = Operation {
+        name: "orderListOpoco",
+        path: "/api/v3/orderList/opoco",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[
+                "pendingAboveType",
+                "pendingSide",
+                "symbol",
+                "workingPrice",
+                "workingQuantity",
+                "workingSide",
+                "workingType",
+            ],
+            &[
+                ("newOrderRespType", &["ACK", "RESULT", "FULL"]),
+                (
+                    "selfTradePreventionMode",
+                    &[
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_MAKER",
+                        "EXPIRE_BOTH",
+                        "DECREMENT",
+                        "TRANSFER",
+                    ],
+                ),
+                ("workingType", &["LIMIT", "LIMIT_MAKER"]),
+                ("workingSide", &["BUY", "SELL"]),
+                ("workingTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("workingPegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("workingPegOffsetType", &["PRICE_LEVEL"]),
+                ("pendingSide", &["BUY", "SELL"]),
+                (
+                    "pendingAboveType",
+                    &[
+                        "STOP_LOSS_LIMIT",
+                        "STOP_LOSS",
+                        "LIMIT_MAKER",
+                        "TAKE_PROFIT",
+                        "TAKE_PROFIT_LIMIT",
+                    ],
+                ),
+                ("pendingAboveTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("pendingAbovePegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("pendingAbovePegOffsetType", &["PRICE_LEVEL"]),
+                (
+                    "pendingBelowType",
+                    &[
+                        "STOP_LOSS",
+                        "STOP_LOSS_LIMIT",
+                        "TAKE_PROFIT",
+                        "TAKE_PROFIT_LIMIT",
+                    ],
+                ),
+                ("pendingBelowTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("pendingBelowPegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("pendingBelowPegOffsetType", &["PRICE_LEVEL"]),
+            ],
+            &[],
+        )?;
+        super::validation::validate("orderListOpoco", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`orderListOto`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-oto).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OrderListOto {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "listClientOrderId", skip_serializing_if = "Option::is_none")]
+    list_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "newOrderRespType", skip_serializing_if = "Option::is_none")]
+    response_type: Option<String>,
+    #[serde(
+        rename = "selfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    self_trade_prevention_mode: Option<String>,
+    #[serde(rename = "workingType", skip_serializing_if = "Option::is_none")]
+    working_type: Option<String>,
+    #[serde(rename = "workingSide", skip_serializing_if = "Option::is_none")]
+    working_side: Option<String>,
+    #[serde(
+        rename = "workingClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "workingPrice", skip_serializing_if = "Option::is_none")]
+    working_price: Option<Decimal>,
+    #[serde(rename = "workingQuantity", skip_serializing_if = "Option::is_none")]
+    working_quantity: Option<Decimal>,
+    #[serde(rename = "workingIcebergQty", skip_serializing_if = "Option::is_none")]
+    working_iceberg_qty: Option<Decimal>,
+    #[serde(rename = "workingTimeInForce", skip_serializing_if = "Option::is_none")]
+    working_time_in_force: Option<String>,
+    #[serde(rename = "workingStrategyId", skip_serializing_if = "Option::is_none")]
+    working_strategy_id: Option<i64>,
+    #[serde(
+        rename = "workingStrategyType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_strategy_type: Option<i64>,
+    #[serde(rename = "pendingType", skip_serializing_if = "Option::is_none")]
+    pending_type: Option<String>,
+    #[serde(
+        rename = "workingPegPriceType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_price_type: Option<String>,
+    #[serde(
+        rename = "workingPegOffsetType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "workingPegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_offset_value: Option<i64>,
+    #[serde(rename = "pendingSide", skip_serializing_if = "Option::is_none")]
+    pending_side: Option<String>,
+    #[serde(
+        rename = "pendingClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "pendingPrice", skip_serializing_if = "Option::is_none")]
+    pending_price: Option<Decimal>,
+    #[serde(rename = "pendingStopPrice", skip_serializing_if = "Option::is_none")]
+    pending_stop_price: Option<Decimal>,
+    #[serde(
+        rename = "pendingTrailingDelta",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_trailing_delta: Option<Decimal>,
+    #[serde(rename = "pendingQuantity", skip_serializing_if = "Option::is_none")]
+    pending_quantity: Option<Decimal>,
+    #[serde(rename = "pendingIcebergQty", skip_serializing_if = "Option::is_none")]
+    pending_iceberg_qty: Option<Decimal>,
+    #[serde(rename = "pendingTimeInForce", skip_serializing_if = "Option::is_none")]
+    pending_time_in_force: Option<String>,
+    #[serde(rename = "pendingStrategyId", skip_serializing_if = "Option::is_none")]
+    pending_strategy_id: Option<i64>,
+    #[serde(
+        rename = "pendingStrategyType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_strategy_type: Option<i64>,
+    #[serde(
+        rename = "pendingPegPriceType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_peg_price_type: Option<String>,
+    #[serde(
+        rename = "pendingPegOffsetType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "pendingPegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_peg_offset_value: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl OrderListOto {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `listClientOrderId` parameter.
+    #[must_use]
+    pub fn list_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.list_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `newOrderRespType` parameter.
+    #[must_use]
+    pub fn response_type(mut self, value: impl Into<String>) -> Self {
+        self.response_type = Some(value.into());
+        self
+    }
+    /// Set the provider `selfTradePreventionMode` parameter.
+    #[must_use]
+    pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
+        self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `workingType` parameter.
+    #[must_use]
+    pub fn working_type(mut self, value: impl Into<String>) -> Self {
+        self.working_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingSide` parameter.
+    #[must_use]
+    pub fn working_side(mut self, value: impl Into<String>) -> Self {
+        self.working_side = Some(value.into());
+        self
+    }
+    /// Set the provider `workingClientOrderId` parameter.
+    #[must_use]
+    pub fn working_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.working_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `workingPrice` parameter.
+    #[must_use]
+    pub fn working_price(mut self, value: Decimal) -> Self {
+        self.working_price = Some(value);
+        self
+    }
+    /// Set the provider `workingQuantity` parameter.
+    #[must_use]
+    pub fn working_quantity(mut self, value: Decimal) -> Self {
+        self.working_quantity = Some(value);
+        self
+    }
+    /// Set the provider `workingIcebergQty` parameter.
+    #[must_use]
+    pub fn working_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.working_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `workingTimeInForce` parameter.
+    #[must_use]
+    pub fn working_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.working_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `workingStrategyId` parameter.
+    #[must_use]
+    pub fn working_strategy_id(mut self, value: i64) -> Self {
+        self.working_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `workingStrategyType` parameter.
+    #[must_use]
+    pub fn working_strategy_type(mut self, value: i64) -> Self {
+        self.working_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `pendingType` parameter.
+    #[must_use]
+    pub fn pending_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingPegPriceType` parameter.
+    #[must_use]
+    pub fn working_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.working_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingPegOffsetType` parameter.
+    #[must_use]
+    pub fn working_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.working_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingPegOffsetValue` parameter.
+    #[must_use]
+    pub fn working_peg_offset_value(mut self, value: i64) -> Self {
+        self.working_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `pendingSide` parameter.
+    #[must_use]
+    pub fn pending_side(mut self, value: impl Into<String>) -> Self {
+        self.pending_side = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingClientOrderId` parameter.
+    #[must_use]
+    pub fn pending_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.pending_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingPrice` parameter.
+    #[must_use]
+    pub fn pending_price(mut self, value: Decimal) -> Self {
+        self.pending_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingStopPrice` parameter.
+    #[must_use]
+    pub fn pending_stop_price(mut self, value: Decimal) -> Self {
+        self.pending_stop_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingTrailingDelta` parameter.
+    #[must_use]
+    pub fn pending_trailing_delta(mut self, value: Decimal) -> Self {
+        self.pending_trailing_delta = Some(value);
+        self
+    }
+    /// Set the provider `pendingQuantity` parameter.
+    #[must_use]
+    pub fn pending_quantity(mut self, value: Decimal) -> Self {
+        self.pending_quantity = Some(value);
+        self
+    }
+    /// Set the provider `pendingIcebergQty` parameter.
+    #[must_use]
+    pub fn pending_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.pending_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `pendingTimeInForce` parameter.
+    #[must_use]
+    pub fn pending_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.pending_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingStrategyId` parameter.
+    #[must_use]
+    pub fn pending_strategy_id(mut self, value: i64) -> Self {
+        self.pending_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingStrategyType` parameter.
+    #[must_use]
+    pub fn pending_strategy_type(mut self, value: i64) -> Self {
+        self.pending_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `pendingPegPriceType` parameter.
+    #[must_use]
+    pub fn pending_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingPegOffsetType` parameter.
+    #[must_use]
+    pub fn pending_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingPegOffsetValue` parameter.
+    #[must_use]
+    pub fn pending_peg_offset_value(mut self, value: i64) -> Self {
+        self.pending_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OrderListOto {
+    type Response = super::rest_models::OrderListOtoResponse;
+    const OP: Operation = Operation {
+        name: "orderListOto",
+        path: "/api/v3/orderList/oto",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[
+                "pendingQuantity",
+                "pendingSide",
+                "pendingType",
+                "symbol",
+                "workingPrice",
+                "workingQuantity",
+                "workingSide",
+                "workingType",
+            ],
+            &[
+                ("newOrderRespType", &["ACK", "RESULT", "FULL"]),
+                (
+                    "selfTradePreventionMode",
+                    &[
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_MAKER",
+                        "EXPIRE_BOTH",
+                        "DECREMENT",
+                        "TRANSFER",
+                    ],
+                ),
+                ("workingType", &["LIMIT", "LIMIT_MAKER"]),
+                ("workingSide", &["BUY", "SELL"]),
+                ("workingTimeInForce", &["GTC", "IOC", "FOK"]),
+                (
+                    "pendingType",
+                    &[
+                        "LIMIT",
+                        "MARKET",
+                        "STOP_LOSS",
+                        "STOP_LOSS_LIMIT",
+                        "TAKE_PROFIT",
+                        "TAKE_PROFIT_LIMIT",
+                        "LIMIT_MAKER",
+                    ],
+                ),
+                ("workingPegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("workingPegOffsetType", &["PRICE_LEVEL"]),
+                ("pendingSide", &["BUY", "SELL"]),
+                ("pendingTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("pendingPegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("pendingPegOffsetType", &["PRICE_LEVEL"]),
+            ],
+            &[],
+        )?;
+        super::validation::validate("orderListOto", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`orderListOtoco`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-otoco).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OrderListOtoco {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "listClientOrderId", skip_serializing_if = "Option::is_none")]
+    list_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "newOrderRespType", skip_serializing_if = "Option::is_none")]
+    response_type: Option<String>,
+    #[serde(
+        rename = "selfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    self_trade_prevention_mode: Option<String>,
+    #[serde(rename = "workingType", skip_serializing_if = "Option::is_none")]
+    working_type: Option<String>,
+    #[serde(rename = "workingSide", skip_serializing_if = "Option::is_none")]
+    working_side: Option<String>,
+    #[serde(
+        rename = "workingClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "workingPrice", skip_serializing_if = "Option::is_none")]
+    working_price: Option<Decimal>,
+    #[serde(rename = "workingQuantity", skip_serializing_if = "Option::is_none")]
+    working_quantity: Option<Decimal>,
+    #[serde(rename = "workingIcebergQty", skip_serializing_if = "Option::is_none")]
+    working_iceberg_qty: Option<Decimal>,
+    #[serde(rename = "workingTimeInForce", skip_serializing_if = "Option::is_none")]
+    working_time_in_force: Option<String>,
+    #[serde(rename = "workingStrategyId", skip_serializing_if = "Option::is_none")]
+    working_strategy_id: Option<i64>,
+    #[serde(
+        rename = "workingStrategyType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_strategy_type: Option<i64>,
+    #[serde(
+        rename = "workingPegPriceType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_price_type: Option<String>,
+    #[serde(
+        rename = "workingPegOffsetType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "workingPegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_peg_offset_value: Option<i64>,
+    #[serde(rename = "pendingSide", skip_serializing_if = "Option::is_none")]
+    pending_side: Option<String>,
+    #[serde(rename = "pendingQuantity", skip_serializing_if = "Option::is_none")]
+    pending_quantity: Option<Decimal>,
+    #[serde(rename = "pendingAboveType", skip_serializing_if = "Option::is_none")]
+    pending_above_type: Option<String>,
+    #[serde(
+        rename = "pendingAboveClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "pendingAbovePrice", skip_serializing_if = "Option::is_none")]
+    pending_above_price: Option<Decimal>,
+    #[serde(
+        rename = "pendingAboveStopPrice",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_stop_price: Option<Decimal>,
+    #[serde(
+        rename = "pendingAboveTrailingDelta",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_trailing_delta: Option<Decimal>,
+    #[serde(
+        rename = "pendingAboveIcebergQty",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_iceberg_qty: Option<Decimal>,
+    #[serde(
+        rename = "pendingAboveTimeInForce",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_time_in_force: Option<String>,
+    #[serde(
+        rename = "pendingAboveStrategyId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_strategy_id: Option<i64>,
+    #[serde(
+        rename = "pendingAboveStrategyType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_strategy_type: Option<i64>,
+    #[serde(
+        rename = "pendingAbovePegPriceType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_peg_price_type: Option<String>,
+    #[serde(
+        rename = "pendingAbovePegOffsetType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "pendingAbovePegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_peg_offset_value: Option<i64>,
+    #[serde(rename = "pendingBelowType", skip_serializing_if = "Option::is_none")]
+    pending_below_type: Option<String>,
+    #[serde(
+        rename = "pendingBelowClientOrderId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "pendingBelowPrice", skip_serializing_if = "Option::is_none")]
+    pending_below_price: Option<Decimal>,
+    #[serde(
+        rename = "pendingBelowStopPrice",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_stop_price: Option<Decimal>,
+    #[serde(
+        rename = "pendingBelowTrailingDelta",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_trailing_delta: Option<Decimal>,
+    #[serde(
+        rename = "pendingBelowIcebergQty",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_iceberg_qty: Option<Decimal>,
+    #[serde(
+        rename = "pendingBelowTimeInForce",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_time_in_force: Option<String>,
+    #[serde(
+        rename = "pendingBelowStrategyId",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_strategy_id: Option<i64>,
+    #[serde(
+        rename = "pendingBelowStrategyType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_strategy_type: Option<i64>,
+    #[serde(
+        rename = "pendingBelowPegPriceType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_peg_price_type: Option<String>,
+    #[serde(
+        rename = "pendingBelowPegOffsetType",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_peg_offset_type: Option<String>,
+    #[serde(
+        rename = "pendingBelowPegOffsetValue",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_peg_offset_value: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl OrderListOtoco {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `listClientOrderId` parameter.
+    #[must_use]
+    pub fn list_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.list_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `newOrderRespType` parameter.
+    #[must_use]
+    pub fn response_type(mut self, value: impl Into<String>) -> Self {
+        self.response_type = Some(value.into());
+        self
+    }
+    /// Set the provider `selfTradePreventionMode` parameter.
+    #[must_use]
+    pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
+        self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `workingType` parameter.
+    #[must_use]
+    pub fn working_type(mut self, value: impl Into<String>) -> Self {
+        self.working_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingSide` parameter.
+    #[must_use]
+    pub fn working_side(mut self, value: impl Into<String>) -> Self {
+        self.working_side = Some(value.into());
+        self
+    }
+    /// Set the provider `workingClientOrderId` parameter.
+    #[must_use]
+    pub fn working_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.working_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `workingPrice` parameter.
+    #[must_use]
+    pub fn working_price(mut self, value: Decimal) -> Self {
+        self.working_price = Some(value);
+        self
+    }
+    /// Set the provider `workingQuantity` parameter.
+    #[must_use]
+    pub fn working_quantity(mut self, value: Decimal) -> Self {
+        self.working_quantity = Some(value);
+        self
+    }
+    /// Set the provider `workingIcebergQty` parameter.
+    #[must_use]
+    pub fn working_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.working_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `workingTimeInForce` parameter.
+    #[must_use]
+    pub fn working_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.working_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `workingStrategyId` parameter.
+    #[must_use]
+    pub fn working_strategy_id(mut self, value: i64) -> Self {
+        self.working_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `workingStrategyType` parameter.
+    #[must_use]
+    pub fn working_strategy_type(mut self, value: i64) -> Self {
+        self.working_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `workingPegPriceType` parameter.
+    #[must_use]
+    pub fn working_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.working_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingPegOffsetType` parameter.
+    #[must_use]
+    pub fn working_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.working_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `workingPegOffsetValue` parameter.
+    #[must_use]
+    pub fn working_peg_offset_value(mut self, value: i64) -> Self {
+        self.working_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `pendingSide` parameter.
+    #[must_use]
+    pub fn pending_side(mut self, value: impl Into<String>) -> Self {
+        self.pending_side = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingQuantity` parameter.
+    #[must_use]
+    pub fn pending_quantity(mut self, value: Decimal) -> Self {
+        self.pending_quantity = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveType` parameter.
+    #[must_use]
+    pub fn pending_above_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_above_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingAboveClientOrderId` parameter.
+    #[must_use]
+    pub fn pending_above_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.pending_above_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingAbovePrice` parameter.
+    #[must_use]
+    pub fn pending_above_price(mut self, value: Decimal) -> Self {
+        self.pending_above_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveStopPrice` parameter.
+    #[must_use]
+    pub fn pending_above_stop_price(mut self, value: Decimal) -> Self {
+        self.pending_above_stop_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveTrailingDelta` parameter.
+    #[must_use]
+    pub fn pending_above_trailing_delta(mut self, value: Decimal) -> Self {
+        self.pending_above_trailing_delta = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveIcebergQty` parameter.
+    #[must_use]
+    pub fn pending_above_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.pending_above_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveTimeInForce` parameter.
+    #[must_use]
+    pub fn pending_above_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.pending_above_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingAboveStrategyId` parameter.
+    #[must_use]
+    pub fn pending_above_strategy_id(mut self, value: i64) -> Self {
+        self.pending_above_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveStrategyType` parameter.
+    #[must_use]
+    pub fn pending_above_strategy_type(mut self, value: i64) -> Self {
+        self.pending_above_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `pendingAbovePegPriceType` parameter.
+    #[must_use]
+    pub fn pending_above_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_above_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingAbovePegOffsetType` parameter.
+    #[must_use]
+    pub fn pending_above_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_above_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingAbovePegOffsetValue` parameter.
+    #[must_use]
+    pub fn pending_above_peg_offset_value(mut self, value: i64) -> Self {
+        self.pending_above_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowType` parameter.
+    #[must_use]
+    pub fn pending_below_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_below_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingBelowClientOrderId` parameter.
+    #[must_use]
+    pub fn pending_below_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.pending_below_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowPrice` parameter.
+    #[must_use]
+    pub fn pending_below_price(mut self, value: Decimal) -> Self {
+        self.pending_below_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowStopPrice` parameter.
+    #[must_use]
+    pub fn pending_below_stop_price(mut self, value: Decimal) -> Self {
+        self.pending_below_stop_price = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowTrailingDelta` parameter.
+    #[must_use]
+    pub fn pending_below_trailing_delta(mut self, value: Decimal) -> Self {
+        self.pending_below_trailing_delta = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowIcebergQty` parameter.
+    #[must_use]
+    pub fn pending_below_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.pending_below_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowTimeInForce` parameter.
+    #[must_use]
+    pub fn pending_below_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.pending_below_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingBelowStrategyId` parameter.
+    #[must_use]
+    pub fn pending_below_strategy_id(mut self, value: i64) -> Self {
+        self.pending_below_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowStrategyType` parameter.
+    #[must_use]
+    pub fn pending_below_strategy_type(mut self, value: i64) -> Self {
+        self.pending_below_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowPegPriceType` parameter.
+    #[must_use]
+    pub fn pending_below_peg_price_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_below_peg_price_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingBelowPegOffsetType` parameter.
+    #[must_use]
+    pub fn pending_below_peg_offset_type(mut self, value: impl Into<String>) -> Self {
+        self.pending_below_peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `pendingBelowPegOffsetValue` parameter.
+    #[must_use]
+    pub fn pending_below_peg_offset_value(mut self, value: i64) -> Self {
+        self.pending_below_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OrderListOtoco {
+    type Response = super::rest_models::OrderListOtocoResponse;
+    const OP: Operation = Operation {
+        name: "orderListOtoco",
+        path: "/api/v3/orderList/otoco",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[
+                "pendingAboveType",
+                "pendingQuantity",
+                "pendingSide",
+                "symbol",
+                "workingPrice",
+                "workingQuantity",
+                "workingSide",
+                "workingType",
+            ],
+            &[
+                ("newOrderRespType", &["ACK", "RESULT", "FULL"]),
+                (
+                    "selfTradePreventionMode",
+                    &[
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_MAKER",
+                        "EXPIRE_BOTH",
+                        "DECREMENT",
+                        "TRANSFER",
+                    ],
+                ),
+                ("workingType", &["LIMIT", "LIMIT_MAKER"]),
+                ("workingSide", &["BUY", "SELL"]),
+                ("workingTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("workingPegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("workingPegOffsetType", &["PRICE_LEVEL"]),
+                ("pendingSide", &["BUY", "SELL"]),
+                (
+                    "pendingAboveType",
+                    &[
+                        "STOP_LOSS_LIMIT",
+                        "STOP_LOSS",
+                        "LIMIT_MAKER",
+                        "TAKE_PROFIT",
+                        "TAKE_PROFIT_LIMIT",
+                    ],
+                ),
+                ("pendingAboveTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("pendingAbovePegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("pendingAbovePegOffsetType", &["PRICE_LEVEL"]),
+                (
+                    "pendingBelowType",
+                    &[
+                        "STOP_LOSS",
+                        "STOP_LOSS_LIMIT",
+                        "TAKE_PROFIT",
+                        "TAKE_PROFIT_LIMIT",
+                    ],
+                ),
+                ("pendingBelowTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("pendingBelowPegPriceType", &["PRIMARY_PEG", "MARKET_PEG"]),
+                ("pendingBelowPegOffsetType", &["PRICE_LEVEL"]),
+            ],
+            &[],
+        )?;
+        super::validation::validate("orderListOtoco", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`orderOco`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-oco).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OrderOco {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "listClientOrderId", skip_serializing_if = "Option::is_none")]
+    list_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "limitClientOrderId", skip_serializing_if = "Option::is_none")]
+    limit_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "price", skip_serializing_if = "Option::is_none")]
+    price: Option<Decimal>,
+    #[serde(rename = "limitStrategyId", skip_serializing_if = "Option::is_none")]
+    limit_strategy_id: Option<i64>,
+    #[serde(rename = "limitStrategyType", skip_serializing_if = "Option::is_none")]
+    limit_strategy_type: Option<i64>,
+    #[serde(rename = "limitIcebergQty", skip_serializing_if = "Option::is_none")]
+    limit_iceberg_qty: Option<Decimal>,
+    #[serde(rename = "trailingDelta", skip_serializing_if = "Option::is_none")]
+    trailing_delta: Option<i64>,
+    #[serde(rename = "stopClientOrderId", skip_serializing_if = "Option::is_none")]
+    stop_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "stopPrice", skip_serializing_if = "Option::is_none")]
+    stop_price: Option<Decimal>,
+    #[serde(rename = "stopStrategyId", skip_serializing_if = "Option::is_none")]
+    stop_strategy_id: Option<i64>,
+    #[serde(rename = "stopStrategyType", skip_serializing_if = "Option::is_none")]
+    stop_strategy_type: Option<i64>,
+    #[serde(rename = "stopLimitPrice", skip_serializing_if = "Option::is_none")]
+    stop_limit_price: Option<Decimal>,
+    #[serde(rename = "stopIcebergQty", skip_serializing_if = "Option::is_none")]
+    stop_iceberg_qty: Option<Decimal>,
+    #[serde(
+        rename = "stopLimitTimeInForce",
+        skip_serializing_if = "Option::is_none"
+    )]
+    stop_limit_time_in_force: Option<String>,
+    #[serde(rename = "newOrderRespType", skip_serializing_if = "Option::is_none")]
+    response_type: Option<String>,
+    #[serde(
+        rename = "selfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    self_trade_prevention_mode: Option<String>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl OrderOco {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `listClientOrderId` parameter.
+    #[must_use]
+    pub fn list_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.list_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `limitClientOrderId` parameter.
+    #[must_use]
+    pub fn limit_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.limit_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `price` parameter.
+    #[must_use]
+    pub fn price(mut self, value: Decimal) -> Self {
+        self.price = Some(value);
+        self
+    }
+    /// Set the provider `limitStrategyId` parameter.
+    #[must_use]
+    pub fn limit_strategy_id(mut self, value: i64) -> Self {
+        self.limit_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `limitStrategyType` parameter.
+    #[must_use]
+    pub fn limit_strategy_type(mut self, value: i64) -> Self {
+        self.limit_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `limitIcebergQty` parameter.
+    #[must_use]
+    pub fn limit_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.limit_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `trailingDelta` parameter.
+    #[must_use]
+    pub fn trailing_delta(mut self, value: i64) -> Self {
+        self.trailing_delta = Some(value);
+        self
+    }
+    /// Set the provider `stopClientOrderId` parameter.
+    #[must_use]
+    pub fn stop_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.stop_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `stopPrice` parameter.
+    #[must_use]
+    pub fn stop_price(mut self, value: Decimal) -> Self {
+        self.stop_price = Some(value);
+        self
+    }
+    /// Set the provider `stopStrategyId` parameter.
+    #[must_use]
+    pub fn stop_strategy_id(mut self, value: i64) -> Self {
+        self.stop_strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `stopStrategyType` parameter.
+    #[must_use]
+    pub fn stop_strategy_type(mut self, value: i64) -> Self {
+        self.stop_strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `stopLimitPrice` parameter.
+    #[must_use]
+    pub fn stop_limit_price(mut self, value: Decimal) -> Self {
+        self.stop_limit_price = Some(value);
+        self
+    }
+    /// Set the provider `stopIcebergQty` parameter.
+    #[must_use]
+    pub fn stop_iceberg_qty(mut self, value: Decimal) -> Self {
+        self.stop_iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `stopLimitTimeInForce` parameter.
+    #[must_use]
+    pub fn stop_limit_time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.stop_limit_time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `newOrderRespType` parameter.
+    #[must_use]
+    pub fn response_type(mut self, value: impl Into<String>) -> Self {
+        self.response_type = Some(value.into());
+        self
+    }
+    /// Set the provider `selfTradePreventionMode` parameter.
+    #[must_use]
+    pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
+        self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OrderOco {
+    type Response = super::rest_models::OrderOcoResponse;
+    const OP: Operation = Operation {
+        name: "orderOco",
+        path: "/api/v3/order/oco",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["price", "quantity", "side", "stopPrice", "symbol"],
+            &[
+                ("side", &["BUY", "SELL"]),
+                ("stopLimitTimeInForce", &["GTC", "IOC", "FOK"]),
+                ("newOrderRespType", &["ACK", "RESULT", "FULL"]),
+                (
+                    "selfTradePreventionMode",
+                    &[
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_MAKER",
+                        "EXPIRE_BOTH",
+                        "DECREMENT",
+                        "TRANSFER",
+                    ],
+                ),
+            ],
+            &[],
+        )?;
+        super::validation::validate("orderOco", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`sorOrder`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#sor-order).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct SorOrder {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    type_value: Option<String>,
+    #[serde(rename = "timeInForce", skip_serializing_if = "Option::is_none")]
+    time_in_force: Option<String>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "price", skip_serializing_if = "Option::is_none")]
+    price: Option<Decimal>,
+    #[serde(rename = "newClientOrderId", skip_serializing_if = "Option::is_none")]
+    new_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "strategyId", skip_serializing_if = "Option::is_none")]
+    strategy_id: Option<i64>,
+    #[serde(rename = "strategyType", skip_serializing_if = "Option::is_none")]
+    strategy_type: Option<i64>,
+    #[serde(rename = "icebergQty", skip_serializing_if = "Option::is_none")]
+    iceberg_qty: Option<Decimal>,
+    #[serde(rename = "newOrderRespType", skip_serializing_if = "Option::is_none")]
+    response_type: Option<String>,
+    #[serde(
+        rename = "selfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    self_trade_prevention_mode: Option<String>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl SorOrder {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `type` parameter.
+    #[must_use]
+    pub fn type_value(mut self, value: impl Into<String>) -> Self {
+        self.type_value = Some(value.into());
+        self
+    }
+    /// Set the provider `timeInForce` parameter.
+    #[must_use]
+    pub fn time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `price` parameter.
+    #[must_use]
+    pub fn price(mut self, value: Decimal) -> Self {
+        self.price = Some(value);
+        self
+    }
+    /// Set the provider `newClientOrderId` parameter.
+    #[must_use]
+    pub fn new_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.new_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `strategyId` parameter.
+    #[must_use]
+    pub fn strategy_id(mut self, value: i64) -> Self {
+        self.strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `strategyType` parameter.
+    #[must_use]
+    pub fn strategy_type(mut self, value: i64) -> Self {
+        self.strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `icebergQty` parameter.
+    #[must_use]
+    pub fn iceberg_qty(mut self, value: Decimal) -> Self {
+        self.iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `newOrderRespType` parameter.
+    #[must_use]
+    pub fn response_type(mut self, value: impl Into<String>) -> Self {
+        self.response_type = Some(value.into());
+        self
+    }
+    /// Set the provider `selfTradePreventionMode` parameter.
+    #[must_use]
+    pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
+        self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for SorOrder {
+    type Response = super::rest_models::SorOrderResponse;
+    const OP: Operation = Operation {
+        name: "sorOrder",
+        path: "/api/v3/sor/order",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["quantity", "side", "symbol", "type"],
+            &[
+                ("side", &["BUY", "SELL"]),
+                ("type", &["MARKET", "LIMIT"]),
+                ("timeInForce", &["GTC", "IOC", "FOK"]),
+                ("newOrderRespType", &["ACK", "RESULT", "FULL"]),
+                (
+                    "selfTradePreventionMode",
+                    &[
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_MAKER",
+                        "EXPIRE_BOTH",
+                        "DECREMENT",
+                        "TRANSFER",
+                    ],
+                ),
+            ],
+            &[],
+        )?;
+        super::validation::validate("sorOrder", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`sorOrderTest`](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#sor-order-test).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct SorOrderTest {
+    #[serde(
+        rename = "computeCommissionRates",
+        skip_serializing_if = "Option::is_none"
+    )]
+    compute_commission_rates: Option<bool>,
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    type_value: Option<String>,
+    #[serde(rename = "timeInForce", skip_serializing_if = "Option::is_none")]
+    time_in_force: Option<String>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "price", skip_serializing_if = "Option::is_none")]
+    price: Option<Decimal>,
+    #[serde(rename = "newClientOrderId", skip_serializing_if = "Option::is_none")]
+    new_client_order_id: Option<ClientOrderId>,
+    #[serde(rename = "strategyId", skip_serializing_if = "Option::is_none")]
+    strategy_id: Option<i64>,
+    #[serde(rename = "strategyType", skip_serializing_if = "Option::is_none")]
+    strategy_type: Option<i64>,
+    #[serde(rename = "icebergQty", skip_serializing_if = "Option::is_none")]
+    iceberg_qty: Option<Decimal>,
+    #[serde(rename = "newOrderRespType", skip_serializing_if = "Option::is_none")]
+    response_type: Option<String>,
+    #[serde(
+        rename = "selfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    self_trade_prevention_mode: Option<String>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<Decimal>,
+}
+impl SorOrderTest {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `computeCommissionRates` parameter.
+    #[must_use]
+    pub fn compute_commission_rates(mut self, value: bool) -> Self {
+        self.compute_commission_rates = Some(value);
+        self
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `type` parameter.
+    #[must_use]
+    pub fn type_value(mut self, value: impl Into<String>) -> Self {
+        self.type_value = Some(value.into());
+        self
+    }
+    /// Set the provider `timeInForce` parameter.
+    #[must_use]
+    pub fn time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `price` parameter.
+    #[must_use]
+    pub fn price(mut self, value: Decimal) -> Self {
+        self.price = Some(value);
+        self
+    }
+    /// Set the provider `newClientOrderId` parameter.
+    #[must_use]
+    pub fn new_client_order_id(mut self, value: ClientOrderId) -> Self {
+        self.new_client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `strategyId` parameter.
+    #[must_use]
+    pub fn strategy_id(mut self, value: i64) -> Self {
+        self.strategy_id = Some(value);
+        self
+    }
+    /// Set the provider `strategyType` parameter.
+    #[must_use]
+    pub fn strategy_type(mut self, value: i64) -> Self {
+        self.strategy_type = Some(value);
+        self
+    }
+    /// Set the provider `icebergQty` parameter.
+    #[must_use]
+    pub fn iceberg_qty(mut self, value: Decimal) -> Self {
+        self.iceberg_qty = Some(value);
+        self
+    }
+    /// Set the provider `newOrderRespType` parameter.
+    #[must_use]
+    pub fn response_type(mut self, value: impl Into<String>) -> Self {
+        self.response_type = Some(value.into());
+        self
+    }
+    /// Set the provider `selfTradePreventionMode` parameter.
+    #[must_use]
+    pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
+        self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: Decimal) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for SorOrderTest {
+    type Response = super::rest_models::SorOrderTestResponse;
+    const OP: Operation = Operation {
+        name: "sorOrderTest",
+        path: "/api/v3/sor/order/test",
+        method: "POST",
+        security: Security::Signed,
+        mutation: false,
+        weight: 0,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["quantity", "side", "symbol", "type"],
+            &[
+                ("side", &["BUY", "SELL"]),
+                ("type", &["MARKET", "LIMIT"]),
+                ("timeInForce", &["GTC", "IOC", "FOK"]),
+                ("newOrderRespType", &["ACK", "RESULT", "FULL"]),
+                (
+                    "selfTradePreventionMode",
+                    &[
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_MAKER",
+                        "EXPIRE_BOTH",
+                        "DECREMENT",
+                        "TRANSFER",
+                    ],
+                ),
+            ],
+            &[],
+        )?;
+        super::validation::validate("sorOrderTest", &p)
     }
     fn cost(&self) -> Result<crate::core::Cost, Error> {
         super::rate::cost(Self::OP, &parameters(self)?)
@@ -2871,6 +6627,222 @@ impl super::RestClient {
         request: &OrderTest,
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::rest_models::OrderTestResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [allOrderList](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#all-order-list).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn all_order_list(
+        &self,
+        request: &AllOrderList,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::AllOrderListResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [getOrderList](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#get-order-list).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn get_order_list(
+        &self,
+        request: &GetOrderList,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::GetOrderListResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [deleteOrderList](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#delete-order-list).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn delete_order_list(
+        &self,
+        request: &DeleteOrderList,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::DeleteOrderListResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [myAllocations](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-allocations).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn my_allocations(
+        &self,
+        request: &MyAllocations,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::MyAllocationsResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [myFilters](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-filters).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn my_filters(
+        &self,
+        request: &MyFilters,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::MyFiltersResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [myPreventedMatches](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#my-prevented-matches).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn my_prevented_matches(
+        &self,
+        request: &MyPreventedMatches,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::MyPreventedMatchesResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [openOrderList](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#open-order-list).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn open_order_list(
+        &self,
+        request: &OpenOrderList,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OpenOrderListResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [orderAmendments](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account#order-amendments).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn order_amendments(
+        &self,
+        request: &OrderAmendments,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OrderAmendmentsResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [orderAmendKeepPriority](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-amend-keep-priority).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn order_amend_keep_priority(
+        &self,
+        request: &OrderAmendKeepPriority,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OrderAmendKeepPriorityResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [orderCancelReplace](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-cancel-replace).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn order_cancel_replace(
+        &self,
+        request: &OrderCancelReplace,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OrderCancelReplaceResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [orderListOco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-oco).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn order_list_oco(
+        &self,
+        request: &OrderListOco,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OrderListOcoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [orderListOpo](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-opo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn order_list_opo(
+        &self,
+        request: &OrderListOpo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OrderListOpoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [orderListOpoco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-opoco).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn order_list_opoco(
+        &self,
+        request: &OrderListOpoco,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OrderListOpocoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [orderListOto](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-oto).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn order_list_oto(
+        &self,
+        request: &OrderListOto,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OrderListOtoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [orderListOtoco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-list-otoco).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn order_list_otoco(
+        &self,
+        request: &OrderListOtoco,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OrderListOtocoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [orderOco](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#order-oco).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn order_oco(
+        &self,
+        request: &OrderOco,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OrderOcoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [sorOrder](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#sor-order).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn sor_order(
+        &self,
+        request: &SorOrder,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::SorOrderResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [sorOrderTest](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade#sor-order-test).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn sor_order_test(
+        &self,
+        request: &SorOrderTest,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::SorOrderTestResponse>, Error> {
         self.inner.execute(request, deadline).await
     }
 }

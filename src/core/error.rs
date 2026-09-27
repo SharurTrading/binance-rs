@@ -11,6 +11,10 @@ pub enum Outcome {
     NotSent,
     /// A documented definitive venue rejection.
     Rejected,
+    /// A venue acknowledgment accepted a leg; this does not prove any fill.
+    Accepted,
+    /// A documented multi-leg operation accepted some work and refused other work.
+    Partial,
     /// A mutation may have executed; query venue truth before taking further action.
     Unknown,
     /// A read failed; no mutation was requested.
@@ -31,6 +35,8 @@ pub struct RateEvidence {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct ResponseMeta {
+    /// Units selected for the provider timestamps in this response.
+    pub time_unit: super::TimeUnit,
     /// Caller-supplied order identities keyed by parameter paths, including batch indices.
     pub client_order_ids: BTreeMap<String, String>,
     /// HTTP-equivalent status.
@@ -67,6 +73,33 @@ pub struct VenueFailure {
     pub outcome: Outcome,
     /// Rate evidence, even when the payload could not be read or decoded.
     pub rates: RateEvidence,
+    /// Safe, independent leg evidence from a documented partial-operation response.
+    /// Financial/account payloads are not stored in errors; query venue state for fills.
+    pub partial: Option<Box<PartialOperation>>,
+}
+
+/// Safe evidence for each leg of a multi-operation request, keyed by wire leg name.
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct PartialOperation {
+    /// Both legs remain present, including not-attempted and unknown outcomes.
+    pub legs: BTreeMap<String, OperationLeg>,
+    /// Strongest documented overall execution evidence.
+    pub outcome: Outcome,
+}
+
+/// Identifiers and execution evidence for one operation leg; never a raw body.
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct OperationLeg {
+    /// Strongest outcome supported by the documented result and venue code.
+    pub outcome: Outcome,
+    /// Venue error code, including unknown future codes.
+    pub code: Option<i64>,
+    /// Venue order identity when an acknowledgment supplies it.
+    pub order_id: Option<i64>,
+    /// Caller order identity returned by the venue.
+    pub client_order_id: Option<String>,
 }
 
 /// Client errors never retain a request URL, secret, or raw sensitive body.
@@ -228,14 +261,22 @@ pub(crate) fn failure_for(
     value: &serde_json::Value,
     rates: RateEvidence,
 ) -> Error {
-    failure_classified(
+    let mut error = failure_classified(
         op.name,
         op.mutation,
         status,
         value,
         rates,
         (op.definitive)(status, value),
-    )
+    );
+    if let Some(parse) = op.partial
+        && let Some(partial) = parse(status, value)
+        && let Error::Venue(venue) = &mut error
+    {
+        venue.outcome = partial.outcome;
+        venue.partial = Some(Box::new(partial));
+    }
+    error
 }
 fn failure_classified(
     operation: &'static str,
@@ -260,5 +301,6 @@ fn failure_classified(
         code,
         outcome,
         rates,
+        partial: None,
     }))
 }

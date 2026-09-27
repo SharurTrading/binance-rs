@@ -66,17 +66,30 @@ pub(crate) fn cost(op: Operation, p: &BTreeMap<String, Value>) -> Result<Cost, E
                 20
             }
         }
-        "orderTest" => {
+        "orderTest" | "sorOrderTest" => {
             if p.get("computeCommissionRates").and_then(Value::as_bool) == Some(true) {
                 20
             } else {
                 1
             }
         }
+        "myPreventedMatches" => {
+            if p.contains_key("orderId") {
+                20
+            } else {
+                2
+            }
+        }
         _ => op.weight,
     };
     let rest = op.path.starts_with("/api/");
-    let orders = u64::from(matches!(op.name, "newOrder" | "orderPlace"));
+    let orders = match op.name {
+        "newOrder" | "orderPlace" | "sorOrder" | "sorOrderPlace" | "orderCancelReplace" => 1,
+        "orderListOco" | "orderOco" | "orderListPlace" | "orderListPlaceOco" | "orderListOto"
+        | "orderListOpo" | "orderListPlaceOto" | "orderListPlaceOpo" => 2,
+        "orderListOtoco" | "orderListOpoco" | "orderListPlaceOtoco" | "orderListPlaceOpoco" => 3,
+        _ => 0,
+    };
     Ok(Cost {
         weight: if rest { weight } else { 0 },
         ws_weight: if rest { 0 } else { weight },

@@ -20,13 +20,14 @@ Three separate JSON product clients are available:
 | Product | REST | WebSocket API | Market streams | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
 | USDⓈ-M | 95 | 18 + 3 session methods | 20 | 10 |
-| Spot (initial coverage) | 30 | 34 + 3 session methods | 15 | 6 |
+| Spot (JSON catalog) | 48 | 52 + 3 session methods | 15 | 6 |
 | COIN-M (initial coverage) | 63 | 10 + 3 session methods | 19 | 7 |
 
 [USDⓈ-M coverage](docs/coverage.md) and
 [Spot/COIN-M coverage](docs/spot-coinm-coverage.md) record official sources and
-verification limits. Spot order lists, cancel/replace, amend, SOR, and migrated
-COIN-M algo endpoints remain tracked in
+verification limits. Advanced Spot JSON bindings include order lists, SOR, amend,
+cancel/replace partial evidence, and explicit microsecond units. COIN-M migrated
+algo evidence and Spot FIX/SBE remain tracked in
 [issue #11](https://github.com/SharurTrading/binance-rs/issues/11).
 
 ## Boundary and architecture

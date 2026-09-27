@@ -22,6 +22,7 @@ pub(crate) struct Operation {
     pub mutation: bool,
     pub weight: u64,
     pub success_weight: Option<u64>,
+    pub partial: Option<fn(u16, &Value) -> Option<super::error::PartialOperation>>,
     pub definitive: fn(u16, &Value) -> bool,
     pub validate_time: fn(&BTreeMap<String, Value>, u64) -> Result<(), Error>,
 }

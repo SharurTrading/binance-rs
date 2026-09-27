@@ -52,6 +52,7 @@ impl Request for AccountInformation {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -107,6 +108,7 @@ impl Request for FuturesAccountBalance {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -162,6 +164,7 @@ impl Request for GetCurrentPositionMode {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -225,6 +228,7 @@ impl Request for ChangePositionMode {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -296,6 +300,7 @@ impl Request for GetDownloadIdForFuturesOrderHistory {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -367,6 +372,7 @@ impl Request for GetDownloadIdForFuturesTradeHistory {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -438,6 +444,7 @@ impl Request for GetDownloadIdForFuturesTransactionHistory {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -501,6 +508,7 @@ impl Request for GetFuturesOrderHistoryDownloadLinkById {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -564,6 +572,7 @@ impl Request for GetFuturesTradeDownloadLinkById {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -627,6 +636,7 @@ impl Request for GetFuturesTransactionHistoryDownloadLinkById {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -730,6 +740,7 @@ impl Request for GetIncomeHistory {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -807,6 +818,7 @@ impl Request for NotionalBracketForPair {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -870,6 +882,7 @@ impl Request for NotionalBracketForSymbol {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -933,6 +946,7 @@ impl Request for UserCommissionRate {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1028,6 +1042,7 @@ impl Request for Basis {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1083,6 +1098,7 @@ impl Request for CheckServerTime {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1165,6 +1181,7 @@ impl Request for CompressedAggregateTradesList {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1260,6 +1277,7 @@ impl Request for ContinuousContractKlineCandlestickData {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1318,6 +1336,7 @@ impl Request for ExchangeInformation {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1392,6 +1411,7 @@ impl Request for GetFundingRateHistoryOfPerpetualFutures {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1455,6 +1475,7 @@ impl Request for IndexPriceAndMarkPrice {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1537,6 +1558,7 @@ impl Request for IndexPriceKlineCandlestickData {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1630,6 +1652,7 @@ impl Request for KlineCandlestickData {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1731,6 +1754,7 @@ impl Request for LongShortRatio {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1827,6 +1851,7 @@ impl Request for MarkPriceKlineCandlestickData {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1904,6 +1929,7 @@ impl Request for OldTradesLookup {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1959,6 +1985,7 @@ impl Request for OpenInterest {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2049,6 +2076,7 @@ impl Request for OpenInterestStatistics {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2121,6 +2149,7 @@ impl Request for OrderBook {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2208,6 +2237,7 @@ impl Request for PremiumIndexKlineData {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2269,6 +2299,7 @@ impl Request for QueryIndexPriceConstituents {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2327,6 +2358,7 @@ impl Request for RecentTradesList {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2390,6 +2422,7 @@ impl Request for SymbolOrderBookTicker {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2448,6 +2481,7 @@ impl Request for SymbolPriceTicker {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2538,6 +2572,7 @@ impl Request for TakerBuySellVolume {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2593,6 +2628,7 @@ impl Request for TestConnectivity {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2651,6 +2687,7 @@ impl Request for Ticker24hrPriceChangeStatistics {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2741,6 +2778,7 @@ impl Request for TopTraderLongShortRatioAccounts {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2845,6 +2883,7 @@ impl Request for TopTraderLongShortRatioPositions {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2965,6 +3004,7 @@ impl Request for AccountTradeList {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3071,6 +3111,7 @@ impl Request for AllOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3145,6 +3186,7 @@ impl Request for AutoCancelAllOpenOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3208,6 +3250,7 @@ impl Request for CancelAllOpenOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3290,6 +3333,7 @@ impl Request for CancelMultipleOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3353,6 +3397,7 @@ impl Request for ModifyMultipleOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3416,6 +3461,7 @@ impl Request for PlaceMultipleOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3495,6 +3541,7 @@ impl Request for CancelOrder {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3614,6 +3661,7 @@ impl Request for ModifyOrder {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3831,6 +3879,7 @@ impl Request for NewOrder {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3947,6 +3996,7 @@ impl Request for QueryOrder {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4018,6 +4068,7 @@ impl Request for ChangeInitialLeverage {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4089,6 +4140,7 @@ impl Request for ChangeMarginType {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4160,6 +4212,7 @@ impl Request for CurrentAllOpenOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4263,6 +4316,7 @@ impl Request for GetOrderModifyHistory {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4361,6 +4415,7 @@ impl Request for GetPositionMarginChangeHistory {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4448,6 +4503,7 @@ impl Request for ModifyIsolatedPositionMargin {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4511,6 +4567,7 @@ impl Request for PositionAdlQuantileEstimation {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4582,6 +4639,7 @@ impl Request for PositionInformation {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4661,6 +4719,7 @@ impl Request for QueryCurrentOpenOrder {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4756,6 +4815,7 @@ impl Request for UsersForceOrders {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4805,6 +4865,7 @@ impl Request for CloseUserDataStream {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4846,6 +4907,7 @@ impl Request for KeepaliveUserDataStream {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4887,6 +4949,7 @@ impl Request for StartUserDataStream {
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
+        partial: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;

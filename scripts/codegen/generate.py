@@ -220,7 +220,7 @@ def request_type(models, schema, name, field):
         return 'String'
     if field in ['symbol', 'pair']:
         return 'Symbol'
-    if field in ['newClientOrderId','origClientOrderId','clientAlgoId','origClientAlgoId']:
+    if field.lower().endswith('clientorderid') or field in ['clientAlgoId','origClientAlgoId']:
         return 'ClientOrderId'
     if field == 'listenKey':
         return 'SensitiveString'
@@ -270,13 +270,14 @@ def generate(kind):
         security = 'Signed' if op.get('x-signed') else 'Key' if op.get('x-security-type') in ['MARKET_DATA','USER_STREAM'] else 'Public'
         mutation = op['method']!='GET' if kind=='rest' else op['path'] in ['/order.place','/order.modify','/order.cancel','/algoOrder.place','/algoOrder.cancel','/userDataStream.start','/userDataStream.stop','/userDataStream.ping']
         if PRODUCT == 'spot' and kind == 'ws':
-            mutation = op['operationId'] in ['orderPlace','orderCancel','openOrdersCancelAll','userDataStreamSubscribe','userDataStreamSubscribeSignature','userDataStreamUnsubscribe']
-        if op['operationId'] in ['testOrder','orderTest']:mutation=False
+            mutation = op['tags'][0] == 'trade' or op['operationId'] in ['userDataStreamSubscribe','userDataStreamSubscribeSignature','userDataStreamUnsubscribe']
+        if op['operationId'] in ['testOrder','orderTest','sorOrderTest']:mutation=False
         # Generating download jobs has side effects despite the HTTP GET method.
         if op['operationId'].startswith('getDownloadId'):
             mutation=True
         success_weight = 'Some(0)' if PRODUCT == 'spot' and op['operationId'] in ['newOrder','deleteOrder','deleteOpenOrders','orderPlace','orderCancel','openOrdersCancelAll'] else 'None'
-        op_expr = f'Operation {{ name: {lit(op["operationId"])}, path: {lit(op["path"])}, method: {lit(op["method"])}, security: Security::{security}, mutation: {str(mutation).lower()}, weight: {op.get("x-ip-weight",0)}, validate_time: super::validation::validate_time, definitive: super::validation::definitive, success_weight: {success_weight} }}'
+        partial = 'Some(super::validation::partial)' if op.get('x-partial-result') else 'None'
+        op_expr = f'Operation {{ name: {lit(op["operationId"])}, path: {lit(op["path"])}, method: {lit(op["method"])}, security: Security::{security}, mutation: {str(mutation).lower()}, weight: {op.get("x-ip-weight",0)}, validate_time: super::validation::validate_time, definitive: super::validation::definitive, success_weight: {success_weight}, partial: {partial} }}'
         required_rust='&['+', '.join(lit(v) for v in sorted(required))+']'
         validation=f'let p = parameters(self)?; validate_parameters(&p, {required_rust}, &[{", ".join(enums)}], &[{", ".join(bounds)}])?; super::validation::validate({lit(op["operationId"])}, &p)'
         requests.append('\n'.join([f'/// Validated request builder for [`{op["operationId"]}`]({op["source"]}).',
@@ -415,14 +416,24 @@ def generate_events(coverage):
     pub(crate) fn api_payload(operation:&str,value:Value)->Result<ApiPayload,Error> {
         match operation {
     '''
-    for o in ws:
-     n=pascal(o['name']);text+=f'        "{o["name"]}"=>serde_json::from_value(value).map(|v|ApiPayload::{n}(Box::new(v))),\n'
+    chunks=[ws[i:i+20] for i in range(0,len(ws),20)]
+    for i,chunk in enumerate(chunks):
+        text+='        '+'|'.join(lit(o['name']) for o in chunk)+f'=>return api_payload_{i}(operation,value),\n'
     text+='''        "sessionLogon"|"sessionStatus"|"sessionLogout"=>serde_json::from_value(value).map(ApiPayload::Session),
             _=>return Err(Error::Gap("unrecognized correlated API operation")),
         }.map_err(|_|Error::Gap("malformed correlated API response"))
     }
     
-    /// Every documented market-stream payload, with provider distinctions intact.
+    '''
+    for i,chunk in enumerate(chunks):
+        text+=f'fn api_payload_{i}(operation:&str,value:Value)->Result<ApiPayload,Error> {{\n    match operation {{\n'
+        for o in chunk:
+            n=pascal(o['name']);text+=f'        "{o["name"]}"=>serde_json::from_value(value).map(|v|ApiPayload::{n}(Box::new(v))),\n'
+        text+='''        _=>return Err(Error::Gap("unrecognized correlated API operation")),
+        }.map_err(|_|Error::Gap("malformed correlated API response"))
+    }
+    '''
+    text+='''    /// Every documented market-stream payload, with provider distinctions intact.
     #[derive(Clone,Debug,PartialEq)]
     #[non_exhaustive]
     pub enum MarketPayload {

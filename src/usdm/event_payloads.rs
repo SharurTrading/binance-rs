@@ -95,6 +95,34 @@ pub struct SessionStatus {
 
 pub(crate) fn api_payload(operation: &str, value: Value) -> Result<ApiPayload, Error> {
     match operation {
+        "accountInformation"
+        | "accountInformationV2"
+        | "futuresAccountBalance"
+        | "futuresAccountBalanceV2"
+        | "orderBook"
+        | "symbolOrderBookTicker"
+        | "symbolPriceTicker"
+        | "cancelAlgoOrder"
+        | "cancelOrder"
+        | "modifyOrder"
+        | "newAlgoOrder"
+        | "newOrder"
+        | "positionInformation"
+        | "positionInformationV2"
+        | "queryOrder"
+        | "closeUserDataStream"
+        | "keepaliveUserDataStream"
+        | "startUserDataStream" => return api_payload_0(operation, value),
+        "sessionLogon" | "sessionStatus" | "sessionLogout" => {
+            serde_json::from_value(value).map(ApiPayload::Session)
+        }
+        _ => return Err(Error::Gap("unrecognized correlated API operation")),
+    }
+    .map_err(|_| Error::Gap("malformed correlated API response"))
+}
+
+fn api_payload_0(operation: &str, value: Value) -> Result<ApiPayload, Error> {
+    match operation {
         "accountInformation" => {
             serde_json::from_value(value).map(|v| ApiPayload::AccountInformation(Box::new(v)))
         }
@@ -143,14 +171,10 @@ pub(crate) fn api_payload(operation: &str, value: Value) -> Result<ApiPayload, E
         "startUserDataStream" => {
             serde_json::from_value(value).map(|v| ApiPayload::StartUserDataStream(Box::new(v)))
         }
-        "sessionLogon" | "sessionStatus" | "sessionLogout" => {
-            serde_json::from_value(value).map(ApiPayload::Session)
-        }
         _ => return Err(Error::Gap("unrecognized correlated API operation")),
     }
     .map_err(|_| Error::Gap("malformed correlated API response"))
 }
-
 /// Every documented market-stream payload, with provider distinctions intact.
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]

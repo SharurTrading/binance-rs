@@ -10,13 +10,23 @@
 /// Read-only demo metadata example; callers own the runtime.
 ///
 /// ```no_run
-/// use binance_client::usdm::{Config,Environment,RestClient,rest_requests::CheckServerTime};
-/// # async fn example()->Result<(),binance_client::Error> {
-/// let client=RestClient::new(Config::new(Environment::Demo)?)?;
-/// let response=client.check_server_time(&CheckServerTime::new(),tokio::time::Instant::now()+std::time::Duration::from_secs(10)).await?;
-/// # let _ = response;
-/// # Ok(())
-/// # }
+/// use binance_client::Error;
+/// use binance_client::usdm::{Config, Environment, RestClient, rest_requests::CheckServerTime};
+/// use std::time::Duration;
+/// use tokio::time::Instant;
+///
+/// #[tokio::main(flavor = "current_thread")]
+/// async fn main() -> Result<(), Error> {
+///     let client = RestClient::new(Config::new(Environment::Demo)?)?;
+///     let response = client
+///         .check_server_time(
+///             &CheckServerTime::new(),
+///             Instant::now() + Duration::from_secs(10),
+///         )
+///         .await?;
+///     println!("Server time: {:?}", response.data.server_time);
+///     Ok(())
+/// }
 /// ```
 mod core;
 pub mod usdm;

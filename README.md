@@ -10,12 +10,16 @@ SPDX-License-Identifier: MIT-0
 An **unofficial**, independent Rust inner client for Binance APIs, maintained by
 SharurTrading. This project is not affiliated with or endorsed by Binance.
 
+> **Warning: unreleased and untested for live trading.** This crate is under active
+> development and is not ready for production use. Synthetic tests and read-only
+> public probes do not establish live trading readiness. `publish = false` remains
+> in force.
+
 USDⓈ-M Futures is the first implementation: **95 REST operations, 18 catalog
 WebSocket API methods plus 3 session methods, 20 market streams, and 10 user-data
 event types**. Coverage follows the official catalog checked on 2026-09-26,
 including conditional/algo orders and the current Public/Market/Private routes.
 [Coverage and sources](docs/coverage.md) distinguish bindings from live verification.
-The crate is unreleased and `publish = false` remains in force.
 
 ## Boundary and architecture
 
@@ -39,22 +43,37 @@ with UM; distinct API modules do not imply independent account settings. No OMS 
 
 ## Public demo metadata
 
+Create one client at application startup and reuse it for subsequent requests.
+The application owns the Tokio runtime. This example uses Tokio's `macros` and
+`rt` features with a current-thread runtime.
+
 ```rust,no_run
+use binance_client::Error;
+use binance_client::usdm::rest_requests::{CheckServerTime, ExchangeInformation};
 use binance_client::usdm::{Config, Environment, RestClient};
-use binance_client::usdm::rest_requests::ExchangeInformation;
 use std::time::Duration;
 use tokio::time::Instant;
 
-# async fn example() -> Result<(), binance_client::Error> {
-let client = RestClient::new(Config::new(Environment::Demo)?)?;
-let response = client.exchange_information(
-    &ExchangeInformation::new(),
-    Instant::now() + Duration::from_secs(10),
-).await?;
-let definitions = response.data.symbols;
-# let _ = definitions;
-# Ok(())
-# }
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Error> {
+    let client = RestClient::new(Config::new(Environment::Demo)?)?;
+    let metadata = client
+        .exchange_information(
+            &ExchangeInformation::new(),
+            Instant::now() + Duration::from_secs(10),
+        )
+        .await?;
+    println!("Symbol definitions: {:?}", metadata.data.symbols);
+
+    let server_time = client
+        .check_server_time(
+            &CheckServerTime::new(),
+            Instant::now() + Duration::from_secs(10),
+        )
+        .await?;
+    println!("Server time: {:?}", server_time.data.server_time);
+    Ok(())
+}
 ```
 
 Financial fields use `Decimal`, parsed without floats or silent rounding. Request

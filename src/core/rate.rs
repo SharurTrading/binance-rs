@@ -310,6 +310,9 @@ fn monthly_download(
 }
 
 #[cfg(test)]
+mod capacity_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
 

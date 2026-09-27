@@ -1,0 +1,560 @@
+{
+  "rest": [
+    {
+      "name": "accountInformation",
+      "method": "GET",
+      "path": "/dapi/v1/account",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#account-information"
+    },
+    {
+      "name": "futuresAccountBalance",
+      "method": "GET",
+      "path": "/dapi/v1/balance",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#futures-account-balance"
+    },
+    {
+      "name": "getCurrentPositionMode",
+      "method": "GET",
+      "path": "/dapi/v1/positionSide/dual",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#get-current-position-mode"
+    },
+    {
+      "name": "changePositionMode",
+      "method": "POST",
+      "path": "/dapi/v1/positionSide/dual",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#change-position-mode"
+    },
+    {
+      "name": "getDownloadIdForFuturesOrderHistory",
+      "method": "GET",
+      "path": "/dapi/v1/order/asyn",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#get-download-id-for-futures-order-history"
+    },
+    {
+      "name": "getDownloadIdForFuturesTradeHistory",
+      "method": "GET",
+      "path": "/dapi/v1/trade/asyn",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#get-download-id-for-futures-trade-history"
+    },
+    {
+      "name": "getDownloadIdForFuturesTransactionHistory",
+      "method": "GET",
+      "path": "/dapi/v1/income/asyn",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#get-download-id-for-futures-transaction-history"
+    },
+    {
+      "name": "getFuturesOrderHistoryDownloadLinkById",
+      "method": "GET",
+      "path": "/dapi/v1/order/asyn/id",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#get-futures-order-history-download-link-by-id"
+    },
+    {
+      "name": "getFuturesTradeDownloadLinkById",
+      "method": "GET",
+      "path": "/dapi/v1/trade/asyn/id",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#get-futures-trade-download-link-by-id"
+    },
+    {
+      "name": "getFuturesTransactionHistoryDownloadLinkById",
+      "method": "GET",
+      "path": "/dapi/v1/income/asyn/id",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#get-futures-transaction-history-download-link-by-id"
+    },
+    {
+      "name": "getIncomeHistory",
+      "method": "GET",
+      "path": "/dapi/v1/income",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#get-income-history"
+    },
+    {
+      "name": "notionalBracketForPair",
+      "method": "GET",
+      "path": "/dapi/v1/leverageBracket",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#notional-bracket-for-pair"
+    },
+    {
+      "name": "notionalBracketForSymbol",
+      "method": "GET",
+      "path": "/dapi/v2/leverageBracket",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#notional-bracket-for-symbol"
+    },
+    {
+      "name": "userCommissionRate",
+      "method": "GET",
+      "path": "/dapi/v1/commissionRate",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#user-commission-rate"
+    },
+    {
+      "name": "basis",
+      "method": "GET",
+      "path": "/futures/data/basis",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#basis"
+    },
+    {
+      "name": "checkServerTime",
+      "method": "GET",
+      "path": "/dapi/v1/time",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#check-server-time"
+    },
+    {
+      "name": "compressedAggregateTradesList",
+      "method": "GET",
+      "path": "/dapi/v1/aggTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#compressed-aggregate-trades-list"
+    },
+    {
+      "name": "continuousContractKlineCandlestickData",
+      "method": "GET",
+      "path": "/dapi/v1/continuousKlines",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#continuous-contract-kline-candlestick-data"
+    },
+    {
+      "name": "exchangeInformation",
+      "method": "GET",
+      "path": "/dapi/v1/exchangeInfo",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#exchange-information"
+    },
+    {
+      "name": "getFundingRateHistoryOfPerpetualFutures",
+      "method": "GET",
+      "path": "/dapi/v1/fundingRate",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#get-funding-rate-history-of-perpetual-futures"
+    },
+    {
+      "name": "indexPriceAndMarkPrice",
+      "method": "GET",
+      "path": "/dapi/v1/premiumIndex",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#index-price-and-mark-price"
+    },
+    {
+      "name": "indexPriceKlineCandlestickData",
+      "method": "GET",
+      "path": "/dapi/v1/indexPriceKlines",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#index-price-kline-candlestick-data"
+    },
+    {
+      "name": "klineCandlestickData",
+      "method": "GET",
+      "path": "/dapi/v1/klines",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#kline-candlestick-data"
+    },
+    {
+      "name": "longShortRatio",
+      "method": "GET",
+      "path": "/futures/data/globalLongShortAccountRatio",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#long-short-ratio"
+    },
+    {
+      "name": "markPriceKlineCandlestickData",
+      "method": "GET",
+      "path": "/dapi/v1/markPriceKlines",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#mark-price-kline-candlestick-data"
+    },
+    {
+      "name": "oldTradesLookup",
+      "method": "GET",
+      "path": "/dapi/v1/historicalTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#old-trades-lookup"
+    },
+    {
+      "name": "openInterest",
+      "method": "GET",
+      "path": "/dapi/v1/openInterest",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#open-interest"
+    },
+    {
+      "name": "openInterestStatistics",
+      "method": "GET",
+      "path": "/futures/data/openInterestHist",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#open-interest-statistics"
+    },
+    {
+      "name": "orderBook",
+      "method": "GET",
+      "path": "/dapi/v1/depth",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#order-book"
+    },
+    {
+      "name": "premiumIndexKlineData",
+      "method": "GET",
+      "path": "/dapi/v1/premiumIndexKlines",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#premium-index-kline-data"
+    },
+    {
+      "name": "queryIndexPriceConstituents",
+      "method": "GET",
+      "path": "/dapi/v1/constituents",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#query-index-price-constituents"
+    },
+    {
+      "name": "recentTradesList",
+      "method": "GET",
+      "path": "/dapi/v1/trades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#recent-trades-list"
+    },
+    {
+      "name": "symbolOrderBookTicker",
+      "method": "GET",
+      "path": "/dapi/v1/ticker/bookTicker",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#symbol-order-book-ticker"
+    },
+    {
+      "name": "symbolPriceTicker",
+      "method": "GET",
+      "path": "/dapi/v1/ticker/price",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#symbol-price-ticker"
+    },
+    {
+      "name": "takerBuySellVolume",
+      "method": "GET",
+      "path": "/futures/data/takerBuySellVol",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#taker-buy-sell-volume"
+    },
+    {
+      "name": "testConnectivity",
+      "method": "GET",
+      "path": "/dapi/v1/ping",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#test-connectivity"
+    },
+    {
+      "name": "ticker24hrPriceChangeStatistics",
+      "method": "GET",
+      "path": "/dapi/v1/ticker/24hr",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#ticker24hr-price-change-statistics"
+    },
+    {
+      "name": "topTraderLongShortRatioAccounts",
+      "method": "GET",
+      "path": "/futures/data/topLongShortAccountRatio",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#top-trader-long-short-ratio-accounts"
+    },
+    {
+      "name": "topTraderLongShortRatioPositions",
+      "method": "GET",
+      "path": "/futures/data/topLongShortPositionRatio",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#top-trader-long-short-ratio-positions"
+    },
+    {
+      "name": "accountTradeList",
+      "method": "GET",
+      "path": "/dapi/v1/userTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#account-trade-list"
+    },
+    {
+      "name": "allOrders",
+      "method": "GET",
+      "path": "/dapi/v1/allOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#all-orders"
+    },
+    {
+      "name": "autoCancelAllOpenOrders",
+      "method": "POST",
+      "path": "/dapi/v1/countdownCancelAll",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#auto-cancel-all-open-orders"
+    },
+    {
+      "name": "cancelAllOpenOrders",
+      "method": "DELETE",
+      "path": "/dapi/v1/allOpenOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#cancel-all-open-orders"
+    },
+    {
+      "name": "cancelMultipleOrders",
+      "method": "DELETE",
+      "path": "/dapi/v1/batchOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#cancel-multiple-orders"
+    },
+    {
+      "name": "modifyMultipleOrders",
+      "method": "PUT",
+      "path": "/dapi/v1/batchOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#modify-multiple-orders"
+    },
+    {
+      "name": "placeMultipleOrders",
+      "method": "POST",
+      "path": "/dapi/v1/batchOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#place-multiple-orders"
+    },
+    {
+      "name": "cancelOrder",
+      "method": "DELETE",
+      "path": "/dapi/v1/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#cancel-order"
+    },
+    {
+      "name": "modifyOrder",
+      "method": "PUT",
+      "path": "/dapi/v1/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#modify-order"
+    },
+    {
+      "name": "newOrder",
+      "method": "POST",
+      "path": "/dapi/v1/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#new-order"
+    },
+    {
+      "name": "queryOrder",
+      "method": "GET",
+      "path": "/dapi/v1/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#query-order"
+    },
+    {
+      "name": "changeInitialLeverage",
+      "method": "POST",
+      "path": "/dapi/v1/leverage",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#change-initial-leverage"
+    },
+    {
+      "name": "changeMarginType",
+      "method": "POST",
+      "path": "/dapi/v1/marginType",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#change-margin-type"
+    },
+    {
+      "name": "currentAllOpenOrders",
+      "method": "GET",
+      "path": "/dapi/v1/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#current-all-open-orders"
+    },
+    {
+      "name": "getOrderModifyHistory",
+      "method": "GET",
+      "path": "/dapi/v1/orderAmendment",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#get-order-modify-history"
+    },
+    {
+      "name": "getPositionMarginChangeHistory",
+      "method": "GET",
+      "path": "/dapi/v1/positionMargin/history",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#get-position-margin-change-history"
+    },
+    {
+      "name": "modifyIsolatedPositionMargin",
+      "method": "POST",
+      "path": "/dapi/v1/positionMargin",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#modify-isolated-position-margin"
+    },
+    {
+      "name": "positionAdlQuantileEstimation",
+      "method": "GET",
+      "path": "/dapi/v1/adlQuantile",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#position-adl-quantile-estimation"
+    },
+    {
+      "name": "positionInformation",
+      "method": "GET",
+      "path": "/dapi/v1/positionRisk",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#position-information"
+    },
+    {
+      "name": "queryCurrentOpenOrder",
+      "method": "GET",
+      "path": "/dapi/v1/openOrder",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#query-current-open-order"
+    },
+    {
+      "name": "usersForceOrders",
+      "method": "GET",
+      "path": "/dapi/v1/forceOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#users-force-orders"
+    },
+    {
+      "name": "closeUserDataStream",
+      "method": "DELETE",
+      "path": "/dapi/v1/listenKey",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/user-data-streams#close-user-data-stream"
+    },
+    {
+      "name": "keepaliveUserDataStream",
+      "method": "PUT",
+      "path": "/dapi/v1/listenKey",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/user-data-streams#keepalive-user-data-stream"
+    },
+    {
+      "name": "startUserDataStream",
+      "method": "POST",
+      "path": "/dapi/v1/listenKey",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/user-data-streams#start-user-data-stream"
+    }
+  ],
+  "ws": [
+    {
+      "name": "accountInformation",
+      "method": "POST",
+      "path": "/account.status",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/account#account-information"
+    },
+    {
+      "name": "futuresAccountBalance",
+      "method": "POST",
+      "path": "/account.balance",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/account#futures-account-balance"
+    },
+    {
+      "name": "cancelOrder",
+      "method": "POST",
+      "path": "/order.cancel",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#cancel-order"
+    },
+    {
+      "name": "modifyOrder",
+      "method": "POST",
+      "path": "/order.modify",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#modify-order"
+    },
+    {
+      "name": "newOrder",
+      "method": "POST",
+      "path": "/order.place",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#new-order"
+    },
+    {
+      "name": "positionInformation",
+      "method": "POST",
+      "path": "/account.position",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#position-information"
+    },
+    {
+      "name": "queryOrder",
+      "method": "POST",
+      "path": "/order.status",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#query-order"
+    },
+    {
+      "name": "closeUserDataStream",
+      "method": "POST",
+      "path": "/userDataStream.stop",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/user-data-streams#close-user-data-stream"
+    },
+    {
+      "name": "keepaliveUserDataStream",
+      "method": "POST",
+      "path": "/userDataStream.ping",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/user-data-streams#keepalive-user-data-stream"
+    },
+    {
+      "name": "startUserDataStream",
+      "method": "POST",
+      "path": "/userDataStream.start",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/user-data-streams#start-user-data-stream"
+    }
+  ],
+  "streams": [
+    {
+      "name": "AggregateTradeStreams",
+      "path": "/{symbol}@aggTrade",
+      "route": "market",
+      "type": "AggregateTradeStreamsEvent"
+    },
+    {
+      "name": "AllBookTickersStream",
+      "path": "/!bookTicker",
+      "route": "market",
+      "type": "AllBookTickersStreamEvent"
+    },
+    {
+      "name": "AllMarketLiquidationOrderStreams",
+      "path": "/!forceOrder@arr",
+      "route": "market",
+      "type": "AllMarketLiquidationOrderStreamsEvent"
+    },
+    {
+      "name": "AllMarketMiniTickersStream",
+      "path": "/!miniTicker@arr",
+      "route": "market",
+      "type": "Vec<AllMarketMiniTickersStreamEventItem>"
+    },
+    {
+      "name": "AllMarketTickersStreams",
+      "path": "/!ticker@arr",
+      "route": "market",
+      "type": "Vec<AllMarketTickersStreamsEventItem>"
+    },
+    {
+      "name": "ContinuousContractKlineCandlestickStreams",
+      "path": "/{pair}_{contractType}@continuousKline_{interval}",
+      "route": "market",
+      "type": "ContinuousContractKlineCandlestickStreamsEvent"
+    },
+    {
+      "name": "ContractInfoStream",
+      "path": "/!contractInfo",
+      "route": "market",
+      "type": "ContractInfoStreamEvent"
+    },
+    {
+      "name": "DiffBookDepthStreams",
+      "path": "/{symbol}@depth@{updateSpeed}",
+      "route": "market",
+      "type": "DiffBookDepthStreamsEvent"
+    },
+    {
+      "name": "IndexKlineCandlestickStreams",
+      "path": "/{pair}@indexPriceKline_{interval}",
+      "route": "market",
+      "type": "IndexKlineCandlestickStreamsEvent"
+    },
+    {
+      "name": "IndexPriceStream",
+      "path": "/{pair}@indexPrice@{updateSpeed}",
+      "route": "market",
+      "type": "IndexPriceStreamEvent"
+    },
+    {
+      "name": "IndividualSymbolBookTickerStreams",
+      "path": "/{symbol}@bookTicker",
+      "route": "market",
+      "type": "IndividualSymbolBookTickerStreamsEvent"
+    },
+    {
+      "name": "IndividualSymbolMiniTickerStream",
+      "path": "/{symbol}@miniTicker",
+      "route": "market",
+      "type": "IndividualSymbolMiniTickerStreamEvent"
+    },
+    {
+      "name": "IndividualSymbolTickerStreams",
+      "path": "/{symbol}@ticker",
+      "route": "market",
+      "type": "IndividualSymbolTickerStreamsEvent"
+    },
+    {
+      "name": "KlineCandlestickStreams",
+      "path": "/{symbol}@kline_{interval}",
+      "route": "market",
+      "type": "KlineCandlestickStreamsEvent"
+    },
+    {
+      "name": "MarketLiquidationOrderStreams",
+      "path": "/{symbol}@forceOrder",
+      "route": "market",
+      "type": "MarketLiquidationOrderStreamsEvent"
+    },
+    {
+      "name": "MarkPriceKlineCandlestickStreams",
+      "path": "/{symbol}@markPriceKline_{interval}",
+      "route": "market",
+      "type": "MarkPriceKlineCandlestickStreamsEvent"
+    },
+    {
+      "name": "MarkPriceOfAllSymbolsOfAPair",
+      "path": "/{pair}@markPrice@{updateSpeed}",
+      "route": "market",
+      "type": "Vec<MarkPriceOfAllSymbolsOfAPairEventItem>"
+    },
+    {
+      "name": "MarkPriceStream",
+      "path": "/{symbol}@markPrice@{updateSpeed}",
+      "route": "market",
+      "type": "MarkPriceStreamEvent"
+    },
+    {
+      "name": "PartialBookDepthStreams",
+      "path": "/{symbol}@depth{levels}@{updateSpeed}",
+      "route": "market",
+      "type": "PartialBookDepthStreamsEvent"
+    }
+  ]
+}

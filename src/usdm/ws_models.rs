@@ -860,11 +860,181 @@ pub struct OrderBookResponse {
     pub extra: BTreeMap<String, serde_json::Value>,
 }
 
-/// Exact response for `symbolOrderBookTicker`.
-pub type SymbolOrderBookTickerResponse = BTreeMap<String, serde_json::Value>;
+/// Provider alternatives for `SymbolOrderBookTickerResponse`; no member is discarded.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+#[serde(untagged)]
+pub enum SymbolOrderBookTickerResponse {
+    /// Wire alternative 1.
+    Variant1(Box<SymbolOrderBookTickerResponseVariant1>),
+    /// Wire alternative 2.
+    Variant2(Box<Vec<SymbolOrderBookTickerResponseVariant2Item>>),
+}
 
-/// Exact response for `symbolPriceTicker`.
-pub type SymbolPriceTickerResponse = BTreeMap<String, serde_json::Value>;
+/// Provider-native `SymbolOrderBookTickerResponseVariant1` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SymbolOrderBookTickerResponseVariant1 {
+    /// Exact `lastUpdateId` wire field.
+    #[serde(
+        rename = "lastUpdateId",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub last_update_id: Option<i64>,
+    /// Exact `symbol` wire field.
+    #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<Symbol>,
+    /// Exact `bidPrice` wire field.
+    #[serde(
+        rename = "bidPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub bid_price: Option<Decimal>,
+    /// Exact `bidQty` wire field.
+    #[serde(
+        rename = "bidQty",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub bid_qty: Option<Decimal>,
+    /// Exact `askPrice` wire field.
+    #[serde(
+        rename = "askPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub ask_price: Option<Decimal>,
+    /// Exact `askQty` wire field.
+    #[serde(
+        rename = "askQty",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub ask_qty: Option<Decimal>,
+    /// Exact `time` wire field.
+    #[serde(rename = "time", default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<i64>,
+    /// Unknown future wire fields, retained without inventing defaults.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, serde_json::Value>,
+}
+
+/// Provider-native `SymbolOrderBookTickerResponseVariant2Item` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SymbolOrderBookTickerResponseVariant2Item {
+    /// Exact `lastUpdateId` wire field.
+    #[serde(
+        rename = "lastUpdateId",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub last_update_id: Option<i64>,
+    /// Exact `symbol` wire field.
+    #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<Symbol>,
+    /// Exact `bidPrice` wire field.
+    #[serde(
+        rename = "bidPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub bid_price: Option<Decimal>,
+    /// Exact `bidQty` wire field.
+    #[serde(
+        rename = "bidQty",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub bid_qty: Option<Decimal>,
+    /// Exact `askPrice` wire field.
+    #[serde(
+        rename = "askPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub ask_price: Option<Decimal>,
+    /// Exact `askQty` wire field.
+    #[serde(
+        rename = "askQty",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub ask_qty: Option<Decimal>,
+    /// Exact `time` wire field.
+    #[serde(rename = "time", default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<i64>,
+    /// Unknown future wire fields, retained without inventing defaults.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, serde_json::Value>,
+}
+
+/// Provider alternatives for `SymbolPriceTickerResponse`; no member is discarded.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+#[serde(untagged)]
+pub enum SymbolPriceTickerResponse {
+    /// Wire alternative 1.
+    Variant1(Box<SymbolPriceTickerResponseVariant1>),
+    /// Wire alternative 2.
+    Variant2(Box<Vec<SymbolPriceTickerResponseVariant2Item>>),
+}
+
+/// Provider-native `SymbolPriceTickerResponseVariant1` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SymbolPriceTickerResponseVariant1 {
+    /// Exact `symbol` wire field.
+    #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<Symbol>,
+    /// Exact `price` wire field.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `time` wire field.
+    #[serde(rename = "time", default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<i64>,
+    /// Unknown future wire fields, retained without inventing defaults.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, serde_json::Value>,
+}
+
+/// Provider-native `SymbolPriceTickerResponseVariant2Item` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SymbolPriceTickerResponseVariant2Item {
+    /// Exact `symbol` wire field.
+    #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<Symbol>,
+    /// Exact `price` wire field.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `time` wire field.
+    #[serde(rename = "time", default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<i64>,
+    /// Unknown future wire fields, retained without inventing defaults.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, serde_json::Value>,
+}
 
 /// Provider-native `CancelAlgoOrderResponse` payload.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

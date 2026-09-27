@@ -13,7 +13,7 @@ mod time;
 pub use credentials::{Credentials, Signer};
 pub use error::{Error, Outcome, RateEvidence, Response, ResponseMeta, VenueFailure};
 pub(crate) use http::HttpClient;
-pub use identity::{ClientOrderId, RequestId, SensitiveString, Symbol};
+pub use identity::{Asset, ClientOrderId, RequestId, SensitiveString, Symbol};
 pub(crate) use rate::Cost;
 pub use rate::{BudgetLimits, Budgets};
 pub(crate) use request::{Operation, Request, Security};

@@ -34,32 +34,16 @@ impl From<Value> for UnknownMessage {
 pub enum ApiPayload {
     /// `accountInformation` response.
     AccountInformation(Box<super::ws_models::AccountInformationResponse>),
-    /// `accountInformationV2` response.
-    AccountInformationV2(Box<super::ws_models::AccountInformationV2Response>),
     /// `futuresAccountBalance` response.
     FuturesAccountBalance(Box<super::ws_models::FuturesAccountBalanceResponse>),
-    /// `futuresAccountBalanceV2` response.
-    FuturesAccountBalanceV2(Box<super::ws_models::FuturesAccountBalanceV2Response>),
-    /// `orderBook` response.
-    OrderBook(Box<super::ws_models::OrderBookResponse>),
-    /// `symbolOrderBookTicker` response.
-    SymbolOrderBookTicker(Box<super::ws_models::SymbolOrderBookTickerResponse>),
-    /// `symbolPriceTicker` response.
-    SymbolPriceTicker(Box<super::ws_models::SymbolPriceTickerResponse>),
-    /// `cancelAlgoOrder` response.
-    CancelAlgoOrder(Box<super::ws_models::CancelAlgoOrderResponse>),
     /// `cancelOrder` response.
     CancelOrder(Box<super::ws_models::CancelOrderResponse>),
     /// `modifyOrder` response.
     ModifyOrder(Box<super::ws_models::ModifyOrderResponse>),
-    /// `newAlgoOrder` response.
-    NewAlgoOrder(Box<super::ws_models::NewAlgoOrderResponse>),
     /// `newOrder` response.
     NewOrder(Box<super::ws_models::NewOrderResponse>),
     /// `positionInformation` response.
     PositionInformation(Box<super::ws_models::PositionInformationResponse>),
-    /// `positionInformationV2` response.
-    PositionInformationV2(Box<super::ws_models::PositionInformationV2Response>),
     /// `queryOrder` response.
     QueryOrder(Box<super::ws_models::QueryOrderResponse>),
     /// `closeUserDataStream` response.
@@ -98,24 +82,8 @@ pub(crate) fn api_payload(operation: &str, value: Value) -> Result<ApiPayload, E
         "accountInformation" => {
             serde_json::from_value(value).map(|v| ApiPayload::AccountInformation(Box::new(v)))
         }
-        "accountInformationV2" => {
-            serde_json::from_value(value).map(|v| ApiPayload::AccountInformationV2(Box::new(v)))
-        }
         "futuresAccountBalance" => {
             serde_json::from_value(value).map(|v| ApiPayload::FuturesAccountBalance(Box::new(v)))
-        }
-        "futuresAccountBalanceV2" => {
-            serde_json::from_value(value).map(|v| ApiPayload::FuturesAccountBalanceV2(Box::new(v)))
-        }
-        "orderBook" => serde_json::from_value(value).map(|v| ApiPayload::OrderBook(Box::new(v))),
-        "symbolOrderBookTicker" => {
-            serde_json::from_value(value).map(|v| ApiPayload::SymbolOrderBookTicker(Box::new(v)))
-        }
-        "symbolPriceTicker" => {
-            serde_json::from_value(value).map(|v| ApiPayload::SymbolPriceTicker(Box::new(v)))
-        }
-        "cancelAlgoOrder" => {
-            serde_json::from_value(value).map(|v| ApiPayload::CancelAlgoOrder(Box::new(v)))
         }
         "cancelOrder" => {
             serde_json::from_value(value).map(|v| ApiPayload::CancelOrder(Box::new(v)))
@@ -123,15 +91,9 @@ pub(crate) fn api_payload(operation: &str, value: Value) -> Result<ApiPayload, E
         "modifyOrder" => {
             serde_json::from_value(value).map(|v| ApiPayload::ModifyOrder(Box::new(v)))
         }
-        "newAlgoOrder" => {
-            serde_json::from_value(value).map(|v| ApiPayload::NewAlgoOrder(Box::new(v)))
-        }
         "newOrder" => serde_json::from_value(value).map(|v| ApiPayload::NewOrder(Box::new(v))),
         "positionInformation" => {
             serde_json::from_value(value).map(|v| ApiPayload::PositionInformation(Box::new(v)))
-        }
-        "positionInformationV2" => {
-            serde_json::from_value(value).map(|v| ApiPayload::PositionInformationV2(Box::new(v)))
         }
         "queryOrder" => serde_json::from_value(value).map(|v| ApiPayload::QueryOrder(Box::new(v))),
         "closeUserDataStream" => {
@@ -157,6 +119,8 @@ pub(crate) fn api_payload(operation: &str, value: Value) -> Result<ApiPayload, E
 pub enum MarketPayload {
     /// `AggregateTradeStreams` events.
     AggregateTradeStreams(Box<super::stream_models::AggregateTradeStreamsEvent>),
+    /// `AllBookTickersStream` events.
+    AllBookTickersStream(Box<super::stream_models::AllBookTickersStreamEvent>),
     /// `AllMarketLiquidationOrderStreams` events.
     AllMarketLiquidationOrderStreams(
         Box<super::stream_models::AllMarketLiquidationOrderStreamsEvent>,
@@ -165,16 +129,22 @@ pub enum MarketPayload {
     AllMarketMiniTickersStream(Box<Vec<super::stream_models::AllMarketMiniTickersStreamEventItem>>),
     /// `AllMarketTickersStreams` events.
     AllMarketTickersStreams(Box<Vec<super::stream_models::AllMarketTickersStreamsEventItem>>),
-    /// `CompositeIndexSymbolInformationStreams` events.
-    CompositeIndexSymbolInformationStreams(
-        Box<super::stream_models::CompositeIndexSymbolInformationStreamsEvent>,
-    ),
     /// `ContinuousContractKlineCandlestickStreams` events.
     ContinuousContractKlineCandlestickStreams(
         Box<super::stream_models::ContinuousContractKlineCandlestickStreamsEvent>,
     ),
     /// `ContractInfoStream` events.
     ContractInfoStream(Box<super::stream_models::ContractInfoStreamEvent>),
+    /// `DiffBookDepthStreams` events.
+    DiffBookDepthStreams(Box<super::stream_models::DiffBookDepthStreamsEvent>),
+    /// `IndexKlineCandlestickStreams` events.
+    IndexKlineCandlestickStreams(Box<super::stream_models::IndexKlineCandlestickStreamsEvent>),
+    /// `IndexPriceStream` events.
+    IndexPriceStream(Box<super::stream_models::IndexPriceStreamEvent>),
+    /// `IndividualSymbolBookTickerStreams` events.
+    IndividualSymbolBookTickerStreams(
+        Box<super::stream_models::IndividualSymbolBookTickerStreamsEvent>,
+    ),
     /// `IndividualSymbolMiniTickerStream` events.
     IndividualSymbolMiniTickerStream(
         Box<super::stream_models::IndividualSymbolMiniTickerStreamEvent>,
@@ -183,30 +153,20 @@ pub enum MarketPayload {
     IndividualSymbolTickerStreams(Box<super::stream_models::IndividualSymbolTickerStreamsEvent>),
     /// `KlineCandlestickStreams` events.
     KlineCandlestickStreams(Box<super::stream_models::KlineCandlestickStreamsEvent>),
-    /// `LiquidationOrderStreams` events.
-    LiquidationOrderStreams(Box<super::stream_models::LiquidationOrderStreamsEvent>),
+    /// `MarketLiquidationOrderStreams` events.
+    MarketLiquidationOrderStreams(Box<super::stream_models::MarketLiquidationOrderStreamsEvent>),
+    /// `MarkPriceKlineCandlestickStreams` events.
+    MarkPriceKlineCandlestickStreams(
+        Box<super::stream_models::MarkPriceKlineCandlestickStreamsEvent>,
+    ),
+    /// `MarkPriceOfAllSymbolsOfAPair` events.
+    MarkPriceOfAllSymbolsOfAPair(
+        Box<Vec<super::stream_models::MarkPriceOfAllSymbolsOfAPairEventItem>>,
+    ),
     /// `MarkPriceStream` events.
     MarkPriceStream(Box<super::stream_models::MarkPriceStreamEvent>),
-    /// `MarkPriceStreamForAllMarket` events.
-    MarkPriceStreamForAllMarket(
-        Box<Vec<super::stream_models::MarkPriceStreamForAllMarketEventItem>>,
-    ),
-    /// `AssetIndex` events.
-    AssetIndex(Box<Vec<super::stream_models::AssetIndexEventItem>>),
-    /// `TradingSessionStream` events.
-    TradingSessionStream(Box<super::stream_models::TradingSessionStreamEvent>),
-    /// `AllBookTickersStream` events.
-    AllBookTickersStream(Box<super::stream_models::AllBookTickersStreamEvent>),
-    /// `DiffBookDepthStreams` events.
-    DiffBookDepthStreams(Box<super::stream_models::DiffBookDepthStreamsEvent>),
-    /// `IndividualSymbolBookTickerStreams` events.
-    IndividualSymbolBookTickerStreams(
-        Box<super::stream_models::IndividualSymbolBookTickerStreamsEvent>,
-    ),
     /// `PartialBookDepthStreams` events.
     PartialBookDepthStreams(Box<super::stream_models::PartialBookDepthStreamsEvent>),
-    /// `RpiDiffBookDepthStreams` events.
-    RpiDiffBookDepthStreams(Box<super::stream_models::RpiDiffBookDepthStreamsEvent>),
 }
 
 pub(crate) fn market_payload(kind: &str, value: Value) -> Result<MarketPayload, Error> {
@@ -214,50 +174,47 @@ pub(crate) fn market_payload(kind: &str, value: Value) -> Result<MarketPayload, 
         "aggregateTradeStreams" => {
             serde_json::from_value(value).map(|v| MarketPayload::AggregateTradeStreams(Box::new(v)))
         }
+        "allBookTickersStream" => {
+            serde_json::from_value(value).map(|v| MarketPayload::AllBookTickersStream(Box::new(v)))
+        }
         "allMarketLiquidationOrderStreams" => serde_json::from_value(value)
             .map(|v| MarketPayload::AllMarketLiquidationOrderStreams(Box::new(v))),
         "allMarketMiniTickersStream" => serde_json::from_value(value)
             .map(|v| MarketPayload::AllMarketMiniTickersStream(Box::new(v))),
         "allMarketTickersStreams" => serde_json::from_value(value)
             .map(|v| MarketPayload::AllMarketTickersStreams(Box::new(v))),
-        "compositeIndexSymbolInformationStreams" => serde_json::from_value(value)
-            .map(|v| MarketPayload::CompositeIndexSymbolInformationStreams(Box::new(v))),
         "continuousContractKlineCandlestickStreams" => serde_json::from_value(value)
             .map(|v| MarketPayload::ContinuousContractKlineCandlestickStreams(Box::new(v))),
         "contractInfoStream" => {
             serde_json::from_value(value).map(|v| MarketPayload::ContractInfoStream(Box::new(v)))
         }
+        "diffBookDepthStreams" => {
+            serde_json::from_value(value).map(|v| MarketPayload::DiffBookDepthStreams(Box::new(v)))
+        }
+        "indexKlineCandlestickStreams" => serde_json::from_value(value)
+            .map(|v| MarketPayload::IndexKlineCandlestickStreams(Box::new(v))),
+        "indexPriceStream" => {
+            serde_json::from_value(value).map(|v| MarketPayload::IndexPriceStream(Box::new(v)))
+        }
+        "individualSymbolBookTickerStreams" => serde_json::from_value(value)
+            .map(|v| MarketPayload::IndividualSymbolBookTickerStreams(Box::new(v))),
         "individualSymbolMiniTickerStream" => serde_json::from_value(value)
             .map(|v| MarketPayload::IndividualSymbolMiniTickerStream(Box::new(v))),
         "individualSymbolTickerStreams" => serde_json::from_value(value)
             .map(|v| MarketPayload::IndividualSymbolTickerStreams(Box::new(v))),
         "klineCandlestickStreams" => serde_json::from_value(value)
             .map(|v| MarketPayload::KlineCandlestickStreams(Box::new(v))),
-        "liquidationOrderStreams" => serde_json::from_value(value)
-            .map(|v| MarketPayload::LiquidationOrderStreams(Box::new(v))),
+        "marketLiquidationOrderStreams" => serde_json::from_value(value)
+            .map(|v| MarketPayload::MarketLiquidationOrderStreams(Box::new(v))),
+        "markPriceKlineCandlestickStreams" => serde_json::from_value(value)
+            .map(|v| MarketPayload::MarkPriceKlineCandlestickStreams(Box::new(v))),
+        "markPriceOfAllSymbolsOfAPair" => serde_json::from_value(value)
+            .map(|v| MarketPayload::MarkPriceOfAllSymbolsOfAPair(Box::new(v))),
         "markPriceStream" => {
             serde_json::from_value(value).map(|v| MarketPayload::MarkPriceStream(Box::new(v)))
         }
-        "markPriceStreamForAllMarket" => serde_json::from_value(value)
-            .map(|v| MarketPayload::MarkPriceStreamForAllMarket(Box::new(v))),
-        "assetIndex" => {
-            serde_json::from_value(value).map(|v| MarketPayload::AssetIndex(Box::new(v)))
-        }
-        "tradingSessionStream" => {
-            serde_json::from_value(value).map(|v| MarketPayload::TradingSessionStream(Box::new(v)))
-        }
-        "allBookTickersStream" => {
-            serde_json::from_value(value).map(|v| MarketPayload::AllBookTickersStream(Box::new(v)))
-        }
-        "diffBookDepthStreams" => {
-            serde_json::from_value(value).map(|v| MarketPayload::DiffBookDepthStreams(Box::new(v)))
-        }
-        "individualSymbolBookTickerStreams" => serde_json::from_value(value)
-            .map(|v| MarketPayload::IndividualSymbolBookTickerStreams(Box::new(v))),
         "partialBookDepthStreams" => serde_json::from_value(value)
             .map(|v| MarketPayload::PartialBookDepthStreams(Box::new(v))),
-        "rpiDiffBookDepthStreams" => serde_json::from_value(value)
-            .map(|v| MarketPayload::RpiDiffBookDepthStreams(Box::new(v))),
         _ => return Err(Error::Gap("unrecognized subscribed stream")),
     }
     .map_err(|_| Error::Gap("malformed market payload"))
@@ -271,10 +228,6 @@ pub enum UserPayload {
     AccountConfigUpdate(Box<super::stream_models::AccountConfigUpdateEvent>),
     /// Provider `accountUpdate` event.
     AccountUpdate(Box<super::stream_models::AccountUpdateEvent>),
-    /// Provider `algoUpdate` event.
-    AlgoUpdate(Box<super::stream_models::AlgoUpdateEvent>),
-    /// Provider `conditionalOrderTriggerReject` event.
-    ConditionalOrderTriggerReject(Box<super::stream_models::ConditionalOrderTriggerRejectEvent>),
     /// Provider `gridUpdate` event.
     GridUpdate(Box<super::stream_models::GridUpdateEvent>),
     /// Provider `listenKeyExpired` event.
@@ -285,8 +238,6 @@ pub enum UserPayload {
     OrderTradeUpdate(Box<super::stream_models::OrderTradeUpdateEvent>),
     /// Provider `strategyUpdate` event.
     StrategyUpdate(Box<super::stream_models::StrategyUpdateEvent>),
-    /// Provider `tradeLite` event.
-    TradeLite(Box<super::stream_models::TradeLiteEvent>),
     /// A future event type, preserved for explicit consumer handling.
     Unknown(UnknownMessage),
 }
@@ -313,11 +264,6 @@ pub(crate) fn user_payload(value: Value) -> Result<UserPayload, Error> {
         "ACCOUNT_UPDATE" => {
             serde_json::from_value(value).map(|v| UserPayload::AccountUpdate(Box::new(v)))
         }
-        "ALGO_UPDATE" => {
-            serde_json::from_value(value).map(|v| UserPayload::AlgoUpdate(Box::new(v)))
-        }
-        "CONDITIONAL_ORDER_TRIGGER_REJECT" => serde_json::from_value(value)
-            .map(|v| UserPayload::ConditionalOrderTriggerReject(Box::new(v))),
         "GRID_UPDATE" => {
             serde_json::from_value(value).map(|v| UserPayload::GridUpdate(Box::new(v)))
         }
@@ -333,7 +279,6 @@ pub(crate) fn user_payload(value: Value) -> Result<UserPayload, Error> {
         "STRATEGY_UPDATE" => {
             serde_json::from_value(value).map(|v| UserPayload::StrategyUpdate(Box::new(v)))
         }
-        "TRADE_LITE" => serde_json::from_value(value).map(|v| UserPayload::TradeLite(Box::new(v))),
         _ => return Ok(UserPayload::Unknown(value.into())),
     }
     .map_err(|_| Error::Gap("malformed execution/account event"))

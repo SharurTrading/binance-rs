@@ -38,13 +38,20 @@ impl WsClient {
     /// # Errors
     /// Refuses invalid transport configuration or failed handshake/rate admission.
     pub async fn connect(config: Config) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
-        let (socket, events, driver) = Socket::connect(
+        let (socket, events, driver) = Socket::connect_with_policy(
             config.websocket,
             config.credentials,
             config.clock,
             config.budgets,
             config.timeout,
-            true,
+            crate::core::socket::SocketPolicy {
+                handshake: crate::core::Cost {
+                    ws_weight: 2,
+                    connections: 1,
+                    ..Default::default()
+                },
+                ping_limit: 5,
+            },
         )
         .await?;
         Ok((
@@ -200,6 +207,22 @@ pub enum ApiEvent {
         /// Exact response evidence.
         result: Result<Response<ApiPayload>, Error>,
     },
+    /// A current Spot subscription event, kept separate from market delivery.
+    UserData {
+        /// Source socket generation.
+        generation: u64,
+        /// Provider subscription identifier.
+        subscription_id: i64,
+        /// Typed execution/account payload; balance events are partial updates.
+        payload: super::event_payloads::UserPayload,
+    },
+    /// Provider shutdown notice; caller initiates a new generation explicitly.
+    ServerShutdown {
+        /// Source generation.
+        generation: u64,
+        /// Exact shutdown notice, retained without a continuity assertion.
+        payload: UnknownMessage,
+    },
     /// Uncorrelated or future API event, explicitly preserved.
     Unknown {
         /// Socket generation.
@@ -229,10 +252,53 @@ impl ApiEvents {
             SocketEvent::Established(g) => ApiEvent::Established(g),
             SocketEvent::Retired(g) => ApiEvent::Retired(g),
             SocketEvent::Gap { generation, error } => ApiEvent::Gap { generation, error },
-            SocketEvent::Data { generation, value } => ApiEvent::Unknown {
-                generation,
-                payload: value.into(),
-            },
+            SocketEvent::Data { generation, value } => {
+                let notice = value.get("event").unwrap_or(&value);
+                if notice.get("e").and_then(serde_json::Value::as_str) == Some("serverShutdown") {
+                    if notice
+                        .get("E")
+                        .and_then(serde_json::Value::as_i64)
+                        .is_none()
+                    {
+                        self.inner.stop();
+                        ApiEvent::Gap {
+                            generation,
+                            error: Error::Gap("malformed shutdown notice"),
+                        }
+                    } else {
+                        ApiEvent::ServerShutdown {
+                            generation,
+                            payload: value.into(),
+                        }
+                    }
+                } else if let Some(event) = value.get("event") {
+                    let decoded = value
+                        .get("subscriptionId")
+                        .and_then(serde_json::Value::as_i64)
+                        .filter(|id| *id >= 0)
+                        .ok_or(Error::Gap("Spot subscription identity"))
+                        .and_then(|id| {
+                            super::event_payloads::user_payload(event.clone())
+                                .map(|payload| (id, payload))
+                        });
+                    match decoded {
+                        Ok((subscription_id, payload)) => ApiEvent::UserData {
+                            generation,
+                            subscription_id,
+                            payload,
+                        },
+                        Err(error) => {
+                            self.inner.stop();
+                            ApiEvent::Gap { generation, error }
+                        }
+                    }
+                } else {
+                    ApiEvent::Unknown {
+                        generation,
+                        payload: value.into(),
+                    }
+                }
+            }
             SocketEvent::Late {
                 generation,
                 id,

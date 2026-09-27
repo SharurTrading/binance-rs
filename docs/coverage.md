@@ -55,7 +55,7 @@ interval boundaries and cooldown expiry; local fixtures count outbound attempts.
 Additional quotas cover funding, history, hourly/daily conversion, and calendar-month
 downloads. These checks prove local admission invariants, not live venue throughput.
 
-The separately invoked credential-free Futures demo probes passed on 2026-09-26:
+The separately invoked credential-free Futures demo probes passed on 2026-09-27:
 REST ping/server time/exchange metadata, WebSocket API depth, and routed Public depth
 stream. No authenticated endpoint or market mutation was exercised. Live execution,
 account modes, conversion, long-range history and asynchronous download jobs still

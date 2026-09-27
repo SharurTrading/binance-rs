@@ -14,15 +14,12 @@ pub(crate) struct SapiCost {
 }
 impl Budgets {
     pub(crate) fn admit_sapi(&self, cost: SapiCost, now: u64) -> Result<(), Error> {
-        let ip_cooldown = self
-            .ip
-            .lock()
-            .map_err(|_| Error::Configuration("IP budget poisoned"))?
-            .cooldown;
-        if now < ip_cooldown {
-            return Err(Error::Admission {
-                retry_after: Duration::from_millis(ip_cooldown - now),
-            });
+        {
+            let ip = self
+                .ip
+                .lock()
+                .map_err(|_| Error::Configuration("IP budget poisoned"))?;
+            ip.check_cooldown(now)?;
         }
         let owner = if cost.uid { &self.account } else { &self.ip };
         let mut state = owner
@@ -71,6 +68,12 @@ impl Budgets {
         now: u64,
         status: u16,
     ) -> Result<(), Error> {
+        if status == 418 && e.retry_after.is_none() {
+            self.ip
+                .lock()
+                .map_err(|_| Error::Configuration("IP budget poisoned"))?
+                .cooldown_timing_unknown = true;
+        }
         let Some(cost) = cost.sapi else {
             return self.observe(e, now, false);
         };

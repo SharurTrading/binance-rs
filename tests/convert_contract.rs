@@ -272,3 +272,35 @@ async fn uncertain_limit_cancellation_retains_native_order_identity() {
     assert_eq!(fixture.attempts(), 1);
     fixture.finish().await;
 }
+
+#[tokio::test]
+async fn ban_without_retry_timing_does_not_fabricate_permission_to_send() {
+    let budgets = binance_client::Budgets::sapi().unwrap();
+    let fixture = HttpFixture::new(
+        418,
+        "Retry-After: malformed\r\n",
+        r#"{"code":-1003}"#,
+        None,
+        false,
+    )
+    .await;
+    let client =
+        convert::RestClient::new(config().budgets(budgets).rest_url(&fixture.url).unwrap())
+            .unwrap();
+    let request = convert::rest_requests::ListAllConvertPairs::new();
+    assert_eq!(
+        client
+            .list_all_convert_pairs(&request, deadline())
+            .await
+            .unwrap_err()
+            .outcome(),
+        Some(Outcome::ReadFailed)
+    );
+    let error = client
+        .list_all_convert_pairs(&request, deadline())
+        .await
+        .unwrap_err();
+    assert_eq!(error.outcome(), Some(Outcome::NotSent));
+    assert_eq!(fixture.attempts(), 1);
+    fixture.finish().await;
+}

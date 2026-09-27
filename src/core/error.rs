@@ -125,6 +125,11 @@ pub enum Error {
         /// Earliest estimated delay for a new attempt; no automatic retry is performed.
         retry_after: Duration,
     },
+    /// A venue IP ban supplied no valid retry timing. No expiry is invented;
+    /// all clients sharing this owner refuse sends until the caller verifies
+    /// restored venue authority and supplies a fresh explicit budget owner.
+    #[error("venue IP cooldown timing is unknown")]
+    CooldownTimingUnknown,
     /// An unsent command expired.
     #[error("deadline expired before sending {0}")]
     Expired(&'static str),

@@ -110,9 +110,23 @@ pub(super) struct State {
     // Each counter is re-derivable: release it at the end of its aligned venue interval.
     counts: BTreeMap<&'static str, (u64, u64)>,
     pub(super) cooldown: u64,
+    pub(super) cooldown_timing_unknown: bool,
     observed_weight: (u64, u64),
     pub(super) endpoints: BTreeMap<(&'static str, u64), (u64, u64)>,
     pub(super) endpoint_cooldown: BTreeMap<&'static str, u64>,
+}
+impl State {
+    pub(super) fn check_cooldown(&self, now: u64) -> Result<(), Error> {
+        if self.cooldown_timing_unknown {
+            return Err(Error::CooldownTimingUnknown);
+        }
+        if now < self.cooldown {
+            return Err(Error::Admission {
+                retry_after: Duration::from_millis(self.cooldown - now),
+            });
+        }
+        Ok(())
+    }
 }
 
 /// Shared venue budgets. Clones share both IP and account evidence.
@@ -202,11 +216,7 @@ impl Budgets {
             .account
             .lock()
             .map_err(|_| Error::Configuration("account budget poisoned"))?;
-        if now < ip.cooldown {
-            return Err(Error::Admission {
-                retry_after: Duration::from_millis(ip.cooldown - now),
-            });
-        }
+        ip.check_cooldown(now)?;
         let ip_cost = self.ip_cost(c);
         let ws_cost = vec![(
             "weight",

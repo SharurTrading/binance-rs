@@ -42,6 +42,9 @@ owners. SAPI admissions do not charge Spot/Futures aggregate counters. Response
 `X-SAPI-USED-IP-WEIGHT-1M`, `X-SAPI-USED-UID-WEIGHT-1M`, and `Retry-After` evidence
 updates the originating endpoint scope before attempting to read its body.
 A documented `418` IP ban additionally blocks every shared endpoint/account owner.
+Missing/malformed ban retry timing produces `CooldownTimingUnknown` on subsequent
+admission; no expiry is invented. The caller verifies restored venue authority
+before supplying a fresh explicit owner.
 Admission refuses immediately; it never queues or retries.
 
 Configuration uses the documented production SAPI host, milliseconds, caller

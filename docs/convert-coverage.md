@@ -42,7 +42,9 @@ SAPI admission shares the endpoint IP/UID owners described in
 [Wallet coverage](wallet-coverage.md). Each endpoint independently charges its
 published scope and weight. Header evidence and `Retry-After` update the originating
 scope before reading the body. A `418` IP ban applies across endpoint and UID
-owners sharing that IP. No Spot/Futures aggregate budget is borrowed.
+owners sharing that IP. Missing/malformed ban retry timing refuses subsequent sends
+with `CooldownTimingUnknown`; no retry delay or restored authority is fabricated.
+No Spot/Futures aggregate budget is borrowed.
 Clients start no tasks or hidden runtime. Production SAPI uses HTTPS, explicit
 credentials/proxies and caller deadlines; dependency retries are disabled.
 

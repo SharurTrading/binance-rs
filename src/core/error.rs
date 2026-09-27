@@ -31,6 +31,8 @@ pub struct RateEvidence {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct ResponseMeta {
+    /// Caller-supplied order identities keyed by parameter paths, including batch indices.
+    pub client_order_ids: BTreeMap<String, String>,
     /// HTTP-equivalent status.
     pub status: u16,
     /// The operation name; never a signed URI.
@@ -53,6 +55,8 @@ pub struct Response<T> {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct VenueFailure {
+    /// Caller-supplied order identities retained for reconciliation.
+    pub client_order_ids: BTreeMap<String, String>,
     /// HTTP-equivalent status.
     pub status: u16,
     /// Operation identity, excluding parameters and secrets.
@@ -96,6 +100,8 @@ pub enum Error {
     /// Transport, response-body, or payload decoding failed.
     #[error("{operation} failed with {outcome:?}")]
     Transport {
+        /// Caller-supplied order identities retained after uncertain sends.
+        client_order_ids: BTreeMap<String, String>,
         /// Operation identity.
         operation: &'static str,
         /// The strongest outcome supported by the evidence.
@@ -118,6 +124,16 @@ pub enum Error {
 }
 
 impl Error {
+    pub(crate) fn with_order_ids(mut self, ids: BTreeMap<String, String>) -> Self {
+        match &mut self {
+            Self::Venue(v) => v.client_order_ids = ids,
+            Self::Transport {
+                client_order_ids, ..
+            } => *client_order_ids = ids,
+            _ => (),
+        }
+        self
+    }
     /// The execution outcome, where this error belongs to an operation.
     #[must_use]
     pub fn outcome(&self) -> Option<Outcome> {
@@ -137,13 +153,24 @@ pub(crate) fn failure(
     value: &serde_json::Value,
     rates: RateEvidence,
 ) -> Error {
+    failure_classified(
+        operation,
+        mutation,
+        status,
+        value,
+        rates,
+        futures_definitive(status, value),
+    )
+}
+
+pub(crate) fn futures_definitive(status: u16, value: &serde_json::Value) -> bool {
     let code = value.get("code").and_then(serde_json::Value::as_i64);
     let msg = value
         .get("msg")
         .or_else(|| value.get("message"))
         .and_then(serde_json::Value::as_str);
     // Only documented execution evidence is definitive. Unknown future codes stay unknown.
-    let definitive = code.is_some_and(|c| {
+    code.is_some_and(|c| {
         matches!(
             c,
             -1008
@@ -192,7 +219,33 @@ pub(crate) fn failure(
                 "Service Unavailable."
                     | "Internal error; unable to process your request. Please try again."
             )
-        ));
+        ))
+}
+
+pub(crate) fn failure_for(
+    op: super::Operation,
+    status: u16,
+    value: &serde_json::Value,
+    rates: RateEvidence,
+) -> Error {
+    failure_classified(
+        op.name,
+        op.mutation,
+        status,
+        value,
+        rates,
+        (op.definitive)(status, value),
+    )
+}
+fn failure_classified(
+    operation: &'static str,
+    mutation: bool,
+    status: u16,
+    value: &serde_json::Value,
+    rates: RateEvidence,
+    definitive: bool,
+) -> Error {
+    let code = value.get("code").and_then(serde_json::Value::as_i64);
     let outcome = if !mutation {
         Outcome::ReadFailed
     } else if definitive {
@@ -201,6 +254,7 @@ pub(crate) fn failure(
         Outcome::Unknown
     };
     Error::Venue(Box::new(VenueFailure {
+        client_order_ids: BTreeMap::new(),
         status,
         operation,
         code,

@@ -41,6 +41,11 @@ macro_rules! identity {
     };
 }
 identity!(
+    Asset,
+    "A provider asset identity, including Unicode; never a reporting currency selection.",
+    |s: &str| !s.is_empty() && !s.chars().any(char::is_control)
+);
+identity!(
     Symbol,
     "A provider-supplied symbol; never infer assets from its spelling.",
     |s: &str| !s.is_empty() && !s.chars().any(char::is_control)

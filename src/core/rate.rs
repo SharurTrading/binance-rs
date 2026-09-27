@@ -20,6 +20,14 @@ pub struct BudgetLimits {
     pub orders_per_ten_seconds: u64,
     /// Account order count per minute.
     pub orders_per_minute: u64,
+    /// Optional account daily order limit; absent for Futures.
+    pub orders_per_day: Option<u64>,
+    /// Optional REST raw-request limit per five minutes.
+    pub raw_requests_per_five_minutes: Option<u64>,
+    /// Optional WebSocket connection-attempt limit per five minutes.
+    pub connections_per_five_minutes: Option<u64>,
+    /// Whether REST and WebSocket request weight share one IP counter.
+    pub shared_request_weight: bool,
 }
 impl BudgetLimits {
     /// Binance's documented production USDⓈ-M limits (conservative schema baseline).
@@ -30,6 +38,34 @@ impl BudgetLimits {
             ws_weight_per_minute: 2400,
             orders_per_ten_seconds: 300,
             orders_per_minute: 1200,
+            orders_per_day: None,
+            raw_requests_per_five_minutes: None,
+            connections_per_five_minutes: None,
+            shared_request_weight: false,
+        }
+    }
+    /// COIN-M's current shared UM/CM limits after the June 2026 integration.
+    /// Reuse the same `Budgets` owner for both Futures products on one IP/account.
+    #[must_use]
+    pub fn coinm() -> Self {
+        Self {
+            shared_request_weight: true,
+            ..Self::usdm()
+        }
+    }
+    /// Spot's documented baseline; replace account limits with exchange evidence.
+    /// Sources: Spot WebSocket rate limits and the March 2026 `RAW_REQUESTS` update.
+    #[must_use]
+    pub fn spot() -> Self {
+        Self {
+            weight_per_minute: 6000,
+            ws_weight_per_minute: 6000,
+            orders_per_ten_seconds: 50,
+            orders_per_minute: u64::MAX,
+            orders_per_day: Some(160_000),
+            raw_requests_per_five_minutes: Some(300_000),
+            connections_per_five_minutes: Some(300),
+            shared_request_weight: true,
         }
     }
     /// Set a venue-reported IP minute weight limit.
@@ -58,6 +94,9 @@ pub(crate) struct Cost {
     pub weight: u64,
     pub orders10: u64,
     pub orders60: u64,
+    pub orders_day: u64,
+    pub raw_requests: u64,
+    pub connections: u64,
     pub ws_weight: u64,
     pub funding: bool,
     pub history: bool,
@@ -70,6 +109,7 @@ struct State {
     // Each counter is re-derivable: release it at the end of its aligned venue interval.
     counts: BTreeMap<&'static str, (u64, u64)>,
     cooldown: u64,
+    observed_weight: (u64, u64),
 }
 
 /// Shared venue budgets. Clones share both IP and account evidence.
@@ -98,6 +138,9 @@ impl Budgets {
             || limits.weight_per_minute == 0
             || limits.orders_per_ten_seconds == 0
             || limits.orders_per_minute == 0
+            || limits.orders_per_day == Some(0)
+            || limits.raw_requests_per_five_minutes == Some(0)
+            || limits.connections_per_five_minutes == Some(0)
         {
             return Err(Error::Configuration("zero rate budget"));
         }
@@ -119,6 +162,27 @@ impl Budgets {
             limits: self.limits.clone(),
         }
     }
+    fn ip_cost(&self, c: Cost) -> Vec<(&'static str, u64, u64, u64)> {
+        let weight = if self.limits.shared_request_weight {
+            c.weight.max(c.ws_weight)
+        } else {
+            c.weight
+        };
+        let mut ip_cost = vec![("weight", 60_000, self.limits.weight_per_minute, weight)];
+        if let Some(limit) = self.limits.raw_requests_per_five_minutes {
+            ip_cost.push(("raw", 300_000, limit, c.raw_requests));
+        }
+        if let Some(limit) = self.limits.connections_per_five_minutes {
+            ip_cost.push(("connections", 300_000, limit, c.connections));
+        }
+        if c.funding {
+            ip_cost.push(("funding", 300_000, 500, 1));
+        }
+        if c.history {
+            ip_cost.push(("history", 300_000, 1000, 1));
+        }
+        ip_cost
+    }
     pub(crate) fn admit(&self, c: Cost, now: u64) -> Result<(), Error> {
         let mut ip = self
             .ip
@@ -137,18 +201,16 @@ impl Budgets {
                 retry_after: Duration::from_millis(ip.cooldown - now),
             });
         }
-        let mut ip_cost = vec![("weight", 60_000, self.limits.weight_per_minute, c.weight)];
-        if c.funding {
-            ip_cost.push(("funding", 300_000, 500, 1));
-        }
-        if c.history {
-            ip_cost.push(("history", 300_000, 1000, 1));
-        }
+        let ip_cost = self.ip_cost(c);
         let ws_cost = vec![(
             "weight",
             60_000,
             self.limits.ws_weight_per_minute,
-            c.ws_weight,
+            if self.limits.shared_request_weight {
+                0
+            } else {
+                c.ws_weight
+            },
         )];
         let mut account_cost = vec![
             (
@@ -164,6 +226,9 @@ impl Budgets {
                 c.orders60,
             ),
         ];
+        if let Some(limit) = self.limits.orders_per_day {
+            account_cost.push(("ordersDay", 86_400_000, limit, c.orders_day));
+        }
         if c.quote {
             account_cost.extend([
                 ("quoteHour", 3_600_000, 360, 1),
@@ -215,6 +280,34 @@ impl Budgets {
         }
         Ok(())
     }
+    // Refund only venue-documented successful zero-weight operations, never below evidence.
+    pub(crate) fn refund_weight(
+        &self,
+        amount: u64,
+        now: u64,
+        websocket: bool,
+    ) -> Result<(), Error> {
+        let owner = if websocket && !self.limits.shared_request_weight {
+            &self.ws_ip
+        } else {
+            &self.ip
+        };
+        let mut state = owner
+            .lock()
+            .map_err(|_| Error::Configuration("weight owner poisoned"))?;
+        let bucket = now / 60_000;
+        let floor = if state.observed_weight.0 == bucket {
+            state.observed_weight.1
+        } else {
+            0
+        };
+        if let Some(current) = state.counts.get_mut("weight")
+            && current.0 == bucket
+        {
+            current.1 = current.1.saturating_sub(amount).max(floor);
+        }
+        Ok(())
+    }
     pub(crate) fn observe(&self, e: &RateEvidence, now: u64, websocket: bool) -> Result<(), Error> {
         let mut ip = self
             .ip
@@ -239,14 +332,25 @@ impl Budgets {
         for (name, count) in &e.counters {
             let (state, key, window) = match name.as_str() {
                 "x-mbx-used-weight-1m" => (
-                    if websocket { &mut ws_ip } else { &mut ip },
+                    if websocket && !self.limits.shared_request_weight {
+                        &mut ws_ip
+                    } else {
+                        &mut ip
+                    },
                     "weight",
                     60_000,
                 ),
                 "x-mbx-order-count-10s" => (&mut account, "orders10", 10_000),
                 "x-mbx-order-count-1m" => (&mut account, "orders60", 60_000),
+                "x-mbx-order-count-1d" => (&mut account, "ordersDay", 86_400_000),
                 _ => continue,
             };
+            if key == "weight" {
+                if state.observed_weight.0 != now / window {
+                    state.observed_weight = (now / window, 0);
+                }
+                state.observed_weight.1 = state.observed_weight.1.max(*count);
+            }
             let current = state.counts.entry(key).or_default();
             if current.0 != now / window {
                 *current = (now / window, 0);
@@ -277,9 +381,16 @@ fn monthly_download(
     let key = match kind {
         1 => "downloadOrders",
         2 => "downloadTrades",
-        _ => "downloadIncome",
+        3 => "downloadIncome",
+        4 => "downloadCMOrders",
+        5 => "downloadCMTrades",
+        _ => "downloadCMIncome",
     };
-    let limit = if kind == 1 { 10 } else { 5 };
+    let limit = match kind {
+        1 => 10,
+        4..=6 => 8,
+        _ => 5,
+    };
     let current = account.counts.get(key).copied().unwrap_or_default();
     if current.0 == bucket && current.1 >= limit {
         let (year, month) = if dt.month() == time::Month::December {

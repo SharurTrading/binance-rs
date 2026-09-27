@@ -1,0 +1,3861 @@
+{
+  "checked": "2026-09-27",
+  "source": "https://developers.binance.info/en/docs/catalog/core-trading-spot-trading/api/ws-streams/1.0.0/schema.yaml",
+  "sha256": "64b1b7ffd8e0756497fbe5fc801fb4ae954f6dac03778090fcefebe78521074f",
+  "operations": [
+    {
+      "operationId": "aggTrade",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "a": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "f": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "l": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "m": {
+                    "type": "boolean"
+                  },
+                  "M": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "a",
+                  "p",
+                  "q",
+                  "f",
+                  "l",
+                  "T",
+                  "m",
+                  "M"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "a": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "f": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "l": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "m": {
+                        "type": "boolean"
+                      },
+                      "M": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "a",
+                      "p",
+                      "q",
+                      "f",
+                      "l",
+                      "T",
+                      "m",
+                      "M"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@aggTrade",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "allMarketRollingWindowTicker",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "windowSize",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1h",
+              "4h",
+              "1d"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "e": {
+                      "type": "string"
+                    },
+                    "E": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "s": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "p": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "P": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "o": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "h": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "l": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "c": {
+                      "type": "string"
+                    },
+                    "w": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "v": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "q": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "O": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "C": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "F": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "L": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "n": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  },
+                  "required": [
+                    "e",
+                    "E",
+                    "s",
+                    "p",
+                    "P",
+                    "o",
+                    "h",
+                    "l",
+                    "c",
+                    "w",
+                    "v",
+                    "q",
+                    "O",
+                    "C",
+                    "F",
+                    "L",
+                    "n"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "e": {
+                          "type": "string"
+                        },
+                        "E": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "s": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "p": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "P": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "o": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "h": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "l": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "c": {
+                          "type": "string"
+                        },
+                        "w": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "v": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "q": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "O": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "C": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "F": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "L": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "n": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "required": [
+                        "e",
+                        "E",
+                        "s",
+                        "p",
+                        "P",
+                        "o",
+                        "h",
+                        "l",
+                        "c",
+                        "w",
+                        "v",
+                        "q",
+                        "O",
+                        "C",
+                        "F",
+                        "L",
+                        "n"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/!ticker_{windowSize}@arr",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "allMiniTicker",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "e": {
+                      "type": "string"
+                    },
+                    "E": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "s": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "c": {
+                      "type": "string"
+                    },
+                    "o": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "h": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "l": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "v": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "q": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "required": [
+                    "e",
+                    "E",
+                    "s",
+                    "c",
+                    "o",
+                    "h",
+                    "l",
+                    "v",
+                    "q"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "e": {
+                          "type": "string"
+                        },
+                        "E": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "s": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "c": {
+                          "type": "string"
+                        },
+                        "o": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "h": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "l": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "v": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "q": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "e",
+                        "E",
+                        "s",
+                        "c",
+                        "o",
+                        "h",
+                        "l",
+                        "v",
+                        "q"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/!miniTicker@arr",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "avgPrice",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "i": {
+                    "type": "string"
+                  },
+                  "w": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "i",
+                  "w",
+                  "T"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "i": {
+                        "type": "string"
+                      },
+                      "w": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "i",
+                      "w",
+                      "T"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@avgPrice",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "bookTicker",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "u": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "b": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "B": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "a": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "A": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "u": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "b": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "a": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "A": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@bookTicker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "diffBookDepth",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "updateSpeed",
+          "in": "path",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "100ms"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "U": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "u": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "b": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ],
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "a": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ],
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "U",
+                  "u",
+                  "b",
+                  "a"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "U": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "u": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "b": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ],
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "a": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ],
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "U",
+                      "u",
+                      "b",
+                      "a"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@depth@{updateSpeed}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "kline",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1s",
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "6h",
+              "8h",
+              "12h",
+              "1d",
+              "3d",
+              "1w",
+              "1M"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "k": {
+                    "type": "object",
+                    "properties": {
+                      "t": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "i": {
+                        "type": "string"
+                      },
+                      "f": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "L": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "n": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "x": {
+                        "type": "boolean"
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "V": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "Q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "k"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "k": {
+                        "type": "object",
+                        "properties": {
+                          "t": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "T": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "s": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "i": {
+                            "type": "string"
+                          },
+                          "f": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "L": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "o": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "c": {
+                            "type": "string"
+                          },
+                          "h": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "l": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "v": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "n": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "x": {
+                            "type": "boolean"
+                          },
+                          "q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "V": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "Q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "B": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "k"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@kline_{interval}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "klineOffset",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1s",
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "6h",
+              "8h",
+              "12h",
+              "1d",
+              "3d",
+              "1w",
+              "1M"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "k": {
+                    "type": "object",
+                    "properties": {
+                      "t": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "i": {
+                        "type": "string"
+                      },
+                      "f": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "L": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "n": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "x": {
+                        "type": "boolean"
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "V": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "Q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "k"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "k": {
+                        "type": "object",
+                        "properties": {
+                          "t": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "T": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "s": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "i": {
+                            "type": "string"
+                          },
+                          "f": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "L": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "o": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "c": {
+                            "type": "string"
+                          },
+                          "h": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "l": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "v": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "n": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "x": {
+                            "type": "boolean"
+                          },
+                          "q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "V": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "Q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "B": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "k"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@kline_{interval}@+08:00",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "miniTicker",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "c": {
+                    "type": "string"
+                  },
+                  "o": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "h": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "l": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "v": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "c",
+                  "o",
+                  "h",
+                  "l",
+                  "v",
+                  "q"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "c",
+                      "o",
+                      "h",
+                      "l",
+                      "v",
+                      "q"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@miniTicker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "partialBookDepth",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "levels",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              5,
+              10,
+              20
+            ],
+            "x-decimal": true
+          }
+        },
+        {
+          "name": "updateSpeed",
+          "in": "path",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "100ms"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lastUpdateId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "bids": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "x-prefixItems": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ],
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "asks": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "x-prefixItems": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ],
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "lastUpdateId",
+                  "bids",
+                  "asks"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "lastUpdateId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "bids": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "x-prefixItems": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ],
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "asks": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "x-prefixItems": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ],
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "lastUpdateId",
+                      "bids",
+                      "asks"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@depth{levels}@{updateSpeed}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "referencePrice",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "r": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "t": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "e",
+                  "s",
+                  "r",
+                  "t"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "r": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "t": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "s",
+                      "r",
+                      "t"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@referencePrice",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "rollingWindowTicker",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "windowSize",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1h",
+              "4h",
+              "1d"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "P": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "o": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "h": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "l": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "c": {
+                    "type": "string"
+                  },
+                  "w": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "v": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "O": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "C": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "F": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "L": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "n": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "p",
+                  "P",
+                  "o",
+                  "h",
+                  "l",
+                  "c",
+                  "w",
+                  "v",
+                  "q",
+                  "O",
+                  "C",
+                  "F",
+                  "L",
+                  "n"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "P": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "w": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "O": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "C": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "F": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "L": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "n": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "p",
+                      "P",
+                      "o",
+                      "h",
+                      "l",
+                      "c",
+                      "w",
+                      "v",
+                      "q",
+                      "O",
+                      "C",
+                      "F",
+                      "L",
+                      "n"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@ticker_{windowSize}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "ticker",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "P": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "w": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "x": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "c": {
+                    "type": "string"
+                  },
+                  "Q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "b": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "B": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "a": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "A": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "o": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "h": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "l": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "v": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "O": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "C": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "F": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "L": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "n": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "p",
+                  "P",
+                  "w",
+                  "x",
+                  "c",
+                  "Q",
+                  "b",
+                  "B",
+                  "a",
+                  "A",
+                  "o",
+                  "h",
+                  "l",
+                  "v",
+                  "q",
+                  "O",
+                  "C",
+                  "F",
+                  "L",
+                  "n"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "P": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "w": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "x": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "Q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "b": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "a": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "A": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "O": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "C": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "F": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "L": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "n": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "p",
+                      "P",
+                      "w",
+                      "x",
+                      "c",
+                      "Q",
+                      "b",
+                      "B",
+                      "a",
+                      "A",
+                      "o",
+                      "h",
+                      "l",
+                      "v",
+                      "q",
+                      "O",
+                      "C",
+                      "F",
+                      "L",
+                      "n"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@ticker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "trade",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "t": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "m": {
+                    "type": "boolean"
+                  },
+                  "M": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "t",
+                  "p",
+                  "q",
+                  "T",
+                  "m",
+                  "M"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "t": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "m": {
+                        "type": "boolean"
+                      },
+                      "M": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "t",
+                      "p",
+                      "q",
+                      "T",
+                      "m",
+                      "M"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@trade",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "blockTrade",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "t": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "m": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "t",
+                  "p",
+                  "q",
+                  "T",
+                  "m"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "t": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "m": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "t",
+                      "p",
+                      "q",
+                      "T",
+                      "m"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@blockTrade",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    }
+  ],
+  "components": {
+    "schemas": {
+      "balanceUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "balanceUpdate"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "a": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          },
+          "d": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "T": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "a",
+          "d",
+          "T"
+        ]
+      },
+      "eventStreamTerminated": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "eventStreamTerminated"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "e",
+          "E"
+        ]
+      },
+      "executionReport": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "executionReport"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "s": {
+            "type": "string",
+            "x-rust-type": "crate::Symbol"
+          },
+          "c": {
+            "type": "string",
+            "x-rust-type": "ClientOrderId"
+          },
+          "S": {
+            "type": "string"
+          },
+          "o": {
+            "type": "string"
+          },
+          "f": {
+            "type": "string"
+          },
+          "q": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "p": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "P": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "F": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "g": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "C": {
+            "type": "string"
+          },
+          "x": {
+            "type": "string"
+          },
+          "X": {
+            "type": "string"
+          },
+          "r": {
+            "type": "string"
+          },
+          "i": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "l": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "z": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "L": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "n": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "N": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          },
+          "T": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "t": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "v": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "I": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "w": {
+            "type": "boolean"
+          },
+          "m": {
+            "type": "boolean"
+          },
+          "M": {
+            "type": "boolean"
+          },
+          "O": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Z": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "Y": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "Q": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "W": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "V": {
+            "type": "string"
+          },
+          "d": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "D": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "j": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "J": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "A": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "B": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "u": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "U": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Cs": {
+            "type": "string"
+          },
+          "pl": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "pL": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "pY": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "b": {
+            "type": "string"
+          },
+          "a": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "k": {
+            "type": "string"
+          },
+          "uS": {
+            "type": "boolean"
+          },
+          "gP": {
+            "type": "string"
+          },
+          "gOT": {
+            "type": "string"
+          },
+          "gOV": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gp": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "eR": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "s",
+          "c",
+          "S",
+          "o",
+          "x",
+          "X",
+          "i",
+          "q",
+          "p",
+          "z",
+          "l",
+          "L",
+          "n",
+          "T"
+        ]
+      },
+      "externalLockUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "externalLockUpdate"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "a": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          },
+          "d": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "T": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "a",
+          "T"
+        ]
+      },
+      "listStatus": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "listStatus"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "s": {
+            "type": "string",
+            "x-rust-type": "crate::Symbol"
+          },
+          "g": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "c": {
+            "type": "string"
+          },
+          "l": {
+            "type": "string"
+          },
+          "L": {
+            "type": "string"
+          },
+          "r": {
+            "type": "string"
+          },
+          "C": {
+            "type": "string"
+          },
+          "T": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "O": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "s": {
+                  "type": "string",
+                  "x-rust-type": "crate::Symbol"
+                },
+                "i": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "c": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "T"
+        ]
+      },
+      "outboundAccountPosition": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "outboundAccountPosition"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "u": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "B": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "f": {
+                  "type": "string",
+                  "x-decimal": true
+                },
+                "l": {
+                  "type": "string",
+                  "x-decimal": true
+                }
+              },
+              "required": [
+                "a",
+                "f",
+                "l"
+              ]
+            }
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "u",
+          "B"
+        ]
+      },
+      "User Data Stream Events": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/balanceUpdate"
+          },
+          {
+            "$ref": "#/components/schemas/eventStreamTerminated"
+          },
+          {
+            "$ref": "#/components/schemas/executionReport"
+          },
+          {
+            "$ref": "#/components/schemas/externalLockUpdate"
+          },
+          {
+            "$ref": "#/components/schemas/listStatus"
+          },
+          {
+            "$ref": "#/components/schemas/outboundAccountPosition"
+          }
+        ]
+      }
+    }
+  }
+}

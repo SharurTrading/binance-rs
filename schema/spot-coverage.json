@@ -1,0 +1,482 @@
+{
+  "rest": [
+    {
+      "name": "accountCommission",
+      "method": "GET",
+      "path": "/api/v3/account/commission",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account"
+    },
+    {
+      "name": "allOrders",
+      "method": "GET",
+      "path": "/api/v3/allOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account"
+    },
+    {
+      "name": "getAccount",
+      "method": "GET",
+      "path": "/api/v3/account",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account"
+    },
+    {
+      "name": "getOpenOrders",
+      "method": "GET",
+      "path": "/api/v3/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account"
+    },
+    {
+      "name": "deleteOpenOrders",
+      "method": "DELETE",
+      "path": "/api/v3/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade"
+    },
+    {
+      "name": "getOrder",
+      "method": "GET",
+      "path": "/api/v3/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account"
+    },
+    {
+      "name": "deleteOrder",
+      "method": "DELETE",
+      "path": "/api/v3/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade"
+    },
+    {
+      "name": "newOrder",
+      "method": "POST",
+      "path": "/api/v3/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade"
+    },
+    {
+      "name": "myTrades",
+      "method": "GET",
+      "path": "/api/v3/myTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account"
+    },
+    {
+      "name": "rateLimitOrder",
+      "method": "GET",
+      "path": "/api/v3/rateLimit/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account"
+    },
+    {
+      "name": "exchangeInfo",
+      "method": "GET",
+      "path": "/api/v3/exchangeInfo",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/general"
+    },
+    {
+      "name": "executionRules",
+      "method": "GET",
+      "path": "/api/v3/executionRules",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/general"
+    },
+    {
+      "name": "ping",
+      "method": "GET",
+      "path": "/api/v3/ping",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/general"
+    },
+    {
+      "name": "time",
+      "method": "GET",
+      "path": "/api/v3/time",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/general"
+    },
+    {
+      "name": "aggTrades",
+      "method": "GET",
+      "path": "/api/v3/aggTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "avgPrice",
+      "method": "GET",
+      "path": "/api/v3/avgPrice",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "depth",
+      "method": "GET",
+      "path": "/api/v3/depth",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "getTrades",
+      "method": "GET",
+      "path": "/api/v3/trades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "historicalTrades",
+      "method": "GET",
+      "path": "/api/v3/historicalTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "historicalBlockTrades",
+      "method": "GET",
+      "path": "/api/v3/historicalBlockTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "klines",
+      "method": "GET",
+      "path": "/api/v3/klines",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "ticker",
+      "method": "GET",
+      "path": "/api/v3/ticker",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "ticker24hr",
+      "method": "GET",
+      "path": "/api/v3/ticker/24hr",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "tickerBookTicker",
+      "method": "GET",
+      "path": "/api/v3/ticker/bookTicker",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "tickerPrice",
+      "method": "GET",
+      "path": "/api/v3/ticker/price",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "tickerTradingDay",
+      "method": "GET",
+      "path": "/api/v3/ticker/tradingDay",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "uiKlines",
+      "method": "GET",
+      "path": "/api/v3/uiKlines",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "referencePrice",
+      "method": "GET",
+      "path": "/api/v3/referencePrice",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "referencePriceCalculation",
+      "method": "GET",
+      "path": "/api/v3/referencePrice/calculation",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/market"
+    },
+    {
+      "name": "orderTest",
+      "method": "POST",
+      "path": "/api/v3/order/test",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade"
+    }
+  ],
+  "ws": [
+    {
+      "name": "accountCommission",
+      "method": "POST",
+      "path": "/account.commission",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account"
+    },
+    {
+      "name": "accountRateLimitsOrders",
+      "method": "POST",
+      "path": "/account.rateLimits.orders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account"
+    },
+    {
+      "name": "accountStatus",
+      "method": "POST",
+      "path": "/account.status",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account"
+    },
+    {
+      "name": "allOrders",
+      "method": "POST",
+      "path": "/allOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account"
+    },
+    {
+      "name": "myTrades",
+      "method": "POST",
+      "path": "/myTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account"
+    },
+    {
+      "name": "openOrdersStatus",
+      "method": "POST",
+      "path": "/openOrders.status",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account"
+    },
+    {
+      "name": "orderStatus",
+      "method": "POST",
+      "path": "/order.status",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/account"
+    },
+    {
+      "name": "exchangeInfo",
+      "method": "POST",
+      "path": "/exchangeInfo",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general"
+    },
+    {
+      "name": "executionRules",
+      "method": "POST",
+      "path": "/executionRules",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general"
+    },
+    {
+      "name": "ping",
+      "method": "POST",
+      "path": "/ping",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general"
+    },
+    {
+      "name": "time",
+      "method": "POST",
+      "path": "/time",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general"
+    },
+    {
+      "name": "avgPrice",
+      "method": "POST",
+      "path": "/avgPrice",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "depth",
+      "method": "POST",
+      "path": "/depth",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "klines",
+      "method": "POST",
+      "path": "/klines",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "ticker",
+      "method": "POST",
+      "path": "/ticker",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "ticker24hr",
+      "method": "POST",
+      "path": "/ticker.24hr",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "tickerBook",
+      "method": "POST",
+      "path": "/ticker.book",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "tickerPrice",
+      "method": "POST",
+      "path": "/ticker.price",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "tickerTradingDay",
+      "method": "POST",
+      "path": "/ticker.tradingDay",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "tradesAggregate",
+      "method": "POST",
+      "path": "/trades.aggregate",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "tradesHistorical",
+      "method": "POST",
+      "path": "/trades.historical",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "blockTradesHistorical",
+      "method": "POST",
+      "path": "/blockTrades.historical",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "tradesRecent",
+      "method": "POST",
+      "path": "/trades.recent",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "uiKlines",
+      "method": "POST",
+      "path": "/uiKlines",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "referencePrice",
+      "method": "POST",
+      "path": "/referencePrice",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "referencePriceCalculation",
+      "method": "POST",
+      "path": "/referencePrice.calculation",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/market"
+    },
+    {
+      "name": "openOrdersCancelAll",
+      "method": "POST",
+      "path": "/openOrders.cancelAll",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade"
+    },
+    {
+      "name": "orderCancel",
+      "method": "POST",
+      "path": "/order.cancel",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade"
+    },
+    {
+      "name": "orderPlace",
+      "method": "POST",
+      "path": "/order.place",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade"
+    },
+    {
+      "name": "orderTest",
+      "method": "POST",
+      "path": "/order.test",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/trade"
+    },
+    {
+      "name": "sessionSubscriptions",
+      "method": "POST",
+      "path": "/session.subscriptions",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/user-data-stream"
+    },
+    {
+      "name": "userDataStreamSubscribe",
+      "method": "POST",
+      "path": "/userDataStream.subscribe",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/user-data-stream"
+    },
+    {
+      "name": "userDataStreamSubscribeSignature",
+      "method": "POST",
+      "path": "/userDataStream.subscribe.signature",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/user-data-stream"
+    },
+    {
+      "name": "userDataStreamUnsubscribe",
+      "method": "POST",
+      "path": "/userDataStream.unsubscribe",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/user-data-stream"
+    }
+  ],
+  "streams": [
+    {
+      "name": "AggTrade",
+      "path": "/{symbol}@aggTrade",
+      "route": "market",
+      "type": "AggTradeEvent"
+    },
+    {
+      "name": "AllMarketRollingWindowTicker",
+      "path": "/!ticker_{windowSize}@arr",
+      "route": "market",
+      "type": "Vec<AllMarketRollingWindowTickerEventItem>"
+    },
+    {
+      "name": "AllMiniTicker",
+      "path": "/!miniTicker@arr",
+      "route": "market",
+      "type": "Vec<AllMiniTickerEventItem>"
+    },
+    {
+      "name": "AvgPrice",
+      "path": "/{symbol}@avgPrice",
+      "route": "market",
+      "type": "AvgPriceEvent"
+    },
+    {
+      "name": "BookTicker",
+      "path": "/{symbol}@bookTicker",
+      "route": "market",
+      "type": "BookTickerEvent"
+    },
+    {
+      "name": "DiffBookDepth",
+      "path": "/{symbol}@depth@{updateSpeed}",
+      "route": "market",
+      "type": "DiffBookDepthEvent"
+    },
+    {
+      "name": "Kline",
+      "path": "/{symbol}@kline_{interval}",
+      "route": "market",
+      "type": "KlineEvent"
+    },
+    {
+      "name": "KlineOffset",
+      "path": "/{symbol}@kline_{interval}@+08:00",
+      "route": "market",
+      "type": "KlineOffsetEvent"
+    },
+    {
+      "name": "MiniTicker",
+      "path": "/{symbol}@miniTicker",
+      "route": "market",
+      "type": "MiniTickerEvent"
+    },
+    {
+      "name": "PartialBookDepth",
+      "path": "/{symbol}@depth{levels}@{updateSpeed}",
+      "route": "market",
+      "type": "PartialBookDepthEvent"
+    },
+    {
+      "name": "ReferencePrice",
+      "path": "/{symbol}@referencePrice",
+      "route": "market",
+      "type": "ReferencePriceEvent"
+    },
+    {
+      "name": "RollingWindowTicker",
+      "path": "/{symbol}@ticker_{windowSize}",
+      "route": "market",
+      "type": "RollingWindowTickerEvent"
+    },
+    {
+      "name": "Ticker",
+      "path": "/{symbol}@ticker",
+      "route": "market",
+      "type": "TickerEvent"
+    },
+    {
+      "name": "Trade",
+      "path": "/{symbol}@trade",
+      "route": "market",
+      "type": "TradeEvent"
+    },
+    {
+      "name": "BlockTrade",
+      "path": "/{symbol}@blockTrade",
+      "route": "market",
+      "type": "BlockTradeEvent"
+    }
+  ]
+}

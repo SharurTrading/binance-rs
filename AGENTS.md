@@ -139,6 +139,8 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
 `publish = false` remains until an explicitly authorized release PR. Confirm the
 package name, public API, dependency licenses, provider terms/branding, synthetic
 fixtures, and public-safe Git history before publication. Classify the SemVer impact;
-update version, lockfile, changelog, and documentation together. Require reviewed PR
-and post-merge main CI success. Publish only the exact clean merged commit; annotated
-version tags are immutable. No release is implied by repository creation.
+update version, lockfile, and documentation together. Create `CHANGELOG.md` for the
+first crates.io release and maintain it for releases; pre-release development changes
+are recorded in PR descriptions. Require reviewed PR and post-merge main CI success.
+Publish only the exact clean merged commit; annotated version tags are immutable.
+No release is implied by repository creation.

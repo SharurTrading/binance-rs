@@ -50,6 +50,8 @@ impl Request for AccountInformationV2 {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -103,6 +105,8 @@ impl Request for AccountInformationV3 {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -156,6 +160,8 @@ impl Request for FuturesAccountBalanceV2 {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -209,6 +215,8 @@ impl Request for FuturesAccountBalanceV3 {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -262,6 +270,8 @@ impl Request for FuturesAccountConfiguration {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -323,6 +333,8 @@ impl Request for FuturesTradingQuantitativeRulesIndicators {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -376,6 +388,8 @@ impl Request for GetBnbBurnStatus {
         mutation: false,
         weight: 30,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -437,6 +451,8 @@ impl Request for ToggleBnbBurnOnFuturesTrade {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -490,6 +506,8 @@ impl Request for GetCurrentMultiAssetsMode {
         mutation: false,
         weight: 30,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -551,6 +569,8 @@ impl Request for ChangeMultiAssetsMode {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -604,6 +624,8 @@ impl Request for GetCurrentPositionMode {
         mutation: false,
         weight: 30,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -665,6 +687,8 @@ impl Request for ChangePositionMode {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -734,6 +758,8 @@ impl Request for GetDownloadIdForFuturesOrderHistory {
         mutation: true,
         weight: 1000,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -803,6 +829,8 @@ impl Request for GetDownloadIdForFuturesTradeHistory {
         mutation: true,
         weight: 1000,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -872,6 +900,8 @@ impl Request for GetDownloadIdForFuturesTransactionHistory {
         mutation: true,
         weight: 1000,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -933,6 +963,8 @@ impl Request for GetFuturesOrderHistoryDownloadLinkById {
         mutation: false,
         weight: 10,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -994,6 +1026,8 @@ impl Request for GetFuturesTradeDownloadLinkById {
         mutation: false,
         weight: 10,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1055,6 +1089,8 @@ impl Request for GetFuturesTransactionHistoryDownloadLinkById {
         mutation: false,
         weight: 10,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1156,6 +1192,8 @@ impl Request for GetIncomeHistory {
         mutation: false,
         weight: 30,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1247,6 +1285,8 @@ impl Request for NotionalAndLeverageBrackets {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1300,6 +1340,8 @@ impl Request for QueryUserRateLimit {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1361,6 +1403,8 @@ impl Request for SymbolConfiguration {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1422,6 +1466,8 @@ impl Request for UserCommissionRate {
         mutation: false,
         weight: 20,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1483,6 +1529,8 @@ impl Request for AcceptTheOfferedQuote {
         mutation: true,
         weight: 200,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1544,6 +1592,8 @@ impl Request for ListAllConvertPairs {
         mutation: false,
         weight: 20,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1600,6 +1650,8 @@ impl Request for OrderStatus {
         mutation: false,
         weight: 50,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1688,6 +1740,8 @@ impl Request for SendQuoteRequest {
         mutation: true,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1741,6 +1795,8 @@ impl Request for AdlRisk {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1829,6 +1885,8 @@ impl Request for Basis {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1882,6 +1940,8 @@ impl Request for CheckServerTime {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -1930,6 +1990,8 @@ impl Request for CompositeIndexSymbolInformation {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2010,6 +2072,8 @@ impl Request for CompressedAggregateTradesList {
         mutation: false,
         weight: 20,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2103,6 +2167,8 @@ impl Request for ContinuousContractKlineCandlestickData {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2164,6 +2230,8 @@ impl Request for ExchangeInformation {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2236,6 +2304,8 @@ impl Request for GetFundingRateHistory {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2280,6 +2350,8 @@ impl Request for GetFundingRateInfo {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2360,6 +2432,8 @@ impl Request for IndexPriceKlineCandlestickData {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2451,6 +2525,8 @@ impl Request for KlineCandlestickData {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2542,6 +2618,8 @@ impl Request for LongShortRatio {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2598,6 +2676,8 @@ impl Request for MarkPrice {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2678,6 +2758,8 @@ impl Request for MarkPriceKlineCandlestickData {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2737,6 +2819,8 @@ impl Request for AssetIndex {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2801,6 +2885,8 @@ impl Request for OldTradesLookup {
         mutation: false,
         weight: 200,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2854,6 +2940,8 @@ impl Request for OpenInterest {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2934,6 +3022,8 @@ impl Request for OpenInterestStatistics {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -2998,6 +3088,8 @@ impl Request for OrderBook {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3083,6 +3175,8 @@ impl Request for PremiumIndexKlineData {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3142,6 +3236,8 @@ impl Request for QuarterlyContractSettlementPrice {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3190,6 +3286,8 @@ impl Request for QueryIndexPriceConstituents {
         mutation: false,
         weight: 2,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3238,6 +3336,8 @@ impl Request for QueryInsuranceFundBalanceSnapshot {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3294,6 +3394,8 @@ impl Request for RecentTradesList {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3355,6 +3457,8 @@ impl Request for RpiOrderBook {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3403,6 +3507,8 @@ impl Request for SymbolOrderBookTicker {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3451,6 +3557,8 @@ impl Request for SymbolPriceTicker {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3499,6 +3607,8 @@ impl Request for SymbolPriceTickerV2 {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3579,6 +3689,8 @@ impl Request for TakerBuySellVolume {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3626,6 +3738,8 @@ impl Request for TestConnectivity {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3674,6 +3788,8 @@ impl Request for Ticker24hrPriceChangeStatistics {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3754,6 +3870,8 @@ impl Request for TopTraderLongShortRatioAccounts {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3842,6 +3960,8 @@ impl Request for TopTraderLongShortRatioPositions {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3889,6 +4009,8 @@ impl Request for TradingSchedule {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -3945,6 +4067,8 @@ impl Request for ClassicPortfolioMarginAccountInformation {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4046,6 +4170,8 @@ impl Request for AccountTradeList {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4142,6 +4268,8 @@ impl Request for AllOrders {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4214,6 +4342,8 @@ impl Request for AutoCancelAllOpenOrders {
         mutation: true,
         weight: 10,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4283,6 +4413,8 @@ impl Request for CancelAlgoOrder {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4499,6 +4631,8 @@ impl Request for NewAlgoOrder {
         mutation: true,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4606,6 +4740,8 @@ impl Request for QueryAlgoOrder {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4662,6 +4798,8 @@ impl Request for CancelAllAlgoOpenOrders {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4723,6 +4861,8 @@ impl Request for CancelAllOpenOrders {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4803,6 +4943,8 @@ impl Request for CancelMultipleOrders {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4864,6 +5006,8 @@ impl Request for ModifyMultipleOrders {
         mutation: true,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -4925,6 +5069,8 @@ impl Request for PlaceMultipleOrders {
         mutation: true,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5002,6 +5148,8 @@ impl Request for CancelOrder {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5127,6 +5275,8 @@ impl Request for ModifyOrder {
         mutation: true,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5303,6 +5453,8 @@ impl Request for NewOrder {
         mutation: true,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5414,6 +5566,8 @@ impl Request for QueryOrder {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5478,6 +5632,8 @@ impl Request for ChangeInitialLeverage {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5550,6 +5706,8 @@ impl Request for ChangeMarginType {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5627,6 +5785,8 @@ impl Request for CurrentAllAlgoOpenOrders {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5688,6 +5848,8 @@ impl Request for CurrentAllOpenOrders {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5741,6 +5903,8 @@ impl Request for FuturesTradfiPerpsContract {
         mutation: true,
         weight: 50,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5842,6 +6006,8 @@ impl Request for GetOrderModifyHistory {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -5938,6 +6104,8 @@ impl Request for GetPositionMarginChangeHistory {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6023,6 +6191,8 @@ impl Request for ModifyIsolatedPositionMargin {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6084,6 +6254,8 @@ impl Request for PositionAdlQuantileEstimation {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6145,6 +6317,8 @@ impl Request for PositionInformationV2 {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6206,6 +6380,8 @@ impl Request for PositionInformationV3 {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6299,6 +6475,8 @@ impl Request for QueryAllAlgoOrders {
         mutation: false,
         weight: 5,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6376,6 +6554,8 @@ impl Request for QueryCurrentOpenOrder {
         mutation: false,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6579,6 +6759,8 @@ impl Request for TestOrder {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6710,6 +6892,8 @@ impl Request for UsersForceOrders {
         mutation: false,
         weight: 0,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6754,6 +6938,8 @@ impl Request for CloseUserDataStream {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6793,6 +6979,8 @@ impl Request for KeepaliveUserDataStream {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;
@@ -6832,6 +7020,8 @@ impl Request for StartUserDataStream {
         mutation: true,
         weight: 1,
         validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
     };
     fn validate(&self) -> Result<(), Error> {
         let p = parameters(self)?;

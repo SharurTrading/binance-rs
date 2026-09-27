@@ -3,10 +3,12 @@
 
 //! Independent Binance inner clients with provider-native product modules.
 //!
-//! [`usdm`] implements USDⓈ-M Futures. The caller owns the Tokio runtime,
+//! [`spot`], [`usdm`], and [`coinm`] implement distinct trading products.
+//! The caller owns the Tokio runtime,
 //! credentials, order IDs, trading policy, and recovery of ambiguous mutations.
 //! Infrastructure is shared without conflating product account or contract models.
 
+pub mod coinm;
 /// Read-only demo metadata example; callers own the runtime.
 ///
 /// ```no_run
@@ -29,11 +31,12 @@
 /// }
 /// ```
 mod core;
+pub mod spot;
 pub mod usdm;
 
-pub use core::{BudgetLimits, Budgets};
 pub use core::{
-    ClientOrderId, Clock, Credentials, Error, Outcome, RateEvidence, RequestId, Response,
+    Asset, ClientOrderId, Clock, Credentials, Error, Outcome, RateEvidence, RequestId, Response,
     ResponseMeta, SensitiveString, Signer, Symbol, SystemClock, VenueFailure,
 };
+pub use core::{BudgetLimits, Budgets};
 pub use rust_decimal::Decimal;

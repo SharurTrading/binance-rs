@@ -15,11 +15,19 @@ SharurTrading. This project is not affiliated with or endorsed by Binance.
 > public probes do not establish live trading readiness. `publish = false` remains
 > in force.
 
-USDⓈ-M Futures is the first implementation: **95 REST operations, 18 catalog
-WebSocket API methods plus 3 session methods, 20 market streams, and 10 user-data
-event types**. Coverage follows the official catalog checked on 2026-09-26,
-including conditional/algo orders and the current Public/Market/Private routes.
-[Coverage and sources](docs/coverage.md) distinguish bindings from live verification.
+Three separate JSON product clients are available:
+
+| Product | REST | WebSocket API | Market streams | User event kinds |
+| --- | ---: | ---: | ---: | ---: |
+| USDⓈ-M | 95 | 18 + 3 session methods | 20 | 10 |
+| Spot (initial coverage) | 30 | 34 + 3 session methods | 15 | 6 |
+| COIN-M (initial coverage) | 63 | 10 + 3 session methods | 19 | 7 |
+
+[USDⓈ-M coverage](docs/coverage.md) and
+[Spot/COIN-M coverage](docs/spot-coinm-coverage.md) record official sources and
+verification limits. Spot order lists, cancel/replace, amend, SOR, and migrated
+COIN-M algo endpoints remain tracked in
+[issue #11](https://github.com/SharurTrading/binance-rs/issues/11).
 
 ## Boundary and architecture
 
@@ -31,10 +39,12 @@ accounting belong to consumers. There is no dependency on a consuming platform.
 
 ```text
 core: identities, credentials, signing, time, HTTP, sockets, rate budgets
-  └── usdm: configuration, REST/WS requests, responses, streams, depth bootstrap
+  ├── usdm: linear Futures models, requests, streams, depth bootstrap
+  ├── spot: asset balances, base quantity/quote spend, Spot depth bootstrap
+  └── coinm: inverse Futures models, requests, streams, depth bootstrap
 ```
 
-Spot and COIN-M will reuse the core and get separate product modules. Asset balances,
+Spot and COIN-M reuse the core through separate product modules. Asset balances,
 linear versus inverse settlement, position modes, and product routes stay native.
 Portfolio Margin Pro is another API/account product, not a USDⓈ-M configuration
 switch. It can reuse transport and signing without pretending its account or order
@@ -89,7 +99,8 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
 - Mutations are attempted once. Timeout, disconnect, malformed/truncated replies,
   and unknown future errors remain `Outcome::Unknown` unless documented evidence
   proves rejection. Query venue truth; a timeout does not cancel an order.
-- Responses/errors retain safe status, venue code, rate counters, and retry timing.
+- Responses/errors retain safe status, venue code, rate counters, retry timing, and
+  caller order IDs (parameter paths identify nested batch members).
   Batch results preserve input order and each member's success/refusal/uncertainty.
   Malformed members retain redacted `BatchResult::Unknown` evidence without hiding
   successful receipts. Resolve uncertain members with venue reads; never replay
@@ -101,10 +112,12 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
 - Ingress is unbounded and source ordered. Queue depth, oldest age, and counts
   distinguish lag from actual loss. Generations, gaps, and retirement are explicit.
 - Market and execution connections are separate. Mixed market routes are refused.
-  Listen-key renewal and reconnect are explicit caller operations; no automatic
+  Spot execution events arrive through WebSocket API subscriptions; Futures use
+  listen keys. Renewal and reconnect are explicit caller operations; no automatic
   replay, recovery, credential loading, or hidden continuity claim.
-- `DepthBook` implements snapshot bridging and the Futures `pu` chain. It retains
-  bootstrap events and marks real gaps unproven. Its finite snapshot is always partial.
+- Each product has a `DepthBook`: Spot bridges snapshot + 1; Futures retain `pu`
+  continuity. Bootstrap events are retained and real gaps are explicit. Every
+  finite snapshot remains partial.
 
 HMAC, RSA PKCS#8, Ed25519 PKCS#8, and external signers are supported. WebSocket
 session logon requires Ed25519. TLS is required except exact loopback fixtures;
@@ -120,19 +133,35 @@ runtime; caller-owned, joinable drivers govern all client WebSocket lifecycles.
 
 ## Budgets
 
-Clone a `Config` to share budgets between REST and WebSocket clients. Across accounts
-on the same IP, use one `Budgets` owner and `for_account()`; reuse the resulting owner
-for every credential/client of that account. REST and WebSocket general IP budgets
-are distinct, account order limits are shared, and documented cross-transport order
-weight is charged to both scopes. Separate independent `Config::new` values do not
-coordinate IP usage automatically.
+Clone a product `Config` to share budgets between its REST and WebSocket clients.
+Across accounts on the same IP, use one `Budgets` owner and `for_account()`; reuse
+that account owner for every credential/client of the account. Spot shares REST/WS
+weight, daily/ten-second order counts, and connection-attempt limits. Successful
+ordinary Spot submits/cancels release the documented weight reservation; failures
+remain charged and observed venue counters are never reduced.
+
+UM and CM share IP/account limits after the current integration. Configure an
+explicit common owner for both products:
+
+```rust
+use binance_client::{BudgetLimits, Budgets, Error, coinm, usdm};
+
+let budgets = Budgets::new(BudgetLimits::coinm())?;
+let um = usdm::Config::new(usdm::Environment::Production)?.budgets(budgets.clone());
+let cm = coinm::Config::new(coinm::Environment::Production)?.budgets(budgets);
+# Ok::<(), Error>(())
+```
+
+Independent `Config::new` values do not coordinate IP usage automatically. The
+existing USDⓈ-M default preserves its separate REST/WS reservation baseline;
+use the shared owner above when combining Futures products.
 
 Baseline limits are conservative documented values, with demo REST limits from
-exchange metadata. Configure `BudgetLimits` from current venue evidence. The client
-also tracks funding/history, conversion, and monthly download-job limits. External
+exchange metadata. Configure `BudgetLimits` from current venue evidence. USDⓈ-M
+also tracks its documented funding/history, conversion, and monthly download-job limits. External
 clients and frontend usage can consume the same budgets; local admission cannot
 guarantee venue acceptance. It never waits, retries, or sends a command after expiry. The catalog omits
-`testOrder` quota weights; the client conservatively reserves one IP unit and one
+USDⓈ-M `testOrder` quota weights; the client conservatively reserves one IP unit and one
 order slot pending [verification #4](https://github.com/SharurTrading/binance-rs/issues/4).
 That validation endpoint does not submit to the matching engine.
 

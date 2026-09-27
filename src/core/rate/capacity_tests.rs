@@ -235,3 +235,131 @@ fn all_download_kinds_admit_the_full_calendar_quota_and_reset_together() {
         ));
     }
 }
+#[test]
+fn spot_full_weight_raw_and_connection_budgets_share_an_ip_owner() {
+    let budgets = Budgets::new(BudgetLimits::spot()).unwrap();
+    for _ in 0..300 {
+        budgets
+            .admit(
+                Cost {
+                    connections: 1,
+                    ..Cost::default()
+                },
+                0,
+            )
+            .unwrap();
+    }
+    assert_refused(
+        &budgets,
+        Cost {
+            connections: 1,
+            ..Cost::default()
+        },
+        0,
+        300_000,
+    );
+    for _ in 0..300_000 {
+        budgets
+            .admit(
+                Cost {
+                    raw_requests: 1,
+                    ..Cost::default()
+                },
+                0,
+            )
+            .unwrap();
+    }
+    assert_refused(
+        &budgets,
+        Cost {
+            raw_requests: 1,
+            ..Cost::default()
+        },
+        0,
+        300_000,
+    );
+    for i in 0..6000 {
+        budgets
+            .admit(
+                if i % 2 == 0 {
+                    Cost {
+                        weight: 1,
+                        ..Cost::default()
+                    }
+                } else {
+                    Cost {
+                        ws_weight: 1,
+                        ..Cost::default()
+                    }
+                },
+                0,
+            )
+            .unwrap();
+    }
+    assert_refused(
+        &budgets,
+        Cost {
+            weight: 1,
+            ..Cost::default()
+        },
+        0,
+        60_000,
+    );
+    assert_refused(
+        &budgets.for_account(),
+        Cost {
+            ws_weight: 1,
+            ..Cost::default()
+        },
+        0,
+        60_000,
+    );
+    budgets
+        .admit(
+            Cost {
+                weight: 1,
+                ..Cost::default()
+            },
+            60_000,
+        )
+        .unwrap();
+}
+
+#[test]
+fn spot_daily_order_evidence_refuses_until_the_aligned_day_boundary() {
+    let budgets = Budgets::new(BudgetLimits::spot()).unwrap();
+    let mut rates = RateEvidence::default();
+    rates
+        .counters
+        .insert("x-mbx-order-count-1d".into(), 159_999);
+    budgets.observe(&rates, 0, true).unwrap();
+    let cost = Cost {
+        orders10: 1,
+        orders_day: 1,
+        ..Cost::default()
+    };
+    budgets.admit(cost, 0).unwrap();
+    assert_refused(&budgets, cost, 10_000, 86_390_000);
+    budgets.admit(cost, 86_400_000).unwrap();
+}
+
+#[test]
+fn weight_refunds_never_remove_venue_evidence_or_a_new_interval_reservation() {
+    let b = Budgets::new(BudgetLimits::spot().weight_per_minute(2)).unwrap();
+    let c = Cost {
+        weight: 1,
+        ..Cost::default()
+    };
+    b.admit(c, 0).unwrap();
+    b.admit(c, 0).unwrap();
+    let mut evidence = RateEvidence::default();
+    evidence.counters.insert("x-mbx-used-weight-1m".into(), 2);
+    b.observe(&evidence, 0, false).unwrap();
+    b.refund_weight(1, 0, false).unwrap();
+    assert_refused(&b, c, 0, 60_000);
+    b.admit(c, 60_000).unwrap();
+    b.admit(c, 60_000).unwrap();
+    // A late answer belongs to its admission interval, including on the WS API.
+    b.refund_weight(1, 0, true).unwrap();
+    assert_refused(&b, c, 60_000, 60_000);
+}

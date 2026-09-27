@@ -61,7 +61,7 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
         }
     }
     if op == "modifyOrder" {
-        required(p, &["symbol", "side", "quantity"])?;
+        required(p, &["symbol", "side", "quantity", "price"])?;
         if !p.contains_key("price") && !p.contains_key("priceMatch") {
             return Err(Error::Validation("modify price"));
         }

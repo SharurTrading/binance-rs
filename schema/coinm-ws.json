@@ -1,0 +1,1874 @@
+{
+  "checked": "2026-09-27",
+  "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/1.0.0/schema.yaml",
+  "sha256": "e0f3dd8fea8008bb9a2d11f4c023baced0157177b24c177e35e9fc60027de61b",
+  "operations": [
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "accountInformation",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "account.status"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64",
+                      "maximum": 60000
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "object",
+                    "properties": {
+                      "feeTier": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "canTrade": {
+                        "type": "boolean"
+                      },
+                      "canDeposit": {
+                        "type": "boolean"
+                      },
+                      "canWithdraw": {
+                        "type": "boolean"
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "assets": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "asset": {
+                              "type": "string",
+                              "x-rust-type": "crate::Asset"
+                            },
+                            "walletBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "unrealizedProfit": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "marginBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maintMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "initialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "positionInitialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "openOrderInitialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maxWithdrawAmount": {
+                              "type": "string"
+                            },
+                            "crossWalletBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "crossUnPnl": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "availableBalance": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "updateTime": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          }
+                        }
+                      },
+                      "positions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "symbol": {
+                              "type": "string",
+                              "x-rust-type": "crate::Symbol"
+                            },
+                            "initialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maintMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "unrealizedProfit": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "positionInitialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "openOrderInitialMargin": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "leverage": {
+                              "type": "string"
+                            },
+                            "isolated": {
+                              "type": "boolean"
+                            },
+                            "positionSide": {
+                              "type": "string"
+                            },
+                            "entryPrice": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "maxQty": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "notionalValue": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "isolatedWallet": {
+                              "type": "string"
+                            },
+                            "updateTime": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "positionAmt": {
+                              "type": "string"
+                            },
+                            "breakEvenPrice": {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/account.status",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/account#account-information"
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "futuresAccountBalance",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "account.balance"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64",
+                      "maximum": 60000
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "accountAlias": {
+                          "type": "string"
+                        },
+                        "asset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "balance": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "withdrawAvailable": {
+                          "type": "string"
+                        },
+                        "crossWalletBalance": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "crossUnPnl": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "availableBalance": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "updateTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "required": [
+                        "asset",
+                        "balance",
+                        "withdrawAvailable"
+                      ]
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/account.balance",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/account#futures-account-balance"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "cancelOrder",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "order.cancel"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "origClientOrderId": {
+                      "type": "string",
+                      "x-rust-type": "ClientOrderId"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64",
+                      "maximum": 60000
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "symbol",
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "object",
+                    "properties": {
+                      "orderId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "symbol": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "pair": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "clientOrderId": {
+                        "type": "string",
+                        "x-rust-type": "ClientOrderId"
+                      },
+                      "price": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "origQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "executedQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "cumQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "timeInForce": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "reduceOnly": {
+                        "type": "boolean"
+                      },
+                      "closePosition": {
+                        "type": "boolean"
+                      },
+                      "side": {
+                        "type": "string"
+                      },
+                      "positionSide": {
+                        "type": "string"
+                      },
+                      "stopPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "workingType": {
+                        "type": "string"
+                      },
+                      "priceProtect": {
+                        "type": "boolean"
+                      },
+                      "origType": {
+                        "type": "string"
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "required": [
+                      "orderId",
+                      "clientOrderId"
+                    ]
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/order.cancel",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#cancel-order"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "modifyOrder",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "order.modify"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "origClientOrderId": {
+                      "type": "string",
+                      "x-rust-type": "ClientOrderId"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "side": {
+                      "type": "string",
+                      "enum": [
+                        "BUY",
+                        "SELL"
+                      ]
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "price": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "priceMatch": {
+                      "type": "string",
+                      "enum": [
+                        "OPPONENT",
+                        "OPPONENT_5",
+                        "OPPONENT_10",
+                        "OPPONENT_20",
+                        "QUEUE",
+                        "QUEUE_5",
+                        "QUEUE_10",
+                        "QUEUE_20"
+                      ],
+                      "x-decimal": true
+                    },
+                    "modifyId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64",
+                      "maximum": 60000
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "symbol",
+                    "side",
+                    "quantity",
+                    "price",
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "object",
+                    "properties": {
+                      "orderId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "symbol": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "pair": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "clientOrderId": {
+                        "type": "string",
+                        "x-rust-type": "ClientOrderId"
+                      },
+                      "modifyId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "price": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "origQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "executedQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "cumQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "timeInForce": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "reduceOnly": {
+                        "type": "boolean"
+                      },
+                      "closePosition": {
+                        "type": "boolean"
+                      },
+                      "side": {
+                        "type": "string"
+                      },
+                      "positionSide": {
+                        "type": "string"
+                      },
+                      "stopPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "workingType": {
+                        "type": "string"
+                      },
+                      "priceProtect": {
+                        "type": "boolean"
+                      },
+                      "origType": {
+                        "type": "string"
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "required": [
+                      "orderId",
+                      "clientOrderId"
+                    ]
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/order.modify",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#modify-order",
+      "x-ip-weight": 0
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "newOrder",
+      "x-ip-weight": 0,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "order.place"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "side": {
+                      "type": "string",
+                      "enum": [
+                        "BUY",
+                        "SELL"
+                      ]
+                    },
+                    "positionSide": {
+                      "type": "string",
+                      "enum": [
+                        "BOTH",
+                        "LONG",
+                        "SHORT"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "LIMIT",
+                        "MARKET",
+                        "STOP",
+                        "STOP_MARKET",
+                        "TAKE_PROFIT",
+                        "TAKE_PROFIT_MARKET",
+                        "TRAILING_STOP_MARKET"
+                      ]
+                    },
+                    "timeInForce": {
+                      "type": "string",
+                      "enum": [
+                        "GTC",
+                        "IOC",
+                        "FOK",
+                        "GTX"
+                      ]
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "reduceOnly": {
+                      "type": "string",
+                      "enum": [
+                        "true",
+                        "false"
+                      ]
+                    },
+                    "price": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "newClientOrderId": {
+                      "type": "string",
+                      "x-rust-type": "ClientOrderId"
+                    },
+                    "stopPrice": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "closePosition": {
+                      "type": "string",
+                      "enum": [
+                        "true",
+                        "false"
+                      ]
+                    },
+                    "activationPrice": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "callbackRate": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "workingType": {
+                      "type": "string",
+                      "enum": [
+                        "MARK_PRICE",
+                        "CONTRACT_PRICE"
+                      ]
+                    },
+                    "priceProtect": {
+                      "type": "string",
+                      "enum": [
+                        "true",
+                        "false"
+                      ],
+                      "x-decimal": true
+                    },
+                    "newOrderRespType": {
+                      "type": "string",
+                      "enum": [
+                        "ACK",
+                        "RESULT"
+                      ]
+                    },
+                    "priceMatch": {
+                      "type": "string",
+                      "enum": [
+                        "OPPONENT",
+                        "OPPONENT_5",
+                        "OPPONENT_10",
+                        "OPPONENT_20",
+                        "QUEUE",
+                        "QUEUE_5",
+                        "QUEUE_10",
+                        "QUEUE_20"
+                      ],
+                      "x-decimal": true
+                    },
+                    "selfTradePreventionMode": {
+                      "type": "string",
+                      "enum": [
+                        "NONE",
+                        "EXPIRE_TAKER",
+                        "EXPIRE_BOTH",
+                        "EXPIRE_MAKER"
+                      ]
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64",
+                      "maximum": 60000
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "symbol",
+                    "side",
+                    "type",
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "object",
+                    "properties": {
+                      "orderId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "symbol": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "pair": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "clientOrderId": {
+                        "type": "string",
+                        "x-rust-type": "ClientOrderId"
+                      },
+                      "price": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "origQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "executedQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "cumQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "timeInForce": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "reduceOnly": {
+                        "type": "boolean"
+                      },
+                      "closePosition": {
+                        "type": "boolean"
+                      },
+                      "side": {
+                        "type": "string"
+                      },
+                      "positionSide": {
+                        "type": "string"
+                      },
+                      "stopPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "workingType": {
+                        "type": "string"
+                      },
+                      "priceProtect": {
+                        "type": "boolean"
+                      },
+                      "origType": {
+                        "type": "string"
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    },
+                    "required": [
+                      "orderId",
+                      "clientOrderId"
+                    ]
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/order.place",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#new-order"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "positionInformation",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "account.position"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "marginAsset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "pair": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64",
+                      "maximum": 60000
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "symbol": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "positionAmt": {
+                          "type": "string"
+                        },
+                        "entryPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "markPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "unRealizedProfit": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "liquidationPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "leverage": {
+                          "type": "string"
+                        },
+                        "maxQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "marginType": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "isolatedMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "isAutoAddMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "positionSide": {
+                          "type": "string"
+                        },
+                        "notionalValue": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "isolatedWallet": {
+                          "type": "string"
+                        },
+                        "updateTime": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "breakEvenPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      }
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/account.position",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#position-information"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "queryOrder",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "order.status"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "origClientOrderId": {
+                      "type": "string",
+                      "x-rust-type": "ClientOrderId"
+                    },
+                    "recvWindow": {
+                      "type": "integer",
+                      "format": "int64",
+                      "maximum": 60000
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "symbol",
+                    "timestamp",
+                    "apiKey"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "object",
+                    "properties": {
+                      "orderId": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "symbol": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "pair": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "clientOrderId": {
+                        "type": "string",
+                        "x-rust-type": "ClientOrderId"
+                      },
+                      "price": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "avgPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "origQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "executedQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "cumQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "cumBase": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "timeInForce": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "reduceOnly": {
+                        "type": "boolean"
+                      },
+                      "closePosition": {
+                        "type": "boolean"
+                      },
+                      "side": {
+                        "type": "string"
+                      },
+                      "positionSide": {
+                        "type": "string"
+                      },
+                      "stopPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "workingType": {
+                        "type": "string"
+                      },
+                      "priceProtect": {
+                        "type": "boolean"
+                      },
+                      "origType": {
+                        "type": "string"
+                      },
+                      "selfTradePreventionMode": {
+                        "type": "string"
+                      },
+                      "time": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "updateTime": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "priceMatch": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    },
+                    "required": [
+                      "orderId",
+                      "clientOrderId"
+                    ]
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/order.status",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#query-order"
+    },
+    {
+      "tags": [
+        "user-data-streams"
+      ],
+      "operationId": "closeUserDataStream",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_STREAM",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "userDataStream.stop"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "apiKey"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/userDataStream.stop",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/user-data-streams#close-user-data-stream"
+    },
+    {
+      "tags": [
+        "user-data-streams"
+      ],
+      "operationId": "keepaliveUserDataStream",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_STREAM",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "userDataStream.ping"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "apiKey"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "object",
+                    "properties": {
+                      "listenKey": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/userDataStream.ping",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/user-data-streams#keepalive-user-data-stream"
+    },
+    {
+      "tags": [
+        "user-data-streams"
+      ],
+      "operationId": "startUserDataStream",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_STREAM",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "userDataStream.start"
+                  ]
+                },
+                "params": {
+                  "type": "object",
+                  "properties": {
+                    "apiKey": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "apiKey"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Successful Response": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "result": {
+                    "type": "object",
+                    "properties": {
+                      "listenKey": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/userDataStream.start",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/user-data-streams#start-user-data-stream"
+    }
+  ],
+  "components": {
+    "schemas": {}
+  }
+}

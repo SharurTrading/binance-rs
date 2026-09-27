@@ -87,7 +87,7 @@ enum Command {
     Call {
         op: Operation,
         params: BTreeMap<String, Value>,
-        cost: Cost,
+        cost: Box<Cost>,
         id: RequestId,
         deadline: Instant,
         reply: oneshot::Sender<Result<(Value, ResponseMeta), Error>>,
@@ -129,6 +129,9 @@ impl SocketEvents {
 }
 
 struct Pending {
+    admitted_at: u64,
+    weight: u64,
+    client_order_ids: BTreeMap<String, String>,
     op: Operation,
     id: RequestId,
     deadline: Instant,
@@ -167,6 +170,12 @@ pub(crate) fn tls_config() -> Result<rustls::ClientConfig, Error> {
     .with_no_client_auth())
 }
 
+/// Product-sourced connection/control admission, independent of wire models.
+pub(crate) struct SocketPolicy {
+    pub handshake: Cost,
+    pub ping_limit: usize,
+}
+
 impl Socket {
     pub async fn connect(
         url: url::Url,
@@ -175,6 +184,30 @@ impl Socket {
         budgets: Budgets,
         timeout: Duration,
         api: bool,
+    ) -> Result<(Self, SocketEvents, SocketDriver), Error> {
+        Self::connect_with_policy(
+            url,
+            credentials,
+            clock,
+            budgets,
+            timeout,
+            SocketPolicy {
+                handshake: Cost {
+                    ws_weight: if api { 5 } else { 0 },
+                    ..Cost::default()
+                },
+                ping_limit: if api { 5 } else { 10 },
+            },
+        )
+        .await
+    }
+    pub async fn connect_with_policy(
+        url: url::Url,
+        credentials: Option<Credentials>,
+        clock: Arc<dyn Clock>,
+        budgets: Budgets,
+        timeout: Duration,
+        policy: SocketPolicy,
     ) -> Result<(Self, SocketEvents, SocketDriver), Error> {
         let generation = GENERATION
             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
@@ -187,23 +220,17 @@ impl Socket {
             .map_err(|_| Error::Configuration("WebSocket URI"))?
             .connector(&connector)
             .limits(Limits::unlimited());
-        if api {
-            budgets.admit(
-                Cost {
-                    ws_weight: 5,
-                    ..Cost::default()
-                },
-                clock.now_millis()?,
-            )?;
-        }
+        budgets.admit(policy.handshake, clock.now_millis()?)?;
         let (ws, _) = tokio::time::timeout(timeout, builder.connect())
             .await
             .map_err(|_| Error::Transport {
+                client_order_ids: BTreeMap::new(),
                 operation: "connect",
                 outcome: Outcome::NotSent,
                 meta: None,
             })?
             .map_err(|_| Error::Transport {
+                client_order_ids: BTreeMap::new(),
                 operation: "connect",
                 outcome: Outcome::NotSent,
                 meta: None,
@@ -236,7 +263,7 @@ impl Socket {
             stats,
             generation,
             lifetime: Instant::now() + Duration::from_hours(24),
-            ping_limit: if api { 5 } else { 10 },
+            ping_limit: policy.ping_limit,
             pending: BTreeMap::new(),
             used_ids: BTreeSet::new(),
         };
@@ -250,22 +277,25 @@ impl Socket {
         id: RequestId,
         deadline: Instant,
     ) -> Result<(Value, ResponseMeta), Error> {
+        let client_order_ids = super::request::order_ids(&params);
         let (reply, rx) = oneshot::channel();
         self.tx
             .send(Command::Call {
                 op,
                 params,
-                cost,
+                cost: Box::new(cost),
                 id,
                 deadline,
                 reply,
             })
             .map_err(|_| Error::Transport {
+                client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome: Outcome::NotSent,
                 meta: None,
             })?;
         rx.await.map_err(|_| Error::Transport {
+            client_order_ids: client_order_ids.clone(),
             operation: op.name,
             outcome: if op.mutation {
                 Outcome::Unknown
@@ -332,6 +362,7 @@ impl SocketDriver {
                     let _ = reply.send(Err(Error::Expired(op.name)));
                     return Ok(());
                 }
+                let client_order_ids = super::request::order_ids(&params);
                 let prepare = (|| {
                     let now = self.clock.now_millis()?;
                     (op.validate_time)(&params, now)?;
@@ -357,15 +388,15 @@ impl SocketDriver {
                     }
                     let body=serde_json::to_string(&serde_json::json!({"id":id.as_str(),"method":op.path.trim_start_matches('/'),"params":params}))
                         .map_err(|_|Error::Validation("WebSocket encoding"))?;
-                    self.budgets.admit(cost, now)?;
+                    self.budgets.admit(*cost, now)?;
                     (op.validate_time)(&params, self.clock.now_millis()?)?;
                     if deadline <= Instant::now() {
                         return Err(Error::Expired(op.name));
                     }
-                    Ok(body)
+                    Ok((body, now))
                 })();
-                let body = match prepare {
-                    Ok(body) => body,
+                let (body, admitted_at) = match prepare {
+                    Ok(prepared) => prepared,
                     Err(error) => {
                         let _ = reply.send(Err(error));
                         return Ok(());
@@ -374,6 +405,9 @@ impl SocketDriver {
                 self.pending.insert(
                     id.as_str().to_owned(),
                     Pending {
+                        admitted_at,
+                        weight: cost.ws_weight,
+                        client_order_ids,
                         op,
                         id,
                         deadline,
@@ -397,6 +431,7 @@ impl SocketDriver {
                 && let Some(reply) = p.reply.take()
             {
                 let _ = reply.send(Err(Error::Transport {
+                    client_order_ids: p.client_order_ids.clone(),
                     operation: p.op.name,
                     outcome: if p.op.mutation {
                         Outcome::Unknown
@@ -435,6 +470,7 @@ impl SocketDriver {
             let rates = ws_rates(&value, now);
             self.budgets.observe(&rates, now, true)?;
             let meta = ResponseMeta {
+                client_order_ids: p.client_order_ids.clone(),
                 status,
                 operation: p.op.name,
                 rates,
@@ -444,6 +480,19 @@ impl SocketDriver {
                 .or_else(|| value.get("error"))
                 .cloned()
                 .ok_or(Error::Gap("WebSocket response payload"))?;
+            if (200..300).contains(&status)
+                && payload
+                    .get("code")
+                    .and_then(Value::as_i64)
+                    .is_none_or(|c| c >= 0)
+                && let Some(success) = p.op.success_weight
+            {
+                self.budgets.refund_weight(
+                    p.weight.saturating_sub(success),
+                    p.admitted_at,
+                    true,
+                )?;
+            }
             if let Some(reply) = p.reply.take() {
                 if let Err(result) = reply.send(Ok((payload.clone(), meta.clone())))
                     && result.is_ok()
@@ -534,6 +583,7 @@ impl SocketDriver {
         for (_, mut p) in std::mem::take(&mut self.pending) {
             if let Some(reply) = p.reply.take() {
                 let _ = reply.send(Err(Error::Transport {
+                    client_order_ids: p.client_order_ids.clone(),
                     operation: p.op.name,
                     outcome: if p.op.mutation {
                         Outcome::Unknown
@@ -602,7 +652,10 @@ fn ws_rates(v: &Value, now: u64) -> RateEvidence {
     }
     e.retry_after = v
         .get("error")
-        .and_then(|e| e.get("retryAfter"))
+        .and_then(|e| {
+            e.get("retryAfter")
+                .or_else(|| e.get("data").and_then(|d| d.get("retryAfter")))
+        })
         .and_then(Value::as_u64)
         .map(|deadline| Duration::from_millis(deadline.saturating_sub(now)));
     e

@@ -123,10 +123,12 @@ impl HttpClient {
         deadline: Instant,
     ) -> Result<Response<R::Response>, Error> {
         request.validate()?;
+        let client_order_ids = request::order_ids(&request::parameters(request)?);
         let op = R::OP;
         let wire = self.prepare(op, request, deadline)?;
         let now = self.clock.now_millis()?;
-        self.budgets.admit(request.cost()?, now)?;
+        let cost = request.cost()?;
+        self.budgets.admit(cost, now)?;
         (op.validate_time)(&request::parameters(request)?, self.clock.now_millis()?)?;
         if Instant::now() >= deadline {
             return Err(Error::Expired(op.name));
@@ -143,11 +145,13 @@ impl HttpClient {
         let response = tokio::time::timeout_at(attempt_deadline, self.client.execute(wire))
             .await
             .map_err(|_| Error::Transport {
+                client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome,
                 meta: None,
             })?
             .map_err(|_| Error::Transport {
+                client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome,
                 meta: None,
@@ -155,6 +159,7 @@ impl HttpClient {
         let status = response.status().as_u16();
         let rates = header_rates(response.headers());
         let meta = ResponseMeta {
+            client_order_ids: client_order_ids.clone(),
             status,
             operation: op.name,
             rates,
@@ -162,6 +167,7 @@ impl HttpClient {
         self.budgets
             .observe(&meta.rates, self.clock.now_millis().unwrap_or(now), false)
             .map_err(|_| Error::Transport {
+                client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome,
                 meta: Some(Box::new(meta.clone())),
@@ -169,21 +175,34 @@ impl HttpClient {
         let body = tokio::time::timeout_at(attempt_deadline, response.bytes())
             .await
             .map_err(|_| Error::Transport {
+                client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome,
                 meta: Some(Box::new(meta.clone())),
             })?
             .map_err(|_| Error::Transport {
+                client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome,
                 meta: Some(Box::new(meta.clone())),
             })?;
         let value =
             serde_json::from_slice::<serde_json::Value>(&body).map_err(|_| Error::Transport {
+                client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome,
                 meta: Some(Box::new(meta.clone())),
             })?;
+        if (200..300).contains(&status)
+            && value
+                .get("code")
+                .and_then(serde_json::Value::as_i64)
+                .is_none_or(|c| c >= 0)
+            && let Some(success) = op.success_weight
+        {
+            self.budgets
+                .refund_weight(cost.weight.saturating_sub(success), now, false)?;
+        }
         decode(op, status, value, meta)
     }
 }
@@ -200,15 +219,11 @@ pub(crate) fn decode<T: DeserializeOwned>(
             .and_then(serde_json::Value::as_i64)
             .is_some_and(|v| v < 0)
     {
-        return Err(super::error::failure(
-            op.name,
-            op.mutation,
-            status,
-            &value,
-            meta.rates,
-        ));
+        return Err(super::error::failure_for(op, status, &value, meta.rates)
+            .with_order_ids(meta.client_order_ids));
     }
     let data = serde_json::from_value(value).map_err(|_| Error::Transport {
+        client_order_ids: meta.client_order_ids.clone(),
         operation: op.name,
         outcome: if op.mutation {
             Outcome::Unknown

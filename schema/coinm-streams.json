@@ -1,0 +1,5269 @@
+{
+  "checked": "2026-09-27",
+  "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/1.0.0/schema.yaml",
+  "sha256": "2b8c1574a1a8934c96bddde6020040241bf5208e77ea9ecd6160a8d7865323a9",
+  "operations": [
+    {
+      "operationId": "aggregateTradeStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "aggTrade"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "a": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "f": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "l": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "m": {
+                    "type": "boolean"
+                  },
+                  "st": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "a",
+                  "s",
+                  "p",
+                  "q",
+                  "f",
+                  "l",
+                  "T",
+                  "m"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "aggTrade"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "a": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "f": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "l": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "m": {
+                        "type": "boolean"
+                      },
+                      "st": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "a",
+                      "s",
+                      "p",
+                      "q",
+                      "f",
+                      "l",
+                      "T",
+                      "m"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@aggTrade",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#aggregate-trade-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "allBookTickersStream",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "bookTicker"
+                    ]
+                  },
+                  "u": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "b": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "B": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "a": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "A": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "ps": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "st": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "u",
+                  "s",
+                  "b",
+                  "B",
+                  "a",
+                  "A",
+                  "T",
+                  "E"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "bookTicker"
+                        ]
+                      },
+                      "u": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "b": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "a": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "A": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "st": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "u",
+                      "s",
+                      "b",
+                      "B",
+                      "a",
+                      "A",
+                      "T",
+                      "E"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/!bookTicker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#all-book-tickers-stream",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "allMarketLiquidationOrderStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "forceOrder"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "o": {
+                    "type": "object",
+                    "properties": {
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "S": {
+                        "type": "string"
+                      },
+                      "o": {
+                        "type": "string"
+                      },
+                      "f": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "ap": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "X": {
+                        "type": "string"
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "z": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    }
+                  },
+                  "st": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "o"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "forceOrder"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "o": {
+                        "type": "object",
+                        "properties": {
+                          "s": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "ps": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "S": {
+                            "type": "string"
+                          },
+                          "o": {
+                            "type": "string"
+                          },
+                          "f": {
+                            "type": "string"
+                          },
+                          "q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "p": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "ap": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "X": {
+                            "type": "string"
+                          },
+                          "l": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "z": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "T": {
+                            "type": "integer",
+                            "format": "int64"
+                          }
+                        }
+                      },
+                      "st": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "o"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/!forceOrder@arr",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#all-market-liquidation-order-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "allMarketMiniTickersStream",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "24hrMiniTicker"
+                      ]
+                    },
+                    "E": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "s": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "ps": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "c": {
+                      "type": "string"
+                    },
+                    "o": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "h": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "l": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "v": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "q": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "st": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "e",
+                    "E",
+                    "s",
+                    "c",
+                    "o",
+                    "h",
+                    "l",
+                    "v",
+                    "q"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "e": {
+                          "type": "string",
+                          "enum": [
+                            "24hrMiniTicker"
+                          ]
+                        },
+                        "E": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "s": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "ps": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "c": {
+                          "type": "string"
+                        },
+                        "o": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "h": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "l": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "v": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "q": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "st": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "e",
+                        "E",
+                        "s",
+                        "c",
+                        "o",
+                        "h",
+                        "l",
+                        "v",
+                        "q"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/!miniTicker@arr",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#all-market-mini-tickers-stream",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "allMarketTickersStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "24hrTicker"
+                      ]
+                    },
+                    "E": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "s": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "p": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "P": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "w": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "c": {
+                      "type": "string"
+                    },
+                    "Q": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "o": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "h": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "l": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "v": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "q": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "O": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "C": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "F": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "L": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "n": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "ps": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "st": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "e",
+                    "E",
+                    "s",
+                    "p",
+                    "P",
+                    "w",
+                    "c",
+                    "Q",
+                    "o",
+                    "h",
+                    "l",
+                    "v",
+                    "q",
+                    "O",
+                    "C",
+                    "F",
+                    "L",
+                    "n"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "e": {
+                          "type": "string",
+                          "enum": [
+                            "24hrTicker"
+                          ]
+                        },
+                        "E": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "s": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "p": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "P": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "w": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "c": {
+                          "type": "string"
+                        },
+                        "Q": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "o": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "h": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "l": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "v": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "q": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "O": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "C": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "F": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "L": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "n": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "ps": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "st": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "e",
+                        "E",
+                        "s",
+                        "p",
+                        "P",
+                        "w",
+                        "c",
+                        "Q",
+                        "o",
+                        "h",
+                        "l",
+                        "v",
+                        "q",
+                        "O",
+                        "C",
+                        "F",
+                        "L",
+                        "n"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/!ticker@arr",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#all-market-tickers-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "continuousContractKlineCandlestickStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "pair",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "contractType",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "perpetual",
+              "current_quarter",
+              "next_quarter"
+            ]
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "6h",
+              "8h",
+              "12h",
+              "1d",
+              "3d",
+              "1w",
+              "1M"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "continuous_kline"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "ps": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "ct": {
+                    "type": "string"
+                  },
+                  "k": {
+                    "type": "object",
+                    "properties": {
+                      "t": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "i": {
+                        "type": "string"
+                      },
+                      "f": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "L": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "n": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "x": {
+                        "type": "boolean"
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "V": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "Q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "ct",
+                  "k"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "continuous_kline"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "ct": {
+                        "type": "string"
+                      },
+                      "k": {
+                        "type": "object",
+                        "properties": {
+                          "t": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "T": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "i": {
+                            "type": "string"
+                          },
+                          "f": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "L": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "o": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "c": {
+                            "type": "string"
+                          },
+                          "h": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "l": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "v": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "n": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "x": {
+                            "type": "boolean"
+                          },
+                          "q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "V": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "Q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "B": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "ct",
+                      "k"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{pair}_{contractType}@continuousKline_{interval}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#continuous-contract-kline-candlestick-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "contractInfoStream",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "contractInfo"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "ps": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "ct": {
+                    "type": "string"
+                  },
+                  "dt": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "ot": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "cs": {
+                    "type": "string"
+                  },
+                  "bks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "bs": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "bnf": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "bnc": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "mmr": {
+                          "type": "number",
+                          "format": "float"
+                        },
+                        "cf": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "mi": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "ma": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      }
+                    }
+                  },
+                  "st": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "ct",
+                  "dt",
+                  "ot",
+                  "cs",
+                  "bks"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "contractInfo"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "ct": {
+                        "type": "string"
+                      },
+                      "dt": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "ot": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "cs": {
+                        "type": "string"
+                      },
+                      "bks": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "bs": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "bnf": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "bnc": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "mmr": {
+                              "type": "number",
+                              "format": "float"
+                            },
+                            "cf": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "mi": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "ma": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          }
+                        }
+                      },
+                      "st": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "ct",
+                      "dt",
+                      "ot",
+                      "cs",
+                      "bks"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/!contractInfo",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#contract-info-stream",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "diffBookDepthStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "updateSpeed",
+          "in": "path",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "100ms",
+              "500ms"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "depthUpdate"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "ps": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "U": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "u": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "pu": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "b": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ],
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "a": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ],
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "st": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "T",
+                  "s",
+                  "U",
+                  "u",
+                  "pu",
+                  "b",
+                  "a"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "depthUpdate"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "U": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "u": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "pu": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "b": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ],
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "a": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ],
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "st": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "T",
+                      "s",
+                      "U",
+                      "u",
+                      "pu",
+                      "b",
+                      "a"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@depth@{updateSpeed}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#diff-book-depth-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "indexKlineCandlestickStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "pair",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "6h",
+              "8h",
+              "12h",
+              "1d",
+              "3d",
+              "1w",
+              "1M"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "indexPrice_kline"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "ps": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "k": {
+                    "type": "object",
+                    "properties": {
+                      "t": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "i": {
+                        "type": "string"
+                      },
+                      "f": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "L": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "n": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "x": {
+                        "type": "boolean"
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "V": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "Q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "k"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "indexPrice_kline"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "k": {
+                        "type": "object",
+                        "properties": {
+                          "t": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "T": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "s": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "i": {
+                            "type": "string"
+                          },
+                          "f": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "L": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "o": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "c": {
+                            "type": "string"
+                          },
+                          "h": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "l": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "v": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "n": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "x": {
+                            "type": "boolean"
+                          },
+                          "q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "V": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "Q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "B": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "k"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{pair}@indexPriceKline_{interval}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#index-kline-candlestick-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "indexPriceStream",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "pair",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "updateSpeed",
+          "in": "path",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1s"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "indexPriceUpdate"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "i": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "i",
+                  "p"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "indexPriceUpdate"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "i": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "i",
+                      "p"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{pair}@indexPrice@{updateSpeed}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#index-price-stream",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "individualSymbolBookTickerStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "bookTicker"
+                    ]
+                  },
+                  "u": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "b": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "B": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "a": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "A": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "ps": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "st": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "u",
+                  "s",
+                  "b",
+                  "B",
+                  "a",
+                  "A",
+                  "T",
+                  "E"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "bookTicker"
+                        ]
+                      },
+                      "u": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "b": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "a": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "A": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "st": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "u",
+                      "s",
+                      "b",
+                      "B",
+                      "a",
+                      "A",
+                      "T",
+                      "E"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@bookTicker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#individual-symbol-book-ticker-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "individualSymbolMiniTickerStream",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "24hrMiniTicker"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "ps": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "c": {
+                    "type": "string"
+                  },
+                  "o": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "h": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "l": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "v": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "st": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "c",
+                  "o",
+                  "h",
+                  "l",
+                  "v",
+                  "q"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "24hrMiniTicker"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "st": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "c",
+                      "o",
+                      "h",
+                      "l",
+                      "v",
+                      "q"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@miniTicker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#individual-symbol-mini-ticker-stream",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "individualSymbolTickerStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "24hrTicker"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "P": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "w": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "c": {
+                    "type": "string"
+                  },
+                  "Q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "o": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "h": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "l": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "v": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "O": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "C": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "F": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "L": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "n": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "ps": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "st": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "p",
+                  "P",
+                  "w",
+                  "c",
+                  "Q",
+                  "o",
+                  "h",
+                  "l",
+                  "v",
+                  "q",
+                  "O",
+                  "C",
+                  "F",
+                  "L",
+                  "n"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "24hrTicker"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "P": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "w": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "Q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "O": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "C": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "F": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "L": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "n": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "st": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "p",
+                      "P",
+                      "w",
+                      "c",
+                      "Q",
+                      "o",
+                      "h",
+                      "l",
+                      "v",
+                      "q",
+                      "O",
+                      "C",
+                      "F",
+                      "L",
+                      "n"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@ticker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#individual-symbol-ticker-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "klineCandlestickStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "6h",
+              "8h",
+              "12h",
+              "1d",
+              "3d",
+              "1w",
+              "1M"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "kline"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "k": {
+                    "type": "object",
+                    "properties": {
+                      "t": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "i": {
+                        "type": "string"
+                      },
+                      "f": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "L": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "n": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "x": {
+                        "type": "boolean"
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "V": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "Q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "k"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "kline"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "k": {
+                        "type": "object",
+                        "properties": {
+                          "t": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "T": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "s": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "i": {
+                            "type": "string"
+                          },
+                          "f": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "L": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "o": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "c": {
+                            "type": "string"
+                          },
+                          "h": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "l": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "v": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "n": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "x": {
+                            "type": "boolean"
+                          },
+                          "q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "V": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "Q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "B": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "k"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@kline_{interval}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#kline-candlestick-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "marketLiquidationOrderStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "forceOrder"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "o": {
+                    "type": "object",
+                    "properties": {
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "S": {
+                        "type": "string"
+                      },
+                      "o": {
+                        "type": "string"
+                      },
+                      "f": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "ap": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "X": {
+                        "type": "string"
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "z": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "o"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "forceOrder"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "o": {
+                        "type": "object",
+                        "properties": {
+                          "s": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "ps": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "S": {
+                            "type": "string"
+                          },
+                          "o": {
+                            "type": "string"
+                          },
+                          "f": {
+                            "type": "string"
+                          },
+                          "q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "p": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "ap": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "X": {
+                            "type": "string"
+                          },
+                          "l": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "z": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "T": {
+                            "type": "integer",
+                            "format": "int64"
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "o"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@forceOrder",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#market-liquidation-order-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "markPriceKlineCandlestickStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "6h",
+              "8h",
+              "12h",
+              "1d",
+              "3d",
+              "1w",
+              "1M"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "markPrice_kline"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "ps": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "k": {
+                    "type": "object",
+                    "properties": {
+                      "t": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "i": {
+                        "type": "string"
+                      },
+                      "f": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "L": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "n": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "x": {
+                        "type": "boolean"
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "V": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "Q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "k"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "markPrice_kline"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "k": {
+                        "type": "object",
+                        "properties": {
+                          "t": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "T": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "s": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "i": {
+                            "type": "string"
+                          },
+                          "f": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "L": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "o": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "c": {
+                            "type": "string"
+                          },
+                          "h": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "l": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "v": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "n": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "x": {
+                            "type": "boolean"
+                          },
+                          "q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "V": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "Q": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "B": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "k"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@markPriceKline_{interval}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#mark-price-kline-candlestick-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "markPriceOfAllSymbolsOfAPair",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "pair",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "updateSpeed",
+          "in": "path",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1s"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "markPriceUpdate"
+                      ]
+                    },
+                    "E": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "s": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "p": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "P": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "i": {
+                      "type": "string"
+                    },
+                    "r": {
+                      "type": "string"
+                    },
+                    "T": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "st": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "e",
+                    "E",
+                    "s",
+                    "p",
+                    "P",
+                    "i",
+                    "r",
+                    "T"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "e": {
+                          "type": "string",
+                          "enum": [
+                            "markPriceUpdate"
+                          ]
+                        },
+                        "E": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "s": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "p": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "P": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "i": {
+                          "type": "string"
+                        },
+                        "r": {
+                          "type": "string"
+                        },
+                        "T": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "st": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "e",
+                        "E",
+                        "s",
+                        "p",
+                        "P",
+                        "i",
+                        "r",
+                        "T"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{pair}@markPrice@{updateSpeed}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#mark-price-of-all-symbols-of-apair",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "markPriceStream",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "updateSpeed",
+          "in": "path",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1s"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "markPriceUpdate"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "P": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "i": {
+                    "type": "string"
+                  },
+                  "r": {
+                    "type": "string"
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "st": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "s",
+                  "p",
+                  "P",
+                  "i",
+                  "r",
+                  "T"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "markPriceUpdate"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "P": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "i": {
+                        "type": "string"
+                      },
+                      "r": {
+                        "type": "string"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "st": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "p",
+                      "P",
+                      "i",
+                      "r",
+                      "T"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@markPrice@{updateSpeed}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#mark-price-stream",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    },
+    {
+      "operationId": "partialBookDepthStreams",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "levels",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              5,
+              10,
+              20
+            ],
+            "x-decimal": true
+          }
+        },
+        {
+          "name": "updateSpeed",
+          "in": "path",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "100ms",
+              "500ms"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "depthUpdate"
+                    ]
+                  },
+                  "E": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "s": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "ps": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "U": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "u": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "pu": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "b": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    }
+                  },
+                  "a": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    }
+                  },
+                  "st": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "E",
+                  "T",
+                  "s",
+                  "U",
+                  "u",
+                  "pu",
+                  "b",
+                  "a"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "depthUpdate"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "ps": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      },
+                      "U": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "u": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "pu": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "b": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        }
+                      },
+                      "a": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        }
+                      },
+                      "st": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "T",
+                      "s",
+                      "U",
+                      "u",
+                      "pu",
+                      "b",
+                      "a"
+                    ]
+                  }
+                },
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{symbol}@depth{levels}@{updateSpeed}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#partial-book-depth-streams",
+      "tags": [
+        "market"
+      ],
+      "x-ip-weight": 0
+    }
+  ],
+  "components": {
+    "schemas": {
+      "accountConfigUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "ACCOUNT_CONFIG_UPDATE"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "T": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ac": {
+            "type": "object",
+            "properties": {
+              "s": {
+                "type": "string",
+                "x-rust-type": "crate::Symbol"
+              },
+              "l": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "T"
+        ]
+      },
+      "accountUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "ACCOUNT_UPDATE"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "T": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "i": {
+            "type": "string"
+          },
+          "a": {
+            "type": "object",
+            "properties": {
+              "m": {
+                "type": "string"
+              },
+              "B": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "a": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "wb": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "cw": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "bc": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "required": [
+                    "a",
+                    "wb",
+                    "cw",
+                    "bc"
+                  ]
+                }
+              },
+              "P": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "s": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "pa": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "ep": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "bep": {
+                      "type": "string"
+                    },
+                    "cr": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "up": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "mt": {
+                      "type": "string"
+                    },
+                    "iw": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "ps": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "s",
+                    "pa",
+                    "ep",
+                    "cr",
+                    "up",
+                    "mt",
+                    "iw",
+                    "ps"
+                  ]
+                }
+              },
+              "S": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "T",
+          "a"
+        ]
+      },
+      "gridUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "GRID_UPDATE"
+            ]
+          },
+          "T": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gu": {
+            "type": "object",
+            "properties": {
+              "si": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "st": {
+                "type": "string"
+              },
+              "ss": {
+                "type": "string"
+              },
+              "s": {
+                "type": "string",
+                "x-rust-type": "crate::Symbol"
+              },
+              "r": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "up": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "uq": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "uf": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "mp": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "ut": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          }
+        },
+        "required": [
+          "e",
+          "T",
+          "E"
+        ]
+      },
+      "listenKeyExpired": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "listenKeyExpired"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "listenKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "e",
+          "E"
+        ]
+      },
+      "marginCall": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "MARGIN_CALL"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "i": {
+            "type": "string"
+          },
+          "cw": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "p": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "s": {
+                  "type": "string",
+                  "x-rust-type": "crate::Symbol"
+                },
+                "ps": {
+                  "type": "string"
+                },
+                "pa": {
+                  "type": "string",
+                  "x-decimal": true
+                },
+                "mt": {
+                  "type": "string"
+                },
+                "iw": {
+                  "type": "string",
+                  "x-decimal": true
+                },
+                "mp": {
+                  "type": "string",
+                  "x-decimal": true
+                },
+                "up": {
+                  "type": "string",
+                  "x-decimal": true
+                },
+                "mm": {
+                  "type": "string",
+                  "x-decimal": true
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "e",
+          "E"
+        ]
+      },
+      "orderTradeUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "ORDER_TRADE_UPDATE"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "T": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "i": {
+            "type": "string"
+          },
+          "o": {
+            "type": "object",
+            "properties": {
+              "s": {
+                "type": "string",
+                "x-rust-type": "crate::Symbol"
+              },
+              "c": {
+                "type": "string",
+                "x-rust-type": "ClientOrderId"
+              },
+              "S": {
+                "type": "string"
+              },
+              "o": {
+                "type": "string"
+              },
+              "f": {
+                "type": "string"
+              },
+              "q": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "p": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "ap": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "sp": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "x": {
+                "type": "string"
+              },
+              "X": {
+                "type": "string"
+              },
+              "i": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "M": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "l": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "z": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "L": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "ma": {
+                "type": "string",
+                "x-rust-type": "crate::Asset"
+              },
+              "N": {
+                "type": "string",
+                "x-rust-type": "crate::Asset"
+              },
+              "n": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "T": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "t": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "rp": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "b": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "a": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "m": {
+                "type": "boolean"
+              },
+              "R": {
+                "type": "boolean"
+              },
+              "wt": {
+                "type": "string"
+              },
+              "ot": {
+                "type": "string"
+              },
+              "ps": {
+                "type": "string"
+              },
+              "cp": {
+                "type": "boolean"
+              },
+              "AP": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "cr": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "pP": {
+                "type": "boolean"
+              },
+              "V": {
+                "type": "string"
+              },
+              "pm": {
+                "type": "string"
+              },
+              "er": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "s",
+              "c",
+              "S",
+              "o",
+              "X",
+              "i",
+              "q",
+              "p",
+              "z",
+              "l"
+            ]
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "T",
+          "o"
+        ]
+      },
+      "strategyUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "STRATEGY_UPDATE"
+            ]
+          },
+          "T": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "su": {
+            "type": "object",
+            "properties": {
+              "si": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "st": {
+                "type": "string"
+              },
+              "ss": {
+                "type": "string"
+              },
+              "s": {
+                "type": "string",
+                "x-rust-type": "crate::Symbol"
+              },
+              "ut": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "c": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          }
+        },
+        "required": [
+          "e",
+          "T",
+          "E"
+        ]
+      },
+      "User Data Stream Events": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/accountConfigUpdate"
+          },
+          {
+            "$ref": "#/components/schemas/accountUpdate"
+          },
+          {
+            "$ref": "#/components/schemas/gridUpdate"
+          },
+          {
+            "$ref": "#/components/schemas/listenKeyExpired"
+          },
+          {
+            "$ref": "#/components/schemas/marginCall"
+          },
+          {
+            "$ref": "#/components/schemas/orderTradeUpdate"
+          },
+          {
+            "$ref": "#/components/schemas/strategyUpdate"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -55,6 +55,12 @@ jobs:
           if [ "$RUNNER_OS" = Windows ]; then python_cmd=python; fi
           "$python_cmd" scripts/codegen/generate.py --check
 
+      - name: Changelog monitor offline tests
+        run: |
+          python_cmd=python3
+          if [ "$RUNNER_OS" = Windows ]; then python_cmd=python; fi
+          "$python_cmd" -m unittest discover -s tests/ci -p 'test_*.py'
+
       - name: Formatting
         run: cargo fmt --all -- --check
 

@@ -1443,9 +1443,10 @@ pub struct NewAlgoOrderResponse {
     #[serde(
         rename = "icebergQuantity",
         default,
+        deserialize_with = "super::wire::decimal_option_null_string",
         skip_serializing_if = "Option::is_none"
     )]
-    pub iceberg_quantity: Option<String>,
+    pub iceberg_quantity: Option<Decimal>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
@@ -1967,8 +1968,13 @@ pub struct QueryOrderResponse {
     )]
     pub client_order_id: Option<ClientOrderId>,
     /// Exact `cumQuote` wire field.
-    #[serde(rename = "cumQuote", default, skip_serializing_if = "Option::is_none")]
-    pub cum_quote: Option<String>,
+    #[serde(
+        rename = "cumQuote",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub cum_quote: Option<Decimal>,
     /// Exact `executedQty` wire field.
     #[serde(
         rename = "executedQty",

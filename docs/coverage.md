@@ -57,9 +57,14 @@ downloads. These checks prove local admission invariants, not live venue through
 
 The separately invoked credential-free Futures demo probes passed on 2026-09-27:
 REST ping/server time/exchange metadata, WebSocket API depth, and routed Public depth
-stream. No authenticated endpoint or market mutation was exercised. Live execution,
-account modes, conversion, long-range history and asynchronous download jobs still
-need human review and explicitly authorized account-specific testing.
+stream. Separately authorized account probes on the same date passed signed USD-M
+REST balance/account reads, signed WebSocket balance reads, and one post-only
+placement/cancellation over each transport. Queries confirmed both owned orders
+canceled with zero fills and preserved caller IDs. These probes establish basic demo
+order lifecycles only; fills, user execution streams, advanced order families,
+account-mode changes, conversion, long-range history and download jobs remain
+outside this verification. Credentials and sensitive venue payloads were not
+recorded in fixtures or CI.
 
 The client does not synchronize server time automatically, renew listen keys,
 reconnect, replay orders, or reconcile trading state. Inject adjusted clocks and
@@ -74,6 +79,20 @@ subject to venue eligibility. The validation-only `testOrder` endpoint accepts t
 catalog's legacy conditional inputs and empty acknowledgment without claiming execution.
 Its omitted quota weights use a conservative one-IP-unit/one-order-slot reservation,
 tracked by [verification #4](https://github.com/SharurTrading/binance-rs/issues/4).
+Authorized demo observations on 2026-09-27 showed order-count headers on the
+validation-only response and no IP-weight increase between surrounding pings.
+The response did not decode as documented order evidence; the client retained a
+read failure rather than inventing financial values. This does not establish
+production quota weights, so the conservative reservation remains.
+
+A schema audit after the demo probes corrected categorical order modes and exact
+financial annotations. Cumulative base/quote amounts, annualized basis, funding
+rates, withdrawable amounts and liquidation fees use Decimal. Documented empty
+funding/interest rates for delivery contracts, empty trailing fields on new algo
+receipts, and the algo iceberg `"null"` sentinel map to absent amounts rather than
+zero; other malformed financial strings fail. See
+[wire corrections #23](https://github.com/SharurTrading/binance-rs/issues/23) and the
+[USD-M trade reference](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade).
 
 ## REST operations
 

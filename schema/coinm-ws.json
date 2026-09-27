@@ -132,7 +132,8 @@
                               "x-decimal": true
                             },
                             "maxWithdrawAmount": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "crossWalletBalance": {
                               "type": "string",
@@ -671,8 +672,7 @@
                         "QUEUE_5",
                         "QUEUE_10",
                         "QUEUE_20"
-                      ],
-                      "x-decimal": true
+                      ]
                     },
                     "modifyId": {
                       "type": "integer",
@@ -984,8 +984,7 @@
                         "QUEUE_5",
                         "QUEUE_10",
                         "QUEUE_20"
-                      ],
-                      "x-decimal": true
+                      ]
                     },
                     "selfTradePreventionMode": {
                       "type": "string",
@@ -1514,8 +1513,7 @@
                         "format": "int64"
                       },
                       "priceMatch": {
-                        "type": "string",
-                        "x-decimal": true
+                        "type": "string"
                       }
                     },
                     "required": [

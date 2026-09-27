@@ -2246,7 +2246,9 @@
                         "x-decimal": true
                       },
                       "icebergQuantity": {
-                        "type": "string"
+                        "type": "string",
+                        "x-decimal": true,
+                        "x-decimal-unavailable": "null"
                       },
                       "selfTradePreventionMode": {
                         "type": "string"
@@ -3059,7 +3061,8 @@
                         "type": "string"
                       },
                       "cumQuote": {
-                        "type": "string"
+                        "type": "string",
+                        "x-decimal": true
                       },
                       "executedQty": {
                         "type": "string",

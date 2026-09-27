@@ -222,3 +222,85 @@ async fn spot_success_refunds_weight_but_rejection_and_venue_counters_do_not() {
         f.finish().await;
     }
 }
+
+#[tokio::test]
+async fn coinm_successful_price_match_mode_decodes_without_replaying_mutation() {
+    let f = HttpFixture::new(
+        200,
+        "X-MBX-ORDER-COUNT-1M: 1\r\n",
+        r#"{"orderId":7,"clientOrderId":"synthetic-order","status":"NEW","priceMatch":"NONE","executedQty":"0"}"#,
+        None,
+        false,
+    )
+    .await;
+    let config = coinm::Config::new(coinm::Environment::Demo)
+        .unwrap()
+        .rest_url(&f.url)
+        .unwrap()
+        .clock(Arc::new(FixedClock(1_700_000_001_000)))
+        .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap());
+    let client = coinm::RestClient::new(config).unwrap();
+    let response = client
+        .new_order(
+            &coinm::rest_requests::NewOrder::new()
+                .symbol(Symbol::new("BTCUSD_PERP").unwrap())
+                .side("BUY")
+                .type_value("LIMIT")
+                .time_in_force("GTX")
+                .quantity(Decimal::ONE)
+                .price(Decimal::from(100))
+                .new_client_order_id(
+                    binance_client::ClientOrderId::new("synthetic-order").unwrap(),
+                ),
+            deadline(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(response.data.client_order_id.as_str(), "synthetic-order");
+    assert_eq!(response.data.price_match.as_deref(), Some("NONE"));
+    assert_eq!(response.meta.rates.counters["x-mbx-order-count-1m"], 1);
+    assert_eq!(f.attempts(), 1);
+    f.finish().await;
+}
+
+#[tokio::test]
+async fn validation_only_order_refuses_empty_demo_placeholders_without_fabricating_evidence() {
+    let f = HttpFixture::new(
+        200,
+        "X-MBX-ORDER-COUNT-10S: 1\r\nX-MBX-ORDER-COUNT-1M: 1\r\n",
+        r#"{"orderId":0,"clientOrderId":"","symbol":"","price":"","origQty":"","executedQty":"","stopPrice":""}"#,
+        None,
+        false,
+    )
+    .await;
+    let client = usdm::RestClient::new(support::config().rest_url(&f.url).unwrap()).unwrap();
+    let error = client
+        .test_order(
+            &usdm::rest_requests::TestOrder::new()
+                .symbol(Symbol::new("BTCUSDT").unwrap())
+                .side("BUY")
+                .type_value("MARKET")
+                .quantity(Decimal::ONE)
+                .new_client_order_id(
+                    binance_client::ClientOrderId::new("synthetic-validation").unwrap(),
+                ),
+            deadline(),
+        )
+        .await
+        .unwrap_err();
+    let Error::Transport {
+        outcome,
+        meta: Some(meta),
+        client_order_ids,
+        ..
+    } = error
+    else {
+        panic!("missing failed-read evidence")
+    };
+    assert_eq!(outcome, Outcome::ReadFailed);
+    assert_eq!(meta.status, 200);
+    assert_eq!(meta.rates.counters["x-mbx-order-count-10s"], 1);
+    assert_eq!(client_order_ids["newClientOrderId"], "synthetic-validation");
+    assert_eq!(f.attempts(), 1);
+    f.finish().await;
+}

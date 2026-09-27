@@ -118,9 +118,10 @@ pub struct AccountInformationResponseAssetsItem {
     #[serde(
         rename = "maxWithdrawAmount",
         default,
+        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub max_withdraw_amount: Option<String>,
+    pub max_withdraw_amount: Option<Decimal>,
     /// Exact `crossWalletBalance` wire field.
     #[serde(
         rename = "crossWalletBalance",
@@ -976,10 +977,9 @@ pub struct QueryOrderResponse {
     #[serde(
         rename = "priceMatch",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<Decimal>,
+    pub price_match: Option<String>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,

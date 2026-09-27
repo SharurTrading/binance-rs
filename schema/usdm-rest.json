@@ -2787,7 +2787,8 @@
                       "x-decimal": true
                     },
                     "annualizedBasisRate": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true
                     },
                     "basis": {
                       "type": "string",
@@ -6640,10 +6641,12 @@
                       "type": "string"
                     },
                     "cumQuote": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true
                     },
                     "cumBase": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true
                     },
                     "executedQty": {
                       "type": "string",
@@ -7127,7 +7130,9 @@
                     "x-decimal": true
                   },
                   "icebergQuantity": {
-                    "type": "string"
+                    "type": "string",
+                    "x-decimal": true,
+                    "x-decimal-unavailable": "null"
                   },
                   "selfTradePreventionMode": {
                     "type": "string"
@@ -7148,10 +7153,14 @@
                     "type": "boolean"
                   },
                   "activatePrice": {
-                    "type": "string"
+                    "type": "string",
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "callbackRate": {
-                    "type": "string"
+                    "type": "string",
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "createTime": {
                     "type": "integer",
@@ -7294,7 +7303,9 @@
                     "x-decimal": true
                   },
                   "icebergQuantity": {
-                    "type": "string"
+                    "type": "string",
+                    "x-decimal": true,
+                    "x-decimal-unavailable": "null"
                   },
                   "tpOrderType": {
                     "type": "string"
@@ -8783,7 +8794,8 @@
                     "type": "string"
                   },
                   "cumQuote": {
-                    "type": "string"
+                    "type": "string",
+                    "x-decimal": true
                   },
                   "executedQty": {
                     "type": "string",
@@ -9152,7 +9164,9 @@
                       "x-decimal": true
                     },
                     "icebergQuantity": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true,
+                      "x-decimal-unavailable": "null"
                     },
                     "tpTriggerPrice": {
                       "type": "string",
@@ -9280,7 +9294,8 @@
                       "type": "string"
                     },
                     "cumQuote": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true
                     },
                     "executedQty": {
                       "type": "string",
@@ -10316,7 +10331,9 @@
                       "x-decimal": true
                     },
                     "icebergQuantity": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true,
+                      "x-decimal-unavailable": "null"
                     },
                     "tpTriggerPrice": {
                       "type": "string",
@@ -10458,7 +10475,8 @@
                     "type": "string"
                   },
                   "cumQuote": {
-                    "type": "string"
+                    "type": "string",
+                    "x-decimal": true
                   },
                   "executedQty": {
                     "type": "string",
@@ -10744,7 +10762,8 @@
                     "x-decimal": true
                   },
                   "cumQuote": {
-                    "type": "string"
+                    "type": "string",
+                    "x-decimal": true
                   },
                   "executedQty": {
                     "type": "string",

@@ -153,7 +153,7 @@ pub enum Error {
         /// Earliest estimated delay for a new attempt; no automatic retry is performed.
         retry_after: Duration,
     },
-    /// A venue IP ban supplied no valid retry timing. No expiry is invented;
+    /// Venue retry timing was unusable, or an IP ban supplied no timing. No expiry is invented;
     /// all clients sharing this owner refuse sends until the caller verifies
     /// restored venue authority and supplies a fresh explicit budget owner.
     #[error("venue IP cooldown timing is unknown")]
@@ -165,6 +165,8 @@ pub enum Error {
     /// reason is the caller's own lifecycle, not a venue deadline or verdict.
     #[error("{operation} was not sent: {reason}")]
     NotSent {
+        /// Caller-supplied reconciliation identities of the refused command.
+        client_order_ids: BTreeMap<String, String>,
         /// Operation identity that never reached the venue.
         operation: &'static str,
         /// Static safe diagnostic.
@@ -204,6 +206,9 @@ impl Error {
         match &mut self {
             Self::Venue(v) => v.client_order_ids = ids,
             Self::Transport {
+                client_order_ids, ..
+            }
+            | Self::NotSent {
                 client_order_ids, ..
             } => *client_order_ids = ids,
             _ => (),

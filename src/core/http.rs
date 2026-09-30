@@ -311,10 +311,13 @@ fn header_rates(headers: &reqwest::header::HeaderMap) -> RateEvidence {
             evidence.counters.insert(name.to_owned(), value);
         }
     }
-    evidence.retry_after = headers
-        .get("retry-after")
-        .and_then(|v| v.to_str().ok())
-        .and_then(|v| v.parse().ok())
-        .map(Duration::from_secs);
+    if let Some(value) = headers.get("retry-after") {
+        evidence.retry_after = value
+            .to_str()
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .map(Duration::from_secs);
+        evidence.retry_after_unusable = evidence.retry_after.is_none();
+    }
     evidence
 }

@@ -677,10 +677,13 @@ impl SocketDriver {
         let mut close_replies = Vec::new();
         while let Some(command) = self.commands.recv().await {
             match command {
-                Command::Call { op, reply, .. } => {
+                Command::Call {
+                    op, params, reply, ..
+                } => {
                     // The command never reached the socket, so the caller's own
                     // deadline did not expire. The reason is this retirement.
                     let _ = reply.send(Err(Error::NotSent {
+                        client_order_ids: super::request::order_ids(&params),
                         operation: op.name,
                         reason: "socket generation retired before send",
                     }));
@@ -731,19 +734,26 @@ fn ws_rates(v: &Value, now: u64, binary_timestamps: bool) -> RateEvidence {
             }
         }
     }
-    let deadline = v
-        .get("error")
-        .and_then(|e| {
-            e.get("retryAfter")
-                .or_else(|| e.get("data").and_then(|d| d.get("retryAfter")))
-        })
-        .and_then(Value::as_u64);
+    let deadline = v.get("error").and_then(|e| {
+        e.get("retryAfter")
+            .or_else(|| e.get("data").and_then(|d| d.get("retryAfter")))
+    });
     if let Some(deadline) = deadline {
+        // The SBE ErrorResponse schema explicitly makes retryAfter optional;
+        // its null sentinel projects to JSON null and means absent timing.
+        if binary_timestamps && deadline.is_null() {
+            return e;
+        }
+        let Some(deadline) = deadline.as_u64() else {
+            e.retry_after_unusable = true;
+            return e;
+        };
         // A venue deadline at or before the local clock proves nothing about how long
         // to wait. Zero would silently read as "no cooldown", so the timing is reported
         // unusable instead: the refusal stands and no expiry is invented.
         let remaining = if binary_timestamps {
-            deadline.checked_sub(now.saturating_mul(1000))
+            now.checked_mul(1000)
+                .and_then(|now| deadline.checked_sub(now))
         } else {
             deadline.checked_sub(now)
         };
@@ -763,5 +773,19 @@ fn ws_rates(v: &Value, now: u64, binary_timestamps: bool) -> RateEvidence {
 impl Drop for SocketEvents {
     fn drop(&mut self) {
         self.stop.cancel();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn optional_sbe_retry_timing_is_absent_while_malformed_json_is_unusable() {
+        let error = serde_json::json!({"error":{"code":-1100,"retryAfter":null}});
+        let binary = ws_rates(&error, 1_700_000_000_000, true);
+        assert_eq!(binary.retry_after, None);
+        assert!(!binary.retry_after_unusable);
+        assert!(ws_rates(&error, 1_700_000_000_000, false).retry_after_unusable);
     }
 }

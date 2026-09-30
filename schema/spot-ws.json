@@ -12344,7 +12344,8 @@
             "type": "integer"
           },
           "maxPosition": {
-            "type": "string"
+            "type": "string",
+            "x-decimal": true
           }
         }
       },

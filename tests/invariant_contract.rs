@@ -48,6 +48,10 @@ fn filter_payload() -> serde_json::Value {
             {"filterType": "MAX_POSITION", "maxPosition": "10.00000000"},
             {"filterType": "FUTURE_FILTER", "futureSetting": "1"},
         ],
+        "assetFilters": [
+            {"filterType":"MAX_ASSET", "asset":"USDC", "limit":"42.00000001"},
+            {"filterType":"FUTURE_ASSET_FILTER", "futureSetting":"1"},
+        ],
     })
 }
 
@@ -73,10 +77,19 @@ fn spot_rest_filter_lists_dispatch_on_the_venue_filter_type() {
             && f.max_qty == "9000.00000000".parse::<Decimal>().unwrap()
             && f.step_size == "0.00100000".parse::<Decimal>().unwrap()));
     assert!(matches!(&symbol[2], Symbol_::Notional(f) if f.apply_min_to_market));
-    assert!(matches!(&symbol[3], Symbol_::MaxPosition(f) if f.max_position == "10.00000000"));
+    assert!(matches!(&symbol[3], Symbol_::MaxPosition(f) if f.max_position == Decimal::TEN));
     // A filter this build does not model is retained, never forced into a documented
     // kind with invented evidence.
     assert!(matches!(&symbol[4], Symbol_::Unknown(_)));
+    let assets = response.asset_filters.unwrap();
+    assert!(
+        matches!(&assets[0], binance_client::spot::rest_models::MyFiltersResponseAssetFiltersItem::MaxAsset(f)
+        if f.asset.as_str() == "USDC" && f.limit == "42.00000001".parse::<Decimal>().unwrap())
+    );
+    assert!(matches!(
+        &assets[1],
+        binance_client::spot::rest_models::MyFiltersResponseAssetFiltersItem::Unknown(_)
+    ));
 }
 
 #[test]
@@ -97,6 +110,15 @@ fn spot_socket_filter_lists_dispatch_on_the_venue_filter_type() {
             && f.max_qty == "9000.00000000".parse::<Decimal>().unwrap()
             && f.step_size == "0.00100000".parse::<Decimal>().unwrap()));
     assert!(matches!(&symbol[4], SocketSymbolFilters::Unknown(_)));
+    let assets = response.asset_filters.unwrap();
+    assert!(
+        matches!(&assets[0], binance_client::spot::ws_models::MyFiltersResponseAssetFiltersItem::MaxAsset(f)
+        if f.asset.as_str() == "USDC" && f.limit == "42.00000001".parse::<Decimal>().unwrap())
+    );
+    assert!(matches!(
+        &assets[1],
+        binance_client::spot::ws_models::MyFiltersResponseAssetFiltersItem::Unknown(_)
+    ));
 }
 
 /// A filter without its discriminator, or missing the evidence its kind requires, is
@@ -109,6 +131,9 @@ fn incomplete_or_undiscriminated_filters_are_refused() {
         json!({"symbolFilters": [{"filterType": "LOT_SIZE", "maxQty": "9000.00000000", "stepSize": "0.00100000"}]}),
         json!({"symbolFilters": [{"filterType": "LOT_SIZE", "minQty": "0.00100000", "stepSize": ""}]}),
         json!({"exchangeFilters": [{"filterType": "EXCHANGE_MAX_NUM_ORDERS"}]}),
+        json!({"symbolFilters": [{"filterType":"MAX_POSITION", "maxPosition":"NaN"}]}),
+        json!({"assetFilters": [{"filterType":"MAX_ASSET", "asset":"BTC", "limit":"NaN"}]}),
+        json!({"assetFilters": [{"filterType":"MAX_ASSET", "limit":"1"}]}),
     ] {
         let rest: Result<MyFiltersResponse, _> = serde_json::from_value(payload.clone());
         assert!(rest.is_err(), "rest accepted {payload}");
@@ -180,6 +205,39 @@ async fn unrepresentable_retry_timing_keeps_the_acknowledgment() {
     );
     assert_eq!(fixture.attempts(), 1, "the refusal never reached the wire");
     fixture.finish().await;
+}
+
+#[tokio::test]
+async fn malformed_http_retry_timing_keeps_the_answer_and_refuses_future_sends() {
+    use binance_client::{Error, usdm::rest_requests::CheckServerTime};
+    use support::{HttpFixture, config, deadline};
+    for value in ["invalid", "-1", "18446744073709551616"] {
+        let fixture = HttpFixture::new(
+            200,
+            &format!("Retry-After: {value}\r\n"),
+            r#"{"serverTime":1700000000000}"#,
+            None,
+            false,
+        )
+        .await;
+        let client =
+            binance_client::usdm::RestClient::new(config().rest_url(&fixture.url).unwrap())
+                .unwrap();
+        let response = client
+            .check_server_time(&CheckServerTime::new(), deadline())
+            .await
+            .unwrap();
+        assert_eq!(response.data.server_time, Some(1_700_000_000_000));
+        assert!(response.meta.rates.retry_after_unusable);
+        assert!(matches!(
+            client
+                .check_server_time(&CheckServerTime::new(), deadline())
+                .await,
+            Err(Error::CooldownTimingUnknown)
+        ));
+        assert_eq!(fixture.attempts(), 1);
+        fixture.finish().await;
+    }
 }
 
 #[tokio::test]
@@ -257,81 +315,89 @@ async fn a_correlated_answer_survives_evidence_that_cannot_be_classified() {
 }
 
 #[tokio::test]
-async fn a_venue_retry_deadline_in_the_past_refuses_instead_of_reading_as_no_cooldown() {
+async fn unusable_venue_retry_deadlines_refuse_instead_of_reading_as_no_cooldown() {
     use binance_client::{Error, usdm::WsClient};
     use futures_util::{SinkExt, StreamExt};
     use support::{config, deadline};
     use tokio::net::TcpListener;
     use tokio_websockets::{Limits, Message, ServerBuilder};
 
-    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
-    let url = format!("ws://{}", listener.local_addr().unwrap());
-    let server = tokio::spawn(async move {
-        let (stream, _) = listener.accept().await.unwrap();
-        let mut ws = ServerBuilder::new()
-            .limits(Limits::unlimited())
-            .accept(stream)
+    for retry_after in [
+        json!(1_699_999_999_000_u64),
+        json!(-1),
+        json!("invalid"),
+        json!(null),
+    ] {
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("ws://{}", listener.local_addr().unwrap());
+        let server = tokio::spawn(async move {
+            let (stream, _) = listener.accept().await.unwrap();
+            let mut ws = ServerBuilder::new()
+                .limits(Limits::unlimited())
+                .accept(stream)
+                .await
+                .unwrap()
+                .1;
+            let request = ws.next().await.unwrap().unwrap();
+            let id =
+                serde_json::from_slice::<serde_json::Value>(request.as_payload()).unwrap()["id"]
+                    .as_str()
+                    .unwrap()
+                    .to_owned();
+            // The venue's retry deadline is already behind the injected clock. Zero
+            // remaining time is not evidence that no cooldown applies.
+            ws.send(Message::text(
+                json!({
+                    "id": id, "status": 429,
+                    "error": {"code": -1003, "msg": "Too many requests", "retryAfter": retry_after}
+                })
+                .to_string(),
+            ))
             .await
-            .unwrap()
-            .1;
-        let request = ws.next().await.unwrap().unwrap();
-        let id = serde_json::from_slice::<serde_json::Value>(request.as_payload()).unwrap()["id"]
-            .as_str()
-            .unwrap()
-            .to_owned();
-        // The venue's retry deadline is already behind the injected clock. Zero
-        // remaining time is not evidence that no cooldown applies.
-        ws.send(Message::text(
-            json!({
-                "id": id, "status": 429,
-                "error": {"code": -1003, "msg": "Too many requests", "retryAfter": 1_699_999_999_000_u64}
-            })
-            .to_string(),
-        ))
-        .await
-        .unwrap();
-        while let Some(message) = ws.next().await {
-            if message.unwrap().is_close() {
-                ws.flush().await.unwrap();
+            .unwrap();
+            while let Some(message) = ws.next().await {
+                if message.unwrap().is_close() {
+                    ws.flush().await.unwrap();
+                    break;
+                }
+            }
+        });
+        let (client, mut events, driver) = WsClient::connect(config().websocket_url(&url).unwrap())
+            .await
+            .unwrap();
+        let driver = tokio::spawn(driver.run());
+        events.recv().await.unwrap();
+        let refused = client
+            .new_order(&order(), RequestId::new("invariant-2").unwrap(), deadline())
+            .await
+            .unwrap_err();
+        // The venue refusal is reported exactly as sent, with the unusable timing kept
+        // as evidence instead of being read as "retry now".
+        let Error::Venue(failure) = &refused else {
+            panic!("expected the venue refusal, got {refused}");
+        };
+        assert_eq!(failure.status, 429);
+        assert_eq!(failure.code, Some(-1003));
+        assert_eq!(failure.outcome, Outcome::Unknown);
+        assert!(failure.rates.retry_after.is_none());
+        assert!(failure.rates.retry_after_unusable);
+        let afterwards = client
+            .new_order(&order(), RequestId::new("invariant-3").unwrap(), deadline())
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(afterwards, Error::CooldownTimingUnknown),
+            "{afterwards}"
+        );
+        client.close().await.unwrap();
+        while let Some(event) = events.recv().await {
+            if matches!(event, binance_client::usdm::ApiEvent::Retired(_)) {
                 break;
             }
         }
-    });
-    let (client, mut events, driver) = WsClient::connect(config().websocket_url(&url).unwrap())
-        .await
-        .unwrap();
-    let driver = tokio::spawn(driver.run());
-    events.recv().await.unwrap();
-    let refused = client
-        .new_order(&order(), RequestId::new("invariant-2").unwrap(), deadline())
-        .await
-        .unwrap_err();
-    // The venue refusal is reported exactly as sent, with the unusable timing kept
-    // as evidence instead of being read as "retry now".
-    let Error::Venue(failure) = &refused else {
-        panic!("expected the venue refusal, got {refused}");
-    };
-    assert_eq!(failure.status, 429);
-    assert_eq!(failure.code, Some(-1003));
-    assert_eq!(failure.outcome, Outcome::Unknown);
-    assert!(failure.rates.retry_after.is_none());
-    assert!(failure.rates.retry_after_unusable);
-    let afterwards = client
-        .new_order(&order(), RequestId::new("invariant-3").unwrap(), deadline())
-        .await
-        .unwrap_err();
-    assert!(
-        matches!(afterwards, Error::CooldownTimingUnknown),
-        "{afterwards}"
-    );
-    client.close().await.unwrap();
-    while let Some(event) = events.recv().await {
-        if matches!(event, binance_client::usdm::ApiEvent::Retired(_)) {
-            break;
-        }
+        driver.await.unwrap().unwrap();
+        server.await.unwrap();
     }
-    driver.await.unwrap().unwrap();
-    server.await.unwrap();
 }
 
 /// An unsent command reports that it was never sent. The caller's own deadline did
@@ -339,6 +405,7 @@ async fn a_venue_retry_deadline_in_the_past_refuses_instead_of_reading_as_no_coo
 #[test]
 fn an_unsent_command_reports_not_sent_rather_than_an_expired_deadline() {
     let error = binance_client::Error::NotSent {
+        client_order_ids: std::collections::BTreeMap::new(),
         operation: "newOrder",
         reason: "socket generation retired before send",
     };
@@ -347,4 +414,62 @@ fn an_unsent_command_reports_not_sent_rather_than_an_expired_deadline() {
         !error.to_string().contains("deadline"),
         "an unsent command must not claim a deadline it never reached: {error}"
     );
+}
+
+#[tokio::test]
+async fn generation_retirement_preserves_the_unsent_orders_identity() {
+    use binance_client::{Error, usdm::WsClient};
+    use futures_util::{SinkExt, StreamExt};
+    use support::{config, deadline};
+    use tokio::net::TcpListener;
+    use tokio_websockets::ServerBuilder;
+
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let url = format!("ws://{}", listener.local_addr().unwrap());
+    let server = tokio::spawn(async move {
+        let (stream, _) = listener.accept().await.unwrap();
+        let mut ws = ServerBuilder::new().accept(stream).await.unwrap().1;
+        let message = ws.next().await.unwrap().unwrap();
+        assert!(message.is_close(), "an unsent order reached the wire");
+        ws.flush().await.unwrap();
+    });
+    let (client, mut events, driver) = WsClient::connect(config().websocket_url(&url).unwrap())
+        .await
+        .unwrap();
+    let request = order();
+    let call = client.new_order(
+        &request,
+        RequestId::new("queued-order").unwrap(),
+        deadline(),
+    );
+    tokio::pin!(call);
+    // Poll the call once to place it in the inbox before the driver starts.
+    tokio::select! {
+        biased;
+        result = &mut call => panic!("queued call settled early: {result:?}"),
+        () = std::future::ready(()) => (),
+    }
+    let (closed, retired) = tokio::join!(client.close(), driver.run());
+    closed.unwrap();
+    retired.unwrap();
+    let error = call.await.unwrap_err();
+    let Error::NotSent {
+        client_order_ids,
+        operation,
+        ..
+    } = error
+    else {
+        panic!("expected an unsent lifecycle refusal, got {error:?}");
+    };
+    assert_eq!(operation, "newOrder");
+    assert_eq!(client_order_ids["newClientOrderId"], "invariant/order:1");
+    assert!(matches!(
+        events.recv().await,
+        Some(binance_client::usdm::ApiEvent::Established(_))
+    ));
+    assert!(matches!(
+        events.recv().await,
+        Some(binance_client::usdm::ApiEvent::Retired(_))
+    ));
+    server.await.unwrap();
 }

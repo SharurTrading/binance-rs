@@ -587,6 +587,41 @@ fn binary_logon_ack() -> Vec<u8> {
     b[4..6].copy_from_slice(&0xeb50_u16.to_le_bytes());
     b
 }
+
+#[test]
+fn binary_market_subscription_preserves_symbols_in_zero_fixed_width_entries() {
+    use binance_client::spot::fix::decode_sbe;
+    // Official FIX schema 1:1, template 202: RelatedSym contains variable
+    // Symbol data only. MDEntryTypes has a one-byte fixed block.
+    let mut b = vec![0; 6];
+    for value in [4_u16, 202, 1, 1] {
+        b.extend_from_slice(&value.to_le_bytes());
+    }
+    b.extend_from_slice(&2_u32.to_le_bytes());
+    b.extend_from_slice(&1_790_471_000_123_456_i64.to_le_bytes());
+    b.push(b'1'); // subscribe
+    b.extend_from_slice(&1_u16.to_le_bytes());
+    b.push(1); // aggregated book
+    b.extend_from_slice(&0_u16.to_le_bytes());
+    b.extend_from_slice(&1_u16.to_le_bytes());
+    b.push(7);
+    b.extend_from_slice(b"BTCUSDT");
+    b.push(1); // MDEntryTypes fixed block width
+    b.push(2); // two MDEntryTypes
+    b.extend_from_slice(b"01");
+    b.push(6);
+    b.extend_from_slice(b"book-1");
+    let len = u32::try_from(b.len()).unwrap();
+    b[..4].copy_from_slice(&len.to_le_bytes());
+    b[4..6].copy_from_slice(&0xeb50_u16.to_le_bytes());
+    let message = decode_sbe(Role::MarketData, &b).unwrap();
+    let Some(Value::Group(symbols)) = message.field("NoRelatedSym") else {
+        panic!("missing symbol group");
+    };
+    assert!(
+        matches!(symbols[0].get("Symbol"), Some(Value::Symbol(symbol)) if symbol.as_str() == "BTCUSDT")
+    );
+}
 #[tokio::test]
 async fn both_binary_session_modes_authenticate_and_logout_without_invented_header_ids() {
     use binance_client::spot::fix::{Encoding, Event, Session, decode_sbe};

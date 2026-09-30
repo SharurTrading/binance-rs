@@ -68,12 +68,12 @@ class Models:
             return 'Decimal'
         if 'oneOf' in schema or 'anyOf' in schema:
             variants = schema.get('oneOf', schema.get('anyOf'))
-            if len(variants) == 1:
+            tags = [self.resolve(x).get('properties', {}).get('filterType', {}).get('enum', []) for x in variants]
+            if len(variants) == 1 and not all(len(t) == 1 for t in tags):
                 return self.type(variants[0], name, response)
             if name not in self.defs:
                 self.defs[name] = ''
                 types = [self.type(x, name+'Variant'+str(i+1), response) for i, x in enumerate(variants)]
-                tags = [self.resolve(x).get('properties', {}).get('filterType', {}).get('enum', []) for x in variants]
                 if tags and all(len(t) == 1 for t in tags):
                     for x in variants:
                         resolved = self.resolve(x)

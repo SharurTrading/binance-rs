@@ -2338,8 +2338,8 @@ pub struct ExchangeInfoResponseSymbolsItemFiltersItemVariant12 {
     )]
     pub qty_exponent: Option<i64>,
     /// Exact `maxPosition` wire field.
-    #[serde(rename = "maxPosition")]
-    pub max_position: String,
+    #[serde(rename = "maxPosition", deserialize_with = "super::wire::decimal")]
+    pub max_position: Decimal,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4429,19 +4429,42 @@ pub struct MyFiltersResponse {
     pub extra: super::event_payloads::UnknownMessage,
 }
 
-/// Provider alternatives for `MyFiltersResponseExchangeFiltersItem`; no member is discarded.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+/// Provider filters with explicit discriminator dispatch and unknown retention.
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[non_exhaustive]
 #[serde(untagged)]
 pub enum MyFiltersResponseExchangeFiltersItem {
-    /// Wire alternative 1.
-    Variant1(Box<MyFiltersResponseExchangeFiltersItemVariant1>),
-    /// Wire alternative 2.
-    Variant2(Box<MyFiltersResponseExchangeFiltersItemVariant2>),
-    /// Wire alternative 3.
-    Variant3(Box<MyFiltersResponseExchangeFiltersItemVariant3>),
-    /// Wire alternative 4.
-    Variant4(Box<MyFiltersResponseExchangeFiltersItemVariant4>),
+    /// Provider `EXCHANGE_MAX_NUM_ORDERS` filter.
+    ExchangeMaxNumOrders(Box<MyFiltersResponseExchangeFiltersItemVariant1>),
+    /// Provider `EXCHANGE_MAX_NUM_ALGO_ORDERS` filter.
+    ExchangeMaxNumAlgoOrders(Box<MyFiltersResponseExchangeFiltersItemVariant2>),
+    /// Provider `EXCHANGE_MAX_NUM_ICEBERG_ORDERS` filter.
+    ExchangeMaxNumIcebergOrders(Box<MyFiltersResponseExchangeFiltersItemVariant3>),
+    /// Provider `EXCHANGE_MAX_NUM_ORDER_LISTS` filter.
+    ExchangeMaxNumOrderLists(Box<MyFiltersResponseExchangeFiltersItemVariant4>),
+    /// Future filter facts, retained with redacted Debug.
+    Unknown(super::event_payloads::UnknownMessage),
+}
+impl<'de> Deserialize<'de> for MyFiltersResponseExchangeFiltersItem {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let value = serde_json::Value::deserialize(d)?;
+        match value.get("filterType").and_then(serde_json::Value::as_str) {
+            Some("EXCHANGE_MAX_NUM_ORDERS") => serde_json::from_value(value)
+                .map(|v| Self::ExchangeMaxNumOrders(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("EXCHANGE_MAX_NUM_ALGO_ORDERS") => serde_json::from_value(value)
+                .map(|v| Self::ExchangeMaxNumAlgoOrders(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("EXCHANGE_MAX_NUM_ICEBERG_ORDERS") => serde_json::from_value(value)
+                .map(|v| Self::ExchangeMaxNumIcebergOrders(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("EXCHANGE_MAX_NUM_ORDER_LISTS") => serde_json::from_value(value)
+                .map(|v| Self::ExchangeMaxNumOrderLists(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some(_) => Ok(Self::Unknown(value.into())),
+            None => Err(serde::de::Error::custom("filter type required")),
+        }
+    }
 }
 
 /// Provider-native `MyFiltersResponseExchangeFiltersItemVariant1` payload.
@@ -4449,19 +4472,11 @@ pub enum MyFiltersResponseExchangeFiltersItem {
 #[non_exhaustive]
 pub struct MyFiltersResponseExchangeFiltersItemVariant1 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `maxNumOrders` wire field.
-    #[serde(
-        rename = "maxNumOrders",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_num_orders: Option<i64>,
+    #[serde(rename = "maxNumOrders")]
+    pub max_num_orders: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4472,19 +4487,11 @@ pub struct MyFiltersResponseExchangeFiltersItemVariant1 {
 #[non_exhaustive]
 pub struct MyFiltersResponseExchangeFiltersItemVariant2 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `maxNumAlgoOrders` wire field.
-    #[serde(
-        rename = "maxNumAlgoOrders",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_num_algo_orders: Option<i64>,
+    #[serde(rename = "maxNumAlgoOrders")]
+    pub max_num_algo_orders: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4495,19 +4502,11 @@ pub struct MyFiltersResponseExchangeFiltersItemVariant2 {
 #[non_exhaustive]
 pub struct MyFiltersResponseExchangeFiltersItemVariant3 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `maxNumIcebergOrders` wire field.
-    #[serde(
-        rename = "maxNumIcebergOrders",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_num_iceberg_orders: Option<i64>,
+    #[serde(rename = "maxNumIcebergOrders")]
+    pub max_num_iceberg_orders: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4518,61 +4517,112 @@ pub struct MyFiltersResponseExchangeFiltersItemVariant3 {
 #[non_exhaustive]
 pub struct MyFiltersResponseExchangeFiltersItemVariant4 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `maxNumOrderLists` wire field.
-    #[serde(
-        rename = "maxNumOrderLists",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_num_order_lists: Option<i64>,
+    #[serde(rename = "maxNumOrderLists")]
+    pub max_num_order_lists: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
 }
 
-/// Provider alternatives for `MyFiltersResponseSymbolFiltersItem`; no member is discarded.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+/// Provider filters with explicit discriminator dispatch and unknown retention.
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[non_exhaustive]
 #[serde(untagged)]
 pub enum MyFiltersResponseSymbolFiltersItem {
-    /// Wire alternative 1.
-    Variant1(Box<MyFiltersResponseSymbolFiltersItemVariant1>),
-    /// Wire alternative 2.
-    Variant2(Box<MyFiltersResponseSymbolFiltersItemVariant2>),
-    /// Wire alternative 3.
-    Variant3(Box<MyFiltersResponseSymbolFiltersItemVariant3>),
-    /// Wire alternative 4.
-    Variant4(Box<MyFiltersResponseSymbolFiltersItemVariant4>),
-    /// Wire alternative 5.
-    Variant5(Box<MyFiltersResponseSymbolFiltersItemVariant5>),
-    /// Wire alternative 6.
-    Variant6(Box<MyFiltersResponseSymbolFiltersItemVariant6>),
-    /// Wire alternative 7.
-    Variant7(Box<MyFiltersResponseSymbolFiltersItemVariant7>),
-    /// Wire alternative 8.
-    Variant8(Box<MyFiltersResponseSymbolFiltersItemVariant8>),
-    /// Wire alternative 9.
-    Variant9(Box<MyFiltersResponseSymbolFiltersItemVariant9>),
-    /// Wire alternative 10.
-    Variant10(Box<MyFiltersResponseSymbolFiltersItemVariant10>),
-    /// Wire alternative 11.
-    Variant11(Box<MyFiltersResponseSymbolFiltersItemVariant11>),
-    /// Wire alternative 12.
-    Variant12(Box<MyFiltersResponseSymbolFiltersItemVariant12>),
-    /// Wire alternative 13.
-    Variant13(Box<MyFiltersResponseSymbolFiltersItemVariant13>),
-    /// Wire alternative 14.
-    Variant14(Box<MyFiltersResponseSymbolFiltersItemVariant14>),
-    /// Wire alternative 15.
-    Variant15(Box<MyFiltersResponseSymbolFiltersItemVariant15>),
-    /// Wire alternative 16.
-    Variant16(Box<MyFiltersResponseSymbolFiltersItemVariant16>),
+    /// Provider `PRICE_FILTER` filter.
+    PriceFilter(Box<MyFiltersResponseSymbolFiltersItemVariant1>),
+    /// Provider `PERCENT_PRICE` filter.
+    PercentPrice(Box<MyFiltersResponseSymbolFiltersItemVariant2>),
+    /// Provider `PERCENT_PRICE_BY_SIDE` filter.
+    PercentPriceBySide(Box<MyFiltersResponseSymbolFiltersItemVariant3>),
+    /// Provider `LOT_SIZE` filter.
+    LotSize(Box<MyFiltersResponseSymbolFiltersItemVariant4>),
+    /// Provider `MIN_NOTIONAL` filter.
+    MinNotional(Box<MyFiltersResponseSymbolFiltersItemVariant5>),
+    /// Provider `NOTIONAL` filter.
+    Notional(Box<MyFiltersResponseSymbolFiltersItemVariant6>),
+    /// Provider `ICEBERG_PARTS` filter.
+    IcebergParts(Box<MyFiltersResponseSymbolFiltersItemVariant7>),
+    /// Provider `MARKET_LOT_SIZE` filter.
+    MarketLotSize(Box<MyFiltersResponseSymbolFiltersItemVariant8>),
+    /// Provider `MAX_NUM_ORDERS` filter.
+    MaxNumOrders(Box<MyFiltersResponseSymbolFiltersItemVariant9>),
+    /// Provider `MAX_NUM_ALGO_ORDERS` filter.
+    MaxNumAlgoOrders(Box<MyFiltersResponseSymbolFiltersItemVariant10>),
+    /// Provider `MAX_NUM_ICEBERG_ORDERS` filter.
+    MaxNumIcebergOrders(Box<MyFiltersResponseSymbolFiltersItemVariant11>),
+    /// Provider `MAX_POSITION` filter.
+    MaxPosition(Box<MyFiltersResponseSymbolFiltersItemVariant12>),
+    /// Provider `TRAILING_DELTA` filter.
+    TrailingDelta(Box<MyFiltersResponseSymbolFiltersItemVariant13>),
+    /// Provider `T_PLUS_SELL` filter.
+    TPlusSell(Box<MyFiltersResponseSymbolFiltersItemVariant14>),
+    /// Provider `MAX_NUM_ORDER_LISTS` filter.
+    MaxNumOrderLists(Box<MyFiltersResponseSymbolFiltersItemVariant15>),
+    /// Provider `MAX_NUM_ORDER_AMENDS` filter.
+    MaxNumOrderAmends(Box<MyFiltersResponseSymbolFiltersItemVariant16>),
+    /// Future filter facts, retained with redacted Debug.
+    Unknown(super::event_payloads::UnknownMessage),
+}
+impl<'de> Deserialize<'de> for MyFiltersResponseSymbolFiltersItem {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let value = serde_json::Value::deserialize(d)?;
+        match value.get("filterType").and_then(serde_json::Value::as_str) {
+            Some("PRICE_FILTER") => serde_json::from_value(value)
+                .map(|v| Self::PriceFilter(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("PERCENT_PRICE") => serde_json::from_value(value)
+                .map(|v| Self::PercentPrice(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("PERCENT_PRICE_BY_SIDE") => serde_json::from_value(value)
+                .map(|v| Self::PercentPriceBySide(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("LOT_SIZE") => serde_json::from_value(value)
+                .map(|v| Self::LotSize(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("MIN_NOTIONAL") => serde_json::from_value(value)
+                .map(|v| Self::MinNotional(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("NOTIONAL") => serde_json::from_value(value)
+                .map(|v| Self::Notional(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("ICEBERG_PARTS") => serde_json::from_value(value)
+                .map(|v| Self::IcebergParts(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("MARKET_LOT_SIZE") => serde_json::from_value(value)
+                .map(|v| Self::MarketLotSize(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("MAX_NUM_ORDERS") => serde_json::from_value(value)
+                .map(|v| Self::MaxNumOrders(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("MAX_NUM_ALGO_ORDERS") => serde_json::from_value(value)
+                .map(|v| Self::MaxNumAlgoOrders(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("MAX_NUM_ICEBERG_ORDERS") => serde_json::from_value(value)
+                .map(|v| Self::MaxNumIcebergOrders(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("MAX_POSITION") => serde_json::from_value(value)
+                .map(|v| Self::MaxPosition(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("TRAILING_DELTA") => serde_json::from_value(value)
+                .map(|v| Self::TrailingDelta(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("T_PLUS_SELL") => serde_json::from_value(value)
+                .map(|v| Self::TPlusSell(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("MAX_NUM_ORDER_LISTS") => serde_json::from_value(value)
+                .map(|v| Self::MaxNumOrderLists(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("MAX_NUM_ORDER_AMENDS") => serde_json::from_value(value)
+                .map(|v| Self::MaxNumOrderAmends(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some(_) => Ok(Self::Unknown(value.into())),
+            None => Err(serde::de::Error::custom("filter type required")),
+        }
+    }
 }
 
 /// Provider-native `MyFiltersResponseSymbolFiltersItemVariant1` payload.
@@ -4580,12 +4630,8 @@ pub enum MyFiltersResponseSymbolFiltersItem {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant1 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `priceExponent` wire field.
     #[serde(
         rename = "priceExponent",
@@ -4594,24 +4640,14 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant1 {
     )]
     pub price_exponent: Option<i64>,
     /// Exact `minPrice` wire field.
-    #[serde(
-        rename = "minPrice",
-        default,
-        deserialize_with = "super::wire::decimal_option",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub min_price: Option<Decimal>,
+    #[serde(rename = "minPrice", deserialize_with = "super::wire::decimal")]
+    pub min_price: Decimal,
     /// Exact `maxPrice` wire field.
-    #[serde(
-        rename = "maxPrice",
-        default,
-        deserialize_with = "super::wire::decimal_option",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_price: Option<Decimal>,
+    #[serde(rename = "maxPrice", deserialize_with = "super::wire::decimal")]
+    pub max_price: Decimal,
     /// Exact `tickSize` wire field.
-    #[serde(rename = "tickSize", default, skip_serializing_if = "Option::is_none")]
-    pub tick_size: Option<String>,
+    #[serde(rename = "tickSize", deserialize_with = "super::wire::decimal")]
+    pub tick_size: Decimal,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4622,12 +4658,8 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant1 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant2 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `multiplierExponent` wire field.
     #[serde(
         rename = "multiplierExponent",
@@ -4636,26 +4668,14 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant2 {
     )]
     pub multiplier_exponent: Option<i64>,
     /// Exact `multiplierUp` wire field.
-    #[serde(
-        rename = "multiplierUp",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub multiplier_up: Option<String>,
+    #[serde(rename = "multiplierUp", deserialize_with = "super::wire::decimal")]
+    pub multiplier_up: Decimal,
     /// Exact `multiplierDown` wire field.
-    #[serde(
-        rename = "multiplierDown",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub multiplier_down: Option<String>,
+    #[serde(rename = "multiplierDown", deserialize_with = "super::wire::decimal")]
+    pub multiplier_down: Decimal,
     /// Exact `avgPriceMins` wire field.
-    #[serde(
-        rename = "avgPriceMins",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub avg_price_mins: Option<i64>,
+    #[serde(rename = "avgPriceMins")]
+    pub avg_price_mins: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4666,12 +4686,8 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant2 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant3 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `multiplierExponent` wire field.
     #[serde(
         rename = "multiplierExponent",
@@ -4680,40 +4696,26 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant3 {
     )]
     pub multiplier_exponent: Option<i64>,
     /// Exact `bidMultiplierUp` wire field.
-    #[serde(
-        rename = "bidMultiplierUp",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub bid_multiplier_up: Option<String>,
+    #[serde(rename = "bidMultiplierUp", deserialize_with = "super::wire::decimal")]
+    pub bid_multiplier_up: Decimal,
     /// Exact `bidMultiplierDown` wire field.
     #[serde(
         rename = "bidMultiplierDown",
-        default,
-        skip_serializing_if = "Option::is_none"
+        deserialize_with = "super::wire::decimal"
     )]
-    pub bid_multiplier_down: Option<String>,
+    pub bid_multiplier_down: Decimal,
     /// Exact `askMultiplierUp` wire field.
-    #[serde(
-        rename = "askMultiplierUp",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub ask_multiplier_up: Option<String>,
+    #[serde(rename = "askMultiplierUp", deserialize_with = "super::wire::decimal")]
+    pub ask_multiplier_up: Decimal,
     /// Exact `askMultiplierDown` wire field.
     #[serde(
         rename = "askMultiplierDown",
-        default,
-        skip_serializing_if = "Option::is_none"
+        deserialize_with = "super::wire::decimal"
     )]
-    pub ask_multiplier_down: Option<String>,
+    pub ask_multiplier_down: Decimal,
     /// Exact `avgPriceMins` wire field.
-    #[serde(
-        rename = "avgPriceMins",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub avg_price_mins: Option<i64>,
+    #[serde(rename = "avgPriceMins")]
+    pub avg_price_mins: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4724,12 +4726,8 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant3 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant4 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `qtyExponent` wire field.
     #[serde(
         rename = "qtyExponent",
@@ -4738,24 +4736,14 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant4 {
     )]
     pub qty_exponent: Option<i64>,
     /// Exact `minQty` wire field.
-    #[serde(
-        rename = "minQty",
-        default,
-        deserialize_with = "super::wire::decimal_option",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub min_qty: Option<Decimal>,
+    #[serde(rename = "minQty", deserialize_with = "super::wire::decimal")]
+    pub min_qty: Decimal,
     /// Exact `maxQty` wire field.
-    #[serde(
-        rename = "maxQty",
-        default,
-        deserialize_with = "super::wire::decimal_option",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_qty: Option<Decimal>,
+    #[serde(rename = "maxQty", deserialize_with = "super::wire::decimal")]
+    pub max_qty: Decimal,
     /// Exact `stepSize` wire field.
-    #[serde(rename = "stepSize", default, skip_serializing_if = "Option::is_none")]
-    pub step_size: Option<String>,
+    #[serde(rename = "stepSize", deserialize_with = "super::wire::decimal")]
+    pub step_size: Decimal,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4766,12 +4754,8 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant4 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant5 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `priceExponent` wire field.
     #[serde(
         rename = "priceExponent",
@@ -4780,26 +4764,14 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant5 {
     )]
     pub price_exponent: Option<i64>,
     /// Exact `minNotional` wire field.
-    #[serde(
-        rename = "minNotional",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub min_notional: Option<String>,
+    #[serde(rename = "minNotional", deserialize_with = "super::wire::decimal")]
+    pub min_notional: Decimal,
     /// Exact `applyToMarket` wire field.
-    #[serde(
-        rename = "applyToMarket",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub apply_to_market: Option<bool>,
+    #[serde(rename = "applyToMarket")]
+    pub apply_to_market: bool,
     /// Exact `avgPriceMins` wire field.
-    #[serde(
-        rename = "avgPriceMins",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub avg_price_mins: Option<i64>,
+    #[serde(rename = "avgPriceMins")]
+    pub avg_price_mins: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4810,12 +4782,8 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant5 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant6 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `priceExponent` wire field.
     #[serde(
         rename = "priceExponent",
@@ -4824,40 +4792,20 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant6 {
     )]
     pub price_exponent: Option<i64>,
     /// Exact `minNotional` wire field.
-    #[serde(
-        rename = "minNotional",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub min_notional: Option<String>,
+    #[serde(rename = "minNotional", deserialize_with = "super::wire::decimal")]
+    pub min_notional: Decimal,
     /// Exact `applyMinToMarket` wire field.
-    #[serde(
-        rename = "applyMinToMarket",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub apply_min_to_market: Option<bool>,
+    #[serde(rename = "applyMinToMarket")]
+    pub apply_min_to_market: bool,
     /// Exact `maxNotional` wire field.
-    #[serde(
-        rename = "maxNotional",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_notional: Option<String>,
+    #[serde(rename = "maxNotional", deserialize_with = "super::wire::decimal")]
+    pub max_notional: Decimal,
     /// Exact `applyMaxToMarket` wire field.
-    #[serde(
-        rename = "applyMaxToMarket",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub apply_max_to_market: Option<bool>,
+    #[serde(rename = "applyMaxToMarket")]
+    pub apply_max_to_market: bool,
     /// Exact `avgPriceMins` wire field.
-    #[serde(
-        rename = "avgPriceMins",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub avg_price_mins: Option<i64>,
+    #[serde(rename = "avgPriceMins")]
+    pub avg_price_mins: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4868,15 +4816,11 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant6 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant7 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `limit` wire field.
-    #[serde(rename = "limit", default, skip_serializing_if = "Option::is_none")]
-    pub limit: Option<i64>,
+    #[serde(rename = "limit")]
+    pub limit: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4887,12 +4831,8 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant7 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant8 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `qtyExponent` wire field.
     #[serde(
         rename = "qtyExponent",
@@ -4901,24 +4841,14 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant8 {
     )]
     pub qty_exponent: Option<i64>,
     /// Exact `minQty` wire field.
-    #[serde(
-        rename = "minQty",
-        default,
-        deserialize_with = "super::wire::decimal_option",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub min_qty: Option<Decimal>,
+    #[serde(rename = "minQty", deserialize_with = "super::wire::decimal")]
+    pub min_qty: Decimal,
     /// Exact `maxQty` wire field.
-    #[serde(
-        rename = "maxQty",
-        default,
-        deserialize_with = "super::wire::decimal_option",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_qty: Option<Decimal>,
+    #[serde(rename = "maxQty", deserialize_with = "super::wire::decimal")]
+    pub max_qty: Decimal,
     /// Exact `stepSize` wire field.
-    #[serde(rename = "stepSize", default, skip_serializing_if = "Option::is_none")]
-    pub step_size: Option<String>,
+    #[serde(rename = "stepSize", deserialize_with = "super::wire::decimal")]
+    pub step_size: Decimal,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4929,19 +4859,11 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant8 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant9 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `maxNumOrders` wire field.
-    #[serde(
-        rename = "maxNumOrders",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_num_orders: Option<i64>,
+    #[serde(rename = "maxNumOrders")]
+    pub max_num_orders: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4952,19 +4874,11 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant9 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant10 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `maxNumAlgoOrders` wire field.
-    #[serde(
-        rename = "maxNumAlgoOrders",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_num_algo_orders: Option<i64>,
+    #[serde(rename = "maxNumAlgoOrders")]
+    pub max_num_algo_orders: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4975,19 +4889,11 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant10 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant11 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `maxNumIcebergOrders` wire field.
-    #[serde(
-        rename = "maxNumIcebergOrders",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_num_iceberg_orders: Option<i64>,
+    #[serde(rename = "maxNumIcebergOrders")]
+    pub max_num_iceberg_orders: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -4998,12 +4904,8 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant11 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant12 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `qtyExponent` wire field.
     #[serde(
         rename = "qtyExponent",
@@ -5012,12 +4914,8 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant12 {
     )]
     pub qty_exponent: Option<i64>,
     /// Exact `maxPosition` wire field.
-    #[serde(
-        rename = "maxPosition",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_position: Option<String>,
+    #[serde(rename = "maxPosition", deserialize_with = "super::wire::decimal")]
+    pub max_position: Decimal,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -5028,40 +4926,20 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant12 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant13 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `minTrailingAboveDelta` wire field.
-    #[serde(
-        rename = "minTrailingAboveDelta",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub min_trailing_above_delta: Option<i64>,
+    #[serde(rename = "minTrailingAboveDelta")]
+    pub min_trailing_above_delta: i64,
     /// Exact `maxTrailingAboveDelta` wire field.
-    #[serde(
-        rename = "maxTrailingAboveDelta",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_trailing_above_delta: Option<i64>,
+    #[serde(rename = "maxTrailingAboveDelta")]
+    pub max_trailing_above_delta: i64,
     /// Exact `minTrailingBelowDelta` wire field.
-    #[serde(
-        rename = "minTrailingBelowDelta",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub min_trailing_below_delta: Option<i64>,
+    #[serde(rename = "minTrailingBelowDelta")]
+    pub min_trailing_below_delta: i64,
     /// Exact `maxTrailingBelowDelta` wire field.
-    #[serde(
-        rename = "maxTrailingBelowDelta",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_trailing_below_delta: Option<i64>,
+    #[serde(rename = "maxTrailingBelowDelta")]
+    pub max_trailing_below_delta: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -5072,15 +4950,11 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant13 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant14 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `endTime` wire field.
-    #[serde(rename = "endTime", default, skip_serializing_if = "Option::is_none")]
-    pub end_time: Option<i64>,
+    #[serde(rename = "endTime")]
+    pub end_time: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -5091,19 +4965,11 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant14 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant15 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `maxNumOrderLists` wire field.
-    #[serde(
-        rename = "maxNumOrderLists",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_num_order_lists: Option<i64>,
+    #[serde(rename = "maxNumOrderLists")]
+    pub max_num_order_lists: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -5114,35 +4980,46 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant15 {
 #[non_exhaustive]
 pub struct MyFiltersResponseSymbolFiltersItemVariant16 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `maxNumOrderAmends` wire field.
-    #[serde(
-        rename = "maxNumOrderAmends",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub max_num_order_amends: Option<i64>,
+    #[serde(rename = "maxNumOrderAmends")]
+    pub max_num_order_amends: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
 }
 
-/// Provider-native `MyFiltersResponseAssetFiltersItem` payload.
+/// Provider filters with explicit discriminator dispatch and unknown retention.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[non_exhaustive]
+#[serde(untagged)]
+pub enum MyFiltersResponseAssetFiltersItem {
+    /// Provider `MAX_ASSET` filter.
+    MaxAsset(Box<MyFiltersResponseAssetFiltersItemVariant1>),
+    /// Future filter facts, retained with redacted Debug.
+    Unknown(super::event_payloads::UnknownMessage),
+}
+impl<'de> Deserialize<'de> for MyFiltersResponseAssetFiltersItem {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let value = serde_json::Value::deserialize(d)?;
+        match value.get("filterType").and_then(serde_json::Value::as_str) {
+            Some("MAX_ASSET") => serde_json::from_value(value)
+                .map(|v| Self::MaxAsset(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some(_) => Ok(Self::Unknown(value.into())),
+            None => Err(serde::de::Error::custom("filter type required")),
+        }
+    }
+}
+
+/// Provider-native `MyFiltersResponseAssetFiltersItemVariant1` payload.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct MyFiltersResponseAssetFiltersItem {
+pub struct MyFiltersResponseAssetFiltersItemVariant1 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `qtyExponent` wire field.
     #[serde(
         rename = "qtyExponent",
@@ -5151,11 +5028,11 @@ pub struct MyFiltersResponseAssetFiltersItem {
     )]
     pub qty_exponent: Option<i64>,
     /// Exact `limit` wire field.
-    #[serde(rename = "limit", default, skip_serializing_if = "Option::is_none")]
-    pub limit: Option<String>,
+    #[serde(rename = "limit", deserialize_with = "super::wire::decimal")]
+    pub limit: Decimal,
     /// Exact `asset` wire field.
-    #[serde(rename = "asset", default, skip_serializing_if = "Option::is_none")]
-    pub asset: Option<String>,
+    #[serde(rename = "asset")]
+    pub asset: crate::Asset,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,

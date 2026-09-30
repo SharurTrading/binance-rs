@@ -12,6 +12,67 @@ use binance_client::{
     spot::sbe::{MarketEvent, decode_market},
 };
 
+// Official schema 3:4: MyFiltersResponse has no fixed entry fields; each
+// symbol filter is a length-prefixed nested message, not a zero-byte entry.
+#[test]
+fn api_filters_decode_zero_fixed_blocks_with_variable_entries() {
+    let mut b = [0_u16, 105, 3, 4]
+        .into_iter()
+        .flat_map(u16::to_le_bytes)
+        .collect::<Vec<_>>();
+    b.extend_from_slice(&0_u16.to_le_bytes());
+    b.extend_from_slice(&0_u32.to_le_bytes()); // exchange filters
+    b.extend_from_slice(&0_u16.to_le_bytes());
+    b.extend_from_slice(&1_u32.to_le_bytes()); // symbol filters
+    b.push(17); // MaxPositionFilter: header plus exponent and mantissa
+    for value in [9_u16, 12, 3, 4] {
+        b.extend_from_slice(&value.to_le_bytes());
+    }
+    b.push((-3_i8).cast_unsigned());
+    b.extend_from_slice(&1234_i64.to_le_bytes());
+    b.extend_from_slice(&0_u16.to_le_bytes());
+    b.extend_from_slice(&0_u32.to_le_bytes()); // asset filters
+    let filters: binance_client::spot::rest_models::MyFiltersResponse =
+        binance_client::spot::sbe::decode_api(&b).unwrap();
+    assert!(filters.exchange_filters.unwrap().is_empty());
+    assert!(matches!(&filters.symbol_filters.unwrap()[0],
+        binance_client::spot::rest_models::MyFiltersResponseSymbolFiltersItem::MaxPosition(f)
+        if f.max_position == "1.234".parse::<Decimal>().unwrap()));
+    for n in 0..b.len() {
+        assert!(binance_client::spot::sbe::decode_api::<serde_json::Value>(&b[..n]).is_err());
+    }
+    // Even an empty group must carry the schema's fixed width.
+    b[8..10].copy_from_slice(&1_u16.to_le_bytes());
+    assert!(binance_client::spot::sbe::decode_api::<serde_json::Value>(&b).is_err());
+}
+
+#[test]
+fn api_list_status_preserves_the_documented_text_default() {
+    // Official ListStatusEvent 606: three int64 fields, three enums,
+    // optional subscription ID, and an empty orders group with fixed width 8.
+    let mut b = [29_u16, 606, 3, 4]
+        .into_iter()
+        .flat_map(u16::to_le_bytes)
+        .collect::<Vec<_>>();
+    for value in [100_i64, 99, 42] {
+        b.extend_from_slice(&value.to_le_bytes());
+    }
+    b.extend_from_slice(&[1, 1, 1]);
+    b.extend_from_slice(&7_u16.to_le_bytes());
+    b.extend_from_slice(&8_u16.to_le_bytes());
+    b.extend_from_slice(&0_u16.to_le_bytes());
+    b.push(7);
+    b.extend_from_slice(b"BTCUSDT");
+    b.push(6);
+    b.extend_from_slice(b"list-1");
+    b.push(0); // absent optional rejectReason projects to text "NONE"
+    let value: serde_json::Value = binance_client::spot::sbe::decode_api(&b).unwrap();
+    assert_eq!(value["subscriptionId"], 7);
+    assert_eq!(value["event"]["r"], "NONE");
+    assert_eq!(value["event"]["C"], "list-1");
+    assert_eq!(value["event"]["O"], serde_json::json!([]));
+}
+
 #[test]
 fn api_depth_uses_its_own_schema_and_exact_nested_price_levels() {
     let mut b = [10_u16, 200, 3, 4]
@@ -80,6 +141,17 @@ fn every_truncation_and_unknown_schema_is_refused() {
     let mut unknown = b.clone();
     unknown[2..4].copy_from_slice(&10004_u16.to_le_bytes());
     assert!(decode_market(&unknown).is_err());
+    // A template this build does not model is never read as the shape of a
+    // neighbouring one, even when its block length would fit.
+    for template in [10005_u16, 10001 + 100, u16::MAX] {
+        let mut wrong = quote();
+        wrong[2..4].copy_from_slice(&template.to_le_bytes());
+        assert!(decode_market(&wrong).is_err(), "template {template}");
+        assert!(binance_client::spot::sbe::decode_api::<
+            binance_client::spot::rest_models::DepthResponse,
+        >(&wrong)
+        .is_err());
+    }
     let mut trailing = b;
     trailing.push(1);
     assert!(decode_market(&trailing).is_err());

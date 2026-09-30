@@ -1875,8 +1875,8 @@ pub struct ExchangeInfoResponseSymbolsItemFiltersItemVariant12 {
     )]
     pub qty_exponent: Option<i64>,
     /// Exact `maxPosition` wire field.
-    #[serde(rename = "maxPosition")]
-    pub max_position: String,
+    #[serde(rename = "maxPosition", deserialize_with = "super::wire::decimal")]
+    pub max_position: Decimal,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -5280,8 +5280,8 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant12 {
     )]
     pub qty_exponent: Option<i64>,
     /// Exact `maxPosition` wire field.
-    #[serde(rename = "maxPosition")]
-    pub max_position: String,
+    #[serde(rename = "maxPosition", deserialize_with = "super::wire::decimal")]
+    pub max_position: Decimal,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -5356,17 +5356,36 @@ pub struct MyFiltersResponseSymbolFiltersItemVariant16 {
     pub extra: super::event_payloads::UnknownMessage,
 }
 
-/// Provider-native `MyFiltersResponseAssetFiltersItem` payload.
+/// Provider filters with explicit discriminator dispatch and unknown retention.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[non_exhaustive]
+#[serde(untagged)]
+pub enum MyFiltersResponseAssetFiltersItem {
+    /// Provider `MAX_ASSET` filter.
+    MaxAsset(Box<MyFiltersResponseAssetFiltersItemVariant1>),
+    /// Future filter facts, retained with redacted Debug.
+    Unknown(super::event_payloads::UnknownMessage),
+}
+impl<'de> Deserialize<'de> for MyFiltersResponseAssetFiltersItem {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let value = serde_json::Value::deserialize(d)?;
+        match value.get("filterType").and_then(serde_json::Value::as_str) {
+            Some("MAX_ASSET") => serde_json::from_value(value)
+                .map(|v| Self::MaxAsset(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some(_) => Ok(Self::Unknown(value.into())),
+            None => Err(serde::de::Error::custom("filter type required")),
+        }
+    }
+}
+
+/// Provider-native `MyFiltersResponseAssetFiltersItemVariant1` payload.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct MyFiltersResponseAssetFiltersItem {
+pub struct MyFiltersResponseAssetFiltersItemVariant1 {
     /// Exact `filterType` wire field.
-    #[serde(
-        rename = "filterType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub filter_type: Option<String>,
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `qtyExponent` wire field.
     #[serde(
         rename = "qtyExponent",
@@ -5375,16 +5394,11 @@ pub struct MyFiltersResponseAssetFiltersItem {
     )]
     pub qty_exponent: Option<i64>,
     /// Exact `limit` wire field.
-    #[serde(
-        rename = "limit",
-        default,
-        deserialize_with = "super::wire::decimal_option",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub limit: Option<Decimal>,
+    #[serde(rename = "limit", deserialize_with = "super::wire::decimal")]
+    pub limit: Decimal,
     /// Exact `asset` wire field.
-    #[serde(rename = "asset", default, skip_serializing_if = "Option::is_none")]
-    pub asset: Option<crate::Asset>,
+    #[serde(rename = "asset")]
+    pub asset: crate::Asset,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,

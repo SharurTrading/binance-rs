@@ -472,16 +472,6 @@ pub(crate) fn user_payload(value: Value) -> Result<UserPayload, Error> {
         .get("e")
         .and_then(Value::as_str)
         .ok_or(Error::Gap("user event type"))?;
-    if event == "ACCOUNT_UPDATE"
-        && value
-            .get("a")
-            .is_none_or(|a| a.get("B").is_none() && a.get("P").is_none())
-    {
-        return Err(Error::Gap("account event has no balance/position evidence"));
-    }
-    if event == "ACCOUNT_CONFIG_UPDATE" && value.get("ac").is_none() && value.get("ai").is_none() {
-        return Err(Error::Gap("account configuration event has no evidence"));
-    }
     match event {
         "balanceUpdate" => {
             serde_json::from_value(value).map(|v| UserPayload::BalanceUpdate(Box::new(v)))

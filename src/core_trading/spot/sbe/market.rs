@@ -294,7 +294,7 @@ pub fn decode_market(bytes: &[u8]) -> Result<MarketEvent, Error> {
                 symbol: r.symbol()?,
             })
         }
-        _ => {
+        10003 => {
             let first_book_update_id = r.i64()?;
             let last_book_update_id = r.i64()?;
             if first_book_update_id > last_book_update_id {
@@ -311,6 +311,9 @@ pub fn decode_market(bytes: &[u8]) -> Result<MarketEvent, Error> {
                 symbol: r.symbol()?,
             })
         }
+        // The expected-length gate above admits only these four templates. A future
+        // template is never read as a depth diff.
+        _ => return Err(r.error("unknown market template")),
     };
     if r.offset != bytes.len() {
         return Err(r.error("trailing market bytes"));

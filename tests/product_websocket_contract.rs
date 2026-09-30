@@ -124,6 +124,76 @@ async fn spot_api_signature_subscription_delivers_partial_balances_and_shutdown_
     server.await.unwrap();
 }
 
+/// A user-data event this Spot build does not model is retained as unknown evidence
+/// on the live socket. Another product's event name is not borrowed into a Spot
+/// continuity failure that would retire the generation.
+#[tokio::test]
+async fn spot_user_data_retains_another_products_event_name_as_unknown() {
+    let (l, url) = listener().await;
+    let server = tokio::spawn(async move {
+        let mut peer = accept(l).await;
+        let request: Value =
+            serde_json::from_slice(peer.next().await.unwrap().unwrap().as_payload()).unwrap();
+        assert_eq!(request["method"], "userDataStream.subscribe.signature");
+        peer.send(Message::text(
+            json!({"id":request["id"],"status":200,"result":{"subscriptionId":9}}).to_string(),
+        ))
+        .await
+        .unwrap();
+        // `ACCOUNT_UPDATE` is a Futures user-data event; Spot does not document it,
+        // and Spot cannot decode its balance/position evidence into a Spot model.
+        peer.send(Message::text(
+            json!({"subscriptionId":9,"event":{"e":"ACCOUNT_UPDATE","E":1}}).to_string(),
+        ))
+        .await
+        .unwrap();
+        // The socket stays alive: the next documented Spot event still arrives.
+        peer.send(Message::text(
+            json!({"subscriptionId":9,"event":{"e":"outboundAccountPosition","E":2,"u":1,"B":[{"a":"BTC","f":"1.0","l":"0"}]}}).to_string(),
+        ))
+        .await
+        .unwrap();
+        finish(peer).await;
+    });
+    let config = spot::Config::new(spot::Environment::Demo)
+        .unwrap()
+        .websocket_url(&url)
+        .unwrap()
+        .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap());
+    let (client, mut events, driver) = spot::WsClient::connect(config).await.unwrap();
+    let driver = tokio::spawn(driver.run());
+    let generation = client.generation();
+    assert!(matches!(events.recv().await,Some(spot::ApiEvent::Established(g)) if g==generation));
+    client
+        .user_data_stream_subscribe_signature(
+            &spot::ws_requests::UserDataStreamSubscribeSignature::new(),
+            RequestId::new("subscribe").unwrap(),
+            deadline(),
+        )
+        .await
+        .unwrap();
+    match events.recv().await {
+        Some(spot::ApiEvent::UserData {
+            generation: g,
+            subscription_id: 9,
+            payload: spot::event_payloads::UserPayload::Unknown(_),
+        }) if g == generation => {}
+        other => panic!("unexpected event {other:?}"),
+    }
+    assert!(matches!(
+        events.recv().await,
+        Some(spot::ApiEvent::UserData {
+            payload: spot::event_payloads::UserPayload::OutboundAccountPosition(_),
+            ..
+        })
+    ));
+    client.close().await.unwrap();
+    assert!(matches!(events.recv().await,Some(spot::ApiEvent::Retired(g)) if g==generation));
+    assert!(events.recv().await.is_none());
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+
 #[tokio::test]
 async fn spot_late_order_reply_keeps_original_caller_and_generation_after_timeout() {
     let (l, url) = listener().await;

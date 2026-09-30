@@ -82,12 +82,16 @@ impl Schema {
     pub(crate) fn size(&self, name: &str) -> Result<usize, Error> {
         let n = self.type_node(name)?;
         match n.kind.as_str() {
-            "type" => primitive_size(
-                n.attr("primitiveType")
-                    .ok_or(Error::Configuration("primitive type"))?,
-            )
-            .and_then(|v| v.checked_mul(n.attr("length").and_then(|s| s.parse().ok()).unwrap_or(1)))
-            .ok_or(Error::Configuration("primitive width")),
+            "type" => {
+                let width = primitive_size(
+                    n.attr("primitiveType")
+                        .ok_or(Error::Configuration("primitive type"))?,
+                )
+                .ok_or(Error::Configuration("primitive width"))?;
+                width
+                    .checked_mul(elements(&n)?)
+                    .ok_or(Error::Configuration("primitive width"))
+            }
             "enum" | "set" => self.size(
                 n.attr("encodingType")
                     .ok_or(Error::Configuration("encoding type"))?,
@@ -99,14 +103,16 @@ impl Schema {
                             .ok_or(Error::Configuration("reference type"))?,
                     )?
                 } else {
-                    primitive_size(
-                        c.attr("primitiveType")
-                            .ok_or(Error::Configuration("composite type"))?,
-                    )
-                    .and_then(|v| {
-                        v.checked_mul(c.attr("length").and_then(|s| s.parse().ok()).unwrap_or(1))
-                    })
-                    .ok_or(Error::Configuration("composite width"))?
+                    {
+                        let width = primitive_size(
+                            c.attr("primitiveType")
+                                .ok_or(Error::Configuration("composite type"))?,
+                        )
+                        .ok_or(Error::Configuration("composite width"))?;
+                        width
+                            .checked_mul(elements(c)?)
+                            .ok_or(Error::Configuration("composite width"))?
+                    }
                 };
                 total
                     .checked_add(size)
@@ -116,6 +122,17 @@ impl Schema {
         }
     }
 }
+/// A declared array width. A present but unreadable width is refused rather than
+/// read as one element, which would silently desynchronise every later field.
+fn elements(node: &Node) -> Result<usize, Error> {
+    match node.attr("length") {
+        None => Ok(1),
+        Some(length) => length
+            .parse()
+            .map_err(|_| Error::Configuration("declared array width")),
+    }
+}
+
 fn primitive_size(name: &str) -> Option<usize> {
     match name {
         "char" | "int8" | "uint8" => Some(1),
@@ -314,7 +331,7 @@ impl<'a> Reader<'a> {
             let value = self.value(field, &scope)?;
             scope.insert(field.name.clone(), value.clone());
             if field.attr("type") != Some("exponent8") {
-                insert(&mut output, field, value)?;
+                insert(self.schema, &mut output, field, value)?;
             }
         }
         if self.offset - start != block {
@@ -326,13 +343,15 @@ impl<'a> Reader<'a> {
                 "data" => self.data(field)?,
                 _ => return Err(self.error("unknown schema field kind")),
             };
-            insert(&mut output, field, value)?;
+            insert(self.schema, &mut output, field, value)?;
         }
         Ok(output)
     }
     fn group(&mut self, field: &Node, scope: &BTreeMap<String, Value>) -> Result<Value, Error> {
         let dimensions = self
             .schema
+            // SBE's XSD declares groupSizeEncoding as the default dimensionType.
+            // See docs/invariant-audit.md for the protocol and venue schema citations.
             .type_node(field.attr("dimensionType").unwrap_or("groupSizeEncoding"))?;
         let mut values = BTreeMap::new();
         for d in dimensions.children {
@@ -350,7 +369,42 @@ impl<'a> Reader<'a> {
             .get("numInGroup")
             .and_then(|v| usize::try_from(*v).ok())
             .ok_or_else(|| self.error("group count"))?;
-        if count > (self.bytes.len() - self.offset) / block.max(1) {
+        // blockLength covers fixed fields only. Binance declares groups made
+        // entirely of nested groups or variable data, whose fixed width is zero.
+        // Verify the declared width even for empty groups, then bound the count
+        // using the fixed fields plus the variable fields' length headers.
+        let mut expected_block = 0_usize;
+        let mut minimum_entry = 0_usize;
+        for node in &field.children {
+            if node.attr("presence") == Some("constant") {
+                continue;
+            }
+            let width = match node.kind.as_str() {
+                "field" | "data" => self.schema.size(
+                    node.attr("type")
+                        .ok_or(Error::Configuration("group entry type"))?,
+                )?,
+                "group" => self
+                    .schema
+                    .size(node.attr("dimensionType").unwrap_or("groupSizeEncoding"))?,
+                _ => return Err(Error::Configuration("group entry kind")),
+            };
+            if node.kind == "field" {
+                expected_block = expected_block
+                    .checked_add(width)
+                    .ok_or(Error::Configuration("group fixed width overflow"))?;
+            }
+            minimum_entry = minimum_entry
+                .checked_add(width)
+                .ok_or(Error::Configuration("group entry width overflow"))?;
+        }
+        if block != expected_block {
+            return Err(self.error("group block width"));
+        }
+        if minimum_entry == 0 {
+            return Err(Error::Configuration("group entry has no encoded evidence"));
+        }
+        if count > (self.bytes.len() - self.offset) / minimum_entry {
             return Err(self.error("truncated group entries"));
         }
         (0..count)
@@ -414,11 +468,32 @@ pub(super) fn exact_decimal(mantissa: i128, exponent: i8) -> Option<Decimal> {
     }
     Decimal::try_from_i128_with_scale(mantissa, scale).ok()
 }
-fn insert(output: &mut Value, node: &Node, mut value: Value) -> Result<(), Error> {
+fn insert(schema: &Schema, output: &mut Value, node: &Node, mut value: Value) -> Result<(), Error> {
     if value.is_null()
         && let Some(default) = node.attr("jsonDefaultValue")
     {
-        value = serde_json::from_str(default).unwrap_or_else(|_| Value::String(default.into()));
+        let ty = schema.type_node(
+            node.attr("type")
+                .ok_or(Error::Configuration("default field type"))?,
+        )?;
+        // jsonDefaultValue is a schema attribute in the field's vocabulary,
+        // including unquoted NONE and empty optional strings. Its type decides
+        // the projection; a failed numeric parse never becomes text.
+        value = if node.kind == "data"
+            && ty
+                .children
+                .iter()
+                .any(|child| child.attr("characterEncoding") == Some("UTF-8"))
+        {
+            Value::String(default.into())
+        } else if node.attr("exponent").is_some() {
+            Decimal::from_str_exact(default)
+                .map_err(|_| Error::Configuration("declared decimal default"))?;
+            Value::String(default.into())
+        } else {
+            serde_json::from_str(default)
+                .map_err(|_| Error::Configuration("declared default value"))?
+        };
     }
     let path = node.attr("jsonPath").unwrap_or(&node.name);
     if path == ".." {
@@ -595,4 +670,54 @@ pub(crate) fn fix_node(template: u16) -> Result<&'static Node, Error> {
 pub fn decode_api<T: DeserializeOwned>(bytes: &[u8]) -> Result<T, Error> {
     serde_json::from_value(decode_api_value(bytes)?)
         .map_err(|_| Error::Gap("SBE native API model mismatch"))
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used, reason = "synthetic parser invariant assertions")]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn schema_defaults_preserve_text_and_refuse_malformed_numbers() {
+        let schema = api_schema().unwrap();
+        let report = schema.messages.get(&603).unwrap();
+        let original = report
+            .children
+            .iter()
+            .find(|node| node.name == "origClientOrderId")
+            .unwrap();
+        let mut output = serde_json::json!({});
+        insert(schema, &mut output, original, Value::Null).unwrap();
+        assert_eq!(output["C"], "");
+
+        let mut timestamp = report
+            .children
+            .iter()
+            .find(|node| node.name == "orderCreationTime")
+            .unwrap()
+            .clone();
+        insert(schema, &mut output, &timestamp, Value::Null).unwrap();
+        assert_eq!(output["O"], -1);
+        timestamp
+            .attrs
+            .insert("jsonDefaultValue".into(), "NONE".into());
+        assert!(matches!(
+            insert(schema, &mut output, &timestamp, Value::Null),
+            Err(Error::Configuration("declared default value"))
+        ));
+        let mut quantity = report
+            .children
+            .iter()
+            .find(|node| node.name == "origQty")
+            .unwrap()
+            .clone();
+        quantity.attrs.insert(
+            "jsonDefaultValue".into(),
+            "0.00000000000000000000000000001".into(),
+        );
+        assert!(matches!(
+            insert(schema, &mut output, &quantity, Value::Null),
+            Err(Error::Configuration("declared decimal default"))
+        ));
+    }
 }

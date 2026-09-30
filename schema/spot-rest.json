@@ -2290,7 +2290,8 @@
                                     "type": "integer"
                                   },
                                   "maxPosition": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "x-decimal": true
                                   }
                                 }
                               },
@@ -5482,7 +5483,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "EXCHANGE_MAX_NUM_ORDERS"
+                              ]
                             },
                             "maxNumOrders": {
                               "type": "integer",
@@ -5494,7 +5498,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "EXCHANGE_MAX_NUM_ALGO_ORDERS"
+                              ]
                             },
                             "maxNumAlgoOrders": {
                               "type": "integer",
@@ -5506,7 +5513,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "EXCHANGE_MAX_NUM_ICEBERG_ORDERS"
+                              ]
                             },
                             "maxNumIcebergOrders": {
                               "type": "integer",
@@ -5518,7 +5528,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "EXCHANGE_MAX_NUM_ORDER_LISTS"
+                              ]
                             },
                             "maxNumOrderLists": {
                               "type": "integer",
@@ -5537,7 +5550,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "PRICE_FILTER"
+                              ]
                             },
                             "priceExponent": {
                               "type": "integer"
@@ -5551,7 +5567,8 @@
                               "x-decimal": true
                             },
                             "tickSize": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             }
                           }
                         },
@@ -5559,16 +5576,21 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "PERCENT_PRICE"
+                              ]
                             },
                             "multiplierExponent": {
                               "type": "integer"
                             },
                             "multiplierUp": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "multiplierDown": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "avgPriceMins": {
                               "type": "integer"
@@ -5579,22 +5601,29 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "PERCENT_PRICE_BY_SIDE"
+                              ]
                             },
                             "multiplierExponent": {
                               "type": "integer"
                             },
                             "bidMultiplierUp": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "bidMultiplierDown": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "askMultiplierUp": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "askMultiplierDown": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "avgPriceMins": {
                               "type": "integer"
@@ -5605,7 +5634,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "LOT_SIZE"
+                              ]
                             },
                             "qtyExponent": {
                               "type": "integer"
@@ -5619,7 +5651,8 @@
                               "x-decimal": true
                             },
                             "stepSize": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             }
                           }
                         },
@@ -5627,13 +5660,17 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "MIN_NOTIONAL"
+                              ]
                             },
                             "priceExponent": {
                               "type": "integer"
                             },
                             "minNotional": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "applyToMarket": {
                               "type": "boolean"
@@ -5647,19 +5684,24 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "NOTIONAL"
+                              ]
                             },
                             "priceExponent": {
                               "type": "integer"
                             },
                             "minNotional": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "applyMinToMarket": {
                               "type": "boolean"
                             },
                             "maxNotional": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "applyMaxToMarket": {
                               "type": "boolean"
@@ -5673,7 +5715,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "ICEBERG_PARTS"
+                              ]
                             },
                             "limit": {
                               "type": "integer",
@@ -5685,7 +5730,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "MARKET_LOT_SIZE"
+                              ]
                             },
                             "qtyExponent": {
                               "type": "integer"
@@ -5699,7 +5747,8 @@
                               "x-decimal": true
                             },
                             "stepSize": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             }
                           }
                         },
@@ -5707,7 +5756,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "MAX_NUM_ORDERS"
+                              ]
                             },
                             "maxNumOrders": {
                               "type": "integer",
@@ -5719,7 +5771,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "MAX_NUM_ALGO_ORDERS"
+                              ]
                             },
                             "maxNumAlgoOrders": {
                               "type": "integer",
@@ -5731,7 +5786,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "MAX_NUM_ICEBERG_ORDERS"
+                              ]
                             },
                             "maxNumIcebergOrders": {
                               "type": "integer",
@@ -5743,13 +5801,17 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "MAX_POSITION"
+                              ]
                             },
                             "qtyExponent": {
                               "type": "integer"
                             },
                             "maxPosition": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             }
                           }
                         },
@@ -5757,7 +5819,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "TRAILING_DELTA"
+                              ]
                             },
                             "minTrailingAboveDelta": {
                               "type": "integer",
@@ -5781,7 +5846,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "T_PLUS_SELL"
+                              ]
                             },
                             "endTime": {
                               "type": "integer",
@@ -5793,7 +5861,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "MAX_NUM_ORDER_LISTS"
+                              ]
                             },
                             "maxNumOrderLists": {
                               "type": "integer",
@@ -5805,7 +5876,10 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "MAX_NUM_ORDER_AMENDS"
+                              ]
                             },
                             "maxNumOrderAmends": {
                               "type": "integer",
@@ -5824,16 +5898,21 @@
                           "type": "object",
                           "properties": {
                             "filterType": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": [
+                                "MAX_ASSET"
+                              ]
                             },
                             "qtyExponent": {
                               "type": "integer"
                             },
                             "limit": {
-                              "type": "string"
+                              "type": "string",
+                              "x-decimal": true
                             },
                             "asset": {
-                              "type": "string"
+                              "type": "string",
+                              "x-rust-type": "crate::Asset"
                             }
                           }
                         }
@@ -10726,7 +10805,8 @@
             "type": "integer"
           },
           "maxPosition": {
-            "type": "string"
+            "type": "string",
+            "x-decimal": true
           }
         }
       },

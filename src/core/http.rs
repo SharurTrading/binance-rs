@@ -216,13 +216,13 @@ impl HttpClient {
             operation: op.name,
             rates,
         };
+        // A clock failure after complete response headers must not cost the venue's
+        // answer, so the earlier reading of this same attempt is reused. It is a real
+        // local reading, never an invented epoch, and it only ever ages a counter
+        // bucket by the elapsed request time.
+        let observed_at = self.clock.now_millis().unwrap_or(now);
         self.budgets
-            .observe_cost(
-                cost,
-                &meta.rates,
-                self.clock.now_millis().unwrap_or(now),
-                status,
-            )
+            .observe_cost(cost, &meta.rates, observed_at, status)
             .map_err(|_| Error::Transport {
                 client_order_ids: client_order_ids.clone(),
                 operation: op.name,
@@ -297,19 +297,27 @@ fn header_rates(headers: &reqwest::header::HeaderMap) -> RateEvidence {
     let mut evidence = RateEvidence::default();
     for (name, value) in headers {
         let name = name.as_str();
-        if (name.starts_with("x-mbx-used-weight-")
+        // Venue counters are retained even when no budget window consumes them.
+        // An interval-less counter is evidence, not a licence to assume an interval.
+        let counted = name.starts_with("x-mbx-used-weight-")
             || name.starts_with("x-mbx-order-count-")
-            || name.starts_with("x-sapi-used-"))
+            || name.starts_with("x-sapi-used-")
+            || name == "x-mbx-used-weight"
+            || name == "x-mbx-order-count";
+        if counted
             && let Ok(value) = value.to_str()
             && let Ok(value) = value.parse()
         {
             evidence.counters.insert(name.to_owned(), value);
         }
     }
-    evidence.retry_after = headers
-        .get("retry-after")
-        .and_then(|v| v.to_str().ok())
-        .and_then(|v| v.parse().ok())
-        .map(Duration::from_secs);
+    if let Some(value) = headers.get("retry-after") {
+        evidence.retry_after = value
+            .to_str()
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .map(Duration::from_secs);
+        evidence.retry_after_unusable = evidence.retry_after.is_none();
+    }
     evidence
 }

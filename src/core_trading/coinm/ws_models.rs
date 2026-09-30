@@ -767,10 +767,9 @@ pub struct PositionInformationResponseItem {
     #[serde(
         rename = "marginType",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub margin_type: Option<Decimal>,
+    pub margin_type: Option<String>,
     /// Exact `isolatedMargin` wire field.
     #[serde(
         rename = "isolatedMargin",
@@ -783,10 +782,9 @@ pub struct PositionInformationResponseItem {
     #[serde(
         rename = "isAutoAddMargin",
         default,
-        deserialize_with = "super::wire::decimal_option",
         skip_serializing_if = "Option::is_none"
     )]
-    pub is_auto_add_margin: Option<Decimal>,
+    pub is_auto_add_margin: Option<String>,
     /// Exact `positionSide` wire field.
     #[serde(
         rename = "positionSide",

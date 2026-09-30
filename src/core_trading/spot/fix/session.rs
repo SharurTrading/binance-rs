@@ -508,7 +508,11 @@ impl SessionDriver {
                 returned.insert(value);
             }
         }
+        // A receipt without a client ID is still attributable by the venue's
+        // reference to the attempt's sequence number. Both the ASCII and binary
+        // encodings decode tag 45 as an integer, so both arms are matched.
         let seq = match message.field("RefSeqNum") {
+            Some(Value::Integer(v)) => u32::try_from(*v).ok(),
             Some(Value::Unsigned(v)) => u32::try_from(*v).ok(),
             _ => None,
         };
@@ -610,6 +614,11 @@ impl SessionDriver {
                 self.clean = true;
                 return Ok(true);
             }
+            // A recovery request changes the expected inbound sequence, which this
+            // session does not implement. The boundary is reported at the request
+            // rather than left to surface as a later sequence mismatch.
+            "2" => return Err(Error::Gap("FIX ResendRequest is unsupported")),
+            "4" => return Err(Error::Gap("FIX SequenceReset-GapFill is unsupported")),
             _ => (),
         }
         Ok(false)

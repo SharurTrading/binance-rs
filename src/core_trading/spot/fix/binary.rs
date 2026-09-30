@@ -237,9 +237,10 @@ impl Writer<'_> {
             None => &[],
             _ => return Err(Error::Validation("SBE group entries")),
         };
-        let dimensions = self
-            .schema
-            .type_node(node.attr("dimensionType").unwrap_or("groupSize32Encoding"))?;
+        let dimensions = self.schema.type_node(
+            node.attr("dimensionType")
+                .ok_or(Error::Configuration("SBE group dimension type"))?,
+        )?;
         let block = block_size(self.schema, &node.children)?;
         for d in dimensions.children {
             let primitive = d

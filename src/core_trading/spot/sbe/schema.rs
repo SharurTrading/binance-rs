@@ -82,12 +82,16 @@ impl Schema {
     pub(crate) fn size(&self, name: &str) -> Result<usize, Error> {
         let n = self.type_node(name)?;
         match n.kind.as_str() {
-            "type" => primitive_size(
-                n.attr("primitiveType")
-                    .ok_or(Error::Configuration("primitive type"))?,
-            )
-            .and_then(|v| v.checked_mul(n.attr("length").and_then(|s| s.parse().ok()).unwrap_or(1)))
-            .ok_or(Error::Configuration("primitive width")),
+            "type" => {
+                let width = primitive_size(
+                    n.attr("primitiveType")
+                        .ok_or(Error::Configuration("primitive type"))?,
+                )
+                .ok_or(Error::Configuration("primitive width"))?;
+                width
+                    .checked_mul(elements(&n)?)
+                    .ok_or(Error::Configuration("primitive width"))
+            }
             "enum" | "set" => self.size(
                 n.attr("encodingType")
                     .ok_or(Error::Configuration("encoding type"))?,
@@ -99,14 +103,16 @@ impl Schema {
                             .ok_or(Error::Configuration("reference type"))?,
                     )?
                 } else {
-                    primitive_size(
-                        c.attr("primitiveType")
-                            .ok_or(Error::Configuration("composite type"))?,
-                    )
-                    .and_then(|v| {
-                        v.checked_mul(c.attr("length").and_then(|s| s.parse().ok()).unwrap_or(1))
-                    })
-                    .ok_or(Error::Configuration("composite width"))?
+                    {
+                        let width = primitive_size(
+                            c.attr("primitiveType")
+                                .ok_or(Error::Configuration("composite type"))?,
+                        )
+                        .ok_or(Error::Configuration("composite width"))?;
+                        width
+                            .checked_mul(elements(c)?)
+                            .ok_or(Error::Configuration("composite width"))?
+                    }
                 };
                 total
                     .checked_add(size)
@@ -116,6 +122,17 @@ impl Schema {
         }
     }
 }
+/// A declared array width. A present but unreadable width is refused rather than
+/// read as one element, which would silently desynchronise every later field.
+fn elements(node: &Node) -> Result<usize, Error> {
+    match node.attr("length") {
+        None => Ok(1),
+        Some(length) => length
+            .parse()
+            .map_err(|_| Error::Configuration("declared array width")),
+    }
+}
+
 fn primitive_size(name: &str) -> Option<usize> {
     match name {
         "char" | "int8" | "uint8" => Some(1),
@@ -333,6 +350,10 @@ impl<'a> Reader<'a> {
     fn group(&mut self, field: &Node, scope: &BTreeMap<String, Value>) -> Result<Value, Error> {
         let dimensions = self
             .schema
+            // The pinned API and market schemas declare no `dimensionType` on a group
+            // and document both candidate encodings, so the decoder has to pick one.
+            // Tracked in issue #33: a wrong choice fails the block-length check loudly
+            // rather than decoding a different amount.
             .type_node(field.attr("dimensionType").unwrap_or("groupSizeEncoding"))?;
         let mut values = BTreeMap::new();
         for d in dimensions.children {
@@ -350,7 +371,12 @@ impl<'a> Reader<'a> {
             .get("numInGroup")
             .and_then(|v| usize::try_from(*v).ok())
             .ok_or_else(|| self.error("group count"))?;
-        if count > (self.bytes.len() - self.offset) / block.max(1) {
+        // A venue block width of zero would make every entry claim zero bytes, so it
+        // is refused instead of being read as one byte per entry.
+        if block == 0 {
+            return Err(self.error("group block width"));
+        }
+        if count > (self.bytes.len() - self.offset) / block {
             return Err(self.error("truncated group entries"));
         }
         (0..count)
@@ -418,7 +444,8 @@ fn insert(output: &mut Value, node: &Node, mut value: Value) -> Result<(), Error
     if value.is_null()
         && let Some(default) = node.attr("jsonDefaultValue")
     {
-        value = serde_json::from_str(default).unwrap_or_else(|_| Value::String(default.into()));
+        value = serde_json::from_str(default)
+            .map_err(|_| Error::Configuration("declared default value"))?;
     }
     let path = node.attr("jsonPath").unwrap_or(&node.name);
     if path == ".." {

@@ -488,15 +488,25 @@ def generate_events(coverage):
     for n,s in ss.items():
      if n=='User Data Stream Events' or 'e' not in s.get('properties',{}):continue
      name=pascal(n);text+=f'    /// Provider `{n}` event.\n    {name}(Box<super::stream_models::{name}Event>),\n'
+    # Evidence guards are emitted only for events this product's own pinned
+    # stream schema documents. A foreign product's event name is never borrowed
+    # into a local continuity failure; the catch-all retains it as unknown.
+    documented={s['properties']['e']['enum'][0] for s in ss.values()
+        if isinstance(s,dict) and 'e' in s.get('properties',{}) and 'enum' in s['properties'].get('e',{})}
+    guards=''
+    for event,probe,message in [
+        ('ACCOUNT_UPDATE','value.get("a").is_none_or(|a|a.get("B").is_none() && a.get("P").is_none())','account event has no balance/position evidence'),
+        ('ACCOUNT_CONFIG_UPDATE','value.get("ac").is_none() && value.get("ai").is_none()','account configuration event has no evidence'),
+    ]:
+        if event in documented:
+            guards+=f'        if event=="{event}" && {probe} {{return Err(Error::Gap("{message}"));}}\n'
     text+='''    /// A future event type, preserved for explicit consumer handling.
         Unknown(UnknownMessage),
     }
     
     pub(crate) fn user_payload(value:Value)->Result<UserPayload,Error> {
         let event=value.get("e").and_then(Value::as_str).ok_or(Error::Gap("user event type"))?;
-        if event=="ACCOUNT_UPDATE" && value.get("a").is_none_or(|a|a.get("B").is_none() && a.get("P").is_none()) {return Err(Error::Gap("account event has no balance/position evidence"));}
-        if event=="ACCOUNT_CONFIG_UPDATE" && value.get("ac").is_none() && value.get("ai").is_none() {return Err(Error::Gap("account configuration event has no evidence"));}
-        match event {
+'''+guards+'''        match event {
     '''
     for n,s in ss.items():
      if n=='User Data Stream Events' or 'e' not in s.get('properties',{}):continue

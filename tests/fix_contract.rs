@@ -43,6 +43,55 @@ fn execution_report_keeps_decimal_quantities_and_fee_asset() {
         assert!(decode(Role::OrderEntry, &bytes[..n]).is_err());
     }
 }
+/// A venue error code is never overruled by an accept-shaped status pair, and an
+/// undocumented code is never read as either acceptance or a documented rejection.
+#[test]
+fn a_venue_error_code_is_never_overruled_by_an_accept_shaped_status() {
+    use binance_client::Outcome;
+    // ExecutionReport tag 150 carries ExecType, tag 39 carries OrdStatus.
+    let report = |tail: &str| {
+        let bytes = frame(&format!(
+            "35=8|49=SPOT|56=CLIENT|34=2|52=20260927-01:02:03.123456|11=owned_1|55=BTCUSDT|40=2|54=1|44=0.125|60=20260927-01:02:03.123456|{tail}"
+        ));
+        decode(Role::OrderEntry, &bytes).unwrap()
+    };
+    let accepted_pair = "150=0|14=0.125|32=0.125|39=0|";
+    // A definitive documented code stays a rejection whatever the status pair says.
+    for code in ["-2011", "-2015", "-1100"] {
+        let message = report(&format!("{accepted_pair}25016={code}|"));
+        assert_eq!(
+            message.outcome(),
+            Outcome::Rejected,
+            "{code} must not read as acceptance"
+        );
+        assert_eq!(
+            message.field("ErrorCode"),
+            Some(&Value::Integer(code.parse().unwrap()))
+        );
+    }
+    // An undocumented or execution-unknown code is not promoted to a rejection.
+    for code in ["-1007", "-999999", "7000"] {
+        assert_eq!(
+            report(&format!("{accepted_pair}25016={code}|")).outcome(),
+            Outcome::Unknown,
+            "{code}"
+        );
+    }
+    // Without an error code the status pair is the only evidence.
+    assert_eq!(report(accepted_pair).outcome(), Outcome::Accepted);
+    assert_eq!(
+        report("150=F|14=0.125|32=0.125|39=2|").outcome(),
+        Outcome::Accepted
+    );
+    assert_eq!(report("150=8|14=0|32=0|39=8|").outcome(), Outcome::Rejected);
+    // A non-ExecutionReport kind carries no execution evidence at all.
+    let heartbeat = frame("35=0|49=SPOT|56=CLIENT|34=2|52=20260927-01:02:03.123456|112=probe|");
+    assert_eq!(
+        decode(Role::OrderEntry, &heartbeat).unwrap().outcome(),
+        Outcome::Unknown
+    );
+}
+
 #[test]
 fn missing_required_and_malformed_money_never_become_defaults() {
     for suffix in ["150=0|14=bad|32=0|39=0|", "150=0|32=0|39=0|"] {
@@ -141,6 +190,178 @@ async fn session_signs_once_services_control_and_preserves_reused_id_candidates(
     assert_eq!(signatures.len(), 1);
     let text = std::str::from_utf8(&signatures[0]).unwrap();
     assert!(text.starts_with("A\x01CLIENT\x01SPOT\x011\x01"));
+}
+
+/// A receipt that names no caller identity is still attributable by the venue's
+/// reference to the attempt's sequence number; that evidence path must not be dead.
+#[tokio::test]
+async fn a_receipt_without_a_caller_id_is_attributed_by_its_reference_sequence() {
+    use binance_client::{
+        BudgetLimits, Budgets, Credentials, RequestId,
+        spot::fix::{AccountBudgets, CompId, Config, Event, Session},
+    };
+    use std::time::Duration;
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let address = format!("tcp://{}", listener.local_addr().unwrap());
+    let server = tokio::spawn(async move {
+        use tokio::io::AsyncWriteExt;
+        let (mut stream, _) = listener.accept().await.unwrap();
+        assert_eq!(
+            decode(Role::OrderEntry, &read_fix(&mut stream).await)
+                .unwrap()
+                .kind
+                .as_str(),
+            "A"
+        );
+        stream
+            .write_all(&frame("35=A|34=1|49=SPOT|56=CLIENT|52=20260927-01:02:03.000001|98=0|108=5|25037=synthetic-server|"))
+            .await
+            .unwrap();
+        let request = decode(Role::OrderEntry, &read_fix(&mut stream).await).unwrap();
+        assert_eq!(request.kind.as_str(), "D");
+        // Tag 45 references the outbound sequence, and no client ID is returned.
+        stream
+            .write_all(&frame(&format!(
+                "35=8|34=2|49=SPOT|56=CLIENT|52=20260927-01:02:03.000002|45={}|37=123|38=1|40=2|54=1|44=1.00000001|55=BTCUSDT|150=0|14=0|32=0|39=0|",
+                request.header.sequence
+            )))
+            .await
+            .unwrap();
+        stream.shutdown().await.unwrap();
+    });
+    let credentials =
+        Credentials::external_ed25519("synthetic-key", std::sync::Arc::new(FixedSigner)).unwrap();
+    let config = Config::new(
+        Role::OrderEntry,
+        CompId::new("CLIENT").unwrap(),
+        credentials,
+        AccountBudgets::new(Budgets::new(BudgetLimits::spot()).unwrap()),
+    )
+    .unwrap()
+    .endpoint(&address)
+    .unwrap()
+    .heartbeat(5)
+    .unwrap();
+    let (session, mut events, driver) = Session::connect(config).await.unwrap();
+    let owner = tokio::spawn(driver.run());
+    assert!(matches!(
+        tokio::time::timeout(Duration::from_secs(5), events.recv())
+            .await
+            .expect("established"),
+        Some(Event::Established { .. })
+    ));
+    assert_eq!(
+        session
+            .send(
+                RequestId::new("attributed-1").unwrap(),
+                limit_order("owned", "1.00000001")
+            )
+            .await
+            .unwrap()
+            .outcome,
+        binance_client::Outcome::Unknown
+    );
+    let mut attributed = 0;
+    while let Some(event) = tokio::time::timeout(Duration::from_secs(5), events.recv())
+        .await
+        .expect("session event")
+    {
+        if let Event::Message {
+            message,
+            candidates,
+            ..
+        } = event
+            && message.kind.as_str() == "8"
+        {
+            assert_eq!(message.field("RefSeqNum"), Some(&Value::Integer(2)));
+            attributed = candidates.len();
+        }
+    }
+    assert_eq!(attributed, 1, "the receipt is attributed to its attempt");
+    owner.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+
+/// A venue recovery request changes the expected inbound sequence. It is reported
+/// as an explicit boundary instead of being silently ignored until a later
+/// sequence mismatch is mistaken for the failure.
+#[tokio::test]
+async fn a_resend_request_is_reported_instead_of_ignored() {
+    use binance_client::{
+        BudgetLimits, Budgets, Credentials, Error,
+        spot::fix::{AccountBudgets, CompId, Config, Event, Session},
+    };
+    use std::time::Duration;
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let address = format!("tcp://{}", listener.local_addr().unwrap());
+    let server = tokio::spawn(async move {
+        use tokio::io::AsyncWriteExt;
+        let (mut stream, _) = listener.accept().await.unwrap();
+        assert_eq!(
+            decode(Role::OrderEntry, &read_fix(&mut stream).await)
+                .unwrap()
+                .kind
+                .as_str(),
+            "A"
+        );
+        stream
+            .write_all(&frame("35=A|34=1|49=SPOT|56=CLIENT|52=20260927-01:02:03.000001|98=0|108=5|25037=synthetic-server|"))
+            .await
+            .unwrap();
+        // The venue asks for a resend of what it believes it missed. This session
+        // does not implement recovery, so the request must be reported.
+        stream
+            .write_all(&frame(
+                "35=2|34=2|49=SPOT|56=CLIENT|52=20260927-01:02:03.000002|7=1|16=0|",
+            ))
+            .await
+            .unwrap();
+        stream.shutdown().await.unwrap();
+    });
+    let credentials =
+        Credentials::external_ed25519("synthetic-key", std::sync::Arc::new(FixedSigner)).unwrap();
+    let config = Config::new(
+        Role::OrderEntry,
+        CompId::new("CLIENT").unwrap(),
+        credentials,
+        AccountBudgets::new(Budgets::new(BudgetLimits::spot()).unwrap()),
+    )
+    .unwrap()
+    .endpoint(&address)
+    .unwrap()
+    .heartbeat(5)
+    .unwrap();
+    let (_session, mut events, driver) = Session::connect(config).await.unwrap();
+    let owner = tokio::spawn(driver.run());
+    let mut delivered = 0;
+    let mut reported = None;
+    let mut retired = false;
+    while let Some(event) = tokio::time::timeout(Duration::from_secs(5), events.recv())
+        .await
+        .expect("session event")
+    {
+        match event {
+            // The request itself is still delivered as accepted ingress.
+            Event::Message { message, .. } if message.kind.as_str() == "2" => delivered += 1,
+            Event::Gap { error, .. } => reported = Some(error),
+            Event::Retired(_) => retired = true,
+            _ => (),
+        }
+    }
+    assert_eq!(
+        delivered, 1,
+        "the recovery request is retained before it is reported"
+    );
+    assert!(
+        matches!(
+            reported,
+            Some(Error::Gap("FIX ResendRequest is unsupported"))
+        ),
+        "{reported:?}"
+    );
+    assert!(retired, "the boundary is exposed by an explicit retirement");
+    owner.await.unwrap().unwrap();
+    server.await.unwrap();
 }
 
 fn limit_order(id: &str, price: &str) -> binance_client::spot::fix::Request {

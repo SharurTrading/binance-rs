@@ -492,67 +492,19 @@ impl SocketDriver {
         {
             return Err(Error::Gap("WebSocket authentication revoked"));
         }
-        let id = value.get("id").and_then(Value::as_str);
+        let id = value.get("id").and_then(Value::as_str).map(str::to_owned);
         if let Some(id) = id
-            && let Some(mut p) = self.pending.remove(id)
+            && let Some(mut p) = self.pending.remove(&id)
         {
-            let status = value
-                .get("status")
-                .and_then(Value::as_u64)
-                .and_then(|s| u16::try_from(s).ok())
-                .ok_or(Error::Gap("WebSocket response status"))?;
-            let now = self
-                .clock
-                .now_millis()
-                .map_err(|_| Error::Gap("clock unavailable after response"))?;
-            let rates = ws_rates(&value, now, self.binary_timestamps);
-            self.budgets.observe_ban(status, &rates)?;
-            self.budgets.observe(&rates, now, true)?;
-            let meta = ResponseMeta {
-                time_unit: self.time_unit,
-                client_order_ids: p.client_order_ids.clone(),
-                status,
-                operation: p.op.name,
-                rates,
-            };
-            let payload = value
-                .get("result")
-                .or_else(|| value.get("error"))
-                .cloned()
-                .ok_or(Error::Gap("WebSocket response payload"))?;
-            if (200..300).contains(&status)
-                && payload
-                    .get("code")
-                    .and_then(Value::as_i64)
-                    .is_none_or(|c| c >= 0)
-                && let Some(success) = p.op.success_weight
-            {
-                self.budgets.refund_weight(
-                    p.weight.saturating_sub(success),
-                    p.admitted_at,
-                    true,
-                )?;
-            }
-            if let Some(reply) = p.reply.take() {
-                if let Err(result) = reply.send(Ok((payload.clone(), meta.clone())))
-                    && result.is_ok()
-                {
-                    self.emit(SocketEvent::Late {
-                        generation: self.generation,
-                        id: p.id,
-                        op: p.op,
-                        value: payload,
-                        meta,
-                    })?;
-                }
-            } else {
-                self.emit(SocketEvent::Late {
+            // A correlated answer is accepted ingress. If its evidence cannot be
+            // classified, the venue's frame is still delivered in source order before
+            // the failure propagates, so no answer and no correlation id is lost.
+            if let Err(error) = self.settle(&mut p, &value) {
+                self.emit(SocketEvent::Data {
                     generation: self.generation,
-                    id: p.id,
-                    op: p.op,
-                    value: payload,
-                    meta,
+                    value: value.clone(),
                 })?;
+                return Err(error);
             }
             return Ok(());
         }
@@ -561,12 +513,72 @@ impl SocketDriver {
             value,
         })
     }
+    /// Hand one correlated answer to its caller, or surface it as a late answer.
+    fn settle(&mut self, p: &mut Pending, value: &Value) -> Result<(), Error> {
+        let status = value
+            .get("status")
+            .and_then(Value::as_u64)
+            .and_then(|s| u16::try_from(s).ok())
+            .ok_or(Error::Gap("WebSocket response status"))?;
+        let now = self
+            .clock
+            .now_millis()
+            .map_err(|_| Error::Gap("clock unavailable after response"))?;
+        let rates = ws_rates(value, now, self.binary_timestamps);
+        self.budgets.observe_ban(status, &rates)?;
+        self.budgets.observe(&rates, now, true)?;
+        let meta = ResponseMeta {
+            time_unit: self.time_unit,
+            client_order_ids: p.client_order_ids.clone(),
+            status,
+            operation: p.op.name,
+            rates,
+        };
+        let payload = value
+            .get("result")
+            .or_else(|| value.get("error"))
+            .cloned()
+            .ok_or(Error::Gap("WebSocket response payload"))?;
+        if (200..300).contains(&status)
+            && payload
+                .get("code")
+                .and_then(Value::as_i64)
+                .is_none_or(|c| c >= 0)
+            && let Some(success) = p.op.success_weight
+        {
+            self.budgets
+                .refund_weight(p.weight.saturating_sub(success), p.admitted_at, true)?;
+        }
+        if let Some(reply) = p.reply.take() {
+            if let Err(result) = reply.send(Ok((payload.clone(), meta.clone())))
+                && result.is_ok()
+            {
+                self.emit(SocketEvent::Late {
+                    generation: self.generation,
+                    id: p.id.clone(),
+                    op: p.op,
+                    value: payload,
+                    meta,
+                })?;
+            }
+        } else {
+            self.emit(SocketEvent::Late {
+                generation: self.generation,
+                id: p.id.clone(),
+                op: p.op,
+                value: payload,
+                meta,
+            })?;
+        }
+        Ok(())
+    }
     /// Run on the caller's runtime. This future owns the socket and every lifecycle write;
     /// it spawns no tasks. The caller joins the task if it chooses to spawn this future.
     pub async fn run(mut self) -> Result<(), Error> {
         self.emit(SocketEvent::Established(self.generation))?;
         let lifetime = self.lifetime;
         let mut failure = None;
+        let mut refusal = None;
         let mut pings: VecDeque<Instant> = VecDeque::new();
         loop {
             if self.stop.is_cancelled() {
@@ -616,10 +628,29 @@ impl SocketDriver {
                 },
             };
             if let Err(error) = step {
-                failure = Some(error);
+                // Only a proven continuity failure is reported as a gap: a sequence gap,
+                // a malformed record, or transport loss. An owner-requested stop is not
+                // lost continuity, and a local failure is returned to the caller
+                // instead of being relabelled as one.
+                match error {
+                    Error::Gap(_) | Error::BinaryDecode { .. } | Error::FixDecode { .. } => {
+                        failure = Some(error);
+                    }
+                    Error::Closed => {}
+                    other => refusal = Some(other),
+                }
                 break;
             }
         }
+        self.retire(failure, refusal).await
+    }
+    /// Retire one generation after its accepted prefix drained: settle every sent
+    /// request, refuse every unsent one, then expose the boundary exactly once.
+    async fn retire(
+        &mut self,
+        failure: Option<Error>,
+        refusal: Option<Error>,
+    ) -> Result<(), Error> {
         // Prefix was emitted in source order. Every sent pending request is now uncertain.
         for (_, mut p) in std::mem::take(&mut self.pending) {
             if let Some(reply) = p.reply.take() {
@@ -647,7 +678,12 @@ impl SocketDriver {
         while let Some(command) = self.commands.recv().await {
             match command {
                 Command::Call { op, reply, .. } => {
-                    let _ = reply.send(Err(Error::Expired(op.name)));
+                    // The command never reached the socket, so the caller's own
+                    // deadline did not expire. The reason is this retirement.
+                    let _ = reply.send(Err(Error::NotSent {
+                        operation: op.name,
+                        reason: "socket generation retired before send",
+                    }));
                 }
                 Command::Close(reply) => close_replies.push(reply),
             }
@@ -661,6 +697,10 @@ impl SocketDriver {
         self.emit(SocketEvent::Retired(self.generation))?;
         for reply in close_replies {
             let _ = reply.send(());
+        }
+        // A local failure is the caller's answer; only continuity failures are gaps.
+        if let Some(error) = refusal {
+            return Err(error);
         }
         Ok(())
     }
@@ -691,20 +731,32 @@ fn ws_rates(v: &Value, now: u64, binary_timestamps: bool) -> RateEvidence {
             }
         }
     }
-    e.retry_after = v
+    let deadline = v
         .get("error")
         .and_then(|e| {
             e.get("retryAfter")
                 .or_else(|| e.get("data").and_then(|d| d.get("retryAfter")))
         })
-        .and_then(Value::as_u64)
-        .map(|deadline| {
-            if binary_timestamps {
-                Duration::from_micros(deadline.saturating_sub(now.saturating_mul(1000)))
-            } else {
-                Duration::from_millis(deadline.saturating_sub(now))
+        .and_then(Value::as_u64);
+    if let Some(deadline) = deadline {
+        // A venue deadline at or before the local clock proves nothing about how long
+        // to wait. Zero would silently read as "no cooldown", so the timing is reported
+        // unusable instead: the refusal stands and no expiry is invented.
+        let remaining = if binary_timestamps {
+            deadline.checked_sub(now.saturating_mul(1000))
+        } else {
+            deadline.checked_sub(now)
+        };
+        match remaining {
+            Some(micros) if binary_timestamps && micros > 0 => {
+                e.retry_after = Some(Duration::from_micros(micros));
             }
-        });
+            Some(millis) if !binary_timestamps && millis > 0 => {
+                e.retry_after = Some(Duration::from_millis(millis));
+            }
+            _ => e.retry_after_unusable = true,
+        }
+    }
     e
 }
 

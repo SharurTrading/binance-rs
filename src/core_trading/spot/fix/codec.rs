@@ -177,14 +177,25 @@ impl Message {
     }
     /// Execution evidence from this record only. Partial cancel/replace operations
     /// still require both legs; no single receipt completes the other leg.
+    ///
+    /// A venue error code is never overruled by an accept-shaped status pair. A
+    /// documented definitive code is a rejection the venue did send; any other
+    /// non-zero code leaves the outcome unknown, and an undocumented value is
+    /// never read as acceptance.
     #[must_use]
     pub fn outcome(&self) -> Outcome {
         let code = match self.field("ErrorCode") {
             Some(Value::Integer(v)) => Some(*v),
             _ => None,
         };
-        if code.is_some_and(|v| !crate::core_trading::spot::validation::definitive_code(v)) {
-            return Outcome::Unknown;
+        if let Some(code) = code
+            && code != 0
+        {
+            return if crate::core_trading::spot::validation::definitive_code(code) {
+                Outcome::Rejected
+            } else {
+                Outcome::Unknown
+            };
         }
         if self.kind.as_str() == "8" {
             let status = match self.field("OrdStatus") {
@@ -201,13 +212,8 @@ impl Message {
                 _ => Outcome::Unknown,
             };
         }
-        match (self.kind.as_str(), self.field("ExecType")) {
-            ("8", Some(Value::Code(code))) if matches!(code.as_str(), "0" | "4" | "5" | "F") => {
-                Outcome::Accepted
-            }
-            ("8", Some(Value::Code(code))) if code == "8" => Outcome::Rejected,
-            _ => Outcome::Unknown,
-        }
+        // Only an ExecutionReport carries execution evidence; other kinds have none.
+        Outcome::Unknown
     }
 }
 #[derive(Deserialize)]

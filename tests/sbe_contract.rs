@@ -80,6 +80,17 @@ fn every_truncation_and_unknown_schema_is_refused() {
     let mut unknown = b.clone();
     unknown[2..4].copy_from_slice(&10004_u16.to_le_bytes());
     assert!(decode_market(&unknown).is_err());
+    // A template this build does not model is never read as the shape of a
+    // neighbouring one, even when its block length would fit.
+    for template in [10005_u16, 10001 + 100, u16::MAX] {
+        let mut wrong = quote();
+        wrong[2..4].copy_from_slice(&template.to_le_bytes());
+        assert!(decode_market(&wrong).is_err(), "template {template}");
+        assert!(binance_client::spot::sbe::decode_api::<
+            binance_client::spot::rest_models::DepthResponse,
+        >(&wrong)
+        .is_err());
+    }
     let mut trailing = b;
     trailing.push(1);
     assert!(decode_market(&trailing).is_err());

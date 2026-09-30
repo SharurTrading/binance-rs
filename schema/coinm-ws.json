@@ -1274,16 +1274,14 @@
                           "x-decimal": true
                         },
                         "marginType": {
-                          "type": "string",
-                          "x-decimal": true
+                          "type": "string"
                         },
                         "isolatedMargin": {
                           "type": "string",
                           "x-decimal": true
                         },
                         "isAutoAddMargin": {
-                          "type": "string",
-                          "x-decimal": true
+                          "type": "string"
                         },
                         "positionSide": {
                           "type": "string"

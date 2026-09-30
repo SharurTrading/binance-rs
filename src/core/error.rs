@@ -29,6 +29,10 @@ pub struct RateEvidence {
     pub counters: BTreeMap<String, u64>,
     /// HTTP Retry-After seconds, or WebSocket retry deadline converted to a duration.
     pub retry_after: Option<Duration>,
+    /// The venue sent retry timing this client cannot use, so no expiry is invented
+    /// and every send sharing the owner is refused until the caller restores
+    /// verified venue authority with a fresh explicit budget owner.
+    pub retry_after_unusable: bool,
 }
 
 /// Transport response metadata independent of product payloads.
@@ -157,6 +161,15 @@ pub enum Error {
     /// An unsent command expired.
     #[error("deadline expired before sending {0}")]
     Expired(&'static str),
+    /// An unsent command was refused before any byte reached the socket. The
+    /// reason is the caller's own lifecycle, not a venue deadline or verdict.
+    #[error("{operation} was not sent: {reason}")]
+    NotSent {
+        /// Operation identity that never reached the venue.
+        operation: &'static str,
+        /// Static safe diagnostic.
+        reason: &'static str,
+    },
     /// Venue response, including ambiguous mutations.
     #[error("venue response: {0:?}")]
     Venue(Box<VenueFailure>),

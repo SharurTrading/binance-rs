@@ -94,12 +94,11 @@ impl Budgets {
             if cost.uid == uid
                 && let Some(delay) = e.retry_after
             {
-                let until = now
-                    .checked_add(
-                        u64::try_from(delay.as_nanos().div_ceil(1_000_000))
-                            .map_err(|_| Error::Configuration("SAPI cooldown overflow"))?,
-                    )
-                    .ok_or(Error::Configuration("SAPI cooldown overflow"))?;
+                // Venue retry timing is never dropped and never narrowed. An
+                // unrepresentable delay saturates at the widest one; erroring here
+                // would discard an answer the venue has already sent.
+                let delay = u64::try_from(delay.as_nanos().div_ceil(1_000_000)).unwrap_or(u64::MAX);
+                let until = now.saturating_add(delay);
                 let current = state.endpoint_cooldown.entry(cost.endpoint).or_default();
                 *current = (*current).max(until);
             }

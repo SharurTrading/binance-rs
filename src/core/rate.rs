@@ -358,7 +358,9 @@ impl Budgets {
         Ok(())
     }
     pub(crate) fn observe_ban(&self, status: u16, evidence: &RateEvidence) -> Result<(), Error> {
-        if status == 418 && evidence.retry_after.is_none() {
+        // A ban, or any venue retry timing this client cannot use, leaves the owner
+        // without an expiry. Refuse every send rather than invent one.
+        if evidence.retry_after.is_none() && (status == 418 || evidence.retry_after_unusable) {
             self.ip
                 .lock()
                 .map_err(|_| Error::Configuration("IP budget poisoned"))?
@@ -380,12 +382,12 @@ impl Budgets {
             .lock()
             .map_err(|_| Error::Configuration("account budget poisoned"))?;
         if let Some(delay) = e.retry_after {
-            let delay = u64::try_from(delay.as_nanos().div_ceil(1_000_000))
-                .map_err(|_| Error::Configuration("cooldown overflow"))?;
-            ip.cooldown = ip.cooldown.max(
-                now.checked_add(delay)
-                    .ok_or(Error::Configuration("cooldown overflow"))?,
-            );
+            // Venue retry timing is never dropped and never narrowed. A delay or deadline
+            // beyond the representable range saturates at the widest one, which refuses
+            // longer than the venue asked; an error here would discard an answer the
+            // venue has already sent.
+            let delay = u64::try_from(delay.as_nanos().div_ceil(1_000_000)).unwrap_or(u64::MAX);
+            ip.cooldown = ip.cooldown.max(now.saturating_add(delay));
         }
         for (name, count) in &e.counters {
             let (state, key, window) = match name.as_str() {

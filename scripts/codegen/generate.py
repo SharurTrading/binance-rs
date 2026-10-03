@@ -290,7 +290,9 @@ def generate(kind):
             mutation=True
         success_weight = 'Some(0)' if PRODUCT == 'spot' and op['operationId'] in ['newOrder','deleteOrder','deleteOpenOrders','orderPlace','orderCancel','openOrdersCancelAll'] else 'None'
         partial = 'Some(super::validation::partial)' if op.get('x-partial-result') else 'None'
-        op_expr = f'Operation {{ name: {lit(op["operationId"])}, path: {lit(op["path"])}, method: {lit(op["method"])}, security: Security::{security}, mutation: {str(mutation).lower()}, weight: {op.get("x-ip-weight",op.get("x-uid-weight",0))}, validate_time: super::validation::validate_time, definitive: super::validation::definitive, success_weight: {success_weight}, partial: {partial} }}'
+        rps = op.get('x-requests-per-second')
+        requests_per_second = f'Some({rps})' if rps is not None else 'None'
+        op_expr = f'Operation {{ name: {lit(op["operationId"])}, path: {lit(op["path"])}, method: {lit(op["method"])}, security: Security::{security}, mutation: {str(mutation).lower()}, weight: {op.get("x-ip-weight",op.get("x-uid-weight",0))}, requests_per_second: {requests_per_second}, validate_time: super::validation::validate_time, definitive: super::validation::definitive, success_weight: {success_weight}, partial: {partial} }}'
         required_rust='&['+', '.join(lit(v) for v in sorted(required))+']'
         validation=f'let p = parameters(self)?; validate_parameters(&p, {required_rust}, &[{", ".join(enums)}], &[{", ".join(bounds)}])?; super::validation::validate({lit(op["operationId"])}, &p)'
         if PRODUCT == 'convert' and op['operationId']=='acceptQuote':
@@ -327,7 +329,10 @@ def generate(kind):
         methods.append('\n'.join([f'    /// [{op["operationId"]}]({op["source"]}).',
             '    ///', '    /// # Errors', '    /// Returns input/admission errors before sending, or typed venue/transport evidence.',
             f'    pub async fn {method}({args}) -> Result<crate::Response<{return_type}>, Error> {{ {call} }}']))
-        coverage.append({'name':op['operationId'],'method':op['method'],'path':op['path'],'source':op['source']})
+        coverage_entry={'name':op['operationId'],'method':op['method'],'path':op['path'],'source':op['source']}
+        if rps is not None:
+            coverage_entry['requests_per_second']=rps
+        coverage.append(coverage_entry)
     common='use std::collections::BTreeMap;\nuse serde::{Serialize, Deserialize};\nuse crate::{Decimal, Symbol, ClientOrderId, SensitiveString};\nuse super::wire::{PriceLevel, Kline};\n'
     # Output only necessary imports to keep strict lint gates unchanged.
     model_text='\n\n'.join(models.defs.values())

@@ -164,6 +164,7 @@ impl WsClient {
             },
             mutation,
             weight: 2,
+            requests_per_second: None,
             success_weight: None,
             partial: None,
             validate_time: super::validation::validate_time,

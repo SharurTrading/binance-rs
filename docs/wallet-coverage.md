@@ -35,7 +35,14 @@ Callers explicitly access provider data; the client never logs raw bodies.
 
 SAPI limits are independent per endpoint: IP **12,000/minute** or UID
 **180,000/minute**, according to the operation's documented scope. Withdrawal
-history also retains its documented **10 requests/second** limit. `Budgets::sapi`
+history also retains its documented **10 requests/second** limit, pinned in the
+schema snapshot (`x-requests-per-second`, verified 2026-10-03 against the
+endpoint's "Account Weight 18000 (10 requests per second)" annotation and the
+2023-09-04 Wallet change log) and derived into admission, so codegen freshness
+checks detect drift. The provider's own figures are in tension — general info's
+independent 180,000/minute UID budget binds an 18000-weight call at 10/minute —
+and the client conservatively enforces both documented budgets rather than
+choosing between them. `Budgets::sapi`
 creates shared owners; clones share them, and `for_account` keeps the common IP
 owner while creating a distinct UID owner. Wallet and Convert can receive the same
 owners. SAPI admissions do not charge Spot/Futures aggregate counters. Response

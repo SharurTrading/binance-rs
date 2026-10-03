@@ -21,6 +21,10 @@ pub(crate) struct Operation {
     pub security: Security,
     pub mutation: bool,
     pub weight: u64,
+    /// Documented per-second request cap for the rare endpoint whose provider
+    /// page annotates one (for example Wallet `withdrawHistory`); admission
+    /// derives its bucket from this pinned fact instead of a local constant.
+    pub requests_per_second: Option<u64>,
     pub success_weight: Option<u64>,
     pub partial: Option<fn(u16, &Value) -> Option<super::error::PartialOperation>>,
     pub definitive: fn(u16, &Value) -> bool,

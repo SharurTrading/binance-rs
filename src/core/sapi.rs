@@ -33,6 +33,9 @@ impl Budgets {
             });
         }
         let mut windows = vec![(60_000, if cost.uid { 180_000 } else { 12_000 }, cost.weight)];
+        // The bucket width is derived from the pinned unit of the provider's
+        // annotation: `x-requests-per-second` is documented per second, so the
+        // interval window is one 1000 ms bucket charging one request.
         if let Some(limit) = cost.requests_per_second {
             windows.push((1000, limit, 1));
         }

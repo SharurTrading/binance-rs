@@ -23,11 +23,14 @@ pub(crate) fn cost(op: Operation, _p: &BTreeMap<String, Value>) -> Result<Cost, 
             | "withdrawHistory"
     );
     let weight = op.weight;
-    let requests_per_second = if op.name == "withdrawHistory" {
-        Some(10)
-    } else {
-        None
-    };
+    // Per-second caps come only from pinned schema evidence
+    // (`x-requests-per-second`, snapshot-checked by codegen): the
+    // withdrawHistory endpoint page annotates its UID weight 18000 as
+    // "10 requests per second", corroborated by the 2023-09-04 Wallet
+    // change log. General info's independent 180,000/minute UID budget
+    // implies 10/minute for an 18000-weight call; the client conservatively
+    // enforces both documented budgets rather than choosing between them.
+    let requests_per_second = op.requests_per_second;
     if weight == 0 {
         return Err(Error::Configuration("missing Wallet quota evidence"));
     }

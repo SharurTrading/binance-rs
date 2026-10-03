@@ -95,6 +95,51 @@ async fn endpoint_weight_headers_survive_truncated_withdrawal_without_retry() {
     fixture.finish().await;
 }
 #[tokio::test]
+async fn definitive_codes_match_the_pinned_error_code_snapshot() {
+    // Machine-checks schema/wallet-error-codes.json: every pinned definitive
+    // code must classify as a definitive refusal below 500, every pinned
+    // never-definitive code (retryable, unknown-execution, rate, and the
+    // retired -1002) must stay ambiguous, and every 5xx stays ambiguous.
+    let snapshot = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/schema/wallet-error-codes.json"
+    ))
+    .unwrap();
+    let snapshot: serde_json::Value = serde_json::from_str(&snapshot).unwrap();
+    let request = wallet::rest_requests::Withdraw::new()
+        .coin(Asset::new("BTC").unwrap())
+        .address(binance_client::SensitiveString::new(
+            "synthetic-destination",
+        ))
+        .amount(Decimal::ONE)
+        .withdraw_order_id(wallet::WithdrawalId::new("caller-withdrawal").unwrap())
+        .build()
+        .unwrap();
+    for (field, expected) in [
+        ("definitive", Outcome::Rejected),
+        ("never_definitive", Outcome::Unknown),
+    ] {
+        for entry in snapshot[field].as_array().unwrap() {
+            let code = entry["code"].as_i64().unwrap();
+            let fixture =
+                HttpFixture::new(400, "", &format!("{{\"code\":{code}}}"), None, false).await;
+            let client = wallet::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+            let error = client.withdraw(&request, deadline()).await.unwrap_err();
+            assert_eq!(error.outcome(), Some(expected), "code {code}");
+            assert_eq!(fixture.attempts(), 1);
+            fixture.finish().await;
+        }
+    }
+    for entry in snapshot["definitive"].as_array().unwrap() {
+        let code = entry["code"].as_i64().unwrap();
+        let fixture = HttpFixture::new(503, "", &format!("{{\"code\":{code}}}"), None, false).await;
+        let client = wallet::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        let error = client.withdraw(&request, deadline()).await.unwrap_err();
+        assert_eq!(error.outcome(), Some(Outcome::Unknown), "5xx code {code}");
+        fixture.finish().await;
+    }
+}
+#[tokio::test]
 async fn read_post_is_read_failed_and_different_endpoint_has_own_budget() {
     let mut fixture = HttpFixture::new(
         503,

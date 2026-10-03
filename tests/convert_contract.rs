@@ -168,13 +168,50 @@ fn history_and_order_queries_validate_required_evidence() {
 }
 
 #[test]
-fn cancellation_classifies_its_own_status_vocabulary() {
-    let receipt: convert::rest_models::CancelLimitOrderResponse =
+fn unpinned_limit_order_status_literals_stay_unknown() {
+    // The Convert catalog documents placeLimitOrder/cancelLimitOrder `status`
+    // as bare strings with example values and no enum (pinned in
+    // schema/convert-error-codes.json), so neither literal is definitive.
+    let cancellation: convert::rest_models::CancelLimitOrderResponse =
         serde_json::from_str(r#"{"orderId":123,"status":"CANCELED"}"#).unwrap();
-    assert_eq!(receipt.outcome(), Outcome::Accepted);
-    let future: convert::rest_models::CancelLimitOrderResponse =
-        serde_json::from_str(r#"{"orderId":123,"status":"ACCEPT_SUCCESS"}"#).unwrap();
-    assert_eq!(future.outcome(), Outcome::Unknown);
+    assert_eq!(cancellation.outcome(), Outcome::Unknown);
+    assert_eq!(cancellation.status, "CANCELED");
+    let placement: convert::rest_models::PlaceLimitOrderResponse =
+        serde_json::from_str(r#"{"orderId":123,"status":"PROCESS"}"#).unwrap();
+    assert_eq!(placement.outcome(), Outcome::Unknown);
+    assert_eq!(placement.status, "PROCESS");
+}
+#[tokio::test]
+async fn accept_quote_status_enum_is_pinned_from_the_catalog() {
+    // acceptQuote.orderStatus is the one Convert status field with a documented
+    // enum (pinned in schema/convert-error-codes.json); it stays classified
+    // while future values stay unknown.
+    for (status, expected) in [
+        ("PROCESS", Outcome::Accepted),
+        ("ACCEPT_SUCCESS", Outcome::Accepted),
+        ("SUCCESS", Outcome::Accepted),
+        ("FAIL", Outcome::Rejected),
+        ("FUTURE_STATUS", Outcome::Unknown),
+    ] {
+        let request = convert::AcceptQuote::new(&quote().await).unwrap();
+        let fixture = HttpFixture::new(
+            200,
+            "",
+            &format!(r#"{{"orderId":"123","createTime":1000,"orderStatus":"{status}"}}"#),
+            None,
+            false,
+        )
+        .await;
+        let client = convert::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        let result = client
+            .accept_quote(&request, deadline())
+            .await
+            .unwrap()
+            .data;
+        assert_eq!(result.receipt.order_status, status);
+        assert_eq!(result.outcome(), expected);
+        fixture.finish().await;
+    }
 }
 #[tokio::test]
 async fn documented_rejection_unknown_codes_and_5xx_are_distinct() {
@@ -197,6 +234,51 @@ async fn documented_rejection_unknown_codes_and_5xx_are_distinct() {
         assert_eq!(error.outcome(), Some(outcome));
         assert!(!format!("{error:?}").contains("synthetic-private-diagnostic"));
         assert_eq!(fixture.attempts(), 1);
+        fixture.finish().await;
+    }
+}
+#[tokio::test]
+async fn definitive_codes_match_the_pinned_error_code_snapshot() {
+    // Machine-checks schema/convert-error-codes.json, including Convert's only
+    // intentional divergence from Wallet: the matching-engine rejection codes
+    // -2010/-2011. Every never-definitive code (retryable, unknown-execution,
+    // rate, and the retired -1002) stays ambiguous, and every 5xx too.
+    let snapshot = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/schema/convert-error-codes.json"
+    ))
+    .unwrap();
+    let snapshot: serde_json::Value = serde_json::from_str(&snapshot).unwrap();
+    let divergence = snapshot["divergence_from_wallet"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|v| v.as_i64().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(divergence, vec![-2010, -2011]);
+    let request = convert::AcceptQuote::new(&quote().await).unwrap();
+    for (field, expected) in [
+        ("definitive", Outcome::Rejected),
+        ("never_definitive", Outcome::Unknown),
+    ] {
+        for entry in snapshot[field].as_array().unwrap() {
+            let code = entry["code"].as_i64().unwrap();
+            let fixture =
+                HttpFixture::new(400, "", &format!("{{\"code\":{code}}}"), None, false).await;
+            let client =
+                convert::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+            let error = client.accept_quote(&request, deadline()).await.unwrap_err();
+            assert_eq!(error.outcome(), Some(expected), "code {code}");
+            assert_eq!(fixture.attempts(), 1);
+            fixture.finish().await;
+        }
+    }
+    for entry in snapshot["definitive"].as_array().unwrap() {
+        let code = entry["code"].as_i64().unwrap();
+        let fixture = HttpFixture::new(503, "", &format!("{{\"code\":{code}}}"), None, false).await;
+        let client = convert::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        let error = client.accept_quote(&request, deadline()).await.unwrap_err();
+        assert_eq!(error.outcome(), Some(Outcome::Unknown), "5xx code {code}");
         fixture.finish().await;
     }
 }

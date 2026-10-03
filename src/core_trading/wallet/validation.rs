@@ -63,7 +63,11 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
 pub(crate) fn validate_time(p: &BTreeMap<String, Value>, _now: u64) -> Result<(), Error> {
     crate::core::validate_parameters(p, &[], &[], &[])
 }
-// Wallet error-code documentation is independent evidence; unknown/5xx remain ambiguous.
+// Wallet error-code documentation is independent evidence; unknown/5xx remain
+// ambiguous. Pinned in schema/wallet-error-codes.json against the product's
+// documented error-code page (verified 2026-10-03), which no longer lists
+// -1002: that legacy unauthorized message is folded into the ambiguous -1001
+// DISCONNECTED family, so an undocumentented -1002 body stays unknown.
 pub(crate) fn definitive(status: u16, value: &Value) -> bool {
     status < 500
         && value
@@ -72,8 +76,7 @@ pub(crate) fn definitive(status: u16, value: &Value) -> bool {
             .is_some_and(|code| {
                 matches!(
                     code,
-                    -1002
-                        | -1020
+                    -1020
                         | -1021
                         | -1022
                         | -1100

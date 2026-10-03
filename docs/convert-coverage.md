@@ -32,11 +32,16 @@ truncated body or malformed receipt remains ambiguous, and mutations are never
 retried. Caller cancellation does not establish venue cancellation.
 
 Acceptance outcomes recognize the documented `PROCESS`, `ACCEPT_SUCCESS`,
-`SUCCESS`, and `FAIL` vocabulary. Processing/accepted acknowledgments do not prove
-completion or fills. Limit placement recognizes its `PROCESS` acknowledgment;
-limit cancellation recognizes `CANCELED`. Unknown statuses remain native strings
-and classify as `Unknown`. Known request refusals use Convert's own error-code
-documentation; unknown codes and every 5xx remain ambiguous.
+`SUCCESS`, and `FAIL` enum of `acceptQuote.orderStatus`, pinned (with the
+definitive error-code list) in `schema/convert-error-codes.json` and
+machine-checked in CI. Processing/accepted acknowledgments do not prove
+completion or fills. The limit placement and cancellation `status` fields have
+no documented enum — the catalog publishes example values (`PROCESS`,
+`CANCELED`) only — so their outcomes stay `Unknown` and the caller reads the
+exact native string. Known request refusals use Convert's own error-code
+documentation, machine-checked against the same snapshot; unknown codes,
+undocumented codes (including the retired `-1002`), and every 5xx remain
+ambiguous.
 
 SAPI admission shares the endpoint IP/UID owners described in
 [Wallet coverage](wallet-coverage.md). Each endpoint independently charges its

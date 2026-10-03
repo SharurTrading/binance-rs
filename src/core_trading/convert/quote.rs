@@ -124,24 +124,27 @@ impl Request for AcceptQuote {
     }
 }
 impl super::rest_models::PlaceLimitOrderResponse {
-    /// Preserve future status uncertainty rather than inferring acceptance from HTTP 200.
+    /// Preserve status uncertainty rather than inferring acceptance from HTTP 200.
+    ///
+    /// The Convert catalog documents this `status` field as a bare string with
+    /// an example value (`PROCESS`) and no enum — unlike `acceptQuote`'s
+    /// `orderStatus`, whose enum is pinned in
+    /// `schema/convert-error-codes.json`. A placement acknowledgment is
+    /// therefore never a definitive outcome here; the caller reads the exact
+    /// native `status` string.
     #[must_use]
     pub fn outcome(&self) -> Outcome {
-        if self.status == "PROCESS" {
-            Outcome::Accepted
-        } else {
-            Outcome::Unknown
-        }
+        Outcome::Unknown
     }
 }
 impl super::rest_models::CancelLimitOrderResponse {
-    /// Classify a documented result; an unknown status does not prove cancellation.
+    /// Preserve status uncertainty; a cancel acknowledgment is not proven removal.
+    ///
+    /// The Convert catalog documents this `status` field as a bare string with
+    /// an example value (`CANCELED`) and no enum, so no literal is pinned and
+    /// the caller reads the exact native `status` string.
     #[must_use]
     pub fn outcome(&self) -> Outcome {
-        if self.status == "CANCELED" {
-            Outcome::Accepted
-        } else {
-            Outcome::Unknown
-        }
+        Outcome::Unknown
     }
 }

@@ -184,6 +184,10 @@ impl MarketStreams {
                     connections: 1,
                     ..Default::default()
                 },
+                // Documented SBE stream connection duty cycle: client
+                // PING/PONG/JSON frames count against a rate limit of
+                // "5 requests per second" (Spot SBE Market Data Streams,
+                // WebSocket Limits; verified 2026-10-03).
                 ping_limit: 5,
                 time_unit: TimeUnit::Microseconds,
                 binary_decoder: Some(super::market::decode_value),

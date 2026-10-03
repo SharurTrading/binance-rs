@@ -395,6 +395,73 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn late_websocket_503_keeps_documented_outcomes_from_the_pinned_snapshot() {
+        // A 503 error reply arriving after the caller timed out classifies like
+        // its REST sibling: only the pinned documented failure messages are
+        // definitive; a body without documented definitive evidence stays
+        // execution-unknown (schema/futures-general-info.json).
+        for (error_body, expected) in [
+            (
+                json!({"code":-1000,"msg":"Service Unavailable."}),
+                Outcome::Rejected,
+            ),
+            (
+                json!({"code":-1000,"msg":"Unknown error, please check your request or try again later."}),
+                Outcome::Unknown,
+            ),
+            (json!({"code":-1000}), Outcome::Unknown),
+        ] {
+            let (listener, url) = listener().await;
+            let (seen, got) = oneshot::channel();
+            let (release, gate) = oneshot::channel();
+            let body = error_body;
+            let server = tokio::spawn(async move {
+                let mut ws = accept(listener).await;
+                let frame = next_json(&mut ws).await;
+                seen.send(()).unwrap();
+                gate.await.unwrap();
+                ws.send(Message::text(
+                    json!({"id":frame["id"],"status":503,"error":body}).to_string(),
+                ))
+                .await
+                .unwrap();
+                finish_server(ws).await;
+            });
+            let (client, mut events, driver) =
+                WsClient::connect(config().websocket_url(&url).unwrap())
+                    .await
+                    .unwrap();
+            let driver = tokio::spawn(driver.run());
+            events.recv().await.unwrap();
+            let caller = client.clone();
+            let call = tokio::spawn(async move {
+                caller
+                    .new_order(&order(), RequestId::new("late-503").unwrap(), deadline())
+                    .await
+            });
+            got.await.unwrap();
+            tokio::time::pause();
+            tokio::time::advance(Duration::from_secs(4)).await;
+            // The timeout itself never fabricates a definitive verdict.
+            assert_eq!(
+                call.await.unwrap().unwrap_err().outcome(),
+                Some(Outcome::Unknown)
+            );
+            tokio::time::resume();
+            release.send(()).unwrap();
+            match events.recv().await.unwrap() {
+                ApiEvent::LateResponse { id, result, .. } => {
+                    assert_eq!(id.as_str(), "late-503");
+                    assert_eq!(result.unwrap_err().outcome(), Some(expected));
+                }
+                other => panic!("late correlation missing: {other:?}"),
+            }
+            retire(&client, &mut events, driver).await;
+            server.await.unwrap();
+        }
+    }
+
+    #[tokio::test]
     async fn caller_cancellation_preserves_sent_request_evidence() {
         let (listener, url) = listener().await;
         let (seen, got) = oneshot::channel();

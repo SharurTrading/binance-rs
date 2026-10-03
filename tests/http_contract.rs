@@ -128,6 +128,52 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn futures_503_classification_matches_the_pinned_general_info_snapshot() {
+        // Machine-checks schema/futures-general-info.json: every documented 503
+        // variant must classify exactly as its pinned documented outcome, so
+        // neither an unevidenced message clause nor snapshot drift passes CI.
+        let snapshot = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/schema/futures-general-info.json"
+        ))
+        .unwrap();
+        let snapshot: serde_json::Value = serde_json::from_str(&snapshot).unwrap();
+        let variants = snapshot["http_return_codes"]["503_variants"]
+            .as_array()
+            .unwrap();
+        assert!(variants.len() >= 4);
+        for variant in variants {
+            let message = variant["msg"].as_str().unwrap();
+            let expected = match variant["documented_outcome"].as_str().unwrap() {
+                "failure" => Outcome::Rejected,
+                "execution-unknown" => Outcome::Unknown,
+                other => panic!("unknown pinned outcome {other}"),
+            };
+            let body = serde_json::json!({"code": variant.get("code").cloned().unwrap_or(serde_json::json!(-1000)), "msg": message}).to_string();
+            let fixture = HttpFixture::new(503, "", &body, None, false).await;
+            let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+            let error = client.new_order(&order(), deadline()).await.unwrap_err();
+            assert_eq!(error.outcome(), Some(expected), "variant {message}");
+            assert_eq!(fixture.attempts(), 1);
+            fixture.finish().await;
+        }
+        // A 503 body without a documented definitive message or code stays
+        // execution-unknown for a mutation, including the documented 5XX
+        // retry-later message and a bare unclassified code.
+        for body in [
+            "{\"code\":-1000,\"msg\":\"Request occur unknown error.\"}",
+            "{\"code\":-1000}",
+        ] {
+            let fixture = HttpFixture::new(503, "", body, None, false).await;
+            let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+            let error = client.new_order(&order(), deadline()).await.unwrap_err();
+            assert_eq!(error.outcome(), Some(Outcome::Unknown));
+            assert_eq!(fixture.attempts(), 1);
+            fixture.finish().await;
+        }
+    }
+
+    #[tokio::test]
     async fn rejection_and_unknown_codes_remain_distinct_and_redacted() {
         for (status, body, outcome) in [
             (

@@ -202,7 +202,8 @@
       "name": "withdrawHistory",
       "method": "GET",
       "path": "/sapi/v1/capital/withdraw/history",
-      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw-history"
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw-history",
+      "requests_per_second": 10
     },
     {
       "name": "getSymbolsDelistScheduleForSpot",

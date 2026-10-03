@@ -179,6 +179,7 @@ impl WsClient {
             },
             mutation,
             weight: 2,
+            requests_per_second: None,
             success_weight: None,
             partial: None,
             validate_time: super::validation::validate_time,
@@ -263,7 +264,7 @@ impl ApiEvents {
                         .is_some_and(|c| c < 0)
                 {
                     Err(crate::core::error::failure_for(
-                        op,
+                        *op,
                         meta.status,
                         &value,
                         meta.rates.clone(),

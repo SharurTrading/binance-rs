@@ -10,13 +10,27 @@
 #[allow(dead_code, reason = "shared fixture helpers")]
 mod support;
 use binance_client::{Asset, Credentials, Decimal, Error, Outcome, wallet};
-use std::sync::Arc;
+use std::sync::{
+    Arc,
+    atomic::{AtomicU64, Ordering},
+};
 use support::{FixedClock, HttpFixture, deadline};
 fn config() -> wallet::Config {
     wallet::Config::new()
         .unwrap()
         .clock(Arc::new(FixedClock(1_700_000_001_000)))
         .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())
+}
+struct ManualClock(AtomicU64);
+impl ManualClock {
+    fn set(&self, millis: u64) {
+        self.0.store(millis, Ordering::SeqCst);
+    }
+}
+impl binance_client::Clock for ManualClock {
+    fn now_millis(&self) -> Result<u64, Error> {
+        Ok(self.0.load(Ordering::SeqCst))
+    }
 }
 #[test]
 fn asset_evidence_is_required_and_exact() {
@@ -138,6 +152,55 @@ async fn definitive_codes_match_the_pinned_error_code_snapshot() {
         assert_eq!(error.outcome(), Some(Outcome::Unknown), "5xx code {code}");
         fixture.finish().await;
     }
+}
+#[tokio::test]
+async fn withdraw_history_per_second_cap_is_derived_from_the_pinned_interval() {
+    // Pinned evidence (schema x-requests-per-second, snapshot-checked): the
+    // endpoint page annotates its UID weight 18000 as "(10 requests per
+    // second)", corroborated by the 2023-09-04 Wallet change log, while
+    // general info's independent 180,000/minute UID budget binds the same
+    // call at 10/minute. Admission enforces both documented budgets: exactly
+    // ten reads fit inside one documented second, the eleventh is refused
+    // without a wire send, and admission resumes only after the boundaries.
+    let clock = Arc::new(ManualClock(AtomicU64::new(60_000)));
+    let fixture = HttpFixture::new(200, "", "[]", None, false).await;
+    let client = wallet::RestClient::new(
+        wallet::Config::new()
+            .unwrap()
+            .clock(clock.clone())
+            .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())
+            .rest_url(&fixture.url)
+            .unwrap(),
+    )
+    .unwrap();
+    let request = wallet::rest_requests::WithdrawHistory::new();
+    for _ in 0..10 {
+        client.withdraw_history(&request, deadline()).await.unwrap();
+    }
+    let error = client
+        .withdraw_history(&request, deadline())
+        .await
+        .unwrap_err();
+    assert_eq!(error.outcome(), Some(Outcome::NotSent));
+    assert!(matches!(error, Error::Admission { .. }));
+    assert_eq!(fixture.attempts(), 10);
+    // One documented second alone is not enough: the endpoint's 18000 weight
+    // against the documented 180,000/minute UID budget holds until the minute
+    // boundary passes, then admission resumes.
+    clock.set(61_500);
+    assert_eq!(
+        client
+            .withdraw_history(&request, deadline())
+            .await
+            .unwrap_err()
+            .outcome(),
+        Some(Outcome::NotSent)
+    );
+    assert_eq!(fixture.attempts(), 10);
+    clock.set(120_500);
+    client.withdraw_history(&request, deadline()).await.unwrap();
+    assert_eq!(fixture.attempts(), 11);
+    fixture.finish().await;
 }
 #[tokio::test]
 async fn read_post_is_read_failed_and_different_endpoint_has_own_budget() {

@@ -135,6 +135,31 @@ fn coinm_depth_keeps_its_previous_update_chain() {
 }
 
 #[test]
+fn coinm_bootstrap_gap_reports_the_count_of_discarded_pending_updates() {
+    use coinm::{
+        book::{BookState, DepthBook},
+        rest_models::OrderBookResponse,
+        stream_models::DiffBookDepthStreamsEvent,
+    };
+    let snapshot: OrderBookResponse =
+        serde_json::from_value(json!({"lastUpdateId":100,"bids":[],"asks":[]})).unwrap();
+    let event = |first, last, previous| -> DiffBookDepthStreamsEvent {
+        serde_json::from_value(json!({"e":"depthUpdate","E":1,"T":1,"s":"BTCUSD_PERP","U":first,"u":last,"pu":previous,"b":[],"a":[]})).unwrap()
+    };
+    let mut b = DepthBook::new(Symbol::new("BTCUSD_PERP").unwrap(), 7);
+    assert_eq!(b.discarded_pending_updates(), 0);
+    // One buffered update bridges, one breaks the `pu` chain mid-drain, and
+    // one is never applied: two accepted updates are discarded at the break.
+    b.update(7, event(99, 101, 98)).unwrap();
+    b.update(7, event(103, 103, 102)).unwrap();
+    b.update(7, event(104, 104, 103)).unwrap();
+    assert!(b.snapshot(&snapshot).is_err());
+    assert_eq!(b.state(), BookState::Gap);
+    assert_eq!(b.discarded_pending_updates(), 2);
+    assert!(b.bids().is_err());
+}
+
+#[test]
 fn known_event_and_filter_evidence_cannot_be_invented() {
     use spot::rest_models::ExchangeInfoResponseSymbolsItemFiltersItem as Filter;
     assert!(

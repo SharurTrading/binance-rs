@@ -129,6 +129,32 @@ mod tests {
     }
 
     #[test]
+    fn bootstrap_gap_reports_the_count_of_discarded_pending_updates() {
+        let mut book = DepthBook::new(Symbol::new("BTCUSDT").unwrap(), 7);
+        assert_eq!(book.discarded_pending_updates(), 0);
+        // The first buffered update bridges, the second breaks the `pu` chain
+        // mid-drain, and the third is never applied: two updates are discarded.
+        book.update(7, update(99, 101, 98, "1")).unwrap();
+        book.update(7, update(103, 103, 102, "2")).unwrap();
+        book.update(7, update(104, 104, 103, "3")).unwrap();
+        assert!(book.snapshot(&snapshot()).is_err());
+        assert_eq!(book.state(), BookState::Gap);
+        assert_eq!(book.discarded_pending_updates(), 2);
+        assert!(book.bids().is_err());
+        assert!(book.asks().is_err());
+        // A later snapshot that bridges the surviving evidence restores views
+        // and clears the discarded count.
+        let recovery: OrderBookResponse = serde_json::from_value(
+            json!({"lastUpdateId":104,"bids":[["100.00000000000000000001","1"]],"asks":[]}),
+        )
+        .unwrap();
+        book.snapshot(&recovery).unwrap();
+        assert_eq!(book.state(), BookState::Ready);
+        assert_eq!(book.discarded_pending_updates(), 0);
+        assert_eq!(book.last_update_id(), Some(104));
+    }
+
+    #[test]
     fn crossed_funding_update_is_partial_and_does_not_fabricate_positions() {
         let event:binance_client::usdm::stream_models::AccountUpdateEvent=serde_json::from_value(json!({"e":"ACCOUNT_UPDATE","E":1,"T":1,"a":{"m":"FUNDING_FEE","B":[{"a":"USDT","wb":"10.1","cw":"10.1","bc":"-0.1"}]}})).unwrap();
         assert!(event.a.upper_p.is_none());

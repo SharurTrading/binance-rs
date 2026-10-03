@@ -121,6 +121,12 @@
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#get-funding-rate-history-of-perpetual-futures"
     },
     {
+      "name": "fundingInfo",
+      "method": "GET",
+      "path": "/dapi/v1/fundingInfo",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#get-funding-rate-info"
+    },
+    {
       "name": "indexPriceAndMarkPrice",
       "method": "GET",
       "path": "/dapi/v1/premiumIndex",
@@ -377,6 +383,24 @@
       "method": "POST",
       "path": "/dapi/v1/listenKey",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/user-data-streams#start-user-data-stream"
+    },
+    {
+      "name": "newAlgoOrder",
+      "method": "POST",
+      "path": "/dapi/v1/algoOrder",
+      "source": "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice"
+    },
+    {
+      "name": "cancelAlgoOrder",
+      "method": "DELETE",
+      "path": "/dapi/v1/algoOrder",
+      "source": "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice"
+    },
+    {
+      "name": "openAlgoOrders",
+      "method": "GET",
+      "path": "/dapi/v1/openAlgoOrders",
+      "source": "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice"
     }
   ],
   "ws": [

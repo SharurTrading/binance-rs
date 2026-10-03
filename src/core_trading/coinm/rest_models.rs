@@ -1244,6 +1244,73 @@ pub struct GetFundingRateHistoryOfPerpetualFuturesResponseItem {
 pub type GetFundingRateHistoryOfPerpetualFuturesResponse =
     Vec<GetFundingRateHistoryOfPerpetualFuturesResponseItem>;
 
+/// Provider-native `FundingInfoResponseItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct FundingInfoResponseItem {
+    /// Exact `symbol` wire field.
+    #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<crate::Symbol>,
+    /// Exact `adjustedFundingRateCap` wire field.
+    #[serde(
+        rename = "adjustedFundingRateCap",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub adjusted_funding_rate_cap: Option<Decimal>,
+    /// Exact `adjustedFundingRateFloor` wire field.
+    #[serde(
+        rename = "adjustedFundingRateFloor",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub adjusted_funding_rate_floor: Option<Decimal>,
+    /// Exact `lastFundingRate` wire field.
+    #[serde(
+        rename = "lastFundingRate",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub last_funding_rate: Option<Decimal>,
+    /// Exact `nextFundingTime` wire field.
+    #[serde(
+        rename = "nextFundingTime",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub next_funding_time: Option<i64>,
+    /// Exact `fundingIntervalHours` wire field.
+    #[serde(
+        rename = "fundingIntervalHours",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub funding_interval_hours: Option<i64>,
+    /// Exact `disclaimer` wire field.
+    #[serde(
+        rename = "disclaimer",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub disclaimer: Option<bool>,
+    /// Exact `updateTime` wire field.
+    #[serde(
+        rename = "updateTime",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub update_time: Option<i64>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Exact response for `fundingInfo`.
+pub type FundingInfoResponse = Vec<FundingInfoResponseItem>;
+
 /// Provider-native `IndexPriceAndMarkPriceResponseItem` payload.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -4486,3 +4553,440 @@ pub struct StartUserDataStreamResponse {
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
 }
+
+/// Provider-native `NewAlgoOrderResponse` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct NewAlgoOrderResponse {
+    /// Exact `algoId` wire field.
+    #[serde(rename = "algoId")]
+    pub algo_id: i64,
+    /// Exact `clientAlgoId` wire field.
+    #[serde(
+        rename = "clientAlgoId",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub client_algo_id: Option<crate::ClientOrderId>,
+    /// Exact `algoType` wire field.
+    #[serde(rename = "algoType", default, skip_serializing_if = "Option::is_none")]
+    pub algo_type: Option<String>,
+    /// Exact `orderType` wire field.
+    #[serde(rename = "orderType", default, skip_serializing_if = "Option::is_none")]
+    pub order_type: Option<String>,
+    /// Exact `symbol` wire field.
+    #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<crate::Symbol>,
+    /// Exact `side` wire field.
+    #[serde(rename = "side", default, skip_serializing_if = "Option::is_none")]
+    pub side: Option<String>,
+    /// Exact `positionSide` wire field.
+    #[serde(
+        rename = "positionSide",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub position_side: Option<String>,
+    /// Exact `timeInForce` wire field.
+    #[serde(
+        rename = "timeInForce",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub time_in_force: Option<String>,
+    /// Exact `quantity` wire field.
+    #[serde(
+        rename = "quantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quantity: Option<Decimal>,
+    /// Exact `algoStatus` wire field.
+    #[serde(
+        rename = "algoStatus",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub algo_status: Option<String>,
+    /// Exact `triggerPrice` wire field.
+    #[serde(
+        rename = "triggerPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub trigger_price: Option<Decimal>,
+    /// Exact `price` wire field.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `icebergQuantity` wire field.
+    #[serde(
+        rename = "icebergQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option_null_string",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub iceberg_quantity: Option<Decimal>,
+    /// Exact `selfTradePreventionMode` wire field.
+    #[serde(
+        rename = "selfTradePreventionMode",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub self_trade_prevention_mode: Option<String>,
+    /// Exact `workingType` wire field.
+    #[serde(
+        rename = "workingType",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub working_type: Option<String>,
+    /// Exact `priceMatch` wire field.
+    #[serde(
+        rename = "priceMatch",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price_match: Option<String>,
+    /// Exact `closePosition` wire field.
+    #[serde(
+        rename = "closePosition",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub close_position: Option<bool>,
+    /// Exact `priceProtect` wire field.
+    #[serde(
+        rename = "priceProtect",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price_protect: Option<bool>,
+    /// Exact `reduceOnly` wire field.
+    #[serde(
+        rename = "reduceOnly",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub reduce_only: Option<bool>,
+    /// Exact `activatePrice` wire field.
+    #[serde(
+        rename = "activatePrice",
+        default,
+        deserialize_with = "super::wire::decimal_option_empty",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub activate_price: Option<Decimal>,
+    /// Exact `callbackRate` wire field.
+    #[serde(
+        rename = "callbackRate",
+        default,
+        deserialize_with = "super::wire::decimal_option_empty",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub callback_rate: Option<Decimal>,
+    /// Exact `createTime` wire field.
+    #[serde(
+        rename = "createTime",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub create_time: Option<i64>,
+    /// Exact `updateTime` wire field.
+    #[serde(
+        rename = "updateTime",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub update_time: Option<i64>,
+    /// Exact `triggerTime` wire field.
+    #[serde(
+        rename = "triggerTime",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub trigger_time: Option<i64>,
+    /// Exact `goodTillDate` wire field.
+    #[serde(
+        rename = "goodTillDate",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub good_till_date: Option<i64>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `CancelAlgoOrderResponse` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct CancelAlgoOrderResponse {
+    /// Exact `algoId` wire field.
+    #[serde(rename = "algoId")]
+    pub algo_id: i64,
+    /// Exact `clientAlgoId` wire field.
+    #[serde(
+        rename = "clientAlgoId",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub client_algo_id: Option<crate::ClientOrderId>,
+    /// Exact `code` wire field.
+    #[serde(rename = "code")]
+    pub code: String,
+    /// Exact `msg` wire field.
+    #[serde(rename = "msg", default, skip_serializing_if = "Option::is_none")]
+    pub msg: Option<SensitiveString>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `OpenAlgoOrdersResponseItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct OpenAlgoOrdersResponseItem {
+    /// Exact `algoId` wire field.
+    #[serde(rename = "algoId")]
+    pub algo_id: i64,
+    /// Exact `clientAlgoId` wire field.
+    #[serde(
+        rename = "clientAlgoId",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub client_algo_id: Option<crate::ClientOrderId>,
+    /// Exact `algoType` wire field.
+    #[serde(rename = "algoType", default, skip_serializing_if = "Option::is_none")]
+    pub algo_type: Option<String>,
+    /// Exact `orderType` wire field.
+    #[serde(rename = "orderType", default, skip_serializing_if = "Option::is_none")]
+    pub order_type: Option<String>,
+    /// Exact `symbol` wire field.
+    #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<crate::Symbol>,
+    /// Exact `side` wire field.
+    #[serde(rename = "side", default, skip_serializing_if = "Option::is_none")]
+    pub side: Option<String>,
+    /// Exact `positionSide` wire field.
+    #[serde(
+        rename = "positionSide",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub position_side: Option<String>,
+    /// Exact `timeInForce` wire field.
+    #[serde(
+        rename = "timeInForce",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub time_in_force: Option<String>,
+    /// Exact `quantity` wire field.
+    #[serde(
+        rename = "quantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quantity: Option<Decimal>,
+    /// Exact `algoStatus` wire field.
+    #[serde(
+        rename = "algoStatus",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub algo_status: Option<String>,
+    /// Exact `triggerPrice` wire field.
+    #[serde(
+        rename = "triggerPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub trigger_price: Option<Decimal>,
+    /// Exact `price` wire field.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `icebergQuantity` wire field.
+    #[serde(
+        rename = "icebergQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option_null_string",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub iceberg_quantity: Option<Decimal>,
+    /// Exact `selfTradePreventionMode` wire field.
+    #[serde(
+        rename = "selfTradePreventionMode",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub self_trade_prevention_mode: Option<String>,
+    /// Exact `workingType` wire field.
+    #[serde(
+        rename = "workingType",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub working_type: Option<String>,
+    /// Exact `priceMatch` wire field.
+    #[serde(
+        rename = "priceMatch",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price_match: Option<String>,
+    /// Exact `closePosition` wire field.
+    #[serde(
+        rename = "closePosition",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub close_position: Option<bool>,
+    /// Exact `priceProtect` wire field.
+    #[serde(
+        rename = "priceProtect",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price_protect: Option<bool>,
+    /// Exact `reduceOnly` wire field.
+    #[serde(
+        rename = "reduceOnly",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub reduce_only: Option<bool>,
+    /// Exact `activatePrice` wire field.
+    #[serde(
+        rename = "activatePrice",
+        default,
+        deserialize_with = "super::wire::decimal_option_empty",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub activate_price: Option<Decimal>,
+    /// Exact `callbackRate` wire field.
+    #[serde(
+        rename = "callbackRate",
+        default,
+        deserialize_with = "super::wire::decimal_option_empty",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub callback_rate: Option<Decimal>,
+    /// Exact `createTime` wire field.
+    #[serde(
+        rename = "createTime",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub create_time: Option<i64>,
+    /// Exact `updateTime` wire field.
+    #[serde(
+        rename = "updateTime",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub update_time: Option<i64>,
+    /// Exact `triggerTime` wire field.
+    #[serde(
+        rename = "triggerTime",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub trigger_time: Option<i64>,
+    /// Exact `goodTillDate` wire field.
+    #[serde(
+        rename = "goodTillDate",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub good_till_date: Option<i64>,
+    /// Exact `actualOrderId` wire field.
+    #[serde(
+        rename = "actualOrderId",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub actual_order_id: Option<String>,
+    /// Exact `actualPrice` wire field.
+    #[serde(
+        rename = "actualPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub actual_price: Option<Decimal>,
+    /// Exact `actualQty` wire field.
+    #[serde(
+        rename = "actualQty",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub actual_qty: Option<Decimal>,
+    /// Exact `isActivated` wire field.
+    #[serde(
+        rename = "isActivated",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub is_activated: Option<bool>,
+    /// Exact `tpTriggerPrice` wire field.
+    #[serde(
+        rename = "tpTriggerPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub tp_trigger_price: Option<Decimal>,
+    /// Exact `tpPrice` wire field.
+    #[serde(
+        rename = "tpPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub tp_price: Option<Decimal>,
+    /// Exact `slTriggerPrice` wire field.
+    #[serde(
+        rename = "slTriggerPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub sl_trigger_price: Option<Decimal>,
+    /// Exact `slPrice` wire field.
+    #[serde(
+        rename = "slPrice",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub sl_price: Option<Decimal>,
+    /// Exact `tpOrderType` wire field.
+    #[serde(
+        rename = "tpOrderType",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub tp_order_type: Option<String>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Exact response for `openAlgoOrders`.
+pub type OpenAlgoOrdersResponse = Vec<OpenAlgoOrdersResponseItem>;

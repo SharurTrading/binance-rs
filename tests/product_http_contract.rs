@@ -264,7 +264,7 @@ async fn coinm_successful_price_match_mode_decodes_without_replaying_mutation() 
 }
 
 #[tokio::test]
-async fn validation_only_order_refuses_empty_demo_placeholders_without_fabricating_evidence() {
+async fn validation_only_order_decodes_zeroed_demo_placeholders_without_fabricating_evidence() {
     let f = HttpFixture::new(
         200,
         "X-MBX-ORDER-COUNT-10S: 1\r\nX-MBX-ORDER-COUNT-1M: 1\r\n",
@@ -274,7 +274,7 @@ async fn validation_only_order_refuses_empty_demo_placeholders_without_fabricati
     )
     .await;
     let client = usdm::RestClient::new(support::config().rest_url(&f.url).unwrap()).unwrap();
-    let error = client
+    let response = client
         .test_order(
             &usdm::rest_requests::TestOrder::new()
                 .symbol(Symbol::new("BTCUSDT").unwrap())
@@ -287,20 +287,19 @@ async fn validation_only_order_refuses_empty_demo_placeholders_without_fabricati
             deadline(),
         )
         .await
-        .unwrap_err();
-    let Error::Transport {
-        outcome,
-        meta: Some(meta),
-        client_order_ids,
-        ..
-    } = error
-    else {
-        panic!("missing failed-read evidence")
-    };
-    assert_eq!(outcome, Outcome::ReadFailed);
-    assert_eq!(meta.status, 200);
-    assert_eq!(meta.rates.counters["x-mbx-order-count-10s"], 1);
-    assert_eq!(client_order_ids["newClientOrderId"], "synthetic-validation");
+        .expect("the zeroed acknowledgment decodes as validated evidence");
+    assert_eq!(response.data.order_id, Some(0));
+    // Nothing the venue did not echo becomes a fabricated value.
+    assert_eq!(response.data.price, None);
+    assert_eq!(response.data.executed_qty, None);
+    assert_eq!(response.data.stop_price, None);
+    assert_eq!(response.data.symbol.as_deref(), Some(""));
+    assert_eq!(response.meta.status, 200);
+    assert_eq!(response.meta.rates.counters["x-mbx-order-count-10s"], 1);
+    assert_eq!(
+        response.meta.client_order_ids["newClientOrderId"],
+        "synthetic-validation"
+    );
     assert_eq!(f.attempts(), 1);
     f.finish().await;
 }

@@ -83,10 +83,11 @@ each attempt reports one slot on both documented order limits
 (`X-MBX-ORDER-COUNT-10S`/`-1M`) and charges no IP weight (weight sentinel `-1`,
 no counter movement between surrounding reads) — the same budget as the
 documented `newOrder` weights. The reservation is no longer conservative.
-The demo response body carries zeroed/empty acknowledgment fields
-(`"symbol":""`, tracked for decode handling); the client surfaces that body as a
-read failure rather than inventing financial values. Demo header accounting may
-differ from production; venue counter evidence is always observed and honored.
+The demo response body zeroes every unechoed field (`orderId:0`,
+`"symbol":""`, empty amounts); that acknowledgment decodes as validated
+evidence with the unechoed fields absent, and malformed financial data stays
+refused. Demo header accounting may differ from production; venue counter
+evidence is always observed and honored.
 
 A schema audit after the demo probes corrected categorical order modes and exact
 financial annotations. Cumulative base/quote amounts, annualized basis, funding

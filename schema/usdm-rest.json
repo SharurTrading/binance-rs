@@ -10755,19 +10755,23 @@
               "schema": {
                 "properties": {
                   "clientOrderId": {
-                    "type": "string"
+                    "type": "string",
+                    "x-rust-type": "String"
                   },
                   "cumQty": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "cumQuote": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "executedQty": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "orderId": {
                     "type": "integer",
@@ -10775,15 +10779,18 @@
                   },
                   "avgPrice": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "origQty": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "price": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "reduceOnly": {
                     "type": "boolean"
@@ -10799,13 +10806,15 @@
                   },
                   "stopPrice": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "closePosition": {
                     "type": "boolean"
                   },
                   "symbol": {
-                    "type": "string"
+                    "type": "string",
+                    "x-rust-type": "String"
                   },
                   "timeInForce": {
                     "type": "string"
@@ -10818,11 +10827,13 @@
                   },
                   "activatePrice": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "priceRate": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "updateTime": {
                     "type": "integer",
@@ -10853,7 +10864,8 @@
       },
       "path": "/fapi/v1/order/test",
       "method": "POST",
-      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade#test-order"
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade#test-order",
+      "x-evidence": "Authorized demo probe 2026-10-03 (issue #47): the validation-only 200 body zeroes every unechoed field - orderId 0, empty symbol/status/clientOrderId strings, empty amount strings, false booleans. The response model therefore keeps identity echoes as plain strings and treats the empty string as the venue's documented-unavailable amount sentinel; malformed amounts stay refused."
     },
     {
       "tags": [

@@ -7471,12 +7471,12 @@ pub struct TestOrderResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub client_order_id: Option<ClientOrderId>,
+    pub client_order_id: Option<String>,
     /// Exact `cumQty` wire field.
     #[serde(
         rename = "cumQty",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub cum_qty: Option<Decimal>,
@@ -7484,7 +7484,7 @@ pub struct TestOrderResponse {
     #[serde(
         rename = "cumQuote",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub cum_quote: Option<Decimal>,
@@ -7492,7 +7492,7 @@ pub struct TestOrderResponse {
     #[serde(
         rename = "executedQty",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub executed_qty: Option<Decimal>,
@@ -7503,7 +7503,7 @@ pub struct TestOrderResponse {
     #[serde(
         rename = "avgPrice",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub avg_price: Option<Decimal>,
@@ -7511,7 +7511,7 @@ pub struct TestOrderResponse {
     #[serde(
         rename = "origQty",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_qty: Option<Decimal>,
@@ -7519,7 +7519,7 @@ pub struct TestOrderResponse {
     #[serde(
         rename = "price",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub price: Option<Decimal>,
@@ -7547,7 +7547,7 @@ pub struct TestOrderResponse {
     #[serde(
         rename = "stopPrice",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub stop_price: Option<Decimal>,
@@ -7560,7 +7560,7 @@ pub struct TestOrderResponse {
     pub close_position: Option<bool>,
     /// Exact `symbol` wire field.
     #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
-    pub symbol: Option<Symbol>,
+    pub symbol: Option<String>,
     /// Exact `timeInForce` wire field.
     #[serde(
         rename = "timeInForce",
@@ -7578,7 +7578,7 @@ pub struct TestOrderResponse {
     #[serde(
         rename = "activatePrice",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub activate_price: Option<Decimal>,
@@ -7586,7 +7586,7 @@ pub struct TestOrderResponse {
     #[serde(
         rename = "priceRate",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub price_rate: Option<Decimal>,

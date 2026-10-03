@@ -53,6 +53,10 @@ mod tests {
         let result = client.test_order(&probe, deadline()).await;
         let evidence = match &result {
             Ok(response) => {
+                // The zeroed validation-only acknowledgment decodes with every
+                // unechoed field absent (issue #47).
+                assert_eq!(response.data.order_id, Some(0));
+                assert_eq!(response.data.executed_qty, None);
                 println!("test order accepted; counters: {:?}", response.meta.rates);
                 Some(response.meta.rates.clone())
             }
@@ -64,17 +68,18 @@ mod tests {
                     } => Some(meta.rates.clone()),
                     _ => None,
                 };
-                println!("test order body refused locally; counters: {rates:?}");
+                println!("test order refused; counters: {rates:?}");
                 rates
             }
         };
+        assert!(result.is_ok());
         let after = client
             .check_server_time(&CheckServerTime::new(), deadline())
             .await
             .unwrap();
         println!("after: {:?}", after.meta.rates);
-        // The venue reports the order-limit counters even when the
-        // acknowledgment body cannot decode as order evidence.
+        // The venue reports the order-limit counters on the accepted
+        // validation-only acknowledgment.
         assert!(evidence.is_some_and(|rates| {
             rates.counters.contains_key("x-mbx-order-count-10s")
                 && rates.counters.contains_key("x-mbx-order-count-1m")

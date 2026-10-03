@@ -212,6 +212,40 @@ mod tests {
     }
 
     #[test]
+    fn zeroed_test_order_acknowledgment_decodes_as_validated_evidence() {
+        // Observed on demo-fapi 2026-10-03 (issue #47): the validation-only
+        // response zeroes every field the venue does not echo. Identity
+        // strings stay plain evidence and empty amounts stay absent rather
+        // than failing the whole acknowledgment.
+        let ack: binance_client::usdm::rest_models::TestOrderResponse =
+            serde_json::from_value(json!({
+                "orderId":0,"symbol":"","status":"","clientOrderId":"","price":"","origQty":"",
+                "executedQty":"","timeInForce":"","type":"","reduceOnly":false,
+                "closePosition":false,"side":"","stopPrice":"","priceProtect":false,
+                "origType":"","updateTime":0
+            }))
+            .unwrap();
+        assert_eq!(ack.order_id, Some(0));
+        assert_eq!(ack.symbol.as_deref(), Some(""));
+        assert_eq!(ack.client_order_id.as_deref(), Some(""));
+        assert_eq!(ack.price, None);
+        assert_eq!(ack.executed_qty, None);
+        assert_eq!(ack.stop_price, None);
+        assert_eq!(ack.update_time, Some(0));
+        // A populated echo decodes with exact amounts, and malformed
+        // financial data stays refused (see also order_wire_contract).
+        let real: binance_client::usdm::rest_models::TestOrderResponse =
+            serde_json::from_value(json!({
+                "orderId":9,"symbol":"BTCUSDT","clientOrderId":"caller-1","price":"100.5",
+                "executedQty":"0.001","status":"NEW","side":"BUY","updateTime":17
+            }))
+            .unwrap();
+        assert_eq!(real.symbol.as_deref(), Some("BTCUSDT"));
+        assert_eq!(real.price, Some(dec("100.5")));
+        assert_eq!(real.executed_qty, Some(dec("0.001")));
+    }
+
+    #[test]
     fn malformed_batch_members_preserve_valid_receipts_and_negative_codes_win() {
         use binance_client::usdm::{rest_models::NewOrderResponse, wire::BatchResult};
         let members: Vec<BatchResult<NewOrderResponse>> = serde_json::from_value(json!([

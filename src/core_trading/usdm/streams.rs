@@ -102,13 +102,24 @@ impl Streams {
                 .collect::<Vec<_>>()
                 .join("/"),
         );
-        let (socket, events, driver) = Socket::connect(
+        let (socket, events, driver) = Socket::connect_with_policy(
             url,
             None,
             config.clock,
             config.budgets,
             config.timeout,
-            false,
+            crate::core::socket::SocketPolicy {
+                handshake: crate::core::Cost::default(),
+                // The codec answers every received ping, so pong servicing must
+                // stay inside the raw-stream connection's documented budget:
+                // "WebSocket connections have a limit of 10 incoming messages
+                // per second" (USDⓈ-M WebSocket Market Streams, Connect;
+                // verified 2026-10-03).
+                ping_limit: 10,
+                time_unit: crate::core::TimeUnit::Milliseconds,
+                binary_decoder: None,
+                api_key_header: false,
+            },
         )
         .await?;
         Ok((
@@ -140,13 +151,23 @@ impl Streams {
             .map_err(|()| Error::Configuration("private stream URL"))?
             .pop_if_empty()
             .push(listen_key.as_str());
-        let (socket, events, driver) = Socket::connect(
+        let (socket, events, driver) = Socket::connect_with_policy(
             url,
             None,
             config.clock,
             config.budgets,
             config.timeout,
-            false,
+            crate::core::socket::SocketPolicy {
+                handshake: crate::core::Cost::default(),
+                // Same documented raw-stream connection duty cycle as the
+                // market route: 10 venue-incoming messages per second bound the
+                // pong stream this driver emits (USDⓈ-M WebSocket Market
+                // Streams, Connect; verified 2026-10-03).
+                ping_limit: 10,
+                time_unit: crate::core::TimeUnit::Milliseconds,
+                binary_decoder: None,
+                api_key_header: false,
+            },
         )
         .await?;
         Ok((

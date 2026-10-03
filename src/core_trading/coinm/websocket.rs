@@ -38,13 +38,28 @@ impl WsClient {
     /// # Errors
     /// Refuses invalid transport configuration or failed handshake/rate admission.
     pub async fn connect(config: Config) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
-        let (socket, events, driver) = Socket::connect(
+        let (socket, events, driver) = Socket::connect_with_policy(
             config.websocket,
             config.credentials,
             config.clock,
             config.budgets,
             config.timeout,
-            true,
+            crate::core::socket::SocketPolicy {
+                handshake: crate::core::Cost {
+                    ws_weight: 5,
+                    ..crate::core::Cost::default()
+                },
+                // The futures WebSocket API documents a 3-minute server ping
+                // cadence but no per-second client-message figure for this
+                // socket family; 5 is the conservative ceiling of the
+                // documented API-socket family budget (spot WebSocket API and
+                // SBE streams count client PING/PONG/JSON frames against
+                // "5 requests per second"), bounding this driver's pong stream.
+                ping_limit: 5,
+                time_unit: crate::core::TimeUnit::Milliseconds,
+                binary_decoder: None,
+                api_key_header: false,
+            },
         )
         .await?;
         Ok((

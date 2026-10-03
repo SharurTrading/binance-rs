@@ -70,6 +70,11 @@ impl WsClient {
                     connections: 1,
                     ..Default::default()
                 },
+                // Spot WebSocket API sockets share the documented API-socket
+                // client-message budget: "The WebSocket server will send a
+                // `ping frame` every 20 seconds" and client frames stay within
+                // the 5-requests-per-second family limit (verified 2026-10-03),
+                // bounding this driver's pong stream.
                 ping_limit: 5,
                 time_unit: config.time_unit,
                 binary_decoder,

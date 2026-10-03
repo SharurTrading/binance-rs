@@ -178,6 +178,9 @@ pub(crate) fn tls_config() -> Result<rustls::ClientConfig, Error> {
 /// Product-sourced connection/control admission, independent of wire models.
 pub(crate) struct SocketPolicy {
     pub handshake: Cost,
+    /// Received-ping servicing ceiling per sliding second. Every call site
+    /// supplies this from its route's documented connection duty cycle; no
+    /// default arm derives it, so an uncited limit cannot be hidden here.
     pub ping_limit: usize,
     pub time_unit: super::TimeUnit,
     pub binary_decoder: Option<BinaryDecoder>,
@@ -185,33 +188,6 @@ pub(crate) struct SocketPolicy {
 }
 
 impl Socket {
-    pub async fn connect(
-        url: url::Url,
-        credentials: Option<Credentials>,
-        clock: Arc<dyn Clock>,
-        budgets: Budgets,
-        timeout: Duration,
-        api: bool,
-    ) -> Result<(Self, SocketEvents, SocketDriver), Error> {
-        Self::connect_with_policy(
-            url,
-            credentials,
-            clock,
-            budgets,
-            timeout,
-            SocketPolicy {
-                handshake: Cost {
-                    ws_weight: if api { 5 } else { 0 },
-                    ..Cost::default()
-                },
-                ping_limit: if api { 5 } else { 10 },
-                time_unit: super::TimeUnit::Milliseconds,
-                binary_decoder: None,
-                api_key_header: false,
-            },
-        )
-        .await
-    }
     pub async fn connect_with_policy(
         url: url::Url,
         credentials: Option<Credentials>,

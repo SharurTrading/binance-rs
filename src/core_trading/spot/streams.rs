@@ -106,6 +106,10 @@ impl Streams {
                     connections: 1,
                     ..Default::default()
                 },
+                // Documented raw-stream connection duty cycle: "WebSocket
+                // connections have a limit of 5 incoming messages per second"
+                // (Spot WebSocket Market Streams, General WSS Information;
+                // verified 2026-10-03).
                 ping_limit: 5,
                 time_unit: config.time_unit,
                 binary_decoder: None,

@@ -158,6 +158,13 @@ impl Streams {
                                 stream: name.to_owned(),
                                 payload,
                             }),
+                        // A stream name this build did not subscribe or model is
+                        // retained evidence on a live socket, not a continuity
+                        // break; only a malformed envelope of a known kind gaps.
+                        (Some(name), None, Some(data)) => Ok(StreamPayload::Market {
+                            stream: name.to_owned(),
+                            payload: MarketPayload::Unknown(data.clone().into()),
+                        }),
                         _ => Err(Error::Gap("unexpected combined stream envelope")),
                     }
                 };

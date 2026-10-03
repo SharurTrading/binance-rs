@@ -468,17 +468,22 @@ def generate_events(coverage):
     for o in coverage['streams']:
      t=o['type'].replace('Vec<','Vec<super::stream_models::') if o['type'].startswith('Vec<') else 'super::stream_models::'+o['type']
      text+=f'    /// `{o["name"]}` events.\n    {o["name"]}(Box<{t}>),\n'
-    text+='''}
-    
-    pub(crate) fn market_payload(kind:&str,value:Value)->Result<MarketPayload,Error> {
-        match kind {
-    '''
+    text+='''    /// A future stream name or kind this build does not model, preserved
+    /// with redacted Debug for explicit consumer handling.
+    Unknown(UnknownMessage),
+}
+
+pub(crate) fn market_payload(kind:&str,value:Value)->Result<MarketPayload,Error> {
+    match kind {
+'''
     for o in coverage['streams']:
      text+=f'        "{o["name"][0].lower()+o["name"][1:]}"=>serde_json::from_value(value).map(|v|MarketPayload::{o["name"]}(Box::new(v))),\n'
-    text+='''        _=>return Err(Error::Gap("unrecognized subscribed stream")),
+    text+='''        // An unrecognized stream kind is retained evidence, not a continuity
+        // break; `Error::Gap` is reserved for malformed payloads of known kinds.
+        _=>return Ok(MarketPayload::Unknown(value.into())),
         }.map_err(|_|Error::Gap("malformed market payload"))
     }
-    
+
     /// Every documented user-data event, plus an explicit unknown-future alternative.
     #[derive(Clone,Debug,PartialEq)]
     #[non_exhaustive]

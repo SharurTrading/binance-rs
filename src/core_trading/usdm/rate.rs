@@ -125,11 +125,13 @@ fn weight(
             _ => return Err(Error::Validation("kline limit")),
         },
         "sendQuoteRequest" => 50,
-        // The catalog omits testOrder weight. Reserve one IP unit plus an order
-        // slot conservatively; retain/observe actual venue header evidence.
-        // Verification: https://github.com/SharurTrading/binance-rs/issues/4.
-        "testOrder" => 1,
-        "newOrder"
+        // The catalog omits testOrder weights, so its cost is pinned from an
+        // authorized demo probe (issue #4, 2026-10-03): the response carries
+        // x-mbx-order-count-10s/1m (one slot each per call, enforced above)
+        // and the venue charges no IP weight (weight sentinel -1; surrounding
+        // reads show no counter movement). Same budget as newOrder.
+        "testOrder"
+        | "newOrder"
         | "newAlgoOrder"
         | "modifyOrder"
         | "getFundingRateHistory"
@@ -154,5 +156,18 @@ mod tests {
             20
         );
         assert!(cost(RpiOrderBook::OP, &parameters(&request.limit(500)).unwrap()).is_err());
+    }
+    #[test]
+    fn test_order_charges_the_verified_zero_weight_and_both_order_slots() {
+        // Verified by the authorized demo probe of 2026-10-03 (issue #4): no
+        // IP weight, one slot on each documented order limit.
+        let cost = cost(
+            crate::core_trading::usdm::rest_requests::TestOrder::OP,
+            &std::collections::BTreeMap::new(),
+        )
+        .unwrap();
+        assert_eq!(cost.weight, 0);
+        assert_eq!(cost.orders10, 1);
+        assert_eq!(cost.orders60, 1);
     }
 }

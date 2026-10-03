@@ -77,13 +77,16 @@ is promised. GTD expiry is rechecked against the injected venue clock before the
 RPI depth accepts the documented 1000 levels only; RPI limit-order TIF remains available
 subject to venue eligibility. The validation-only `testOrder` endpoint accepts the
 catalog's legacy conditional inputs and empty acknowledgment without claiming execution.
-Its omitted quota weights use a conservative one-IP-unit/one-order-slot reservation,
-tracked by [verification #4](https://github.com/SharurTrading/binance-rs/issues/4).
-Authorized demo observations on 2026-09-27 showed order-count headers on the
-validation-only response and no IP-weight increase between surrounding pings.
-The response did not decode as documented order evidence; the client retained a
-read failure rather than inventing financial values. This does not establish
-production quota weights, so the conservative reservation remains.
+Its quota, unpublished by the catalog, is pinned from an authorized demo probe
+(2026-10-03, [verification #4](https://github.com/SharurTrading/binance-rs/issues/4)):
+each attempt reports one slot on both documented order limits
+(`X-MBX-ORDER-COUNT-10S`/`-1M`) and charges no IP weight (weight sentinel `-1`,
+no counter movement between surrounding reads) — the same budget as the
+documented `newOrder` weights. The reservation is no longer conservative.
+The demo response body carries zeroed/empty acknowledgment fields
+(`"symbol":""`, tracked for decode handling); the client surfaces that body as a
+read failure rather than inventing financial values. Demo header accounting may
+differ from production; venue counter evidence is always observed and honored.
 
 A schema audit after the demo probes corrected categorical order modes and exact
 financial annotations. Cumulative base/quote amounts, annualized basis, funding

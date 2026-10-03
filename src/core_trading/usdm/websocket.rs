@@ -249,7 +249,7 @@ impl ApiEvents {
                         .is_some_and(|c| c < 0)
                 {
                     Err(crate::core::error::failure_for(
-                        op,
+                        *op,
                         meta.status,
                         &value,
                         meta.rates.clone(),

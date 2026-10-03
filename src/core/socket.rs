@@ -73,7 +73,9 @@ pub(crate) enum SocketEvent {
     Late {
         generation: u64,
         id: RequestId,
-        op: Operation,
+        // Boxed so this rare-attribution variant does not size every queued
+        // event after the operation facts grew to carry pinned rate evidence.
+        op: Box<Operation>,
         value: Value,
         meta: ResponseMeta,
     },
@@ -556,7 +558,7 @@ impl SocketDriver {
                 self.emit(SocketEvent::Late {
                     generation: self.generation,
                     id: p.id.clone(),
-                    op: p.op,
+                    op: Box::new(p.op),
                     value: payload,
                     meta,
                 })?;
@@ -565,7 +567,7 @@ impl SocketDriver {
             self.emit(SocketEvent::Late {
                 generation: self.generation,
                 id: p.id.clone(),
-                op: p.op,
+                op: Box::new(p.op),
                 value: payload,
                 meta,
             })?;

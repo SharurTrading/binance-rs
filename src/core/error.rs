@@ -300,6 +300,13 @@ pub(crate) fn futures_definitive(status: u16, value: &serde_json::Value) -> bool
     }) || (status == 503
         && matches!(
             msg,
+            // Pinned in schema/futures-general-info.json against the documented
+            // 503 variants of both Futures general-info pages: each message
+            // below is documented as "a failure API operation" (order certainly
+            // not accepted, resend allowed). The sibling variants "Unknown
+            // error, please check your request or try again later." and the
+            // 5XX "Request occur unknown error." are documented
+            // execution-unknown and must never match here.
             Some(
                 "Service Unavailable."
                     | "Internal error; unable to process your request. Please try again."

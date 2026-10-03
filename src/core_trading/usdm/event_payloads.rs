@@ -231,6 +231,9 @@ pub enum MarketPayload {
     PartialBookDepthStreams(Box<super::stream_models::PartialBookDepthStreamsEvent>),
     /// `RpiDiffBookDepthStreams` events.
     RpiDiffBookDepthStreams(Box<super::stream_models::RpiDiffBookDepthStreamsEvent>),
+    /// A future stream name or kind this build does not model, preserved
+    /// with redacted Debug for explicit consumer handling.
+    Unknown(UnknownMessage),
 }
 
 pub(crate) fn market_payload(kind: &str, value: Value) -> Result<MarketPayload, Error> {
@@ -282,7 +285,9 @@ pub(crate) fn market_payload(kind: &str, value: Value) -> Result<MarketPayload, 
             .map(|v| MarketPayload::PartialBookDepthStreams(Box::new(v))),
         "rpiDiffBookDepthStreams" => serde_json::from_value(value)
             .map(|v| MarketPayload::RpiDiffBookDepthStreams(Box::new(v))),
-        _ => return Err(Error::Gap("unrecognized subscribed stream")),
+        // An unrecognized stream kind is retained evidence, not a continuity
+        // break; `Error::Gap` is reserved for malformed payloads of known kinds.
+        _ => return Ok(MarketPayload::Unknown(value.into())),
     }
     .map_err(|_| Error::Gap("malformed market payload"))
 }

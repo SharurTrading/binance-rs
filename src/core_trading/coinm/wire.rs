@@ -49,6 +49,19 @@ pub(crate) fn decimal_option_empty<'de, D: Deserializer<'de>>(
     }
 }
 
+// Fields whose venue "null" literal marks an absent amount use this parser.
+pub(crate) fn decimal_option_null_string<'de, D: Deserializer<'de>>(
+    d: D,
+) -> Result<Option<Decimal>, D::Error> {
+    match Option::<Value>::deserialize(d)? {
+        None => Ok(None),
+        Some(Value::String(value)) if value == "null" => Ok(None),
+        Some(value) => parse_decimal(&value)
+            .map(Some)
+            .map_err(serde::de::Error::custom),
+    }
+}
+
 /// An exact [price, quantity] pair, retaining zero quantities for deletion updates.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]

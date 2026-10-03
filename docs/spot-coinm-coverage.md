@@ -135,13 +135,22 @@ contradictory statuses, malformed bodies, and timeouts remain ambiguous. Late
 WebSocket replies retain the original operation, generation, and caller identity.
 `tests/advanced_spot_contract.rs` reproduces these outcomes and truncated responses.
 
-[Issue #11](https://github.com/SharurTrading/binance-rs/issues/11) still tracks
-COIN-M migrated algo endpoint/request/quota evidence, funding-info quota evidence,
-and FIX unsubscribe acknowledgment evidence. [FIX/SBE protocols](core-protocols.md)
-now have separate native implementations and deterministic fixtures. The integration notice names algo endpoints,
-but the checked catalog omits their endpoint-level request and quota contracts.
-Standard COIN-M order builders refuse migrated conditional types before sending.
-These omissions remain blockers for claiming complete product coverage.
+COIN-M's post-migration conditional surface is now bound from the integration
+notice plus an operator-authorized demo probe (2026-10-03, tracked by
+[issue #11](https://github.com/SharurTrading/binance-rs/issues/11)): the probe
+placed one never-triggerable conditional order on demo-dapi, listed and
+cancelled it with owned cleanup, and observed the full request/response shapes
+and quotas first-hand. `newAlgoOrder` charges one slot on each documented order
+limit and no IP weight; `cancelAlgoOrder` costs weight 1; `openAlgoOrders`
+costs 1 symbol-scoped and 40 unscoped; `fundingInfo` is free (no weight header,
+no counter movement, verified read-only on production and demo). All four are
+pinned in `schema/coinm-rest.json` with their evidence, regenerated into
+validated builders, and regression-tested against the observed wire payloads.
+Standard COIN-M order builders still refuse migrated conditional types before
+sending. The remaining #11 blocker is FIX unsubscribe acknowledgment evidence,
+which requires Ed25519 credentials the current probes do not hold.
+[FIX/SBE protocols](core-protocols.md)
+now have separate native implementations and deterministic fixtures.
 [Listen tokens](https://developers.binance.com/en/docs/products/margin-trading/listen-token-data-stream)
 belong to Margin, rather than Spot. Portfolio Margin/Pro, Options, and Margin are
 separate products outside this implementation. Human execution review and separate
@@ -301,6 +310,10 @@ operator-authorized mutation probes are required before live trading.
 | [continuousContractKlineCandlestickData](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#continuous-contract-kline-candlestick-data) | GET | `/dapi/v1/continuousKlines` |
 | [exchangeInformation](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#exchange-information) | GET | `/dapi/v1/exchangeInfo` |
 | [getFundingRateHistoryOfPerpetualFutures](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#get-funding-rate-history-of-perpetual-futures) | GET | `/dapi/v1/fundingRate` |
+| [fundingInfo](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#get-funding-rate-info) | GET | `/dapi/v1/fundingInfo` |
+| [newAlgoOrder](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice) | POST | `/dapi/v1/algoOrder` |
+| [cancelAlgoOrder](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice) | DELETE | `/dapi/v1/algoOrder` |
+| [openAlgoOrders](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice) | GET | `/dapi/v1/openAlgoOrders` |
 | [indexPriceAndMarkPrice](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#index-price-and-mark-price) | GET | `/dapi/v1/premiumIndex` |
 | [indexPriceKlineCandlestickData](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#index-price-kline-candlestick-data) | GET | `/dapi/v1/indexPriceKlines` |
 | [klineCandlestickData](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#kline-candlestick-data) | GET | `/dapi/v1/klines` |

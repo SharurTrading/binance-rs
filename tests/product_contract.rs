@@ -160,6 +160,113 @@ fn coinm_bootstrap_gap_reports_the_count_of_discarded_pending_updates() {
 }
 
 #[test]
+fn coinm_conditional_algo_and_funding_evidence_decode_from_observed_wire() {
+    // Wire payloads observed live on demo-dapi 2026-10-03 during the
+    // authorized probe for issue #11 (place, list, cancel lifecycle).
+    use binance_client::Decimal as D;
+    use coinm::rest_models::{
+        CancelAlgoOrderResponse, FundingInfoResponse, NewAlgoOrderResponse, OpenAlgoOrdersResponse,
+    };
+    let ack: NewAlgoOrderResponse = serde_json::from_value(json!({
+        "algoId":1_000_000_226_909_486_i64,"clientAlgoId":"cmquota1","algoType":"CONDITIONAL",
+        "orderType":"STOP_MARKET","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"BOTH",
+        "timeInForce":"GTC","quantity":"1","algoStatus":"NEW","triggerPrice":"10000.0",
+        "price":"0.0","icebergQuantity":null,"selfTradePreventionMode":"EXPIRE_MAKER",
+        "workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,
+        "priceProtect":false,"reduceOnly":false,"createTime":1_790_996_069_407_i64,
+        "updateTime":1_790_996_069_407_i64,"triggerTime":0,"goodTillDate":0
+    }))
+    .unwrap();
+    assert_eq!(ack.algo_id, 1_000_000_226_909_486);
+    assert_eq!(ack.algo_status.as_deref(), Some("NEW"));
+    assert_eq!(ack.working_type.as_deref(), Some("CONTRACT_PRICE"));
+    assert_eq!(ack.trigger_price, Some(D::from(10_000)));
+    assert_eq!(ack.iceberg_quantity, None);
+
+    let open: OpenAlgoOrdersResponse = serde_json::from_value(json!([{
+        "algoId":1_000_000_226_909_486_i64,"clientAlgoId":"cmquota1","algoType":"CONDITIONAL",
+        "orderType":"STOP_MARKET","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"BOTH",
+        "timeInForce":"GTC","quantity":"1.0","algoStatus":"NEW","actualOrderId":"",
+        "actualQty":"0.0","triggerPrice":"10000.0","price":"0.0","icebergQuantity":null,
+        "selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE",
+        "priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,
+        "createTime":1_790_996_069_407_i64,"updateTime":1_790_996_069_407_i64,"triggerTime":0,
+        "goodTillDate":0,"isActivated":false
+    }]))
+    .unwrap();
+    assert_eq!(open.len(), 1);
+    assert_eq!(open[0].actual_qty, Some(D::ZERO));
+    assert!(!open[0].is_activated.unwrap_or(true));
+
+    let cancel: CancelAlgoOrderResponse = serde_json::from_value(
+        json!({"algoId":1_000_000_226_909_486_i64,"clientAlgoId":"cmquota1","code":"200","msg":"success"}),
+    )
+    .unwrap();
+    assert_eq!(cancel.algo_id, 1_000_000_226_909_486);
+    assert_eq!(cancel.code, "200");
+
+    let funding: FundingInfoResponse = serde_json::from_value(json!([{
+        "symbol":"SUSHIUSDT","adjustedFundingRateCap":"0.0075",
+        "adjustedFundingRateFloor":"-0.0075","fundingIntervalHours":8,
+        "disclaimer":true,"updateTime":null
+    }]))
+    .unwrap();
+    assert_eq!(funding.len(), 1);
+    assert_eq!(
+        funding[0].adjusted_funding_rate_cap,
+        Some(D::from_str_exact("0.0075").unwrap())
+    );
+    assert_eq!(funding[0].update_time, None);
+    assert_eq!(funding[0].disclaimer, Some(true));
+    assert!(funding[0].last_funding_rate.is_none());
+}
+
+#[test]
+fn coinm_conditional_algo_builder_enforces_the_notice_vocabulary() {
+    use binance_client::{ClientOrderId, Decimal as D};
+    let order = || {
+        coinm::rest_requests::NewAlgoOrder::new()
+            .algo_type("CONDITIONAL")
+            .symbol(Symbol::new("BTCUSD_PERP").unwrap())
+            .side("SELL")
+            .type_value("STOP_MARKET")
+            .client_algo_id(ClientOrderId::new("caller/algo:1").unwrap())
+    };
+    // A STOP_MARKET conditional requires a trigger price.
+    assert!(order().build().is_err());
+    // A plain LIMIT type is not in the notice's conditional vocabulary.
+    assert!(
+        order()
+            .type_value("LIMIT")
+            .trigger_price(D::from(10_000))
+            .build()
+            .is_err()
+    );
+    // A TRAILING_STOP_MARKET requires quantity and callback rate.
+    assert!(
+        order()
+            .type_value("TRAILING_STOP_MARKET")
+            .callback_rate(D::from(2))
+            .build()
+            .is_err()
+    );
+    // The caller identity and the working price type survive to the wire.
+    let request = order()
+        .trigger_price(D::from(10_000))
+        .quantity(D::ONE)
+        .working_type("MARK_PRICE")
+        .build()
+        .unwrap();
+    let wire = serde_json::to_value(&request).unwrap();
+    assert_eq!(wire["clientAlgoId"], "caller/algo:1");
+    assert_eq!(wire["workingType"], "MARK_PRICE");
+    assert_eq!(wire["triggerPrice"], "10000");
+    // Unset documented parameters stay absent.
+    assert!(wire.get("priceMatch").is_none());
+    assert!(wire.get("callbackRate").is_none());
+}
+
+#[test]
 fn known_event_and_filter_evidence_cannot_be_invented() {
     use spot::rest_models::ExchangeInfoResponseSymbolsItemFiltersItem as Filter;
     assert!(

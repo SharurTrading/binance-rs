@@ -13,7 +13,10 @@ pub(crate) fn cost(
         weight: weight(op, p)?,
         ..Cost::default()
     };
-    if matches!(op.name, "newOrder" | "modifyOrder") {
+    // A conditional algo placement consumes the same order slots as a plain
+    // order: the demo probe of 2026-10-03 observed one slot on each of
+    // X-MBX-ORDER-COUNT-10S/-1M per accepted algoOrder (issue #11).
+    if matches!(op.name, "newOrder" | "newAlgoOrder" | "modifyOrder") {
         c.orders10 = 1;
         c.orders60 = 1;
     }
@@ -45,12 +48,10 @@ fn weight(
         .and_then(serde_json::Value::as_u64)
         .unwrap_or(500);
     Ok(match op.name {
-        "currentAllOpenOrders" | "ticker24hrPriceChangeStatistics" => {
-            if symbol {
-                1
-            } else {
-                40
-            }
+        "currentAllOpenOrders" | "ticker24hrPriceChangeStatistics" | "openAlgoOrders" => {
+            // openAlgoOrders: 1 symbol-scoped, 40 unscoped (demo probe
+            // 2026-10-03, issue #11); the others are catalog weights.
+            if symbol { 1 } else { 40 }
         }
         "symbolOrderBookTicker" => {
             if symbol {
@@ -102,6 +103,45 @@ fn weight(
 mod tests {
     use super::*;
     use crate::{BudgetLimits, Budgets, core::Request};
+    #[test]
+    fn probe_verified_algo_and_funding_costs_charge_exact_budgets() {
+        // Weights and order slots observed on demo-dapi 2026-10-03 (issue #11):
+        // an algo placement charges no IP weight but one slot on each order
+        // limit; its reads and cancel charge 1 symbol-scoped / 40 unscoped and
+        // 1 respectively; fundingInfo is free.
+        use super::super::rest_requests::{
+            CancelAlgoOrder, FundingInfo, NewAlgoOrder, OpenAlgoOrders,
+        };
+        use crate::core::parameters;
+        use crate::{ClientOrderId, Decimal, Symbol};
+        let algo = NewAlgoOrder::new()
+            .algo_type("CONDITIONAL")
+            .symbol(Symbol::new("BTCUSD_PERP").unwrap())
+            .side("SELL")
+            .type_value("STOP_MARKET")
+            .trigger_price(Decimal::from(10_000))
+            .client_algo_id(ClientOrderId::new("probe/1").unwrap());
+        let charge = cost(NewAlgoOrder::OP, &parameters(&algo).unwrap()).unwrap();
+        assert_eq!(charge.weight, 0);
+        assert_eq!(charge.orders10, 1);
+        assert_eq!(charge.orders60, 1);
+        let scoped = OpenAlgoOrders::new().symbol(Symbol::new("BTCUSD_PERP").unwrap());
+        assert_eq!(
+            cost(OpenAlgoOrders::OP, &parameters(&scoped).unwrap())
+                .unwrap()
+                .weight,
+            1
+        );
+        assert_eq!(
+            cost(OpenAlgoOrders::OP, &BTreeMap::new()).unwrap().weight,
+            40
+        );
+        assert_eq!(
+            cost(CancelAlgoOrder::OP, &BTreeMap::new()).unwrap().weight,
+            1
+        );
+        assert_eq!(cost(FundingInfo::OP, &BTreeMap::new()).unwrap().weight, 0);
+    }
     #[test]
     fn each_coinm_download_kind_has_eight_calendar_month_slots() {
         use super::super::rest_requests::{

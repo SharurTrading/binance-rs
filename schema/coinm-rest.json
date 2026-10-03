@@ -1,5 +1,5 @@
 {
-  "checked": "2026-09-27",
+  "checked": "2026-10-03",
   "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/1.0.0/schema.yaml",
   "sha256": "6c78887b0c532913942f358957742268da9762a038487a5b9c6364f6abcad90d",
   "operations": [
@@ -2083,6 +2083,65 @@
       "path": "/dapi/v1/fundingRate",
       "method": "GET",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#get-funding-rate-history-of-perpetual-futures"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "fundingInfo",
+      "x-ip-weight": 0,
+      "x-evidence": "Catalog publishes the response schema but no weight. Read-only probes 2026-10-03 (production dapi.binance.com and demo-dapi): no weight header, X-MBX-USED-WEIGHT-1M unchanged across calls (0 IP weight); live arrays also carry disclaimer and a nullable updateTime.",
+      "parameters": [],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "adjustedFundingRateCap": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "adjustedFundingRateFloor": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "lastFundingRate": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "nextFundingTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "fundingIntervalHours": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "disclaimer": {
+                      "type": "boolean"
+                    },
+                    "updateTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/dapi/v1/fundingInfo",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#get-funding-rate-info"
     },
     {
       "tags": [
@@ -7534,6 +7593,580 @@
       "path": "/dapi/v1/listenKey",
       "method": "POST",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/user-data-streams#start-user-data-stream"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "newAlgoOrder",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "x-evidence": "Integration notice C.5 names the conditional vocabulary; Authorized demo probe 2026-10-03 (demo-dapi.binance.com, issue #11): STOP_MARKET SELL accepted (HTTP 200, full acknowledgment observed); headers report one slot on X-MBX-ORDER-COUNT-10S/-1M and no IP weight (sentinel -1).",
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "properties": {
+                "algoType": {
+                  "type": "string",
+                  "enum": [
+                    "CONDITIONAL"
+                  ]
+                },
+                "symbol": {
+                  "type": "string",
+                  "x-rust-type": "crate::Symbol"
+                },
+                "side": {
+                  "type": "string",
+                  "enum": [
+                    "BUY",
+                    "SELL"
+                  ]
+                },
+                "positionSide": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "STOP",
+                    "TAKE_PROFIT",
+                    "STOP_MARKET",
+                    "TAKE_PROFIT_MARKET",
+                    "TRAILING_STOP_MARKET"
+                  ]
+                },
+                "timeInForce": {
+                  "type": "string",
+                  "enum": [
+                    "GTC",
+                    "IOC",
+                    "FOK",
+                    "GTX",
+                    "GTD"
+                  ]
+                },
+                "quantity": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "price": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "triggerPrice": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "workingType": {
+                  "type": "string",
+                  "default": "CONTRACT_PRICE",
+                  "enum": [
+                    "MARK_PRICE",
+                    "CONTRACT_PRICE"
+                  ]
+                },
+                "priceMatch": {
+                  "type": "string",
+                  "enum": [
+                    "OPPONENT",
+                    "OPPONENT_5",
+                    "OPPONENT_10",
+                    "OPPONENT_20",
+                    "QUEUE",
+                    "QUEUE_5",
+                    "QUEUE_10",
+                    "QUEUE_20"
+                  ]
+                },
+                "closePosition": {
+                  "type": "string",
+                  "enum": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "priceProtect": {
+                  "type": "string",
+                  "default": "false",
+                  "enum": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "reduceOnly": {
+                  "type": "string",
+                  "default": "false",
+                  "enum": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "activatePrice": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "callbackRate": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "clientAlgoId": {
+                  "type": "string",
+                  "x-rust-type": "crate::ClientOrderId"
+                },
+                "selfTradePreventionMode": {
+                  "type": "string",
+                  "enum": [
+                    "EXPIRE_TAKER",
+                    "EXPIRE_MAKER",
+                    "EXPIRE_BOTH",
+                    "NONE"
+                  ]
+                },
+                "goodTillDate": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "required": [
+                "algoType",
+                "symbol",
+                "side",
+                "type",
+                "timestamp"
+              ]
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "algoId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "clientAlgoId": {
+                    "type": "string",
+                    "x-rust-type": "crate::ClientOrderId"
+                  },
+                  "algoType": {
+                    "type": "string"
+                  },
+                  "orderType": {
+                    "type": "string"
+                  },
+                  "symbol": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "side": {
+                    "type": "string"
+                  },
+                  "positionSide": {
+                    "type": "string"
+                  },
+                  "timeInForce": {
+                    "type": "string"
+                  },
+                  "quantity": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "algoStatus": {
+                    "type": "string"
+                  },
+                  "triggerPrice": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "price": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "icebergQuantity": {
+                    "type": "string",
+                    "x-decimal": true,
+                    "x-decimal-unavailable": "null"
+                  },
+                  "selfTradePreventionMode": {
+                    "type": "string"
+                  },
+                  "workingType": {
+                    "type": "string"
+                  },
+                  "priceMatch": {
+                    "type": "string"
+                  },
+                  "closePosition": {
+                    "type": "boolean"
+                  },
+                  "priceProtect": {
+                    "type": "boolean"
+                  },
+                  "reduceOnly": {
+                    "type": "boolean"
+                  },
+                  "activatePrice": {
+                    "type": "string",
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
+                  },
+                  "callbackRate": {
+                    "type": "string",
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
+                  },
+                  "createTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "updateTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "triggerTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "goodTillDate": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/dapi/v1/algoOrder",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "cancelAlgoOrder",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "x-evidence": "Integration notice C.5 (cancel by algoId or clientAlgoId); Authorized demo probe 2026-10-03 (demo-dapi.binance.com, issue #11): DELETE by clientAlgoId without symbol accepted (HTTP 200, {algoId, clientAlgoId, code, msg} observed); X-MBX-USED-WEIGHT-1M increased by exactly 1.",
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "algoId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "clientAlgoId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::ClientOrderId"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "algoId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "clientAlgoId": {
+                    "type": "string",
+                    "x-rust-type": "crate::ClientOrderId"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "msg": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/dapi/v1/algoOrder",
+      "method": "DELETE",
+      "source": "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "openAlgoOrders",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-weight": "1 with a symbol; 40 without (observed 2026-10-03)",
+      "x-evidence": "Integration notice C.5; Authorized demo probe 2026-10-03 (demo-dapi.binance.com, issue #11): HTTP 200 with and without symbol; X-MBX-USED-WEIGHT-1M increased by 1 per symbol-scoped call and 40 per unscoped call; item shape observed live.",
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "algoType",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Symbol"
+          }
+        },
+        {
+          "name": "algoId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "algoId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "clientAlgoId": {
+                      "type": "string",
+                      "x-rust-type": "crate::ClientOrderId"
+                    },
+                    "algoType": {
+                      "type": "string"
+                    },
+                    "orderType": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol"
+                    },
+                    "side": {
+                      "type": "string"
+                    },
+                    "positionSide": {
+                      "type": "string"
+                    },
+                    "timeInForce": {
+                      "type": "string"
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "algoStatus": {
+                      "type": "string"
+                    },
+                    "triggerPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "price": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "icebergQuantity": {
+                      "type": "string",
+                      "x-decimal": true,
+                      "x-decimal-unavailable": "null"
+                    },
+                    "selfTradePreventionMode": {
+                      "type": "string"
+                    },
+                    "workingType": {
+                      "type": "string"
+                    },
+                    "priceMatch": {
+                      "type": "string"
+                    },
+                    "closePosition": {
+                      "type": "boolean"
+                    },
+                    "priceProtect": {
+                      "type": "boolean"
+                    },
+                    "reduceOnly": {
+                      "type": "boolean"
+                    },
+                    "activatePrice": {
+                      "type": "string",
+                      "x-decimal": true,
+                      "x-decimal-unavailable": ""
+                    },
+                    "callbackRate": {
+                      "type": "string",
+                      "x-decimal": true,
+                      "x-decimal-unavailable": ""
+                    },
+                    "createTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "updateTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "triggerTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "goodTillDate": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "actualOrderId": {
+                      "type": "string"
+                    },
+                    "actualPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "actualQty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "isActivated": {
+                      "type": "boolean"
+                    },
+                    "tpTriggerPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "tpPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "slTriggerPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "slPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "tpOrderType": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/dapi/v1/openAlgoOrders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice"
     }
   ],
   "components": {

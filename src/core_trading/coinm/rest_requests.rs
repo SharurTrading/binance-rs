@@ -1448,6 +1448,49 @@ impl Request for GetFundingRateHistoryOfPerpetualFutures {
     }
 }
 
+/// Validated request builder for [`fundingInfo`](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#get-funding-rate-info).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct FundingInfo {}
+impl FundingInfo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for FundingInfo {
+    type Response = super::rest_models::FundingInfoResponse;
+    const OP: Operation = Operation {
+        name: "fundingInfo",
+        path: "/dapi/v1/fundingInfo",
+        method: "GET",
+        security: Security::Public,
+        mutation: false,
+        weight: 0,
+        requests_per_second: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("fundingInfo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
 /// Validated request builder for [`indexPriceAndMarkPrice`](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#index-price-and-mark-price).
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct IndexPriceAndMarkPrice {
@@ -5024,6 +5067,407 @@ impl Request for StartUserDataStream {
     }
 }
 
+/// Validated request builder for [`newAlgoOrder`](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct NewAlgoOrder {
+    #[serde(rename = "algoType", skip_serializing_if = "Option::is_none")]
+    algo_type: Option<String>,
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "positionSide", skip_serializing_if = "Option::is_none")]
+    position_side: Option<String>,
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    type_value: Option<String>,
+    #[serde(rename = "timeInForce", skip_serializing_if = "Option::is_none")]
+    time_in_force: Option<String>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "price", skip_serializing_if = "Option::is_none")]
+    price: Option<Decimal>,
+    #[serde(rename = "triggerPrice", skip_serializing_if = "Option::is_none")]
+    trigger_price: Option<Decimal>,
+    #[serde(rename = "workingType", skip_serializing_if = "Option::is_none")]
+    working_type: Option<String>,
+    #[serde(rename = "priceMatch", skip_serializing_if = "Option::is_none")]
+    price_match: Option<String>,
+    #[serde(rename = "closePosition", skip_serializing_if = "Option::is_none")]
+    close_position: Option<String>,
+    #[serde(rename = "priceProtect", skip_serializing_if = "Option::is_none")]
+    price_protect: Option<String>,
+    #[serde(rename = "reduceOnly", skip_serializing_if = "Option::is_none")]
+    reduce_only: Option<String>,
+    #[serde(rename = "activatePrice", skip_serializing_if = "Option::is_none")]
+    activate_price: Option<Decimal>,
+    #[serde(rename = "callbackRate", skip_serializing_if = "Option::is_none")]
+    callback_rate: Option<Decimal>,
+    #[serde(rename = "clientAlgoId", skip_serializing_if = "Option::is_none")]
+    client_algo_id: Option<ClientOrderId>,
+    #[serde(
+        rename = "selfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    self_trade_prevention_mode: Option<String>,
+    #[serde(rename = "goodTillDate", skip_serializing_if = "Option::is_none")]
+    good_till_date: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl NewAlgoOrder {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `algoType` parameter.
+    #[must_use]
+    pub fn algo_type(mut self, value: impl Into<String>) -> Self {
+        self.algo_type = Some(value.into());
+        self
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `positionSide` parameter.
+    #[must_use]
+    pub fn position_side(mut self, value: impl Into<String>) -> Self {
+        self.position_side = Some(value.into());
+        self
+    }
+    /// Set the provider `type` parameter.
+    #[must_use]
+    pub fn type_value(mut self, value: impl Into<String>) -> Self {
+        self.type_value = Some(value.into());
+        self
+    }
+    /// Set the provider `timeInForce` parameter.
+    #[must_use]
+    pub fn time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `price` parameter.
+    #[must_use]
+    pub fn price(mut self, value: Decimal) -> Self {
+        self.price = Some(value);
+        self
+    }
+    /// Set the provider `triggerPrice` parameter.
+    #[must_use]
+    pub fn trigger_price(mut self, value: Decimal) -> Self {
+        self.trigger_price = Some(value);
+        self
+    }
+    /// Set the provider `workingType` parameter.
+    #[must_use]
+    pub fn working_type(mut self, value: impl Into<String>) -> Self {
+        self.working_type = Some(value.into());
+        self
+    }
+    /// Set the provider `priceMatch` parameter.
+    #[must_use]
+    pub fn price_match(mut self, value: impl Into<String>) -> Self {
+        self.price_match = Some(value.into());
+        self
+    }
+    /// Set the provider `closePosition` parameter.
+    #[must_use]
+    pub fn close_position(mut self, value: impl Into<String>) -> Self {
+        self.close_position = Some(value.into());
+        self
+    }
+    /// Set the provider `priceProtect` parameter.
+    #[must_use]
+    pub fn price_protect(mut self, value: impl Into<String>) -> Self {
+        self.price_protect = Some(value.into());
+        self
+    }
+    /// Set the provider `reduceOnly` parameter.
+    #[must_use]
+    pub fn reduce_only(mut self, value: impl Into<String>) -> Self {
+        self.reduce_only = Some(value.into());
+        self
+    }
+    /// Set the provider `activatePrice` parameter.
+    #[must_use]
+    pub fn activate_price(mut self, value: Decimal) -> Self {
+        self.activate_price = Some(value);
+        self
+    }
+    /// Set the provider `callbackRate` parameter.
+    #[must_use]
+    pub fn callback_rate(mut self, value: Decimal) -> Self {
+        self.callback_rate = Some(value);
+        self
+    }
+    /// Set the provider `clientAlgoId` parameter.
+    #[must_use]
+    pub fn client_algo_id(mut self, value: ClientOrderId) -> Self {
+        self.client_algo_id = Some(value);
+        self
+    }
+    /// Set the provider `selfTradePreventionMode` parameter.
+    #[must_use]
+    pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
+        self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `goodTillDate` parameter.
+    #[must_use]
+    pub fn good_till_date(mut self, value: i64) -> Self {
+        self.good_till_date = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for NewAlgoOrder {
+    type Response = super::rest_models::NewAlgoOrderResponse;
+    const OP: Operation = Operation {
+        name: "newAlgoOrder",
+        path: "/dapi/v1/algoOrder",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 0,
+        requests_per_second: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["algoType", "clientAlgoId", "side", "symbol", "type"],
+            &[
+                ("algoType", &["CONDITIONAL"]),
+                ("side", &["BUY", "SELL"]),
+                (
+                    "type",
+                    &[
+                        "STOP",
+                        "TAKE_PROFIT",
+                        "STOP_MARKET",
+                        "TAKE_PROFIT_MARKET",
+                        "TRAILING_STOP_MARKET",
+                    ],
+                ),
+                ("timeInForce", &["GTC", "IOC", "FOK", "GTX", "GTD"]),
+                ("workingType", &["MARK_PRICE", "CONTRACT_PRICE"]),
+                (
+                    "priceMatch",
+                    &[
+                        "OPPONENT",
+                        "OPPONENT_5",
+                        "OPPONENT_10",
+                        "OPPONENT_20",
+                        "QUEUE",
+                        "QUEUE_5",
+                        "QUEUE_10",
+                        "QUEUE_20",
+                    ],
+                ),
+                ("closePosition", &["true", "false"]),
+                ("priceProtect", &["true", "false"]),
+                ("reduceOnly", &["true", "false"]),
+                (
+                    "selfTradePreventionMode",
+                    &["EXPIRE_TAKER", "EXPIRE_MAKER", "EXPIRE_BOTH", "NONE"],
+                ),
+            ],
+            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
+        )?;
+        super::validation::validate("newAlgoOrder", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`cancelAlgoOrder`](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CancelAlgoOrder {
+    #[serde(rename = "algoId", skip_serializing_if = "Option::is_none")]
+    algo_id: Option<i64>,
+    #[serde(rename = "clientAlgoId", skip_serializing_if = "Option::is_none")]
+    client_algo_id: Option<ClientOrderId>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl CancelAlgoOrder {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `algoId` parameter.
+    #[must_use]
+    pub fn algo_id(mut self, value: i64) -> Self {
+        self.algo_id = Some(value);
+        self
+    }
+    /// Set the provider `clientAlgoId` parameter.
+    #[must_use]
+    pub fn client_algo_id(mut self, value: ClientOrderId) -> Self {
+        self.client_algo_id = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for CancelAlgoOrder {
+    type Response = super::rest_models::CancelAlgoOrderResponse;
+    const OP: Operation = Operation {
+        name: "cancelAlgoOrder",
+        path: "/dapi/v1/algoOrder",
+        method: "DELETE",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        requests_per_second: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[],
+            &[],
+            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
+        )?;
+        super::validation::validate("cancelAlgoOrder", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`openAlgoOrders`](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct OpenAlgoOrders {
+    #[serde(rename = "algoType", skip_serializing_if = "Option::is_none")]
+    algo_type: Option<String>,
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "algoId", skip_serializing_if = "Option::is_none")]
+    algo_id: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl OpenAlgoOrders {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `algoType` parameter.
+    #[must_use]
+    pub fn algo_type(mut self, value: impl Into<String>) -> Self {
+        self.algo_type = Some(value.into());
+        self
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `algoId` parameter.
+    #[must_use]
+    pub fn algo_id(mut self, value: i64) -> Self {
+        self.algo_id = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for OpenAlgoOrders {
+    type Response = super::rest_models::OpenAlgoOrdersResponse;
+    const OP: Operation = Operation {
+        name: "openAlgoOrders",
+        path: "/dapi/v1/openAlgoOrders",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 0,
+        requests_per_second: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[],
+            &[],
+            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
+        )?;
+        super::validation::validate("openAlgoOrders", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
 impl super::RestClient {
     /// [accountInformation](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#account-information).
     ///
@@ -5285,6 +5729,18 @@ impl super::RestClient {
         crate::Response<super::rest_models::GetFundingRateHistoryOfPerpetualFuturesResponse>,
         Error,
     > {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [fundingInfo](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#get-funding-rate-info).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn funding_info(
+        &self,
+        request: &FundingInfo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::FundingInfoResponse>, Error> {
         self.inner.execute(request, deadline).await
     }
 
@@ -5810,6 +6266,42 @@ impl super::RestClient {
         request: &StartUserDataStream,
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::rest_models::StartUserDataStreamResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [newAlgoOrder](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn new_algo_order(
+        &self,
+        request: &NewAlgoOrder,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::NewAlgoOrderResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [cancelAlgoOrder](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn cancel_algo_order(
+        &self,
+        request: &CancelAlgoOrder,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::CancelAlgoOrderResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [openAlgoOrders](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn open_algo_orders(
+        &self,
+        request: &OpenAlgoOrders,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::OpenAlgoOrdersResponse>, Error> {
         self.inner.execute(request, deadline).await
     }
 }

@@ -115,12 +115,16 @@ heartbeat intervals; unclean closure also retains component exclusion. Native
 LimitResponse count/max/interval evidence constrains future sends. Counter floors
 are held for a full observed interval instead of guessing its reset origin.
 
-FIX market subscriptions reserve the documented 1000-stream allowance. The current
-contract does not specify successful unsubscribe acknowledgment: uncertain slots
-remain reserved through generation retirement, and an unambiguous subscribe
-rejection can release its reservation. This limitation remains tracked in
-[issue #11](https://github.com/SharurTrading/binance-rs/issues/11); a successful socket
-write is insufficient evidence to erase an active venue subscription.
+FIX market subscriptions reserve the documented 1000-stream allowance. The venue
+contract defines no success acknowledgment for an unsubscribe - only a
+`MarketDataRequestReject <Y>` for an invalid request - so confirmation is defined
+by operator policy ([issue #11](https://github.com/SharurTrading/binance-rs/issues/11)):
+**an unsubscribe written without error is treated as confirmed removal, and the
+inference belongs to consuming clients.** The library therefore releases the
+subscription slot on a clean write, the freed identity is immediately reusable,
+and a late `<Y>` for the released identity is still delivered as ordinary message
+evidence (the consuming client re-evaluates; the venue may still stream until it
+acts). A write that fails releases nothing.
 
 The caller spawns/runs `SessionDriver::run`, requests shutdown, drains through
 `Retired`, and joins its task. Dispatch and ingress ownership are separate. No
@@ -139,9 +143,9 @@ servicing and joined teardown. Private controlled-time tests reproduce queued
 expiration/cancellation, heartbeat probes, observed quota floors and delayed leases.
 These tests establish their named invariants, not exhaustive venue conformance.
 
-[Issue #11](https://github.com/SharurTrading/binance-rs/issues/11) remains open for
-COIN-M algo request/response/quota contracts and funding-info quota evidence, plus
-the FIX unsubscribe evidence limitation above. The current official catalogs do
-not supply the missing COIN-M admission facts. Those endpoints are not exposed with
-guessed quotas or USDⓈ-M assumptions. Execution/credential changes require human
+The COIN-M algo request/response/quota contracts and the funding-info quota that
+[issue #11](https://github.com/SharurTrading/binance-rs/issues/11) originally
+tracked are pinned from the integration notice plus the operator-authorized demo
+probe; the FIX unsubscribe question is closed by the operator's confirmation
+policy above. Execution/credential changes require human
 review. `publish = false` remains; no release or live trading is authorized.

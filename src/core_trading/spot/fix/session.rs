@@ -265,6 +265,13 @@ impl Session {
     /// cannot cancel a venue order. No failure causes a retry or reconnect.
     /// Reusing a wire client ID is permitted; the separate local ID must be unique.
     ///
+    /// For a market-data unsubscribe, a clean write confirms removal by operator
+    /// policy: the venue documents no success acknowledgment, only a
+    /// `MarketDataRequestReject <Y>` for invalid requests. The subscription slot
+    /// is released and its `MDReqID` becomes reusable; consuming clients own the
+    /// no-reject inference, and a late `<Y>` for the released identity is still
+    /// delivered as ordinary message evidence.
+    ///
     /// # Errors
     /// Retains IDs and `NotSent` versus `Unknown`/`ReadFailed` evidence in `SendFailure`.
     pub async fn send(&self, id: RequestId, request: Request) -> Result<Attempt, SendFailure> {
@@ -705,6 +712,7 @@ impl SessionDriver {
         self.attempts.insert(id.as_str().into(), evidence.clone());
         match self.write(&bytes, true).await {
             Ok(()) => {
+                self.release_subscription(&request);
                 let _ = reply.send(Ok(evidence));
                 Ok(())
             }
@@ -802,8 +810,12 @@ impl SessionDriver {
         {
             return Err(Error::Validation("FIX documented 1000 stream limit"));
         }
-        // Unsubscribe has no documented acknowledgment contract: retain uncertain slots
-        // until a definitive subscription rejection or generation retirement (#11).
+        // Unsubscribe confirmation contract: the venue defines no success
+        // acknowledgment for 263=2, only a MarketDataRequestReject <Y> for
+        // invalid requests. Operator policy (issue #11) treats a cleanly
+        // written unsubscribe as confirmed removal - the inference belongs to
+        // consuming clients - so a written unsubscribe releases its slot and
+        // a late <Y> for the released identity remains delivered evidence.
         Ok(())
     }
     fn reserve_subscription(&mut self, request: &Request) -> Result<(), Error> {
@@ -831,6 +843,20 @@ impl SessionDriver {
             .collect::<Result<BTreeSet<_>, _>>()?;
         self.subscriptions.insert(id, streams);
         Ok(())
+    }
+    /// Release a subscription slot after its unsubscribe was written without
+    /// error. Removal is confirmed by the absence of a `<Y>` rejection per the
+    /// documented operator policy; a late rejection is still delivered as an
+    /// event and its identity becomes reusable only through this release.
+    fn release_subscription(&mut self, request: &Request) {
+        if request.kind != super::RequestKind::MarketData
+            || request.fields.get("SubscriptionRequestType") != Some(&Value::Code("2".into()))
+        {
+            return;
+        }
+        if let Some(id) = request.identities().get("MDReqID").cloned() {
+            self.subscriptions.remove(&id);
+        }
     }
     fn timer(&self) -> Result<Instant, Error> {
         if !self.authenticated {

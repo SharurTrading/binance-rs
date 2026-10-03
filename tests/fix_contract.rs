@@ -678,3 +678,149 @@ async fn both_binary_session_modes_authenticate_and_logout_without_invented_head
         server.await.unwrap();
     }
 }
+
+/// An unsubscribe releases its subscription slot once written without error:
+/// the venue documents no success acknowledgment, and the operator's policy
+/// (issue #11) is that consuming clients may treat the absence of a
+/// `MarketDataRequestReject` as confirmation. A late reject for the released
+/// identity must still arrive as observable evidence.
+#[tokio::test]
+async fn an_unsubscribe_releases_its_slot_and_a_late_reject_stays_observable() {
+    use binance_client::{
+        BudgetLimits, Budgets, Credentials, RequestId, Symbol,
+        spot::fix::{
+            AccountBudgets, ClientId, CompId, Config, Event, Fields, Request, RequestKind, Session,
+            Value,
+        },
+    };
+    use tokio::{net::TcpListener, sync::mpsc};
+
+    fn market(subscription: &str, id: &str) -> Request {
+        let symbols = Fields::new(Role::MarketData)
+            .with("Symbol", Value::Symbol(Symbol::new("BTCUSDT").unwrap()))
+            .unwrap();
+        let entries = Fields::new(Role::MarketData)
+            .with("MDEntryType", Value::Code("0".into()))
+            .unwrap();
+        Request::builder(Role::MarketData, RequestKind::MarketData)
+            .field("MDReqID", Value::ClientId(ClientId::new(id).unwrap()))
+            .unwrap()
+            .field("SubscriptionRequestType", Value::Code(subscription.into()))
+            .unwrap()
+            .field("MarketDepth", Value::Integer(1))
+            .unwrap()
+            .field("NoRelatedSym", Value::Group(vec![symbols]))
+            .unwrap()
+            .field("NoMDEntryTypes", Value::Group(vec![entries]))
+            .unwrap()
+            .build()
+            .unwrap()
+    }
+
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let address = format!("tcp://{}", listener.local_addr().unwrap());
+    let (sent_tx, mut sent_rx) = mpsc::channel::<bool>(8);
+    let server = tokio::spawn(unsubscribe_release_peer(sent_tx, listener));
+    let config = Config::new(
+        Role::MarketData,
+        CompId::new("CLIENT").unwrap(),
+        Credentials::external_ed25519("synthetic-key", std::sync::Arc::new(FixedSigner)).unwrap(),
+        AccountBudgets::new(Budgets::new(BudgetLimits::spot()).unwrap()),
+    )
+    .unwrap()
+    .endpoint(&address)
+    .unwrap()
+    .heartbeat(5)
+    .unwrap();
+    let (session, mut events, driver) = Session::connect(config).await.unwrap();
+    let owner = tokio::spawn(driver.run());
+    assert!(matches!(
+        events.recv().await,
+        Some(Event::Established { .. })
+    ));
+    session
+        .send(
+            RequestId::new("subscribe-1").unwrap(),
+            market("1", "market-1"),
+        )
+        .await
+        .unwrap();
+    session
+        .send(
+            RequestId::new("unsubscribe-1").unwrap(),
+            market("2", "market-1"),
+        )
+        .await
+        .unwrap();
+    // The freed identity is immediately reusable for a new subscription.
+    session
+        .send(
+            RequestId::new("subscribe-2").unwrap(),
+            market("1", "market-1"),
+        )
+        .await
+        .unwrap();
+    let mut rejected = false;
+    let mut retired = false;
+    while let Some(event) = events.recv().await {
+        match event {
+            Event::Message { message, .. } if message.kind.as_str() == "Y" => {
+                assert!(
+                    matches!(message.field("MDReqID"), Some(Value::ClientId(v)) if v.as_str()=="market-1")
+                );
+                rejected = true;
+            }
+            Event::Retired(_) => retired = true,
+            _ => (),
+        }
+    }
+    assert!(rejected && retired);
+    owner.await.unwrap().unwrap();
+    server.await.unwrap();
+    assert!(sent_rx.recv().await.unwrap());
+    assert!(sent_rx.recv().await.unwrap());
+    assert!(sent_rx.recv().await.unwrap());
+}
+
+/// Synthetic FIX market-data peer: acknowledges Logon, reads subscribe,
+/// unsubscribe and a re-subscribe reusing the freed identity, then delivers a
+/// late `MarketDataRequestReject` for it before retiring the connection.
+async fn unsubscribe_release_peer(
+    sent_tx: tokio::sync::mpsc::Sender<bool>,
+    listener: tokio::net::TcpListener,
+) {
+    use tokio::io::AsyncWriteExt;
+    let (mut stream, _) = listener.accept().await.unwrap();
+    let logon = decode(Role::MarketData, &read_fix(&mut stream).await).unwrap();
+    assert_eq!(logon.kind.as_str(), "A");
+    stream
+        .write_all(&frame(
+            "35=A|34=1|49=SPOT|56=CLIENT|52=20261003-01:02:03.000001|98=0|108=5|25037=synthetic-server|",
+        ))
+        .await
+        .unwrap();
+    for expected in ["1", "2", "1"] {
+        let request = decode(Role::MarketData, &read_fix(&mut stream).await).unwrap();
+        assert_eq!(request.kind.as_str(), "V");
+        assert_eq!(
+            request.field("SubscriptionRequestType"),
+            Some(&Value::Code(expected.into()))
+        );
+        sent_tx
+            .send(
+                request
+                    .field("MDReqID")
+                    .is_some_and(|v| matches!(v, Value::ClientId(id) if id.as_str() == "market-1")),
+            )
+            .await
+            .unwrap();
+    }
+    // A late rejection for the released identity remains deliverable.
+    stream
+        .write_all(&frame(
+            "35=Y|34=2|49=SPOT|56=CLIENT|52=20261003-01:02:03.000002|262=market-1|281=0|58=synthetic-late-reject|",
+        ))
+        .await
+        .unwrap();
+    stream.shutdown().await.unwrap();
+}

@@ -147,8 +147,10 @@ no counter movement, verified read-only on production and demo). All four are
 pinned in `schema/coinm-rest.json` with their evidence, regenerated into
 validated builders, and regression-tested against the observed wire payloads.
 Standard COIN-M order builders still refuse migrated conditional types before
-sending. The remaining #11 blocker is FIX unsubscribe acknowledgment evidence,
-which requires Ed25519 credentials the current probes do not hold.
+sending. The former FIX unsubscribe blocker is resolved by operator policy: the
+venue defines no success acknowledgment, so a cleanly written unsubscribe is
+treated as confirmed removal (the inference belongs to consuming clients) and
+releases its slot, with late rejections still delivered as evidence.
 [FIX/SBE protocols](core-protocols.md)
 now have separate native implementations and deterministic fixtures.
 [Listen tokens](https://developers.binance.com/en/docs/products/margin-trading/listen-token-data-stream)

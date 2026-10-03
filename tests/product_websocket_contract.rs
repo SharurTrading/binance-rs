@@ -9,7 +9,7 @@
     reason = "local fixture assertions"
 )]
 
-use binance_client::{Credentials, Decimal, Error, Outcome, RequestId, Symbol, coinm, spot};
+use binance_client::{Credentials, Decimal, Error, Outcome, RequestId, Symbol, coinm, spot, usdm};
 use futures_util::{SinkExt, StreamExt};
 use serde_json::{Value, json};
 use std::time::Duration;
@@ -301,6 +301,177 @@ async fn coinm_market_stream_uses_plain_combined_path_and_joins_retirement() {
     );
     events.close().await.unwrap();
     assert!(matches!(events.recv().await,Some(coinm::StreamEvent::Retired(g)) if g==generation));
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+#[tokio::test]
+async fn usdm_unknown_stream_name_is_retained_and_keeps_the_generation_alive() {
+    let (l, url) = listener().await;
+    let server = tokio::spawn(async move {
+        let (stream, _) = l.accept().await.unwrap();
+        let (request, mut peer) = ServerBuilder::new().accept(stream).await.unwrap();
+        assert_eq!(request.uri().path(), "/public/stream");
+        // A known subscribed stream, a future venue stream name, then the known
+        // stream again: every frame is delivered in source order on one socket.
+        peer.send(Message::text(json!({"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":1,"T":1,"s":"BTCUSDT","U":1,"u":2,"pu":0,"b":[],"a":[]}}).to_string())).await.unwrap();
+        peer.send(Message::text(
+            json!({"stream":"btcusdt@futureStream@1s","data":{"e":"futureEvent","x":42}})
+                .to_string(),
+        ))
+        .await
+        .unwrap();
+        peer.send(Message::text(json!({"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":2,"T":2,"s":"BTCUSDT","U":3,"u":3,"pu":2,"b":[],"a":[]}}).to_string())).await.unwrap();
+        finish(peer).await;
+    });
+    let config = usdm::Config::new(usdm::Environment::Demo)
+        .unwrap()
+        .streams_url(&url)
+        .unwrap();
+    let stream =
+        usdm::Stream::diff_book_depth_streams(&Symbol::new("BTCUSDT").unwrap(), "100ms").unwrap();
+    let (mut events, driver) = usdm::Streams::connect(config, &[stream]).await.unwrap();
+    let driver = tokio::spawn(driver.run());
+    let generation = events.generation();
+    assert!(matches!(events.recv().await,Some(usdm::StreamEvent::Established(g)) if g==generation));
+    match events.recv().await.unwrap() {
+        usdm::StreamEvent::Data {
+            generation: g,
+            payload:
+                usdm::streams::StreamPayload::Market {
+                    stream,
+                    payload: usdm::event_payloads::MarketPayload::DiffBookDepthStreams(_),
+                },
+        } => {
+            assert_eq!(g, generation);
+            assert_eq!(stream, "btcusdt@depth@100ms");
+        }
+        other => panic!("unexpected event {other:?}"),
+    }
+    // An unrecognized stream name stays observable evidence on a live socket:
+    // retained as an unknown payload, not a continuity gap or teardown.
+    match events.recv().await.unwrap() {
+        usdm::StreamEvent::Data {
+            generation: g,
+            payload:
+                usdm::streams::StreamPayload::Market {
+                    stream,
+                    payload: usdm::event_payloads::MarketPayload::Unknown(value),
+                },
+        } => {
+            assert_eq!(g, generation);
+            assert_eq!(stream, "btcusdt@futureStream@1s");
+            assert_eq!(value.as_value().get("x").and_then(Value::as_i64), Some(42));
+        }
+        other => panic!("unexpected event {other:?}"),
+    }
+    assert!(
+        matches!(events.recv().await,Some(usdm::StreamEvent::Data{generation:g,..}) if g==generation)
+    );
+    events.close().await.unwrap();
+    assert!(matches!(events.recv().await,Some(usdm::StreamEvent::Retired(g)) if g==generation));
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+#[tokio::test]
+async fn coinm_unknown_stream_name_is_retained_and_keeps_the_generation_alive() {
+    let (l, url) = listener().await;
+    let server = tokio::spawn(async move {
+        let (stream, _) = l.accept().await.unwrap();
+        let (request, mut peer) = ServerBuilder::new().accept(stream).await.unwrap();
+        assert_eq!(request.uri().path(), "/stream");
+        peer.send(Message::text(
+            json!({"stream":"btcusd_perp@futureStream@1s","data":{"e":"futureEvent","x":7}})
+                .to_string(),
+        ))
+        .await
+        .unwrap();
+        peer.send(Message::text(json!({"stream":"btcusd_perp@depth@100ms","data":{"e":"depthUpdate","E":1,"T":1,"s":"BTCUSD_PERP","U":1,"u":2,"pu":0,"b":[],"a":[]}}).to_string())).await.unwrap();
+        finish(peer).await;
+    });
+    let config = coinm::Config::new(coinm::Environment::Demo)
+        .unwrap()
+        .streams_url(&url)
+        .unwrap();
+    let stream =
+        coinm::Stream::diff_book_depth_streams(&Symbol::new("BTCUSD_PERP").unwrap(), "100ms")
+            .unwrap();
+    let (mut events, driver) = coinm::Streams::connect(config, &[stream]).await.unwrap();
+    let driver = tokio::spawn(driver.run());
+    let generation = events.generation();
+    assert!(
+        matches!(events.recv().await,Some(coinm::StreamEvent::Established(g)) if g==generation)
+    );
+    match events.recv().await.unwrap() {
+        coinm::StreamEvent::Data {
+            generation: g,
+            payload:
+                coinm::streams::StreamPayload::Market {
+                    stream,
+                    payload: coinm::event_payloads::MarketPayload::Unknown(value),
+                },
+        } => {
+            assert_eq!(g, generation);
+            assert_eq!(stream, "btcusd_perp@futureStream@1s");
+            assert_eq!(value.as_value().get("x").and_then(Value::as_i64), Some(7));
+        }
+        other => panic!("unexpected event {other:?}"),
+    }
+    // The same socket keeps delivering known payloads in source order.
+    assert!(
+        matches!(events.recv().await,Some(coinm::StreamEvent::Data{generation:g,payload:coinm::streams::StreamPayload::Market{payload:coinm::event_payloads::MarketPayload::DiffBookDepthStreams(_),..}}) if g==generation)
+    );
+    events.close().await.unwrap();
+    assert!(matches!(events.recv().await,Some(coinm::StreamEvent::Retired(g)) if g==generation));
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+#[tokio::test]
+async fn spot_unknown_stream_name_is_retained_and_keeps_the_generation_alive() {
+    let (l, url) = listener().await;
+    let server = tokio::spawn(async move {
+        let (stream, _) = l.accept().await.unwrap();
+        let (request, mut peer) = ServerBuilder::new().accept(stream).await.unwrap();
+        assert_eq!(request.uri().path(), "/stream");
+        peer.send(Message::text(
+            json!({"stream":"btcusdt@futureStream@100ms","data":{"x":"retained"}}).to_string(),
+        ))
+        .await
+        .unwrap();
+        peer.send(Message::text(json!({"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":1,"s":"BTCUSDT","U":1,"u":2,"b":[["1","2"]],"a":[]}}).to_string())).await.unwrap();
+        finish(peer).await;
+    });
+    let config = spot::Config::new(spot::Environment::Demo)
+        .unwrap()
+        .streams_url(&url)
+        .unwrap();
+    let stream = spot::Stream::diff_book_depth(&Symbol::new("BTCUSDT").unwrap(), "100ms").unwrap();
+    let (mut events, driver) = spot::Streams::connect(config, &[stream]).await.unwrap();
+    let driver = tokio::spawn(driver.run());
+    let generation = events.generation();
+    assert!(matches!(events.recv().await,Some(spot::StreamEvent::Established(g)) if g==generation));
+    match events.recv().await.unwrap() {
+        spot::StreamEvent::Data {
+            generation: g,
+            payload:
+                spot::streams::StreamPayload::Market {
+                    stream,
+                    payload: spot::event_payloads::MarketPayload::Unknown(value),
+                },
+        } => {
+            assert_eq!(g, generation);
+            assert_eq!(stream, "btcusdt@futureStream@100ms");
+            assert_eq!(
+                value.as_value().get("x").and_then(Value::as_str),
+                Some("retained")
+            );
+        }
+        other => panic!("unexpected event {other:?}"),
+    }
+    assert!(
+        matches!(events.recv().await,Some(spot::StreamEvent::Data{generation:g,..}) if g==generation)
+    );
+    events.close().await.unwrap();
+    assert!(matches!(events.recv().await,Some(spot::StreamEvent::Retired(g)) if g==generation));
     driver.await.unwrap().unwrap();
     server.await.unwrap();
 }

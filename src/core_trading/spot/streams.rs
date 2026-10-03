@@ -106,6 +106,10 @@ impl Streams {
                     connections: 1,
                     ..Default::default()
                 },
+                // Documented raw-stream connection duty cycle: "WebSocket
+                // connections have a limit of 5 incoming messages per second"
+                // (Spot WebSocket Market Streams, General WSS Information;
+                // verified 2026-10-03).
                 ping_limit: 5,
                 time_unit: config.time_unit,
                 binary_decoder: None,
@@ -158,6 +162,13 @@ impl Streams {
                                 stream: name.to_owned(),
                                 payload,
                             }),
+                        // A stream name this build did not subscribe or model is
+                        // retained evidence on a live socket, not a continuity
+                        // break; only a malformed envelope of a known kind gaps.
+                        (Some(name), None, Some(data)) => Ok(StreamPayload::Market {
+                            stream: name.to_owned(),
+                            payload: MarketPayload::Unknown(data.clone().into()),
+                        }),
                         _ => Err(Error::Gap("unexpected combined stream envelope")),
                     }
                 };

@@ -29,7 +29,10 @@ HTTP status, venue code, and quota evidence. Transfer endpoints without a caller
 ID retain their native venue transaction identity; uncertain results require
 venue history reads. Every mutation is attempted once, including after truncated
 bodies, timeout, 5xx, and decode failure. Read-only POST queries report `ReadFailed`.
-Unknown codes and every 5xx remain ambiguous for mutations. Sensitive addresses,
+Definitive request refusals are pinned in `schema/wallet-error-codes.json`
+against the product's documented error-code page and machine-checked in CI;
+unknown codes, undocumented codes (including the retired `-1002`), and every 5xx
+remain ambiguous for mutations. Sensitive addresses,
 tags, questionnaires, personal data, and unknown fields have redacted Debug.
 Callers explicitly access provider data; the client never logs raw bodies.
 

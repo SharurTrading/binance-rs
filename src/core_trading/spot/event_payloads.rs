@@ -404,6 +404,9 @@ pub enum MarketPayload {
     Trade(Box<super::stream_models::TradeEvent>),
     /// `BlockTrade` events.
     BlockTrade(Box<super::stream_models::BlockTradeEvent>),
+    /// A future stream name or kind this build does not model, preserved
+    /// with redacted Debug for explicit consumer handling.
+    Unknown(UnknownMessage),
 }
 
 pub(crate) fn market_payload(kind: &str, value: Value) -> Result<MarketPayload, Error> {
@@ -442,7 +445,9 @@ pub(crate) fn market_payload(kind: &str, value: Value) -> Result<MarketPayload, 
         "blockTrade" => {
             serde_json::from_value(value).map(|v| MarketPayload::BlockTrade(Box::new(v)))
         }
-        _ => return Err(Error::Gap("unrecognized subscribed stream")),
+        // An unrecognized stream kind is retained evidence, not a continuity
+        // break; `Error::Gap` is reserved for malformed payloads of known kinds.
+        _ => return Ok(MarketPayload::Unknown(value.into())),
     }
     .map_err(|_| Error::Gap("malformed market payload"))
 }

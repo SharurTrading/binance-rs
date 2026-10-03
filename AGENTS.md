@@ -149,8 +149,8 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
   invent a model name or present agent judgment as the account owner's statement.
 - **BN-CI-01:** Every PR and main push runs formatting, strict Clippy, public/private
   tests, doctests, rustdoc, package verification, Markdown, SPDX, dependency/license/
-  advisory checks, and a full-history secret scan. Rust tests run on Linux, macOS,
-  and Windows. No credentialed CI, automated publishing, or trading operations.
+  advisory checks, and a full-history secret scan. Rust tests run on Linux.
+  No credentialed CI, automated publishing, or trading operations.
 
 ## Release gate
 

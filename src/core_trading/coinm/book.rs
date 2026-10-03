@@ -35,6 +35,7 @@ pub struct DepthBook {
     last: i64,
     bridging: bool,
     have_snapshot: bool,
+    gap_discarded: usize,
 }
 impl DepthBook {
     /// Begin collecting updates from one symbol and socket generation.
@@ -50,12 +51,22 @@ impl DepthBook {
             last: 0,
             bridging: true,
             have_snapshot: false,
+            gap_discarded: 0,
         }
     }
     /// Current continuity evidence, independent of event age.
     #[must_use]
     pub fn state(&self) -> BookState {
         self.state
+    }
+    /// Accepted updates discarded when the most recent continuity break was
+    /// detected during a bootstrap drain: the update whose IDs disproved
+    /// continuity plus every buffered update never applied after it. They are
+    /// provably unbridgeable against a later snapshot. Zero until a break
+    /// occurs; a snapshot that restores continuity clears it.
+    #[must_use]
+    pub fn discarded_pending_updates(&self) -> usize {
+        self.gap_discarded
     }
     /// This mirror cannot claim complete venue depth beyond its finite snapshot.
     #[must_use]
@@ -132,8 +143,12 @@ impl DepthBook {
                 .ok_or(Error::Gap("snapshot asks"))?,
         )?;
         while let Some(event) = self.pending.pop_front() {
-            self.apply(&event)?;
+            if let Err(error) = self.apply(&event) {
+                self.gap_discarded = 1 + self.pending.len();
+                return Err(error);
+            }
         }
+        self.gap_discarded = 0;
         self.state = if self.bridging {
             BookState::AwaitingSnapshot
         } else {

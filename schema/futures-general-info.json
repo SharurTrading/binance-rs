@@ -1,0 +1,33 @@
+{
+  "source": [
+    "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/general-info",
+    "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/general-info"
+  ],
+  "verified": "2026-10-03",
+  "http_return_codes": {
+    "5xx_rule": "HTTP 5XX return codes are used for internal errors; the issue is on Binance's side. If there is an error message \"Request occur unknown error.\", please retry later.",
+    "503_variants": [
+      {
+        "msg": "Unknown error, please check your request or try again later.",
+        "documented_outcome": "execution-unknown",
+        "quote": "the API successfully sent the request but not get a response within the timeout period. It is important to NOT treat this as a failure operation; the execution status is UNKNOWN and could have been a success"
+      },
+      {
+        "msg": "Service Unavailable.",
+        "documented_outcome": "failure",
+        "quote": "it means this is a failure API operation and the service might be unavailable at the moment, you need to retry later"
+      },
+      {
+        "msg": "Internal error; unable to process your request. Please try again.",
+        "documented_outcome": "failure",
+        "quote": "it means this is a failure API operation and you can resend your request if you need"
+      },
+      {
+        "code": -1008,
+        "msg": "Request throttled by system-level protection. Reduce-only/close-position orders are exempt. Please try again.",
+        "documented_outcome": "failure",
+        "quote": "This indicates the node has exceeded its maximum concurrency and is temporarily throttled. Close-position, reduce-only, and cancel orders are exempt and will not receive this error."
+      }
+    ]
+  }
+}

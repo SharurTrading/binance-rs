@@ -186,7 +186,7 @@ That validation endpoint does not submit to the matching engine.
 
 See [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), and
 [SECURITY.md](SECURITY.md). CI runs deterministic fault tests, strict Rust checks on
-Linux/macOS/Windows, generated-binding freshness, documentation, packaging,
+Linux, generated-binding freshness, documentation, packaging,
 licenses/advisories, and full-history secret scanning. No credentialed CI or publishing.
 
 The [CI workflow](.github/workflows/ci.yml) checks Binance's official Spot changelog
@@ -201,7 +201,7 @@ can return empty responses to scripted reads. Update `last_reviewed` through a P
 only after reviewing the protocol changes. Date-only comparison cannot distinguish
 multiple edits made on the same day. The weekly schedule becomes active after
 merging into `main`. The read-only freshness job uses public network access;
-the checker tests use offline fixtures on Linux, macOS, and Windows.
+the checker tests use offline fixtures.
 
 Read-only demo probes are ignored by default and require explicit invocation:
 

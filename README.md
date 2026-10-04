@@ -141,11 +141,17 @@ ambient HTTP proxies are ignored. Explicit HTTP proxies are supported; WebSocket
 proxies are not. Sensitive strings and credentials redact `Debug`; callers must
 not log explicit secret access or account payloads.
 
-REST uses fresh HTTP/1 connections to eliminate Hyper's independent retry path on
-reused connections, as well as disabling reqwest retries and redirects. This costs
-connection setup per REST call; use the persistent WebSocket API for latency-sensitive
-operations. Reqwest owns its internal HTTP transport machinery on the caller's
-runtime; caller-owned, joinable drivers govern all client WebSocket lifecycles.
+Every REST request opens a fresh HTTP/1 connection, and reqwest retries and
+redirects are disabled. Why not reuse connections? Hyper (the HTTP layer under
+reqwest) silently resends a request when a reused pooled connection turns out
+to be dead, and a resent order request is a duplicate order. reqwest exposes
+no switch to turn that off, so a fresh connection per request is the only way
+to guarantee one call sends at most one request; every failure is reported to
+the caller instead. The connection-setup cost is fine for configuration,
+queries, and recovery reads; use the persistent WebSocket API for
+latency-sensitive trading. Reqwest owns its internal HTTP transport machinery
+on the caller's runtime; caller-owned, joinable drivers govern all client
+WebSocket lifecycles.
 
 ## Budgets
 

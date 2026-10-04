@@ -203,7 +203,11 @@ async fn unrepresentable_retry_timing_keeps_the_acknowledgment() {
         matches!(refused, Err(binance_client::Error::Admission { .. })),
         "a wider cooldown must refuse the next send, got {refused:?}"
     );
-    assert_eq!(fixture.attempts(), 1, "the refusal never reached the wire");
+    assert_eq!(
+        fixture.connections_accepted(),
+        1,
+        "the refusal never reached the wire"
+    );
     fixture.finish().await;
 }
 
@@ -235,7 +239,7 @@ async fn malformed_http_retry_timing_keeps_the_answer_and_refuses_future_sends()
                 .await,
             Err(Error::CooldownTimingUnknown)
         ));
-        assert_eq!(fixture.attempts(), 1);
+        assert_eq!(fixture.connections_accepted(), 1);
         fixture.finish().await;
     }
 }

@@ -54,7 +54,7 @@ async fn cancel_replace_409_retains_success_and_rejection_without_retry() {
     assert_eq!(partial.legs["newOrder"].code, Some(-2010));
     assert_eq!(e.client_order_ids["cancelOrigClientOrderId"], "old");
     assert_eq!(e.rates.counters["x-mbx-used-weight-1m"], 9);
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }
 
@@ -67,7 +67,7 @@ async fn truncated_replace_is_unknown_and_never_retried() {
         .await
         .unwrap_err();
     assert_eq!(e.outcome(), Some(Outcome::Unknown));
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }
 
@@ -128,7 +128,7 @@ async fn malformed_financial_evidence_cannot_prove_an_accepted_leg() {
         .await
         .unwrap_err();
     assert_eq!(e.outcome(), Some(Outcome::Unknown));
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }
 
@@ -146,7 +146,7 @@ async fn future_leg_codes_never_imply_definitive_rejection() {
         panic!("venue evidence")
     };
     assert_eq!(e.partial.unwrap().legs["newOrder"].code, Some(-999_999));
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }
 
@@ -191,6 +191,6 @@ async fn oco_reserves_two_order_slots_shared_by_client_clones() {
         c.clone().order_list_oco(&r, deadline()).await,
         Err(Error::Admission { .. })
     ));
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }

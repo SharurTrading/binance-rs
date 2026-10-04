@@ -41,6 +41,27 @@ pub struct HttpFixture {
     stop: CancellationToken,
     task: JoinHandle<()>,
 }
+/// Transport race injected by [`HttpFixture::keep_alive`]. Exists for the
+/// HTTP contract binary only, but `support` compiles into every test binary.
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+pub enum KeepAliveFault {
+    /// The n-th request is read in full, then the connection closes without
+    /// responding: the venue may have acted, and the answer is lost.
+    LostAcknowledgement(usize),
+    /// The connection closes after the n-th response, while it sits pooled
+    /// and idle: the next dispatch lands on a connection the client does not
+    /// yet know is dead.
+    StaleIdle(usize),
+}
+/// Per-connection serving policy shared by both fixture constructors.
+#[derive(Clone, Copy)]
+enum Policy {
+    /// One request per connection; each response carries `Connection: close`.
+    Close { hold: bool },
+    /// Keep-alive responses with optional fault injection.
+    KeepAlive { fault: Option<KeepAliveFault> },
+}
 impl HttpFixture {
     pub async fn new(
         status: u16,
@@ -49,60 +70,37 @@ impl HttpFixture {
         length: Option<usize>,
         hold: bool,
     ) -> Self {
-        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let url = format!("http://{}", listener.local_addr().unwrap());
-        let bytes=format!("HTTP/1.1 {status} fixture\r\nConnection: close\r\nContent-Length: {}\r\n{headers}\r\n{body}",length.unwrap_or(body.len())).into_bytes();
-        let count = Arc::new(AtomicUsize::new(0));
-        let counter = count.clone();
-        let stop = CancellationToken::new();
-        let cancel = stop.clone();
-        let (tx, requests) = mpsc::unbounded_channel();
-        let task = tokio::spawn(async move {
-            loop {
-                let accepted = tokio::select! {()=cancel.cancelled()=>break,result=listener.accept()=>result.unwrap()};
-                let (mut stream, _) = accepted;
-                counter.fetch_add(1, Ordering::SeqCst);
-                let request = tokio::select! {()=cancel.cancelled()=>break,result=read_request(&mut stream)=>result};
-                tx.send(request).unwrap();
-                stream.write_all(&bytes).await.unwrap();
-                if hold {
-                    cancel.cancelled().await;
-                    break;
-                }
-            }
-        });
-        Self {
-            url,
-            requests,
-            count,
-            stop,
-            task,
-        }
-    }
-    pub fn attempts(&self) -> usize {
-        self.count.load(Ordering::SeqCst)
+        let bytes = format!(
+            "HTTP/1.1 {status} fixture\r\nConnection: close\r\nContent-Length: {}\r\n{headers}\r\n{body}",
+            length.unwrap_or(body.len())
+        )
+        .into_bytes();
+        Self::spawn(bytes, Policy::Close { hold }).await
     }
     /// Keep-alive fixture: responses omit `Connection: close`, so the client
-    /// pools the connection and later calls reuse it. When `close_after` is
-    /// `Some(n)`, the n-th request is read in full and then closed without a
-    /// response (a lost acknowledgment), and the listener keeps accepting so a
-    /// speculative resend would be observable as a new attempt.
-    // `support` compiles into every test binary; only the HTTP contract
-    // binary exercises this constructor.
+    /// pools the connection and later calls reuse it. [`KeepAliveFault`]
+    /// injects the transport races the contract tests pin, and the listener
+    /// keeps accepting in both cases, so a speculative extra send is
+    /// observable as another accepted connection. This constructor exists
+    /// for the HTTP contract binary only, but `support` compiles into every
+    /// test binary.
     #[allow(dead_code)]
     pub async fn keep_alive(
         status: u16,
         headers: &str,
         body: &str,
-        close_after: Option<usize>,
+        fault: Option<KeepAliveFault>,
     ) -> Self {
-        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let url = format!("http://{}", listener.local_addr().unwrap());
         let bytes = format!(
             "HTTP/1.1 {status} fixture\r\nContent-Length: {}\r\n{headers}\r\n{body}",
             body.len()
         )
         .into_bytes();
+        Self::spawn(bytes, Policy::KeepAlive { fault }).await
+    }
+    async fn spawn(bytes: Vec<u8>, policy: Policy) -> Self {
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}", listener.local_addr().unwrap());
         let count = Arc::new(AtomicUsize::new(0));
         let counter = count.clone();
         let stop = CancellationToken::new();
@@ -114,14 +112,29 @@ impl HttpFixture {
                 let accepted = tokio::select! {()=cancel.cancelled()=>break,result=listener.accept()=>result.unwrap()};
                 let (mut stream, _) = accepted;
                 counter.fetch_add(1, Ordering::SeqCst);
-                loop {
-                    let request = tokio::select! {()=cancel.cancelled()=>break,result=read_request(&mut stream)=>result};
-                    tx.send(request).unwrap();
-                    served += 1;
-                    if close_after == Some(served) {
-                        break;
+                match policy {
+                    Policy::Close { hold } => {
+                        let request = tokio::select! {()=cancel.cancelled()=>break,result=read_request(&mut stream)=>result};
+                        tx.send(request).unwrap();
+                        stream.write_all(&bytes).await.unwrap();
+                        if hold {
+                            cancel.cancelled().await;
+                            break;
+                        }
                     }
-                    stream.write_all(&bytes).await.unwrap();
+                    Policy::KeepAlive { fault } => loop {
+                        let request = tokio::select! {()=cancel.cancelled()=>break,result=read_request(&mut stream)=>result};
+                        tx.send(request).unwrap();
+                        served += 1;
+                        if matches!(fault, Some(KeepAliveFault::LostAcknowledgement(n)) if n == served)
+                        {
+                            break;
+                        }
+                        stream.write_all(&bytes).await.unwrap();
+                        if matches!(fault, Some(KeepAliveFault::StaleIdle(n)) if n == served) {
+                            break;
+                        }
+                    },
                 }
             }
         });
@@ -132,6 +145,11 @@ impl HttpFixture {
             stop,
             task,
         }
+    }
+    /// Accepted TCP connections — not requests sent: with keep-alive pooling,
+    /// one connection can carry many requests.
+    pub fn connections_accepted(&self) -> usize {
+        self.count.load(Ordering::SeqCst)
     }
     pub async fn finish(self) {
         self.stop.cancel();

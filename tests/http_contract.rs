@@ -21,7 +21,7 @@ use std::{
 #[cfg(test)]
 mod tests {
     use super::*;
-    use support::{HttpFixture, config, deadline};
+    use support::{HttpFixture, KeepAliveFault, config, deadline};
 
     fn order() -> NewOrder {
         NewOrder::new()
@@ -70,7 +70,7 @@ mod tests {
                 text
             });
         assert_eq!(signature, expected);
-        assert_eq!(fixture.attempts(), 1);
+        assert_eq!(fixture.connections_accepted(), 1);
         fixture.finish().await;
     }
 
@@ -101,7 +101,7 @@ mod tests {
             client.new_order(&order(), deadline()).await,
             Err(Error::Admission { .. })
         ));
-        assert_eq!(fixture.attempts(), 1);
+        assert_eq!(fixture.connections_accepted(), 1);
         fixture.finish().await;
     }
 
@@ -123,7 +123,7 @@ mod tests {
         .await
         .expect("body must honor per-attempt timeout");
         assert_eq!(result.unwrap_err().outcome(), Some(Outcome::Unknown));
-        assert_eq!(fixture.attempts(), 1);
+        assert_eq!(fixture.connections_accepted(), 1);
         fixture.finish().await;
     }
 
@@ -138,7 +138,7 @@ mod tests {
         assert!(first.starts_with("POST /fapi/v1/order"));
         assert!(second.starts_with("DELETE /fapi/v1/order"));
         assert_eq!(
-            fixture.attempts(),
+            fixture.connections_accepted(),
             1,
             "calls must share the pooled connection"
         );
@@ -147,30 +147,84 @@ mod tests {
     #[tokio::test]
     async fn lost_acknowledgment_on_reused_connection_is_visible_and_never_resent() {
         // Drift pin for the pooled-transport safety argument: hyper may only
-        // resend a request that never started on the wire. A request the
-        // venue received (server read it fully, then closed without
-        // responding) must surface as a visible unknown outcome exactly once,
-        // with no second wire attempt on a fresh connection.
-        let mut fixture = HttpFixture::keep_alive(200, "", "{\"orderId\":7}", Some(2)).await;
+        // resend a request that never reached the connection's encoder. A
+        // request the venue received (server read it fully, then closed
+        // without responding) must surface as a visible unknown outcome
+        // exactly once, with no response metadata and no second wire attempt
+        // on a fresh connection.
+        let mut fixture = HttpFixture::keep_alive(
+            200,
+            "",
+            "{\"orderId\":7}",
+            Some(KeepAliveFault::LostAcknowledgement(2)),
+        )
+        .await;
         let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
         client.new_order(&order(), deadline()).await.unwrap();
         let error = client
             .cancel_order(&cancel(), deadline())
             .await
             .unwrap_err();
-        assert_eq!(error.outcome(), Some(Outcome::Unknown));
+        let Error::Transport {
+            client_order_ids,
+            outcome,
+            meta,
+            ..
+        } = error
+        else {
+            panic!("a lost acknowledgment must surface as a transport failure");
+        };
+        assert_eq!(outcome, Outcome::Unknown);
+        assert!(
+            meta.is_none(),
+            "a lost acknowledgment must carry no response metadata"
+        );
+        assert_eq!(
+            client_order_ids["origClientOrderId"], "fixture/order:1",
+            "the caller's order identity must survive for the venue read"
+        );
         let first = fixture.requests.recv().await.unwrap();
         let second = fixture.requests.recv().await.unwrap();
         assert!(first.starts_with("POST /fapi/v1/order"));
         assert!(second.starts_with("DELETE /fapi/v1/order"));
         assert_eq!(
-            fixture.attempts(),
+            fixture.connections_accepted(),
             1,
             "a lost acknowledgment must not redial"
         );
         assert!(
             fixture.requests.try_recv().is_err(),
             "no resend may follow a lost acknowledgment"
+        );
+        fixture.finish().await;
+    }
+    #[tokio::test]
+    async fn stale_idle_connection_redials_once_and_delivers_the_request_exactly_once() {
+        // Complementary drift pin: a pooled connection closed while idle is
+        // redialed transparently and the caller sees an ordinary success, but
+        // the venue must observe exactly one delivery — never a duplicate.
+        let mut fixture = HttpFixture::keep_alive(
+            200,
+            "",
+            "{\"orderId\":7}",
+            Some(KeepAliveFault::StaleIdle(1)),
+        )
+        .await;
+        let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        client.new_order(&order(), deadline()).await.unwrap();
+        client.cancel_order(&cancel(), deadline()).await.unwrap();
+        let first = fixture.requests.recv().await.unwrap();
+        let second = fixture.requests.recv().await.unwrap();
+        assert!(first.starts_with("POST /fapi/v1/order"));
+        assert!(second.starts_with("DELETE /fapi/v1/order"));
+        assert_eq!(
+            fixture.connections_accepted(),
+            2,
+            "the stale idle connection must be replaced by exactly one redial"
+        );
+        assert!(
+            fixture.requests.try_recv().is_err(),
+            "no duplicate delivery may follow a redial"
         );
         fixture.finish().await;
     }
@@ -202,7 +256,7 @@ mod tests {
             let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
             let error = client.new_order(&order(), deadline()).await.unwrap_err();
             assert_eq!(error.outcome(), Some(expected), "variant {message}");
-            assert_eq!(fixture.attempts(), 1);
+            assert_eq!(fixture.connections_accepted(), 1);
             fixture.finish().await;
         }
         // A 503 body without a documented definitive message or code stays
@@ -216,7 +270,7 @@ mod tests {
             let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
             let error = client.new_order(&order(), deadline()).await.unwrap_err();
             assert_eq!(error.outcome(), Some(Outcome::Unknown));
-            assert_eq!(fixture.attempts(), 1);
+            assert_eq!(fixture.connections_accepted(), 1);
             fixture.finish().await;
         }
     }
@@ -248,7 +302,7 @@ mod tests {
             let debug = format!("{error:?}");
             assert!(!debug.contains("synthetic-api-key"));
             assert!(!debug.contains("synthetic-secret"));
-            assert_eq!(fixture.attempts(), 1);
+            assert_eq!(fixture.connections_accepted(), 1);
             fixture.finish().await;
         }
     }
@@ -295,7 +349,7 @@ mod tests {
                 .await,
             Err(Error::Admission { .. })
         ));
-        assert_eq!(fixture.attempts(), 1);
+        assert_eq!(fixture.connections_accepted(), 1);
         fixture.finish().await;
     }
 
@@ -319,7 +373,7 @@ mod tests {
                 .outcome(),
             Some(Outcome::NotSent)
         );
-        assert_eq!(fixture.attempts(), 0);
+        assert_eq!(fixture.connections_accepted(), 0);
         fixture.finish().await;
     }
 
@@ -403,12 +457,12 @@ mod tests {
                 .outcome(),
             Some(Outcome::NotSent)
         );
-        assert_eq!(fixture.attempts(), 0);
+        assert_eq!(fixture.connections_accepted(), 0);
         client
             .new_order(&request.good_till_date(1_700_000_602_000), deadline())
             .await
             .unwrap();
-        assert_eq!(fixture.attempts(), 1);
+        assert_eq!(fixture.connections_accepted(), 1);
         fixture.finish().await;
     }
 

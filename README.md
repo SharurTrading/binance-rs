@@ -144,13 +144,17 @@ not log explicit secret access or account payloads.
 REST reuses pooled HTTP/1.1 connections (keep-alive), so repeated reads and the
 reconcile path skip per-call connection setup; use the persistent WebSocket API
 for latency-sensitive trading. What if a pooled connection dies? Hyper re-sends
-only a request that never started on the wire — one still queued when the
-connection died, which the venue never saw — so a resend cannot duplicate an
-order; any request that did reach the venue fails loudly as a typed error the
-caller resolves with venue reads. Reqwest retries and redirects stay disabled,
-and a contract test pins these send semantics against dependency drift. Reqwest
-owns its internal HTTP transport machinery on the caller's runtime;
-caller-owned, joinable drivers govern all client WebSocket lifecycles.
+a request only when it was never handed to the connection's encoder — not even
+a partial write reached the venue — so a resend cannot duplicate an order; any
+request the venue did receive fails loudly as a typed error the caller resolves
+with venue reads. One caller-visible consequence: a call that lands on a dead
+idle connection is transparently redialed, so a single call can consume two
+connections while the venue sees one delivery. Reqwest retries and redirects
+stay disabled, and contract tests pin both directions — a venue-received
+request is never resent, and a stale-idle redial delivers exactly once —
+against dependency drift. Reqwest owns its internal HTTP transport machinery on
+the caller's runtime; caller-owned, joinable drivers govern all client
+WebSocket lifecycles.
 
 ## Budgets
 

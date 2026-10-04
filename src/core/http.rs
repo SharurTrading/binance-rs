@@ -35,13 +35,24 @@ impl HttpClient {
             .no_proxy()
             .redirect(reqwest::redirect::Policy::none())
             .retry(reqwest::retry::never())
-            // Pooled keep-alive is safe on the pinned hyper: the engine-level
-            // resend covers only a request that never started on the wire
-            // (still queued when its pooled connection died), while any
-            // request that reached the venue fails visibly. The send
-            // semantics are pinned by http_contract against dependency drift.
+            // Pooled keep-alive safety, named for the code that enforces it.
+            // hyper-util's resend loop (legacy client; `retry_canceled_requests`
+            // defaults to true, gated on `connection_reused`) re-sends only a
+            // request that hyper returned unstarted: never handed to the
+            // connection's encoder, so not even a partial write reached the
+            // venue. Venue-visible invariant: a mutation is delivered to the
+            // venue at most once; a failure before the first byte reaches the
+            // socket may be re-delivered transparently, and the venue cannot
+            // observe the first attempt. A request the venue received fails
+            // visibly. http_contract pins both directions against drift.
             .http1_only()
+            // Restates reqwest's default retention window, kept explicit where
+            // the previous policy overrode its sibling; venue-side idle closes
+            // are governed by the semantics above, not by this timeout. The
+            // per-host idle ceiling is a resource bound for sequential
+            // reconcile reads, not a correctness limit.
             .pool_idle_timeout(Duration::from_secs(90))
+            .pool_max_idle_per_host(4)
             .timeout(timeout)
             .connection_verbose(false);
         if let Some(proxy) = proxy {

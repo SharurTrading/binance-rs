@@ -96,7 +96,7 @@ async fn authority_expiring_during_admission_prevents_send() {
     .unwrap();
     let error = client.accept_quote(&request, deadline()).await.unwrap_err();
     assert_eq!(error.outcome(), Some(Outcome::NotSent));
-    assert_eq!(fixture.attempts(), 0);
+    assert_eq!(fixture.connections_accepted(), 0);
     fixture.finish().await;
 }
 #[tokio::test]
@@ -127,7 +127,7 @@ async fn truncated_acceptance_retains_quote_id_and_never_retries() {
         client.clone().accept_quote(&request, deadline()).await,
         Err(Error::Admission { .. })
     ));
-    assert_eq!(fixture.attempts(), 1);
+    assert_eq!(fixture.connections_accepted(), 1);
     fixture.finish().await;
 }
 #[tokio::test]
@@ -233,7 +233,7 @@ async fn documented_rejection_unknown_codes_and_5xx_are_distinct() {
         let error = client.accept_quote(&request, deadline()).await.unwrap_err();
         assert_eq!(error.outcome(), Some(outcome));
         assert!(!format!("{error:?}").contains("synthetic-private-diagnostic"));
-        assert_eq!(fixture.attempts(), 1);
+        assert_eq!(fixture.connections_accepted(), 1);
         fixture.finish().await;
     }
 }
@@ -269,7 +269,7 @@ async fn definitive_codes_match_the_pinned_error_code_snapshot() {
                 convert::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
             let error = client.accept_quote(&request, deadline()).await.unwrap_err();
             assert_eq!(error.outcome(), Some(expected), "code {code}");
-            assert_eq!(fixture.attempts(), 1);
+            assert_eq!(fixture.connections_accepted(), 1);
             fixture.finish().await;
         }
     }
@@ -321,7 +321,7 @@ async fn sapi_ip_ban_blocks_other_endpoints_and_account_owners() {
     assert!(
         matches!(error,Error::Admission{retry_after} if retry_after==std::time::Duration::from_secs(30))
     );
-    assert_eq!(fixture.attempts(), 1);
+    assert_eq!(fixture.connections_accepted(), 1);
     fixture.finish().await;
 }
 
@@ -351,7 +351,7 @@ async fn uncertain_limit_cancellation_retains_native_order_identity() {
         panic!("transport")
     };
     assert_eq!(client_order_ids["orderId"], "123");
-    assert_eq!(fixture.attempts(), 1);
+    assert_eq!(fixture.connections_accepted(), 1);
     fixture.finish().await;
 }
 
@@ -383,6 +383,6 @@ async fn ban_without_retry_timing_does_not_fabricate_permission_to_send() {
         .await
         .unwrap_err();
     assert_eq!(error.outcome(), Some(Outcome::NotSent));
-    assert_eq!(fixture.attempts(), 1);
+    assert_eq!(fixture.connections_accepted(), 1);
     fixture.finish().await;
 }

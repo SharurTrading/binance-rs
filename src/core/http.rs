@@ -35,10 +35,13 @@ impl HttpClient {
             .no_proxy()
             .redirect(reqwest::redirect::Policy::none())
             .retry(reqwest::retry::never())
-            // Hyper may retry an unstarted request on a reused connection independently
-            // of reqwest policy. Fresh HTTP/1 connections eliminate that retry path.
+            // Pooled keep-alive is safe on the pinned hyper: the engine-level
+            // resend covers only a request that never started on the wire
+            // (still queued when its pooled connection died), while any
+            // request that reached the venue fails visibly. The send
+            // semantics are pinned by http_contract against dependency drift.
             .http1_only()
-            .pool_max_idle_per_host(0)
+            .pool_idle_timeout(Duration::from_secs(90))
             .timeout(timeout)
             .connection_verbose(false);
         if let Some(proxy) = proxy {

@@ -128,6 +128,54 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn sequential_calls_reuse_one_keep_alive_connection() {
+        let mut fixture = HttpFixture::keep_alive(200, "", "{\"orderId\":7}", None).await;
+        let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        client.new_order(&order(), deadline()).await.unwrap();
+        client.cancel_order(&cancel(), deadline()).await.unwrap();
+        let first = fixture.requests.recv().await.unwrap();
+        let second = fixture.requests.recv().await.unwrap();
+        assert!(first.starts_with("POST /fapi/v1/order"));
+        assert!(second.starts_with("DELETE /fapi/v1/order"));
+        assert_eq!(
+            fixture.attempts(),
+            1,
+            "calls must share the pooled connection"
+        );
+        fixture.finish().await;
+    }
+    #[tokio::test]
+    async fn lost_acknowledgment_on_reused_connection_is_visible_and_never_resent() {
+        // Drift pin for the pooled-transport safety argument: hyper may only
+        // resend a request that never started on the wire. A request the
+        // venue received (server read it fully, then closed without
+        // responding) must surface as a visible unknown outcome exactly once,
+        // with no second wire attempt on a fresh connection.
+        let mut fixture = HttpFixture::keep_alive(200, "", "{\"orderId\":7}", Some(2)).await;
+        let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        client.new_order(&order(), deadline()).await.unwrap();
+        let error = client
+            .cancel_order(&cancel(), deadline())
+            .await
+            .unwrap_err();
+        assert_eq!(error.outcome(), Some(Outcome::Unknown));
+        let first = fixture.requests.recv().await.unwrap();
+        let second = fixture.requests.recv().await.unwrap();
+        assert!(first.starts_with("POST /fapi/v1/order"));
+        assert!(second.starts_with("DELETE /fapi/v1/order"));
+        assert_eq!(
+            fixture.attempts(),
+            1,
+            "a lost acknowledgment must not redial"
+        );
+        assert!(
+            fixture.requests.try_recv().is_err(),
+            "no resend may follow a lost acknowledgment"
+        );
+        fixture.finish().await;
+    }
+
+    #[tokio::test]
     async fn futures_503_classification_matches_the_pinned_general_info_snapshot() {
         // Machine-checks schema/futures-general-info.json: every documented 503
         // variant must classify exactly as its pinned documented outcome, so

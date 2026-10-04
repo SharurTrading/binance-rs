@@ -82,6 +82,57 @@ impl HttpFixture {
     pub fn attempts(&self) -> usize {
         self.count.load(Ordering::SeqCst)
     }
+    /// Keep-alive fixture: responses omit `Connection: close`, so the client
+    /// pools the connection and later calls reuse it. When `close_after` is
+    /// `Some(n)`, the n-th request is read in full and then closed without a
+    /// response (a lost acknowledgment), and the listener keeps accepting so a
+    /// speculative resend would be observable as a new attempt.
+    // `support` compiles into every test binary; only the HTTP contract
+    // binary exercises this constructor.
+    #[allow(dead_code)]
+    pub async fn keep_alive(
+        status: u16,
+        headers: &str,
+        body: &str,
+        close_after: Option<usize>,
+    ) -> Self {
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}", listener.local_addr().unwrap());
+        let bytes = format!(
+            "HTTP/1.1 {status} fixture\r\nContent-Length: {}\r\n{headers}\r\n{body}",
+            body.len()
+        )
+        .into_bytes();
+        let count = Arc::new(AtomicUsize::new(0));
+        let counter = count.clone();
+        let stop = CancellationToken::new();
+        let cancel = stop.clone();
+        let (tx, requests) = mpsc::unbounded_channel();
+        let task = tokio::spawn(async move {
+            let mut served = 0;
+            loop {
+                let accepted = tokio::select! {()=cancel.cancelled()=>break,result=listener.accept()=>result.unwrap()};
+                let (mut stream, _) = accepted;
+                counter.fetch_add(1, Ordering::SeqCst);
+                loop {
+                    let request = tokio::select! {()=cancel.cancelled()=>break,result=read_request(&mut stream)=>result};
+                    tx.send(request).unwrap();
+                    served += 1;
+                    if close_after == Some(served) {
+                        break;
+                    }
+                    stream.write_all(&bytes).await.unwrap();
+                }
+            }
+        });
+        Self {
+            url,
+            requests,
+            count,
+            stop,
+            task,
+        }
+    }
     pub async fn finish(self) {
         self.stop.cancel();
         self.task.await.unwrap();

@@ -105,7 +105,7 @@ async fn endpoint_weight_headers_survive_truncated_withdrawal_without_retry() {
         client.clone().withdraw(&request, deadline()).await,
         Err(Error::Admission { .. })
     ));
-    assert_eq!(fixture.attempts(), 1);
+    assert_eq!(fixture.connections_accepted(), 1);
     fixture.finish().await;
 }
 #[tokio::test]
@@ -140,7 +140,7 @@ async fn definitive_codes_match_the_pinned_error_code_snapshot() {
             let client = wallet::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
             let error = client.withdraw(&request, deadline()).await.unwrap_err();
             assert_eq!(error.outcome(), Some(expected), "code {code}");
-            assert_eq!(fixture.attempts(), 1);
+            assert_eq!(fixture.connections_accepted(), 1);
             fixture.finish().await;
         }
     }
@@ -183,7 +183,7 @@ async fn withdraw_history_per_second_cap_is_derived_from_the_pinned_interval() {
         .unwrap_err();
     assert_eq!(error.outcome(), Some(Outcome::NotSent));
     assert!(matches!(error, Error::Admission { .. }));
-    assert_eq!(fixture.attempts(), 10);
+    assert_eq!(fixture.connections_accepted(), 10);
     // One documented second alone is not enough: the endpoint's 18000 weight
     // against the documented 180,000/minute UID budget holds until the minute
     // boundary passes, then admission resumes.
@@ -196,10 +196,10 @@ async fn withdraw_history_per_second_cap_is_derived_from_the_pinned_interval() {
             .outcome(),
         Some(Outcome::NotSent)
     );
-    assert_eq!(fixture.attempts(), 10);
+    assert_eq!(fixture.connections_accepted(), 10);
     clock.set(120_500);
     client.withdraw_history(&request, deadline()).await.unwrap();
-    assert_eq!(fixture.attempts(), 11);
+    assert_eq!(fixture.connections_accepted(), 11);
     fixture.finish().await;
 }
 #[tokio::test]
@@ -234,7 +234,7 @@ async fn read_post_is_read_failed_and_different_endpoint_has_own_budget() {
             .outcome(),
         Some(Outcome::ReadFailed)
     );
-    assert_eq!(fixture.attempts(), 2);
+    assert_eq!(fixture.connections_accepted(), 2);
     assert!(
         fixture
             .requests

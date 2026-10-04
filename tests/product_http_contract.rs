@@ -71,7 +71,7 @@ async fn spot_signs_percent_encoded_unicode_and_exact_quote_spend() {
             s
         });
     assert_eq!(signature, expected);
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }
 
@@ -88,7 +88,7 @@ async fn spot_5xx_cannot_borrow_futures_definitive_rejection() {
         evidence.client_order_ids["newClientOrderId"],
         "caller &/订单"
     );
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }
 
@@ -119,7 +119,7 @@ async fn spot_truncated_mutation_preserves_rate_evidence_without_retry() {
         c.new_order(&spot_order(), deadline()).await,
         Err(Error::Admission { .. })
     ));
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }
 
@@ -155,7 +155,7 @@ async fn futures_products_share_one_explicit_ip_owner() {
             .await,
         Err(Error::Admission { .. })
     ));
-    assert_eq!(f.attempts(), 2);
+    assert_eq!(f.connections_accepted(), 2);
     f.finish().await;
 }
 
@@ -187,7 +187,7 @@ async fn spot_public_metadata_requires_no_credentials_and_is_expired_before_send
         .await,
         Err(Error::Expired(_))
     ));
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }
 
@@ -218,7 +218,7 @@ async fn spot_success_refunds_weight_but_rejection_and_venue_counters_do_not() {
         if !accepts_second {
             assert!(matches!(second, Err(Error::Admission { .. })));
         }
-        assert_eq!(f.attempts(), if accepts_second { 2 } else { 1 });
+        assert_eq!(f.connections_accepted(), if accepts_second { 2 } else { 1 });
         f.finish().await;
     }
 }
@@ -259,7 +259,7 @@ async fn coinm_successful_price_match_mode_decodes_without_replaying_mutation() 
     assert_eq!(response.data.client_order_id.as_str(), "synthetic-order");
     assert_eq!(response.data.price_match.as_deref(), Some("NONE"));
     assert_eq!(response.meta.rates.counters["x-mbx-order-count-1m"], 1);
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }
 
@@ -300,6 +300,6 @@ async fn validation_only_order_decodes_zeroed_demo_placeholders_without_fabricat
         response.meta.client_order_ids["newClientOrderId"],
         "synthetic-validation"
     );
-    assert_eq!(f.attempts(), 1);
+    assert_eq!(f.connections_accepted(), 1);
     f.finish().await;
 }

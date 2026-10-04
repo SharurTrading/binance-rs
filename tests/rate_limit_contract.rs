@@ -92,7 +92,7 @@ async fn weighted_requests_use_remaining_capacity_and_reset_at_the_exact_boundar
         .order_book(&depth.limit(5), deadline())
         .await
         .unwrap();
-    assert_eq!(fixture.attempts(), 2);
+    assert_eq!(fixture.connections_accepted(), 2);
     assert!(fixture.requests.recv().await.unwrap().contains("limit=100"));
     assert!(fixture.requests.recv().await.unwrap().contains("limit=5"));
 
@@ -104,7 +104,7 @@ async fn weighted_requests_use_remaining_capacity_and_reset_at_the_exact_boundar
             .unwrap_err(),
         1,
     );
-    assert_eq!(fixture.attempts(), 2);
+    assert_eq!(fixture.connections_accepted(), 2);
     clock.set(60_000);
     for _ in 0..7 {
         client
@@ -119,7 +119,7 @@ async fn weighted_requests_use_remaining_capacity_and_reset_at_the_exact_boundar
             .unwrap_err(),
         60_000,
     );
-    assert_eq!(fixture.attempts(), 9);
+    assert_eq!(fixture.connections_accepted(), 9);
     fixture.finish().await;
 }
 
@@ -173,7 +173,7 @@ async fn concurrent_clones_and_accounts_fill_but_never_exceed_the_shared_ip_budg
         );
         assert_eq!(refused, CONTENDERS - CAPACITY);
         assert_eq!(
-            fixture.attempts(),
+            fixture.connections_accepted(),
             usize::try_from(round + 1).unwrap() * CAPACITY,
             "refused attempts must never reach the wire"
         );
@@ -223,7 +223,7 @@ async fn order_windows_allow_every_slot_without_resetting_the_longer_window_earl
         &client.new_order(&order(9), deadline()).await.unwrap_err(),
         1,
     );
-    assert_eq!(fixture.attempts(), 5);
+    assert_eq!(fixture.connections_accepted(), 5);
 
     clock.set(60_000);
     for id in 10..13 {
@@ -233,7 +233,7 @@ async fn order_windows_allow_every_slot_without_resetting_the_longer_window_earl
         &client.new_order(&order(13), deadline()).await.unwrap_err(),
         10_000,
     );
-    assert_eq!(fixture.attempts(), 8);
+    assert_eq!(fixture.connections_accepted(), 8);
     fixture.finish().await;
 }
 
@@ -271,7 +271,7 @@ async fn venue_counter_evidence_leaves_exactly_the_reported_remaining_capacity()
             .unwrap_err(),
         59_000,
     );
-    assert_eq!(fixture.attempts(), 4);
+    assert_eq!(fixture.connections_accepted(), 4);
     fixture.finish().await;
 }
 
@@ -314,7 +314,7 @@ async fn venue_cooldown_blocks_shared_clients_until_the_exact_expiry() {
             .unwrap_err(),
         1,
     );
-    assert_eq!(fixture.attempts(), 1);
+    assert_eq!(fixture.connections_accepted(), 1);
     clock.set(3000);
     // The fixture rejects again, proving that the attempt is admitted at expiry.
     assert!(matches!(
@@ -323,6 +323,6 @@ async fn venue_cooldown_blocks_shared_clients_until_the_exact_expiry() {
             .await,
         Err(Error::Venue(_))
     ));
-    assert_eq!(fixture.attempts(), 2);
+    assert_eq!(fixture.connections_accepted(), 2);
     fixture.finish().await;
 }

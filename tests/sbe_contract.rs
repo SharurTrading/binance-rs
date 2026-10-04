@@ -665,7 +665,7 @@ async fn malformed_binary_mutation_retains_ids_status_rates_and_never_retries() 
     assert_eq!(client_order_ids["newClientOrderId"], "binary-no-retry");
     assert_eq!(meta.status, 200);
     assert_eq!(meta.rates.counters["x-mbx-used-weight-1m"], 42);
-    assert_eq!(fixture.attempts(), 1);
+    assert_eq!(fixture.connections_accepted(), 1);
     fixture.finish().await;
 }
 

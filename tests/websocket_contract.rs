@@ -188,7 +188,7 @@ mod tests {
             .await,
             Err(Error::Admission { .. })
         ));
-        assert_eq!(fixture.attempts(), 2);
+        assert_eq!(fixture.connections_accepted(), 2);
         retire(&client, &mut events, driver).await;
         server.await.unwrap();
         fixture.finish().await;
@@ -254,7 +254,7 @@ mod tests {
             .unwrap_err();
         assert_eq!(error.outcome(), Some(Outcome::NotSent));
         assert!(matches!(error, Error::Admission { .. }));
-        assert_eq!(fixture.attempts(), 2);
+        assert_eq!(fixture.connections_accepted(), 2);
 
         // A distinct account has its own full order allowance under the same IP owner.
         let other = binance_client::usdm::RestClient::new(
@@ -275,7 +275,7 @@ mod tests {
                 .await,
             Err(Error::Admission { .. })
         ));
-        assert_eq!(fixture.attempts(), 6);
+        assert_eq!(fixture.connections_accepted(), 6);
         retire(&client, &mut events, driver).await;
         server.await.unwrap();
         fixture.finish().await;

@@ -1445,10 +1445,10 @@ pub struct PartialBookDepthStreamsEvent {
     #[serde(rename = "pu")]
     pub pu: i64,
     /// Exact `b` wire field.
-    #[serde(rename = "b")]
+    #[serde(rename = "b", deserialize_with = "super::wire::decimal_rows")]
     pub b: Vec<Vec<Decimal>>,
     /// Exact `a` wire field.
-    #[serde(rename = "a")]
+    #[serde(rename = "a", deserialize_with = "super::wire::decimal_rows")]
     pub a: Vec<Vec<Decimal>>,
     /// Exact `ps` wire field.
     #[serde(rename = "ps", default, skip_serializing_if = "Option::is_none")]

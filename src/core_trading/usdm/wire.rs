@@ -26,6 +26,17 @@ pub(crate) fn parse_decimal(value: &Value) -> Result<Decimal, &'static str> {
         .map_err(|_| "invalid or unrepresentable decimal")
 }
 
+pub(crate) fn decimal_rows<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<Vec<Decimal>>, D::Error> {
+    Vec::<Vec<Value>>::deserialize(d)?
+        .into_iter()
+        .map(|row| {
+            row.iter()
+                .map(|value| parse_decimal(value).map_err(serde::de::Error::custom))
+                .collect()
+        })
+        .collect()
+}
+
 pub(crate) fn decimal<'de, D: Deserializer<'de>>(d: D) -> Result<Decimal, D::Error> {
     parse_decimal(&Value::deserialize(d)?).map_err(serde::de::Error::custom)
 }

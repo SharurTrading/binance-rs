@@ -102,7 +102,9 @@ async fn main() -> Result<(), Error> {
 }
 ```
 
-Financial fields use `Decimal`, parsed without floats or silent rounding. Request
+Financial fields use `Decimal`, parsed without floats or silent rounding. Futures
+depth arrays apply the same exact parser to every price and quantity token; values
+outside Decimal coefficient or scale limits fail decoding. Request
 builders validate required/conditional inputs on `build()` and again at dispatch.
 Outgoing enum values are checked; incoming enum strings and unknown fields remain
 open to provider additions. Callers use current exchange filters to check tick,

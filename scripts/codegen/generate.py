@@ -179,6 +179,8 @@ class Models:
                 optional = key not in required
                 if not optional and t == 'Decimal':
                     serde_attr = f'#[serde(rename = {lit(key)}, deserialize_with = "super::wire::decimal")]'
+                elif not optional and t == 'Vec<Vec<Decimal>>':
+                    serde_attr = f'#[serde(rename = {lit(key)}, deserialize_with = "super::wire::decimal_rows")]'
                 elif optional and t == 'Decimal':
                     sentinel = s.get('x-decimal-unavailable')
                     decoder = {'': 'decimal_option_empty', 'null': 'decimal_option_null_string'}.get(sentinel, 'decimal_option')

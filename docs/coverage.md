@@ -60,7 +60,8 @@ interval boundaries and cooldown expiry; local fixtures count outbound attempts.
 Additional quotas cover funding, history, hourly/daily conversion, and calendar-month
 downloads. Shared-pool contracts check that clients of one venue pool and environment
 share its IP weight, that Spot and futures and demo and production never share, that a
-stated exchange information limit replaces the baseline, and that venue holds reach
+stated exchange information limit replaces the baseline, that a stated `ORDERS` limit
+binds every account owner of the pool, keyed or not, and that venue holds reach
 every client of the pool while an explicit owner stays isolated. Pool-report
 contracts check, in each market, that `pool_usage()` reports the documented limit
 until exchange information states one and the stated limit after, that its usage

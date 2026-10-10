@@ -403,11 +403,11 @@ fn a_stated_window_without_a_positive_limit_is_a_gap_and_keeps_the_previous_limi
 }
 
 #[test]
-fn only_the_counted_ip_windows_are_adopted_and_the_stricter_of_two_binds() {
+fn only_the_counted_windows_are_adopted_and_the_stricter_of_two_binds() {
     let budgets = Budgets::new(BudgetLimits::coinm()).unwrap();
     budgets
         .adopt_stated([
-            stated("ORDERS", "MINUTE", 1, Some(1)),
+            stated("ORDERS", "SECOND", 1, Some(1)),
             stated("REQUEST_WEIGHT", "SECOND", 10, Some(1)),
             stated("REQUEST_WEIGHT", "MINUTE", 1, Some(4)),
             stated("REQUEST_WEIGHT", "MINUTE", 1, Some(3)),
@@ -423,4 +423,51 @@ fn only_the_counted_ip_windows_are_adopted_and_the_stricter_of_two_binds() {
         budgets.admit(order, 0).unwrap();
     }
     assert_refused(&budgets, order, 0, 60_000);
+}
+
+#[test]
+fn a_stated_order_limit_replaces_each_order_window_and_the_stricter_of_two_binds() {
+    // Options documents no ten-second or daily order limit; a statement adds them.
+    let cases = [
+        (
+            "SECOND",
+            10,
+            Cost {
+                orders10: 1,
+                ..Cost::default()
+            },
+            10_000,
+        ),
+        (
+            "MINUTE",
+            1,
+            Cost {
+                orders60: 1,
+                ..Cost::default()
+            },
+            60_000,
+        ),
+        (
+            "DAY",
+            1,
+            Cost {
+                orders_day: 1,
+                ..Cost::default()
+            },
+            86_400_000,
+        ),
+    ];
+    for (interval, interval_num, order, window) in cases {
+        let budgets = Budgets::new(BudgetLimits::options()).unwrap();
+        budgets
+            .adopt_stated([
+                stated("ORDERS", interval, interval_num, Some(3)),
+                stated("ORDERS", interval, interval_num, Some(2)),
+            ])
+            .unwrap();
+        let account = budgets.for_account();
+        account.admit(order, 0).unwrap();
+        account.admit(order, 0).unwrap();
+        assert_refused(&account, order, 0, window);
+    }
 }

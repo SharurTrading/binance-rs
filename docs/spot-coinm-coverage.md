@@ -56,6 +56,25 @@ reference price, which decodes as `None`. Sources:
 [COIN-M contract info stream](https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-market-streams/Contract-Info-Stream)
 and [Spot reference price streams](https://developers.binance.com/en/docs/products/spot/web-socket-streams#reference-price-streams).
 
+Venue enumerations are string components in the schema facts: an `enum` list, a
+one-line summary and the `x-sources` pages that document the values. The upstream
+schemas list no values for these response fields, so each list was added from the
+cited page. `generate.py` emits each component once per product into `enums.rs` as an
+open enum (one variant per listed value, exact spelling on encode, `Unknown(String)`
+for anything else) and refuses a component defined two ways within a product. Inline
+`enum` lists stay strings that request builders check before sending. Values seen in
+replies but listed on no page decode to `Unknown` until evidence is recorded
+([#80](https://github.com/SharurTrading/binance-rs/issues/80)).
+
+| Market | Enum | Fields | Source |
+| --- | --- | --- | --- |
+| USDⓈ-M | `ContractStatus` | exchange information `status`, `!contractInfo` `cs` | [common definitions](https://developers.binance.info/docs/derivatives/usds-margined-futures/common-definition) |
+| USDⓈ-M | `ContractType` | exchange information and basis `contractType`, `!contractInfo` and continuous kline `ct` | [common definitions](https://developers.binance.info/docs/derivatives/usds-margined-futures/common-definition); `TRADIFI_PERPETUAL` from [continuous klines](https://developers.binance.info/docs/derivatives/usds-margined-futures/market-data/rest-api/Continuous-Contract-Kline-Candlestick-Data) |
+| USDⓈ-M | `FundingRateType` | funding rate history `rateType` | [funding rate history](https://developers.binance.info/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-History) |
+| COIN-M | `ContractStatus` | exchange information `contractStatus`, `!contractInfo` `cs` | [common definitions](https://developers.binance.info/docs/derivatives/coin-margined-futures/common-definition) |
+| COIN-M | `ContractType` | exchange information, basis, open interest, open interest statistics and taker volume `contractType`, `!contractInfo` and continuous kline `ct` | [common definitions](https://developers.binance.info/docs/derivatives/coin-margined-futures/common-definition) |
+| Spot | `SymbolStatus` | REST and WebSocket API exchange information `status` | [Spot enums](https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#symbol-status-status) |
+
 Authoritative behavior references:
 
 - [Spot changelog](https://developers.binance.com/en/docs/products/spot/CHANGELOG)

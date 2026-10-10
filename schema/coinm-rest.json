@@ -1425,7 +1425,7 @@
                       "x-decimal": true
                     },
                     "contractType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/ContractType"
                     },
                     "basisRate": {
                       "type": "string",
@@ -1921,7 +1921,7 @@
                           "x-rust-type": "crate::Symbol"
                         },
                         "contractType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ContractType"
                         },
                         "deliveryDate": {
                           "type": "integer",
@@ -1932,7 +1932,7 @@
                           "format": "int64"
                         },
                         "contractStatus": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ContractStatus"
                         },
                         "contractSize": {
                           "type": "integer",
@@ -3011,7 +3011,7 @@
                     "x-decimal": true
                   },
                   "contractType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/ContractType"
                   },
                   "time": {
                     "type": "integer",
@@ -3117,7 +3117,7 @@
                       "x-rust-type": "crate::Symbol"
                     },
                     "contractType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/ContractType"
                     },
                     "sumOpenInterest": {
                       "type": "string",
@@ -3805,7 +3805,7 @@
                       "x-rust-type": "crate::Symbol"
                     },
                     "contractType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/ContractType"
                     },
                     "takerBuyVol": {
                       "type": "string",
@@ -8170,6 +8170,38 @@
     }
   ],
   "components": {
-    "schemas": {}
+    "schemas": {
+      "ContractStatus": {
+        "type": "string",
+        "description": "Contract status (`contractStatus` in exchange information, `cs` on the contract info stream).",
+        "enum": [
+          "PENDING_TRADING",
+          "TRADING",
+          "PRE_DELIVERING",
+          "DELIVERING",
+          "DELIVERED",
+          "TRADING_HALT",
+          "TRADING_CANCEL_ONLY"
+        ],
+        "x-sources": [
+          "https://developers.binance.info/docs/derivatives/coin-margined-futures/common-definition"
+        ]
+      },
+      "ContractType": {
+        "type": "string",
+        "description": "Contract type (`contractType`, and `ct` on the contract info and continuous kline streams).",
+        "enum": [
+          "PERPETUAL",
+          "CURRENT_QUARTER",
+          "NEXT_QUARTER",
+          "CURRENT_QUARTER_DELIVERING",
+          "NEXT_QUARTER_DELIVERING",
+          "PERPETUAL_DELIVERING"
+        ],
+        "x-sources": [
+          "https://developers.binance.info/docs/derivatives/coin-margined-futures/common-definition"
+        ]
+      }
+    }
   }
 }

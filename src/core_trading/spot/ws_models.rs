@@ -1322,7 +1322,7 @@ pub struct ExchangeInfoResponseSymbolsItem {
     pub symbol: Option<crate::Symbol>,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<String>,
+    pub status: Option<super::enums::SymbolStatus>,
     /// Exact `baseAsset` wire field.
     #[serde(rename = "baseAsset", default, skip_serializing_if = "Option::is_none")]
     pub base_asset: Option<crate::Asset>,

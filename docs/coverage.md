@@ -31,6 +31,10 @@ conditional requirements, routing, and rate weights. Do not replace snapshots
 blindly from a generator. The hand-written transport and validation layer is part
 of the protocol implementation; regenerating DTOs alone cannot establish correctness.
 
+Contract status, contract type and the funding rate type are typed venue enums
+generated from string components in the schema facts; the values and their sources
+are listed under [venue enumerations](spot-coinm-coverage.md#provenance).
+
 ## Additional authoritative references
 
 - [General REST behavior and 503 outcomes](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/general-info)

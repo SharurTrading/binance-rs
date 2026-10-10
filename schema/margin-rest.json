@@ -4639,8 +4639,15 @@
       },
       "x-quota-conditions": {
         "with-symbol": 10,
-        "without-symbol": 40,
+        "without-symbol": "10 * trading_symbol_count",
         "scope": "IP"
+      },
+      "x-all-symbol-quota-evidence": {
+        "source": "https://developers.binance.com/legacy-docs/margin_trading/trade/Query-Margin-Account-Open-Orders",
+        "checked": "2026-10-11",
+        "request_weight_ip": 10,
+        "request_count_rule": "When all symbols are returned, the number of requests counted against the rate limiter is equal to the number of symbols currently trading on the exchange.",
+        "admission_derivation": "All-symbol charge is the documented 10 IP weight multiplied by the current native trading-symbol request count. Caller supplies expiring current venue listing authority; absence or expiry prevents dispatch."
       }
     },
     {
@@ -6514,6 +6521,11 @@
         "MARGIN_BUY": 1500,
         "AUTO_BORROW_REPAY": 1500,
         "scope": "UID"
+      },
+      "x-validation-evidence": {
+        "source": "https://developers.binance.com/legacy-docs/margin_trading/trade/Margin-Account-New-OTO",
+        "checked": "2026-10-11",
+        "pending_trailing_delta_type": "DECIMAL"
       }
     },
     {
@@ -6935,6 +6947,12 @@
         "MARGIN_BUY": 1500,
         "AUTO_BORROW_REPAY": 1500,
         "scope": "UID"
+      },
+      "x-validation-evidence": {
+        "source": "https://developers.binance.com/legacy-docs/margin_trading/trade/Margin-Account-New-OTOCO",
+        "checked": "2026-10-11",
+        "pending_trailing_delta_type": "DECIMAL",
+        "pending_below_type_required": false
       }
     },
     {

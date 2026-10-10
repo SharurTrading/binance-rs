@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-use crate::{Budgets, Clock, Credentials, Error, SystemClock};
+use crate::core::{PoolEnvironment, VenuePool};
+use crate::{Budgets, Clock, Credentials, Error, SystemClock, WeightPools};
 use std::{sync::Arc, time::Duration};
 
 /// Explicit endpoint environments; no silent production fallback.
@@ -35,26 +36,41 @@ impl std::fmt::Debug for Config {
     }
 }
 impl Config {
-    /// Select documented demo or production endpoints with caller-owned venue budgets.
-    /// Use `budget_limits` to validate Options exchange-information rate evidence;
-    /// share the same owner across clients using the same IP/account.
+    /// Select documented endpoints and the process's Options IP pool for this environment.
+    /// Independently constructed clients share IP authority, with separate account owners.
+    /// Clones share both owners; use [`Self::budgets`] to share an account explicitly.
     ///
     /// # Errors
     /// Returns a configuration error if an endpoint or venue budget is invalid.
-    pub fn new(environment: Environment, budgets: Budgets) -> Result<Self, Error> {
-        let (rest, streams) = match environment {
+    pub fn new(environment: Environment) -> Result<Self, Error> {
+        Self::with_pools(environment, WeightPools::process())
+    }
+    /// Select the Options IP pool from an explicit registry.
+    /// Clients using this registry and environment share IP evidence. Every new
+    /// configuration receives a separate account owner; its clones retain that owner.
+    /// Documented host and rate sources are pinned in `schema/options-environments.json`.
+    ///
+    /// # Errors
+    /// Returns a configuration error if endpoint validation or pool ownership fails.
+    pub fn with_pools(environment: Environment, pools: &WeightPools) -> Result<Self, Error> {
+        let (rest, streams, pool) = match environment {
             Environment::Demo => (
                 "https://demo-fapi.binance.com",
                 "wss://demo-fstream.binance.com",
+                PoolEnvironment::Demo,
             ),
-            Environment::Production => ("https://eapi.binance.com", "wss://fstream.binance.com"),
+            Environment::Production => (
+                "https://eapi.binance.com",
+                "wss://fstream.binance.com",
+                PoolEnvironment::Production,
+            ),
         };
         Ok(Self {
             rest: crate::core::validate_url(rest, false)?,
             streams: crate::core::validate_url(streams, true)?,
             credentials: None,
             clock: Arc::new(SystemClock),
-            budgets,
+            budgets: pools.draw(VenuePool::Options, pool)?,
             timeout: Duration::from_secs(10),
             proxy: None,
         })
@@ -71,7 +87,17 @@ impl Config {
         self.clock = clock;
         self
     }
-    /// Share documented IP/account budgets across HTTP and WebSocket clients.
+    /// Report this configuration's shared IP windows at its clock's current time.
+    /// Reports preserve documented or venue-stated limits and admitted usage.
+    ///
+    /// # Errors
+    /// Returns clock failure or a poisoned pool error.
+    pub fn pool_usage(&self) -> Result<crate::PoolUsage, Error> {
+        self.budgets.usage(self.clock.now_millis()?)
+    }
+    /// Replace the drawn pool with an explicit IP/account owner.
+    /// Clone this owner to share both scopes, or use [`Budgets::for_account`] to
+    /// share IP evidence with a separate account owner.
     #[must_use]
     pub fn budgets(mut self, budgets: Budgets) -> Self {
         self.budgets = budgets;
@@ -111,5 +137,39 @@ impl Config {
     pub fn http_proxy(mut self, proxy: reqwest::Proxy) -> Self {
         self.proxy = Some(proxy);
         self
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used, reason = "pinned protocol fixture assertions")]
+mod tests {
+    use super::{Config, Environment};
+    use crate::WeightPools;
+
+    #[test]
+    fn native_options_environment_hosts_match_pinned_official_evidence() {
+        let evidence: serde_json::Value =
+            serde_json::from_str(include_str!("../../../schema/options-environments.json"))
+                .unwrap();
+        for (environment, key) in [
+            (Environment::Demo, "Demo"),
+            (Environment::Production, "Production"),
+        ] {
+            let config = Config::with_pools(environment, &WeightPools::new()).unwrap();
+            let expected = &evidence["environments"][key];
+            assert_eq!(
+                config.rest.as_str().trim_end_matches('/'),
+                expected["rest"].as_str().unwrap()
+            );
+            assert_eq!(
+                config.streams.as_str().trim_end_matches('/'),
+                expected["streams"].as_str().unwrap()
+            );
+            for path in ["/public/", "/market/", "/private/"] {
+                let url = config.streams.join(path).unwrap();
+                assert_eq!(url.path(), path);
+                assert_eq!(url.host_str(), config.streams.host_str());
+            }
+        }
     }
 }

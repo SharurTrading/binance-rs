@@ -175,7 +175,7 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
   tests, doctests, rustdoc, package verification, Markdown, SPDX, dependency/license/
   advisory checks, and a full-history secret scan. Rust tests run on Linux.
   No credentialed CI, automated publishing, or trading operations.
-- **PROC_REVIEW_AGENTS** — If you are reviewing an open github PR, leave inline and outside diff comments (and a summary if needed), the type of comment should depend on if it is possible or suitable to do inline. On each comment attribute your model name in line with PROC-ATTRIB.
+- **PROC_REVIEW_AGENTS** — If you are reviewing an open github PR, leave inline and outside diff comments (and a summary if needed), the type of comment should depend on if it is possible or suitable to do inline. On each comment attribute your model name in line with BN-ATTRIBUTION-01.
 - **PROC-POST_REVIEW** Assess all inline and outside diff comments + summaries. You have final say on what is valid but all comments must be resolved before we can merge due to rulesets.
 
 ## Release gate

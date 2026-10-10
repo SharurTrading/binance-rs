@@ -35,6 +35,13 @@ pub struct RestClient {
     pub(crate) inner: crate::core::HttpClient,
 }
 impl RestClient {
+    /// Report the shared IP pool's windows at the client's current clock time.
+    ///
+    /// # Errors
+    /// Returns clock failure or a poisoned pool error.
+    pub fn pool_usage(&self) -> Result<crate::PoolUsage, crate::Error> {
+        self.inner.pool_usage()
+    }
     /// Construct without network I/O or runtime ownership.
     ///
     /// # Errors

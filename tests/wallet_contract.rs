@@ -332,42 +332,59 @@ async fn dust_receipt_retains_caller_selected_target_asset() {
 #[test]
 fn capital_and_dividend_history_ranges_match_documented_boundaries() {
     let ninety_days = 7_776_000_000;
-    assert!(
-        wallet::rest_requests::DepositHistory::new()
-            .start_time(0)
-            .end_time(ninety_days)
-            .build()
-            .is_err()
-    );
-    assert!(
-        wallet::rest_requests::DepositHistory::new()
-            .start_time(0)
-            .end_time(ninety_days - 1)
-            .build()
-            .is_ok()
-    );
-    assert!(
-        wallet::rest_requests::WithdrawHistory::new()
-            .withdraw_order_id(wallet::WithdrawalId::new("caller-history").unwrap())
-            .start_time(0)
-            .end_time(604_800_000)
-            .build()
-            .is_err()
-    );
-    assert!(
-        wallet::rest_requests::AssetDividendRecord::new()
-            .start_time(0)
-            .end_time(15_552_000_000)
-            .build()
-            .is_ok()
-    );
-    assert!(
-        wallet::rest_requests::AssetDividendRecord::new()
-            .start_time(0)
-            .end_time(15_552_000_001)
-            .build()
-            .is_err()
-    );
+    for (span, accepted) in [
+        (ninety_days - 1, true),
+        (ninety_days, false),
+        (ninety_days + 1, false),
+    ] {
+        assert_eq!(
+            wallet::rest_requests::DepositHistory::new()
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+        assert_eq!(
+            wallet::rest_requests::WithdrawHistory::new()
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+    }
+    let seven_days = 604_800_000;
+    for (span, accepted) in [
+        (seven_days - 1, true),
+        (seven_days, false),
+        (seven_days + 1, false),
+    ] {
+        assert_eq!(
+            wallet::rest_requests::WithdrawHistory::new()
+                .withdraw_order_id(wallet::WithdrawalId::new("caller-history").unwrap())
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+    }
+    let dividend_limit = 15_552_000_000;
+    for (span, accepted) in [
+        (dividend_limit - 1, true),
+        (dividend_limit, true),
+        (dividend_limit + 1, false),
+    ] {
+        assert_eq!(
+            wallet::rest_requests::AssetDividendRecord::new()
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+    }
     assert!(
         wallet::rest_requests::WithdrawHistory::new()
             .id_list((0..46).map(|n| n.to_string()).collect::<Vec<_>>().join(","))
@@ -393,44 +410,80 @@ fn snapshot_and_travel_rule_queries_enforce_their_native_history_windows() {
     let snapshot = wallet::rest_requests::DailyAccountSnapshot::new()
         .type_value("SPOT")
         .start_time(0);
-    assert!(snapshot.clone().end_time(2_591_999_999).build().is_ok());
-    assert!(snapshot.end_time(2_592_000_000).build().is_err());
-    let history = wallet::rest_requests::WithdrawHistoryV1::new().start_time(0);
-    assert!(history.clone().end_time(7_775_999_999).build().is_ok());
-    assert!(history.end_time(7_776_000_000).build().is_err());
-    assert!(
-        wallet::rest_requests::WithdrawHistoryV2::new()
-            .start_time(0)
-            .end_time(7_776_000_001)
-            .build()
-            .is_err()
-    );
+    let thirty_days = 2_592_000_000;
+    for (span, accepted) in [
+        (thirty_days - 1, true),
+        (thirty_days, false),
+        (thirty_days + 1, false),
+    ] {
+        assert_eq!(snapshot.clone().end_time(span).build().is_ok(), accepted);
+    }
+    let ninety_days = 7_776_000_000;
+    for (span, accepted) in [
+        (ninety_days - 1, true),
+        (ninety_days, false),
+        (ninety_days + 1, false),
+    ] {
+        assert_eq!(
+            wallet::rest_requests::WithdrawHistoryV1::new()
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+        assert_eq!(
+            wallet::rest_requests::WithdrawHistoryV2::new()
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+    }
 }
 
 #[test]
 fn travel_rule_deposits_and_withdrawal_ids_keep_documented_history_bounds() {
-    assert!(
-        wallet::rest_requests::DepositHistoryTravelRule::new()
-            .start_time(0)
-            .end_time(7_776_000_000)
-            .build()
-            .is_err()
-    );
-    assert!(
-        wallet::rest_requests::DepositHistoryV2::new()
-            .start_time(0)
-            .end_time(7_776_000_000)
-            .build()
-            .is_err()
-    );
-    assert!(
-        wallet::rest_requests::WithdrawHistoryV2::new()
-            .withdraw_order_id(wallet::WithdrawalId::new("caller-withdrawal").unwrap())
-            .start_time(0)
-            .end_time(604_800_000)
-            .build()
-            .is_err()
-    );
+    let ninety_days = 7_776_000_000;
+    for (span, accepted) in [
+        (ninety_days - 1, true),
+        (ninety_days, false),
+        (ninety_days + 1, false),
+    ] {
+        assert_eq!(
+            wallet::rest_requests::DepositHistoryTravelRule::new()
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+        assert_eq!(
+            wallet::rest_requests::DepositHistoryV2::new()
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+    }
+    let seven_days = 604_800_000;
+    for (span, accepted) in [
+        (seven_days - 1, true),
+        (seven_days, false),
+        (seven_days + 1, false),
+    ] {
+        assert_eq!(
+            wallet::rest_requests::WithdrawHistoryV2::new()
+                .withdraw_order_id(wallet::WithdrawalId::new("caller-withdrawal").unwrap())
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+    }
 }
 
 #[tokio::test]

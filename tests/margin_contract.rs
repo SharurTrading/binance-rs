@@ -1078,3 +1078,223 @@ fn native_margin_identities_preserve_numeric_text_and_individual_sentinel() {
     let lexical = margin::ClientOrderId::new("native margin/id:1").unwrap();
     assert_eq!(lexical.as_str(), "native margin/id:1");
 }
+
+#[test]
+fn pending_trailing_deltas_preserve_native_decimals() {
+    let delta = Decimal::new(125, 2);
+    let oto = oto()
+        .pending_type("STOP_LOSS")
+        .pending_price(Decimal::new(90, 0))
+        .pending_trailing_delta(delta)
+        .list_client_order_id(id("oto-list"))
+        .working_client_order_id(id("oto-working"))
+        .pending_client_order_id(id("oto-pending"));
+    assert!(oto.clone().build().is_ok());
+    assert_eq!(
+        serde_json::to_value(oto.clone()).unwrap()["pendingTrailingDelta"],
+        "1.25"
+    );
+    assert!(oto.pending_trailing_delta(Decimal::ZERO).build().is_err());
+    let otoco = otoco()
+        .pending_above_type("STOP_LOSS")
+        .pending_above_trailing_delta(delta)
+        .pending_below_price(Decimal::new(90, 0))
+        .pending_below_trailing_delta(delta)
+        .list_client_order_id(id("otoco-list"))
+        .working_client_order_id(id("otoco-working"))
+        .pending_above_client_order_id(id("otoco-above"))
+        .pending_below_client_order_id(id("otoco-below"));
+    assert!(otoco.clone().build().is_ok());
+    let wire = serde_json::to_value(otoco.clone()).unwrap();
+    assert_eq!(wire["pendingAboveTrailingDelta"], "1.25");
+    assert_eq!(wire["pendingBelowTrailingDelta"], "1.25");
+    assert!(
+        otoco
+            .clone()
+            .pending_above_trailing_delta(-delta)
+            .build()
+            .is_err()
+    );
+    assert!(
+        otoco
+            .pending_below_trailing_delta(Decimal::ZERO)
+            .build()
+            .is_err()
+    );
+}
+
+#[test]
+fn otoco_optional_below_type_remains_absent_without_fabrication() {
+    let request = margin::rest_requests::MarginAccountNewOtoco::new()
+        .symbol(Symbol::new("BTCUSDT").unwrap())
+        .working_type("LIMIT")
+        .working_side("BUY")
+        .working_price(Decimal::new(100, 0))
+        .working_quantity(Decimal::ONE)
+        .working_time_in_force("GTC")
+        .pending_side("SELL")
+        .pending_quantity(Decimal::ONE)
+        .pending_above_type("LIMIT_MAKER")
+        .pending_above_price(Decimal::new(120, 0))
+        .list_client_order_id(id("otoco-list"))
+        .working_client_order_id(id("otoco-working"))
+        .pending_above_client_order_id(id("otoco-above"))
+        .pending_below_client_order_id(id("otoco-below"));
+    assert!(request.clone().build().is_ok());
+    let wire = serde_json::to_value(&request).unwrap();
+    assert!(wire.get("pendingBelowType").is_none());
+    assert!(
+        request
+            .clone()
+            .pending_below_trailing_delta(Decimal::ONE)
+            .build()
+            .is_err()
+    );
+    assert!(
+        request
+            .clone()
+            .pending_below_iceberg_qty(Decimal::ONE)
+            .build()
+            .is_err()
+    );
+    assert!(
+        request
+            .pending_below_type("STOP_LOSS_LIMIT")
+            .build()
+            .is_err()
+    );
+}
+
+#[tokio::test]
+async fn all_symbol_open_orders_refuse_missing_count_authority_before_wire() {
+    let fixture = HttpFixture::new(200, "", "[]", None, false).await;
+    let client = margin::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+    let request = margin::rest_requests::QueryMarginAccountsOpenOrders::new()
+        .build()
+        .unwrap();
+    assert!(matches!(
+        client
+            .query_margin_accounts_open_orders(&request, deadline())
+            .await,
+        Err(Error::Configuration(
+            "Margin trading-symbol count authority required"
+        ))
+    ));
+    assert_eq!(fixture.connections_accepted(), 0);
+    fixture.finish().await;
+}
+
+#[test]
+fn trading_symbol_authority_validates_count_expiry_and_checked_charge() {
+    assert!(margin::TradingSymbolCount::new(0, 2000).is_err());
+    assert!(margin::TradingSymbolCount::new(50, 0).is_err());
+    assert!(margin::TradingSymbolCount::new(u64::MAX / 10 + 1, 2000).is_err());
+    let authority = margin::TradingSymbolCount::new(50, 2000).unwrap();
+    assert_eq!(authority.count(), 50);
+    assert_eq!(authority.expires_at_millis(), 2000);
+}
+
+#[tokio::test]
+async fn all_symbol_open_orders_charge_full_native_count_on_shared_ip_owner() {
+    let mut fixture = HttpFixture::new(
+        200,
+        "X-SAPI-USED-IP-WEIGHT-1M: 11550\r\n",
+        "[]",
+        None,
+        false,
+    )
+    .await;
+    let budgets = binance_client::Budgets::new(binance_client::BudgetLimits::spot()).unwrap();
+    let first = margin::RestClient::new(
+        config()
+            .budgets(budgets.clone())
+            .rest_url(&fixture.url)
+            .unwrap(),
+    )
+    .unwrap();
+    let second = margin::RestClient::new(
+        config()
+            .budgets(budgets.for_account())
+            .rest_url(&fixture.url)
+            .unwrap(),
+    )
+    .unwrap();
+    let request = margin::rest_requests::QueryMarginAccountsOpenOrders::new()
+        .trading_symbol_count(margin::TradingSymbolCount::new(50, 2000).unwrap())
+        .build()
+        .unwrap();
+    assert!(
+        first
+            .query_margin_accounts_open_orders(&request, deadline())
+            .await
+            .unwrap()
+            .data
+            .is_empty()
+    );
+    let wire = fixture.requests.recv().await.unwrap();
+    assert!(!wire.contains("trading_symbol_count"));
+    assert!(!wire.contains("tradingSymbolCount"));
+    assert!(!wire.contains("expires_at_millis"));
+    let error = second
+        .query_margin_accounts_open_orders(&request, deadline())
+        .await
+        .unwrap_err();
+    assert!(matches!(error, Error::Admission { .. }));
+    assert_eq!(error.outcome(), Some(Outcome::NotSent));
+    assert_eq!(fixture.connections_accepted(), 1);
+    // Failed admission leaves the remaining 450 weight available; a symbol query needs ten.
+    let symbol = margin::rest_requests::QueryMarginAccountsOpenOrders::new()
+        .symbol(Symbol::new("BTCUSDT").unwrap())
+        .build()
+        .unwrap();
+    assert!(
+        second
+            .query_margin_accounts_open_orders(&symbol, deadline())
+            .await
+            .unwrap()
+            .data
+            .is_empty()
+    );
+    let wire = fixture.requests.recv().await.unwrap();
+    assert!(wire.contains("symbol=BTCUSDT"));
+    assert_eq!(fixture.connections_accepted(), 2);
+    fixture.finish().await;
+}
+
+#[tokio::test]
+async fn stale_symbol_count_authority_cannot_send_before_or_after_admission() {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    struct ExpiringCountClock(AtomicUsize);
+    impl binance_client::Clock for ExpiringCountClock {
+        fn now_millis(&self) -> Result<u64, Error> {
+            Ok(if self.0.fetch_add(1, Ordering::SeqCst) < 2 {
+                1000
+            } else {
+                2000
+            })
+        }
+    }
+    let fixture = HttpFixture::new(200, "", "[]", None, false).await;
+    let request = margin::rest_requests::QueryMarginAccountsOpenOrders::new()
+        .trading_symbol_count(margin::TradingSymbolCount::new(50, 2000).unwrap())
+        .build()
+        .unwrap();
+    for clock in [
+        Arc::new(FixedClock(2000)) as Arc<dyn binance_client::Clock>,
+        Arc::new(ExpiringCountClock(AtomicUsize::new(0))),
+    ] {
+        let client =
+            margin::RestClient::new(config().clock(clock).rest_url(&fixture.url).unwrap()).unwrap();
+        let error = client
+            .query_margin_accounts_open_orders(&request, deadline())
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            error,
+            Error::Expired("queryMarginAccountsOpenOrders")
+        ));
+        assert_eq!(error.outcome(), Some(Outcome::NotSent));
+        assert_eq!(fixture.connections_accepted(), 0);
+    }
+    fixture.finish().await;
+}

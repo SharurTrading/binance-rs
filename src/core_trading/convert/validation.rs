@@ -37,6 +37,7 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
             return Err(Error::Validation("Convert order or quote identity"));
         }
         "getConvertTradeHistory" => {
+            // At most 30 days, inclusive: https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#get-convert-trade-history
             let start = p
                 .get("startTime")
                 .and_then(Value::as_i64)

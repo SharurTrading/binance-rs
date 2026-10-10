@@ -114,6 +114,8 @@ fn validate_history(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> 
         .zip(p.get("startTime").and_then(Value::as_i64))
         .and_then(|(end, start)| end.checked_sub(start));
     let limit = match op {
+        // Capital history is <90 days, or withdrawals by caller ID <7: https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital
+        // Travel Rule V2 withdrawals use the same bounds: https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-history-v2
         "depositHistory" | "withdrawHistory" | "withdrawHistoryV2" => {
             Some(if p.contains_key("withdrawOrderId") {
                 604_800_000
@@ -121,10 +123,13 @@ fn validate_history(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> 
                 7_776_000_000
             })
         }
+        // Snapshot interval is <30 days: https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#daily-account-snapshot
         "dailyAccountSnapshot" => Some(2_592_000_000),
+        // Travel Rule history is <90 days: https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule
         "depositHistoryTravelRule" | "depositHistoryV2" | "withdrawHistoryV1" => {
             Some(7_776_000_000)
         }
+        // Dividend interval is <=180 days: https://developers.binance.info/en/docs/catalog/core-trading-wallet/api/rest-api/1.0.0/schema.yaml
         "assetDividendRecord" => Some(15_552_000_000),
         _ => None,
     };

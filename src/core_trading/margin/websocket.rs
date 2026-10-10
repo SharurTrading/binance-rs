@@ -18,6 +18,9 @@ use std::{sync::Arc, time::Duration};
 /// Explicit production Margin socket endpoints and caller-owned connection budgets.
 /// The API weight/connection owner defaults to the process Spot production pool.
 /// SAPI REST has independent endpoint scopes; explicit `budgets` selects another owner.
+/// Margin uses the [same API route](https://developers.binance.com/en/docs/products/margin-trading/listen-token-data-stream);
+/// its [API limits](https://developers.binance.com/legacy-docs/binance-spot-api-docs/websocket-api/rate-limits)
+/// accumulate weight per IP across all connections and limit connections per IP.
 #[derive(Clone)]
 pub struct WsConfig {
     api: url::Url,

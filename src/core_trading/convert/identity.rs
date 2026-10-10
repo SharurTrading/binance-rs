@@ -72,6 +72,7 @@ impl<'de> Deserialize<'de> for OrderId {
 impl From<OrderId> for AcceptanceOrderId {
     /// Explicitly render an integer order identity for the native string status query.
     fn from(value: OrderId) -> Self {
+        // Validated positive i64 IDs render as nonempty ASCII digits, satisfying the text identity invariant.
         Self(value.value().to_string())
     }
 }

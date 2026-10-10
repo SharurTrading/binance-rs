@@ -97,6 +97,9 @@ fn validate_magnitudes(p: &BTreeMap<String, Value>) -> Result<(), Error> {
                 | "pendingBelowPrice"
                 | "pendingBelowStopPrice"
                 | "pendingBelowIcebergQty"
+                | "pendingTrailingDelta"
+                | "pendingAboveTrailingDelta"
+                | "pendingBelowTrailingDelta"
         ) && super::wire::parse_decimal(v).map_err(|_| Error::Validation("Margin magnitude"))?
             <= Decimal::ZERO
         {
@@ -104,14 +107,7 @@ fn validate_magnitudes(p: &BTreeMap<String, Value>) -> Result<(), Error> {
         }
         if matches!(
             k.as_str(),
-            "limit"
-                | "size"
-                | "current"
-                | "tier"
-                | "trailingDelta"
-                | "pendingTrailingDelta"
-                | "pendingAboveTrailingDelta"
-                | "pendingBelowTrailingDelta"
+            "limit" | "size" | "current" | "tier" | "trailingDelta"
         ) && v.as_i64().is_none_or(|n| n <= 0)
         {
             return Err(Error::Validation("positive Margin integer"));
@@ -203,7 +199,6 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
         }
         "marginAccountNewOtoco" => {
             order(p, "working", false)?;
-            required(p, &["pendingBelowType"])?;
             for prefix in ["pendingAbove", "pendingBelow"] {
                 let mut leg = p.clone();
                 leg.insert(
@@ -212,7 +207,15 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
                         .cloned()
                         .ok_or(Error::Validation("Margin pending quantity"))?,
                 );
-                order(&leg, prefix, false)?;
+                // The native below type is optional; absence does not authorize inventing it.
+                if p.contains_key(&format!("{prefix}Type")) {
+                    order(&leg, prefix, false)?;
+                }
+                if p.contains_key(&format!("{prefix}IcebergQty"))
+                    && text(p, &format!("{prefix}TimeInForce")) != Some("GTC")
+                {
+                    return Err(Error::Validation("Margin iceberg requires GTC"));
+                }
                 if p.contains_key(&format!("{prefix}TrailingDelta")) {
                     required(p, &[&format!("{prefix}Price")])?;
                 }

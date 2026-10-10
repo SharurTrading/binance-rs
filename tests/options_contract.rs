@@ -67,12 +67,10 @@ fn option_streams_retain_contract_and_route() {
 mod support;
 use binance_client::{BudgetLimits, Budgets, Credentials, Error, Outcome};
 fn config() -> options::Config {
-    options::Config::new(
-        options::Environment::Demo,
-        Budgets::new(BudgetLimits::usdm()).unwrap(),
-    )
-    .unwrap()
-    .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap())
+    options::Config::new(options::Environment::Demo)
+        .unwrap()
+        .budgets(Budgets::new(BudgetLimits::options()).unwrap())
+        .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap())
 }
 fn order() -> options::rest_requests::NewOrder {
     options::rest_requests::NewOrder::new()
@@ -306,7 +304,7 @@ async fn options_socket_retains_prefix_then_malformed_gap_and_joins_retirement()
 #[tokio::test]
 async fn options_clients_share_admission_and_expired_orders_never_send() {
     let fixture = support::HttpFixture::new(200, "", r#"{"serverTime":1}"#, None, false).await;
-    let budgets = Budgets::new(BudgetLimits::usdm().weight_per_minute(1)).unwrap();
+    let budgets = Budgets::new(BudgetLimits::options().weight_per_minute(1)).unwrap();
     let configured = config().budgets(budgets).rest_url(&fixture.url).unwrap();
     let first = options::RestClient::new(configured.clone()).unwrap();
     let second = options::RestClient::new(configured).unwrap();

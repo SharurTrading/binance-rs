@@ -73,6 +73,8 @@ methods, and canonical acceptance operation facts. Quote authority remains a
 handwritten validated request. Generated freshness checks these product bindings
 offline. No dependencies were added.
 
+[Convert trade history](https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#get-convert-trade-history) permits an explicit interval of at most 30 days, including exactly 2,592,000,000 milliseconds.
+
 `tests/convert_contract.rs` covers amount direction, asset provenance, exact values,
 venue expiry during admission, unsent expired authority, retained quote IDs and
 headers after truncated acceptance, no mutation retries, future statuses, native

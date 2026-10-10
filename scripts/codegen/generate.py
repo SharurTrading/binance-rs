@@ -354,6 +354,14 @@ def generate(kind):
                 enums.append('('+lit(key)+', &['+', '.join(lit(str(v)) for v in s['enum'])+'])')
             if typ=='i64' and ('minimum' in s or 'maximum' in s):
                 bounds.append('('+lit(key)+', '+format(s.get('minimum',-9223372036854775808),'_')+', '+format(s.get('maximum',9223372036854775807),'_')+')')
+        margin_open_orders = PRODUCT == 'margin' and op['operationId'] == 'queryMarginAccountsOpenOrders'
+        if margin_open_orders:
+            fields += ['    #[serde(skip)]', '    trading_symbol_count: Option<super::TradingSymbolCount>,']
+            setters += ['    /// Supply current venue trading-symbol count authority for all-symbol admission.',
+                '    /// This local authority and its expiry are never sent to Binance.',
+                '    #[must_use]', '    pub fn trading_symbol_count(mut self, value: super::TradingSymbolCount) -> Self { self.trading_symbol_count = Some(value); self }']
+        cost_fn = 'super::rate::open_orders_cost(Self::OP, &parameters(self)?, self.trading_symbol_count)' if margin_open_orders else 'super::rate::cost(Self::OP, &parameters(self)?)'
+        authority_fn = ['    fn validate_authority(&self, now: u64) -> Result<(), Error> { self.cost()?.validate_authority(Self::OP.name, now) }'] if margin_open_orders else []
         security = 'Signed' if op.get('x-signed') else 'Key' if op.get('x-security-type') in ['MARKET_DATA','USER_STREAM'] else 'Public'
         mutation = op['method']!='GET' if kind=='rest' else op['path'] in ['/order.place','/order.modify','/order.cancel','/algoOrder.place','/algoOrder.cancel','/userDataStream.start','/userDataStream.stop','/userDataStream.ping']
         if PRODUCT == 'spot' and kind == 'ws':
@@ -393,7 +401,7 @@ def generate(kind):
                 '    pub fn build(self) -> Result<Self, Error> { self.validate()?; Ok(self) }',*weight_fn,'}',
                 f'impl Request for {name} {{', f'    type Response = super::{kind}_models::{response_type};',*empty_response,
                 f'    const OP: Operation = {op_expr};',f'    fn validate(&self) -> Result<(), Error> {{ {validation} }}',
-                '    fn cost(&self) -> Result<crate::core::Cost, Error> { super::rate::cost(Self::OP, &parameters(self)?) }','}']))
+                *authority_fn, f'    fn cost(&self) -> Result<crate::core::Cost, Error> {{ {cost_fn} }}','}']))
         method=snake(op['operationId'])
         if kind=='rest':
             args=f'&self, request: &{name}, deadline: tokio::time::Instant'
@@ -403,7 +411,7 @@ def generate(kind):
             call='self.execute(request, id, deadline).await'
         return_type = f'super::{kind}_models::{response_type}'
         # Exchange information states the venue's own IP limits; its pool adopts them.
-        if kind == 'rest' and (PRODUCT, op['operationId']) in [('spot', 'exchangeInfo'), ('usdm', 'exchangeInformation'), ('coinm', 'exchangeInformation')]:
+        if kind == 'rest' and (PRODUCT, op['operationId']) in [('spot', 'exchangeInfo'), ('usdm', 'exchangeInformation'), ('coinm', 'exchangeInformation'), ('options', 'exchangeInformation')]:
             call='let response=self.inner.execute(request,deadline).await?;super::rate::adopt_stated_limits(&self.inner,&response.data)?;Ok(response)'
         if PRODUCT == 'wallet' and op['operationId'] in ['queryUserWalletBalance','dustConvert','dustConvertibleAssets']:
             context,field,wrapper = {'queryUserWalletBalance':('quote_asset','wallets','QuotedWalletBalance'), 'dustConvert':('target_asset','receipt','DustConversion'), 'dustConvertibleAssets':('target_asset','assets','ConvertibleDust')}[op['operationId']]

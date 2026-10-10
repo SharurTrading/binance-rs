@@ -78,6 +78,11 @@ rechecked immediately before sending.
 SHA-256 and check date. Provider prose/examples were excluded. The generator
 corrects sample asset keys, exact financial types, native identities and required
 receipt evidence. `schema/wallet-coverage.json` and bindings regenerate offline.
+
+[Daily snapshots](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#daily-account-snapshot) require explicit intervals strictly shorter than 30 days.
+[Capital histories](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital) and [Travel Rule histories](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule) require explicit intervals strictly shorter than 90 days; capital and V2 Travel Rule withdrawals queried by caller ID require strictly less than 7 days.
+Dividend history allows up to and including 180 days, as specified by the [official schema notes](https://developers.binance.info/en/docs/catalog/core-trading-wallet/api/rest-api/1.0.0/schema.yaml).
+
 `tests/wallet_contract.rs` covers precision, malformed/missing asset evidence,
 withdrawal caller IDs and redaction, truncated mutations without retry, quota
 headers, independent endpoints, read-only POST failure, isolated transfer symbols,

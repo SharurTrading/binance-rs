@@ -11,6 +11,8 @@ pub use identity::{
     ClientOrderId, OrderId, OrderListId, OrderListKind, OrderListKindError, PreventedMatchId,
     RecordId, TradeId, TransactionId,
 };
+mod authority;
+pub use authority::TradingSymbolCount;
 mod config;
 pub mod event_payloads;
 mod rate;

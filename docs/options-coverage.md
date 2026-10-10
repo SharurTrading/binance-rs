@@ -22,7 +22,9 @@ Protocol facts were checked on 2026-10-10 against the official
 [user-data semantics](https://developers.binance.com/en/docs/products/derivatives-trading-options/user-data-streams).
 
 Pinned source digests and normalized wire facts live in `schema/options-rest.json`,
-`schema/options-streams.json`, and `schema/options-error-codes.json`; generated
+`schema/options-streams.json`, `schema/options-error-codes.json`, and
+`schema/options-environments.json`; the latter pins current Options endpoint hosts
+and baseline limits against official HTML, checked 2026-10-11. Generated
 coverage records each operation and route in `schema/options-coverage.json`.
 Generated bindings are reproducible with `python3 scripts/codegen/generate.py`.
 Financial strings and numbers deserialize directly to exact `Decimal`, including
@@ -60,13 +62,28 @@ venue reads. Block-trade creation has no documented client-order-ID input; its
 returned matching and settlement keys remain native evidence, without inventing
 an unsupported idempotency parameter.
 
-Configuration selects explicit production (`eapi.binance.com`) or documented demo
-(`demo-fapi.binance.com`) endpoints, and requires caller-owned `Budgets`.
-`budget_limits` validates Options exchange-information rate authority, requires
-both weight and order limits, and refuses unsupported intervals. This avoids
-borrowing Futures account limits. Share a budget owner across clones and separate
-Options clients on the same IP/account. Dynamic depth and symbol-dependent costs,
-order/batch counts, response counters and cooldowns use the shared admission core.
+`Config::new(environment)` selects explicit production (`eapi.binance.com`) or
+[documented Options demo](https://developers.binance.com/en/docs/products/derivatives-trading-options/general-info#testnet-api-information)
+(`demo-fapi.binance.com`) endpoints. The same Options documentation specifies demo
+stream routes on `demo-fstream.binance.com`: `/public/`, `/market/`, and `/private/`.
+These native Options environment facts are pinned in `schema/options-environments.json`.
+
+Independent configurations share the process's Options IP pool for their environment.
+`Config::with_pools(environment, &pools)` selects an explicit `WeightPools` registry;
+Options, Futures, Spot, and SAPI pools and demo/production environments stay independent.
+The native documented baseline is
+[2,400 request weight/minute and 1,200 orders/minute](https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition).
+No ten-second order ceiling is inferred. Exchange-information reads apply stated IP
+limits to every client of the pool. `Config::pool_usage` and `RestClient::pool_usage`
+report that shared authority, admitted usage, and reset timing.
+
+Each independent configuration receives a separate account owner; clones share it.
+`Config::budgets(owner.clone())` explicitly shares both IP and account authority;
+`Budgets::for_account()` shares IP evidence while separating account scope.
+`budget_limits` validates complete Options exchange-information rate authority,
+requires both weight and order limits, and refuses unsupported intervals for an
+explicit owner. Dynamic depth and symbol-dependent costs, order/batch counts,
+response counters and cooldowns use the shared admission core.
 History authority is rechecked before dispatch. For endpoints documenting three
 months without a month-end convention, local admission refuses timestamps certainly
 older than that window and leaves the boundary day to the venue; operator
@@ -102,7 +119,9 @@ any local book construction.
 
 Credential-free public contracts cover native identity and required order inputs,
 exact and malformed decimals, batch partial evidence, partial balance identity,
-native rate authority, single-attempt body loss and error-code classification,
+native rate authority, process-wide IP sharing and explicit registry/environment
+isolation, separate and explicitly shared account ownership, documented environment
+hosts, cancellation identity member validation, single-attempt body loss and error-code classification,
 source-ordered private ingress and joined retirement, native required nested
 inputs, history admission, and native depth snapshot/update IDs and signed exact
 decimals. All network fixtures are loopback.

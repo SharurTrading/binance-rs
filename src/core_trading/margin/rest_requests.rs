@@ -2931,6 +2931,8 @@ pub struct QueryMarginAccountsOpenOrders {
     is_isolated: Option<String>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
     recv_window: Option<i64>,
+    #[serde(skip)]
+    trading_symbol_count: Option<super::TradingSymbolCount>,
 }
 impl QueryMarginAccountsOpenOrders {
     /// Start a request builder. Required inputs are checked by `build` and by dispatch.
@@ -2954,6 +2956,13 @@ impl QueryMarginAccountsOpenOrders {
     #[must_use]
     pub fn recv_window(mut self, value: i64) -> Self {
         self.recv_window = Some(value);
+        self
+    }
+    /// Supply current venue trading-symbol count authority for all-symbol admission.
+    /// This local authority and its expiry are never sent to Binance.
+    #[must_use]
+    pub fn trading_symbol_count(mut self, value: super::TradingSymbolCount) -> Self {
+        self.trading_symbol_count = Some(value);
         self
     }
     /// Validate this request before dispatch.
@@ -2991,8 +3000,11 @@ impl Request for QueryMarginAccountsOpenOrders {
         )?;
         super::validation::validate("queryMarginAccountsOpenOrders", &p)
     }
+    fn validate_authority(&self, now: u64) -> Result<(), Error> {
+        self.cost()?.validate_authority(Self::OP.name, now)
+    }
     fn cost(&self) -> Result<crate::core::Cost, Error> {
-        super::rate::cost(Self::OP, &parameters(self)?)
+        super::rate::open_orders_cost(Self::OP, &parameters(self)?, self.trading_symbol_count)
     }
 }
 

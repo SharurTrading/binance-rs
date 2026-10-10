@@ -214,8 +214,11 @@ fn validate_cancel_batch(p: &BTreeMap<String, Value>) -> Result<(), Error> {
                 .ok_or(Error::Validation("Options cancellation identities"))?;
             if values.is_empty()
                 || values.iter().any(|v| {
-                    key == "orderIds"
-                        && serde_json::from_value::<super::OrderId>(v.clone()).is_err()
+                    if key == "orderIds" {
+                        serde_json::from_value::<super::OrderId>(v.clone()).is_err()
+                    } else {
+                        serde_json::from_value::<super::ClientOrderId>(v.clone()).is_err()
+                    }
                 })
             {
                 return Err(Error::Validation("Options cancellation identities"));
@@ -324,4 +327,38 @@ fn validate_common(p: &BTreeMap<String, Value>) -> Result<(), Error> {
         return Err(Error::Validation("Options history time range"));
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::validate_cancel_batch;
+    use serde_json::json;
+    use std::collections::BTreeMap;
+
+    #[test]
+    fn cancellation_members_require_native_identity_evidence() {
+        for (key, malformed) in [
+            ("orderIds", json!("not-an-integer")),
+            ("orderIds", json!(1.5)),
+            ("orderIds", json!(null)),
+            ("clientOrderIds", json!("")),
+            ("clientOrderIds", json!("caller id")),
+            ("clientOrderIds", json!("caller\n")),
+            ("clientOrderIds", json!(5)),
+            ("clientOrderIds", json!(null)),
+        ] {
+            let members = BTreeMap::from([(key.to_owned(), json!([malformed]))]);
+            assert!(
+                validate_cancel_batch(&members).is_err(),
+                "{key}: {members:?}"
+            );
+        }
+        for (key, valid) in [
+            ("orderIds", json!([0, -1, "0007"])),
+            ("clientOrderIds", json!(["caller-1", "caller-2"])),
+        ] {
+            let members = BTreeMap::from([(key.to_owned(), valid)]);
+            assert!(validate_cancel_batch(&members).is_ok());
+        }
+    }
 }

@@ -82,8 +82,10 @@ pub struct Streams {
 impl Streams {
     /// Connect one routed market socket without spawning a task.
     ///
-    /// `streams` may be empty: the socket then carries no stream until
-    /// [`Streams::subscribe`] adds one. A socket stays on its route for life.
+    /// With an empty `streams` slice, the client omits the initial stream query
+    /// and initializes empty membership. [`Streams::subscribe`] can subsequently
+    /// send Binance's documented live subscription control messages. A socket
+    /// stays on its route for life.
     ///
     /// # Errors
     /// Refuses the private route (use [`Streams::user_data`]), a stream of another

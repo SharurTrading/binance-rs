@@ -80,6 +80,24 @@ pub fn budget_limits(
     Ok(limits)
 }
 
+/// Apply venue-stated IP limits to every Options client drawing on this pool.
+pub(crate) fn adopt_stated_limits(
+    client: &crate::core::HttpClient,
+    reply: &super::rest_models::ExchangeInformationResponse,
+) -> Result<(), Error> {
+    client.adopt_stated_limits(
+        reply
+            .rate_limits
+            .iter()
+            .map(|item| crate::core::StatedLimit {
+                kind: item.rate_limit_type.as_deref(),
+                interval: item.interval.as_deref(),
+                interval_num: item.interval_num,
+                limit: item.limit,
+            }),
+    )
+}
+
 pub(crate) fn cost(
     op: crate::core::Operation,
     p: &BTreeMap<String, serde_json::Value>,

@@ -33,7 +33,13 @@ negative membership sentinels return `OrderListKindError` carrying the unchanged
 identity; they never fabricate a normal list. Caller IDs
 preserve caller-selected spelling; the Margin catalog defines no Futures grammar.
 OTO working/pending quantities and sides remain
-caller-selected; stop/limit/iceberg conditions retain the documented contract. No decimal passes through a float;
+caller-selected; stop/limit/iceberg conditions retain the documented contract.
+Pending OTO/OTOCO trailing deltas retain native `Decimal` values, including
+fractional inputs, as specified by the [OTO table](https://developers.binance.com/legacy-docs/margin_trading/trade/Margin-Account-New-OTO)
+and [OTOCO table](https://developers.binance.com/legacy-docs/margin_trading/trade/Margin-Account-New-OTOCO).
+The OTOCO below type remains optional and absent on the wire when omitted; no
+type is invented. Its type-dependent conditions apply when supplied; the
+independent trailing-price and iceberg-GTC conditions still apply. No decimal passes through a float;
 unrepresentable input and malformed financial data fail rather than round.
 
 Cross account assets retain borrowed, interest, free, locked and net amounts.
@@ -47,8 +53,21 @@ exact Decimal values. Partial events never replace a full account snapshot.
 
 SAPI budgets follow Margin general info: independent IP **12,000/minute** or
 UID **180,000/minute** per endpoint. Dynamic fees are 1/5 for cross fee queries,
-1/10 for isolated fee queries, 10/40 for symbol/all-symbol open orders, and
-6/1500 UID for placements depending on borrow side effects. Leverage adjustment
+1/10 for isolated fee queries, and 6/1500 UID for placements depending on borrow
+side effects. [Open-order queries](https://developers.binance.com/legacy-docs/margin_trading/trade/Query-Margin-Account-Open-Orders)
+have weight 10 IP, and the page counts an all-symbol query as one request for
+each symbol currently trading on the exchange.
+Accordingly, all-symbol admission charges `10 * N`; this multiplication derives
+from the documented weight and native request multiplicity. Supply
+`TradingSymbolCount::new(N, expires_at_millis)` via the request's
+`trading_symbol_count` setter, using a current authoritative unfiltered venue
+listing and native `TRADING` status. Counts of account orders, selected symbols or
+Margin-enabled pairs do not establish this authority. The caller chooses its
+freshness expiry; no arbitrary TTL or hidden listing query is selected. Missing
+or expired authority refuses with `Outcome::NotSent`; HTTP rechecks expiry both
+before admission and immediately before sending. Count and expiry are local
+admission evidence and never become wire parameters. Symbol queries charge 10
+and require no count authority. Leverage adjustment
 also enforces its independent **one request/minute/IP** cap. Placements require
 explicit native account order authority from `query_current_margin_order_count_usage`.
 Apply the complete response with `Config::order_limits` or
@@ -60,7 +79,12 @@ endpoint weight. Clones share
 budgets; `for_account` retains the common IP owner and creates a new UID owner.
 Margin REST uses SAPI endpoint scopes independent of the Spot aggregate IP pool.
 The WebSocket API defaults to the process Spot production IP weight/connection
-pool, shared with production Spot clients. `WsConfig::with_pools` selects an
+pool, shared with production Spot clients. The [Margin token page](https://developers.binance.com/en/docs/products/margin-trading/listen-token-data-stream)
+identifies the same `ws-api.binance.com:443/ws-api/v3` API route, and the
+[WebSocket API rate-limit documentation](https://developers.binance.com/legacy-docs/binance-spot-api-docs/websocket-api/rate-limits)
+specifies per-IP weight shared across all connections and a per-IP connection
+limit. Selecting the same process pool follows that shared endpoint authority.
+`WsConfig::with_pools` selects an
 explicit registry, including independent synthetic fixture pools. An explicit
 `Budgets::new(BudgetLimits::spot())` owner can include the documented API weight
 and connection limits while also carrying independent SAPI endpoint scopes.

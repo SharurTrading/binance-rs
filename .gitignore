@@ -18,8 +18,8 @@
 .DS_Store
 .idea/
 .vscode/
-.zcode
-.claude
+.zcode/
+.claude/
 # Generator interpreter caches.
 __pycache__/
 *.pyc

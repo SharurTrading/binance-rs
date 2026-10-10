@@ -185,13 +185,14 @@ WebSocket lifecycles.
 
 ## Budgets
 
-Spot and Futures `Config::new` draw their IP budgets from the process's pool for
+Spot, Futures and Options `Config::new` draw their IP budgets from the process's pool for
 that venue pool and environment, so every client counts against one weight limit:
 
 | Pool | Products | Baseline minute weight | Source |
 | --- | --- | ---: | --- |
 | Spot | Spot | 6,000 | [Spot rate limiters](https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#rate-limiters-ratelimittype) |
 | Futures | USDⓈ-M and COIN-M together | 2,400 | [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice), A.3 |
+| Options | Options | 2,400 | [Options rate limiters](https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition) |
 
 Demo and production never share a pool. Each pool starts at its documented baseline;
 every REST exchange information reply hands its `rateLimits` to the pool, and the
@@ -205,8 +206,8 @@ delay. The futures pool counts REST and WebSocket API weight together.
 
 Wallet, Convert and Margin REST draw from a separate process SAPI IP pool; their
 endpoint weight counters remain independent. Margin WebSocket API uses the Spot
-pool. `with_pools` selects an explicit registry for these products. Options
-requires caller-supplied budgets derived from its native exchange information.
+pool. Options uses its own pool and native exchange-information limits.
+`with_pools` selects an explicit registry for these products.
 
 Each `Config::new` keeps its own account owner; clone a product `Config` to share
 budgets between its REST and WebSocket clients. Across products or credentials of

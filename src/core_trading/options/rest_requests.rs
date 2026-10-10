@@ -3153,7 +3153,9 @@ impl super::RestClient {
         request: &ExchangeInformation,
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::rest_models::ExchangeInformationResponse>, Error> {
-        self.inner.execute(request, deadline).await
+        let response = self.inner.execute(request, deadline).await?;
+        super::rate::adopt_stated_limits(&self.inner, &response.data)?;
+        Ok(response)
     }
 
     /// [historicalExerciseRecords](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#historical-exercise-records).

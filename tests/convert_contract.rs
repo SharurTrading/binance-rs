@@ -154,10 +154,21 @@ async fn unknown_acceptance_status_is_preserved_without_claiming_execution() {
 }
 #[test]
 fn history_and_order_queries_validate_required_evidence() {
-    let request = convert::rest_requests::GetConvertTradeHistory::new()
-        .start_time(0)
-        .end_time(2_592_000_001);
-    assert!(request.build().is_err());
+    let thirty_days = 2_592_000_000;
+    for (span, accepted) in [
+        (thirty_days - 1, true),
+        (thirty_days, true),
+        (thirty_days + 1, false),
+    ] {
+        assert_eq!(
+            convert::rest_requests::GetConvertTradeHistory::new()
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+    }
     assert!(convert::rest_requests::OrderStatus::new().build().is_err());
     assert!(
         serde_json::from_str::<convert::rest_models::OrderStatusResponse>(

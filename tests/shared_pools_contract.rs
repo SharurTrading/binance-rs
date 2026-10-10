@@ -9,7 +9,7 @@
 //! (<https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#ip-limits>).
 //! Exchange information states each pool's limits in `rateLimits`
 //! (<https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#rate-limiters-ratelimittype>).
-//! Only one test draws on the process's registry; every other test builds its own.
+//! One test per independent venue pool draws on the process registry; others use explicit registries.
 
 #![allow(
     clippy::unwrap_used,
@@ -24,8 +24,8 @@
 mod support;
 
 use binance_client::{
-    BudgetLimits, Budgets, Clock, Credentials, Error, Outcome, Symbol, WeightPools, coinm, spot,
-    usdm,
+    BudgetLimits, Budgets, Clock, Credentials, Error, Outcome, Symbol, WeightPools, coinm, options,
+    spot, usdm,
 };
 use std::{
     sync::{
@@ -1080,4 +1080,249 @@ async fn sapi_products_share_ip_cooldown_before_any_later_send() {
     assert_eq!(unused.connections_accepted(), 0);
     banned.finish().await;
     unused.finish().await;
+}
+
+fn options_client(
+    config: options::Config,
+    fixture: &HttpFixture,
+    clock: &Arc<ManualClock>,
+) -> options::RestClient {
+    options::RestClient::new(
+        config
+            .rest_url(&fixture.url)
+            .unwrap()
+            .clock(clock.clone())
+            .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap()),
+    )
+    .unwrap()
+}
+
+async fn options_time(client: &options::RestClient) -> Result<(), Error> {
+    client
+        .check_server_time(&options::rest_requests::CheckServerTime::new(), deadline())
+        .await
+        .map(drop)
+}
+
+#[tokio::test]
+async fn independent_options_clients_share_the_process_environment_pool() {
+    let clock = ManualClock::at(MINUTE_START);
+    let spent = futures_pool_spent().await;
+    let unsent = server_time().await;
+    let first_config = options::Config::new(options::Environment::Production)
+        .unwrap()
+        .clock(clock.clone());
+    let second_config = options::Config::new(options::Environment::Production)
+        .unwrap()
+        .clock(clock.clone());
+    let first = options_client(first_config.clone(), &spent, &clock);
+    let second = options_client(second_config.clone(), &unsent, &clock);
+    options_time(&first).await.unwrap();
+    assert_refused(
+        &options_time(&second).await.unwrap_err(),
+        Duration::from_mins(1),
+    );
+    assert_eq!(
+        first_config.pool_usage().unwrap(),
+        second_config.pool_usage().unwrap()
+    );
+    assert_eq!(second.pool_usage().unwrap().request_weight.used, 2400);
+    assert_eq!(spent.connections_accepted(), 1);
+    assert_eq!(unsent.connections_accepted(), 0);
+    spent.finish().await;
+    unsent.finish().await;
+}
+
+#[tokio::test]
+async fn options_pool_isolated_by_registry_environment_and_product() {
+    let clock = ManualClock::at(MINUTE_START);
+    let pools = WeightPools::new();
+    let independent_pools = WeightPools::new();
+    let spent = futures_pool_spent().await;
+    let unsent = server_time().await;
+    let available = server_time().await;
+    let spender = options_client(
+        options::Config::with_pools(options::Environment::Demo, &pools).unwrap(),
+        &spent,
+        &clock,
+    );
+    options_time(&spender).await.unwrap();
+    let same = options_client(
+        options::Config::with_pools(options::Environment::Demo, &pools).unwrap(),
+        &unsent,
+        &clock,
+    );
+    assert_refused(
+        &options_time(&same).await.unwrap_err(),
+        Duration::from_mins(1),
+    );
+    let separate_environment = options_client(
+        options::Config::with_pools(options::Environment::Production, &pools).unwrap(),
+        &available,
+        &clock,
+    );
+    let separate_registry = options_client(
+        options::Config::with_pools(options::Environment::Demo, &independent_pools).unwrap(),
+        &available,
+        &clock,
+    );
+    options_time(&separate_environment).await.unwrap();
+    options_time(&separate_registry).await.unwrap();
+    let futures = usdm_client(
+        usdm::Config::with_pools(usdm::Environment::Demo, &pools).unwrap(),
+        &available,
+        &clock,
+    );
+    let spot = spot_client(
+        spot::Config::with_pools(spot::Environment::Demo, &pools).unwrap(),
+        &available,
+        &clock,
+    );
+    usdm_time(&futures).await.unwrap();
+    spot_time(&spot).await.unwrap();
+    assert_eq!(unsent.connections_accepted(), 0);
+    assert_eq!(available.connections_accepted(), 4);
+    spent.finish().await;
+    unsent.finish().await;
+    available.finish().await;
+}
+
+fn options_order() -> options::rest_requests::NewOrder {
+    options::rest_requests::NewOrder::new()
+        .symbol(options::Symbol::new("BTC-261030-90000-C").unwrap())
+        .side("BUY")
+        .type_value("LIMIT")
+        .quantity(binance_client::Decimal::ONE)
+        .price(binance_client::Decimal::ONE)
+        .client_order_id(options::ClientOrderId::new("pool-contract").unwrap())
+        .build()
+        .unwrap()
+}
+
+#[tokio::test]
+async fn options_account_owners_are_separate_until_explicitly_shared() {
+    let clock = ManualClock::at(MINUTE_START);
+    let pools = WeightPools::new();
+    let body = r#"{"orderId":7,"symbol":"BTC-261030-90000-C","clientOrderId":"pool-contract"}"#;
+    let exhausted =
+        HttpFixture::new(200, "X-MBX-ORDER-COUNT-1M: 1200\r\n", body, None, false).await;
+    let accepted = HttpFixture::new(200, "", body, None, false).await;
+    let config = options::Config::with_pools(options::Environment::Demo, &pools).unwrap();
+    let first = options_client(config.clone(), &exhausted, &clock);
+    let clone = options_client(config, &accepted, &clock);
+    let separate = options_client(
+        options::Config::with_pools(options::Environment::Demo, &pools).unwrap(),
+        &accepted,
+        &clock,
+    );
+    first.new_order(&options_order(), deadline()).await.unwrap();
+    assert_refused(
+        &clone
+            .new_order(&options_order(), deadline())
+            .await
+            .unwrap_err(),
+        Duration::from_mins(1),
+    );
+    separate
+        .new_order(&options_order(), deadline())
+        .await
+        .unwrap();
+    let owner = Budgets::new(BudgetLimits::options()).unwrap();
+    let explicit = options_client(
+        options::Config::with_pools(options::Environment::Demo, &pools)
+            .unwrap()
+            .budgets(owner.clone()),
+        &exhausted,
+        &clock,
+    );
+    let shared = options_client(
+        options::Config::with_pools(options::Environment::Demo, &pools)
+            .unwrap()
+            .budgets(owner),
+        &accepted,
+        &clock,
+    );
+    explicit
+        .new_order(&options_order(), deadline())
+        .await
+        .unwrap();
+    assert_refused(
+        &shared
+            .new_order(&options_order(), deadline())
+            .await
+            .unwrap_err(),
+        Duration::from_mins(1),
+    );
+    assert_eq!(exhausted.connections_accepted(), 2);
+    assert_eq!(accepted.connections_accepted(), 1);
+    exhausted.finish().await;
+    accepted.finish().await;
+}
+
+#[tokio::test]
+async fn options_has_no_borrowed_futures_ten_second_order_ceiling() {
+    let limits = BudgetLimits::options();
+    assert_eq!(limits.orders_per_ten_seconds, u64::MAX);
+    assert_eq!(limits.orders_per_minute, 1200);
+    let clock = ManualClock::at(MINUTE_START);
+    let pools = WeightPools::new();
+    let body = r#"{"orderId":7,"symbol":"BTC-261030-90000-C","clientOrderId":"pool-contract"}"#;
+    let venue = HttpFixture::new(
+        200,
+        "X-MBX-ORDER-COUNT-10S: 300\r\nX-MBX-ORDER-COUNT-1M: 1\r\n",
+        body,
+        None,
+        false,
+    )
+    .await;
+    let client = options_client(
+        options::Config::with_pools(options::Environment::Demo, &pools).unwrap(),
+        &venue,
+        &clock,
+    );
+    client
+        .new_order(&options_order(), deadline())
+        .await
+        .unwrap();
+    client
+        .new_order(&options_order(), deadline())
+        .await
+        .unwrap();
+    assert_eq!(venue.connections_accepted(), 2);
+    venue.finish().await;
+}
+
+#[tokio::test]
+async fn options_exchange_information_updates_the_shared_ip_pool() {
+    let clock = ManualClock::at(MINUTE_START);
+    let pools = WeightPools::new();
+    let exchange = HttpFixture::new(200, "", r#"{"serverTime":1,"optionContracts":[],"optionAssets":[],"optionSymbols":[],"rateLimits":[{"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":1}]}"#, None, false).await;
+    let unsent = server_time().await;
+    let first = options_client(
+        options::Config::with_pools(options::Environment::Demo, &pools).unwrap(),
+        &exchange,
+        &clock,
+    );
+    let second = options_client(
+        options::Config::with_pools(options::Environment::Demo, &pools).unwrap(),
+        &unsent,
+        &clock,
+    );
+    first
+        .exchange_information(
+            &options::rest_requests::ExchangeInformation::new(),
+            deadline(),
+        )
+        .await
+        .unwrap();
+    let usage = second.pool_usage().unwrap().request_weight;
+    assert_eq!(usage.limit, 1);
+    assert_eq!(usage.source, binance_client::LimitSource::Stated);
+    assert_refused(
+        &options_time(&second).await.unwrap_err(),
+        Duration::from_mins(1),
+    );
+    assert_eq!(unsent.connections_accepted(), 0);
+    exchange.finish().await;
+    unsent.finish().await;
 }

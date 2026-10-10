@@ -11,7 +11,11 @@ pub(crate) fn cost(op: Operation, p: &BTreeMap<String, Value>) -> Result<Cost, E
     let (uid, weight) = match op.name {
         "queryCrossMarginFeeData" => (false, if p.contains_key("coin") { 1 } else { 5 }),
         "queryIsolatedMarginFeeData" => (false, if p.contains_key("symbol") { 1 } else { 10 }),
-        "queryMarginAccountsOpenOrders" => (false, if p.contains_key("symbol") { 10 } else { 40 }),
+        "queryMarginAccountsOpenOrders" if !p.contains_key("symbol") => {
+            return Err(Error::Configuration(
+                "Margin trading-symbol count authority required",
+            ));
+        }
         "marginAccountNewOrder"
         | "marginAccountNewOco"
         | "marginAccountNewOto"
@@ -113,4 +117,30 @@ pub(crate) fn order_windows(
         .into_iter()
         .map(|(window, (count, limit))| (window, count, limit))
         .collect())
+}
+
+/// The endpoint counts an all-symbol query as N requests, each carrying its 10 IP weight.
+/// Local authority never becomes a wire parameter; expiry is checked by HTTP twice.
+pub(crate) fn open_orders_cost(
+    op: Operation,
+    parameters: &BTreeMap<String, Value>,
+    authority: Option<super::TradingSymbolCount>,
+) -> Result<Cost, Error> {
+    if parameters.contains_key("symbol") {
+        return cost(op, parameters);
+    }
+    let authority = authority.ok_or(Error::Configuration(
+        "Margin trading-symbol count authority required",
+    ))?;
+    Ok(Cost {
+        authority_expiry: Some(authority.expires_at_millis()),
+        sapi: Some(SapiCost {
+            endpoint: op.path,
+            uid: false,
+            weight: authority.weight(),
+            requests_per_second: None,
+            requests_per_minute: op.requests_per_minute,
+        }),
+        ..Cost::default()
+    })
 }

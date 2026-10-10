@@ -47,6 +47,15 @@ Malformed or unrepresentable position amounts fail decoding, and absent optional
 amounts remain absent. USD-M WebSocket position V2 applies the same exact parsing
 to its own native `positionAmt` field.
 
+Stream fields the venue documents as conditional decode as absent rather than
+refusing the frame. A COIN-M `!contractInfo` push carries `bks` only on a bracket
+update, so a listing or settlement push decodes with `bks: None`, while an empty
+bracket list stays `Some([])`; `ct`, `dt`, `ot` and `cs` remain required in both
+Futures markets. Spot `@referencePrice` sends `r` as `null` when there is no
+reference price, which decodes as `None`. Sources:
+[COIN-M contract info stream](https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-market-streams/Contract-Info-Stream)
+and [Spot reference price streams](https://developers.binance.com/en/docs/products/spot/web-socket-streams#reference-price-streams).
+
 Authoritative behavior references:
 
 - [Spot changelog](https://developers.binance.com/en/docs/products/spot/CHANGELOG)

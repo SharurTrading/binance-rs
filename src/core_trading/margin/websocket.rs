@@ -58,6 +58,12 @@ impl WsConfig {
         self.clock = value;
         self
     }
+    /// The venue pool this configuration's sockets draw on, the production Spot
+    /// pool; `None` once [`WsConfig::budgets`] replaces it with an explicit owner.
+    #[must_use]
+    pub fn pool_key(&self) -> Option<crate::PoolKey> {
+        self.budgets.pool_key()
+    }
     /// Select an explicit API weight/connection owner. Margin SAPI endpoint scopes
     /// remain independent of Spot aggregate weight, including under a common owner.
     #[must_use]

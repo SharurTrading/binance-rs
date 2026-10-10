@@ -95,6 +95,13 @@ impl Config {
     pub fn pool_usage(&self) -> Result<crate::PoolUsage, Error> {
         self.budgets.usage(self.clock.now_millis()?)
     }
+    /// The venue pool this configuration's clients draw on, to group clients that
+    /// count against one venue limit; `None` once [`Config::budgets`] replaces it
+    /// with an explicit owner.
+    #[must_use]
+    pub fn pool_key(&self) -> Option<crate::PoolKey> {
+        self.budgets.pool_key()
+    }
     /// Replace the drawn pool with an explicit IP/account owner.
     /// Clone this owner to share both scopes, or use [`Budgets::for_account`] to
     /// share IP evidence with a separate account owner.

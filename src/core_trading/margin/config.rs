@@ -42,6 +42,12 @@ impl Config {
         self.inner = self.inner.clock(value);
         self
     }
+    /// The venue pool this configuration's clients draw on, the production SAPI
+    /// pool; `None` once [`Config::budgets`] replaces it with an explicit owner.
+    #[must_use]
+    pub fn pool_key(&self) -> Option<crate::PoolKey> {
+        self.inner.pool_key()
+    }
     /// Share the explicit IP and account owners with all clients in those scopes.
     /// Configure order evidence after selecting this owner.
     #[must_use]

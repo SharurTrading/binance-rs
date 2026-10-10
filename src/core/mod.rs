@@ -20,8 +20,11 @@ pub use error::{
 };
 pub(crate) use http::HttpClient;
 pub use identity::{Asset, ClientOrderId, RequestId, SensitiveString, Symbol};
-pub use rate::{BudgetLimits, Budgets, LimitSource, PoolUsage, WeightPools, WindowUsage};
-pub(crate) use rate::{Cost, PoolEnvironment, StatedLimit, VenuePool};
+pub use rate::{
+    BudgetLimits, Budgets, LimitSource, PoolEnvironment, PoolKey, PoolUsage, VenuePool,
+    WeightPools, WindowUsage,
+};
+pub(crate) use rate::{Cost, StatedLimit};
 pub(crate) use request::{Operation, Request, Security};
 pub(crate) use request::{parameters, validate_parameters};
 pub(crate) use socket::{Socket, SocketEvent};

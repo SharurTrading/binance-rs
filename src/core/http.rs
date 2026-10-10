@@ -83,6 +83,10 @@ impl HttpClient {
     pub(crate) fn pool_usage(&self) -> Result<super::PoolUsage, Error> {
         self.budgets.usage(self.clock.now_millis()?)
     }
+    /// The venue pool this client draws on; `None` for an explicit owner.
+    pub(crate) fn pool_key(&self) -> Option<super::PoolKey> {
+        self.budgets.pool_key()
+    }
     pub(crate) fn time_unit(mut self, unit: super::TimeUnit) -> Self {
         self.time_unit = unit;
         self

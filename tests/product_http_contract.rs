@@ -258,7 +258,14 @@ async fn coinm_successful_price_match_mode_decodes_without_replaying_mutation() 
         .await
         .unwrap();
     assert_eq!(response.data.client_order_id.as_str(), "synthetic-order");
-    assert_eq!(response.data.price_match.as_deref(), Some("NONE"));
+    assert_eq!(
+        response
+            .data
+            .price_match
+            .as_ref()
+            .map(binance_client::coinm::enums::PriceMatch::as_str),
+        Some("NONE")
+    );
     assert_eq!(response.meta.rates.counters["x-mbx-order-count-1m"], 1);
     assert_eq!(f.connections_accepted(), 1);
     f.finish().await;

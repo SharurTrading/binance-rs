@@ -147,7 +147,7 @@
                           "type": "boolean"
                         },
                         "positionSide": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/PositionSide"
                         },
                         "entryPrice": {
                           "type": "string",
@@ -1816,7 +1816,7 @@
                       "type": "object",
                       "properties": {
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1827,7 +1827,7 @@
                           "format": "int64"
                         },
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         }
                       }
                     }
@@ -1847,7 +1847,7 @@
                             "type": "object",
                             "properties": {
                               "filterType": {
-                                "type": "string"
+                                "$ref": "#/components/schemas/FilterType"
                               },
                               "maxPrice": {
                                 "type": "string",
@@ -1895,13 +1895,13 @@
                         "orderTypes": {
                           "type": "array",
                           "items": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderType"
                           }
                         },
                         "timeInForce": {
                           "type": "array",
                           "items": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/TimeInForce"
                           }
                         },
                         "liquidationFee": {
@@ -4321,7 +4321,7 @@
                       "x-rust-type": "crate::Symbol"
                     },
                     "side": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderSide"
                     },
                     "price": {
                       "type": "string",
@@ -4360,7 +4360,7 @@
                       "format": "int64"
                     },
                     "positionSide": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     },
                     "buyer": {
                       "type": "boolean"
@@ -4507,7 +4507,7 @@
                       "x-decimal": true
                     },
                     "origType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "price": {
                       "type": "string",
@@ -4517,13 +4517,13 @@
                       "type": "boolean"
                     },
                     "side": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderSide"
                     },
                     "positionSide": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     },
                     "status": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderStatus"
                     },
                     "stopPrice": {
                       "type": "string",
@@ -4545,10 +4545,10 @@
                       "format": "int64"
                     },
                     "timeInForce": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/TimeInForce"
                     },
                     "type": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "activatePrice": {
                       "type": "string",
@@ -4563,16 +4563,16 @@
                       "format": "int64"
                     },
                     "workingType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/WorkingType"
                     },
                     "priceProtect": {
                       "type": "boolean"
                     },
                     "priceMatch": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PriceMatch"
                     },
                     "selfTradePreventionMode": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/SelfTradePreventionMode"
                     },
                     "goodTillDate": {
                       "type": "integer",
@@ -4842,13 +4842,13 @@
                       "type": "boolean"
                     },
                     "side": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderSide"
                     },
                     "positionSide": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     },
                     "status": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderStatus"
                     },
                     "stopPrice": {
                       "type": "string",
@@ -4866,13 +4866,13 @@
                       "x-rust-type": "crate::Symbol"
                     },
                     "timeInForce": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/TimeInForce"
                     },
                     "origType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "type": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "activatePrice": {
                       "type": "string",
@@ -4883,16 +4883,16 @@
                       "x-decimal": true
                     },
                     "workingType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/WorkingType"
                     },
                     "priceProtect": {
                       "type": "boolean"
                     },
                     "priceMatch": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PriceMatch"
                     },
                     "selfTradePreventionMode": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/SelfTradePreventionMode"
                     },
                     "updateTime": {
                       "type": "integer",
@@ -5034,7 +5034,7 @@
                       "x-rust-type": "crate::Symbol"
                     },
                     "status": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderStatus"
                     },
                     "clientOrderId": {
                       "type": "string",
@@ -5061,10 +5061,10 @@
                       "x-decimal": true
                     },
                     "timeInForce": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/TimeInForce"
                     },
                     "type": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "reduceOnly": {
                       "type": "boolean"
@@ -5073,29 +5073,29 @@
                       "type": "boolean"
                     },
                     "side": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderSide"
                     },
                     "positionSide": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     },
                     "stopPrice": {
                       "type": "string",
                       "x-decimal": true
                     },
                     "workingType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/WorkingType"
                     },
                     "priceProtect": {
                       "type": "boolean"
                     },
                     "origType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "priceMatch": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PriceMatch"
                     },
                     "selfTradePreventionMode": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/SelfTradePreventionMode"
                     },
                     "updateTime": {
                       "type": "integer",
@@ -5329,13 +5329,13 @@
                       "type": "boolean"
                     },
                     "side": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderSide"
                     },
                     "positionSide": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     },
                     "status": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderStatus"
                     },
                     "stopPrice": {
                       "type": "string",
@@ -5353,13 +5353,13 @@
                       "x-rust-type": "crate::Symbol"
                     },
                     "timeInForce": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/TimeInForce"
                     },
                     "type": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "origType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "activatePrice": {
                       "type": "string",
@@ -5374,16 +5374,16 @@
                       "format": "int64"
                     },
                     "workingType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/WorkingType"
                     },
                     "priceProtect": {
                       "type": "boolean"
                     },
                     "priceMatch": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PriceMatch"
                     },
                     "selfTradePreventionMode": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/SelfTradePreventionMode"
                     },
                     "code": {
                       "type": "integer",
@@ -5500,13 +5500,13 @@
                     "type": "boolean"
                   },
                   "side": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderSide"
                   },
                   "positionSide": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PositionSide"
                   },
                   "status": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderStatus"
                   },
                   "stopPrice": {
                     "type": "string",
@@ -5524,13 +5524,13 @@
                     "x-rust-type": "crate::Symbol"
                   },
                   "timeInForce": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/TimeInForce"
                   },
                   "origType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "type": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "activatePrice": {
                     "type": "string",
@@ -5545,16 +5545,16 @@
                     "format": "int64"
                   },
                   "workingType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/WorkingType"
                   },
                   "priceProtect": {
                     "type": "boolean"
                   },
                   "priceMatch": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PriceMatch"
                   },
                   "selfTradePreventionMode": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/SelfTradePreventionMode"
                   }
                 },
                 "required": [
@@ -5678,7 +5678,7 @@
                     "x-rust-type": "crate::Symbol"
                   },
                   "status": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderStatus"
                   },
                   "clientOrderId": {
                     "type": "string",
@@ -5705,10 +5705,10 @@
                     "x-decimal": true
                   },
                   "timeInForce": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/TimeInForce"
                   },
                   "type": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "reduceOnly": {
                     "type": "boolean"
@@ -5717,29 +5717,29 @@
                     "type": "boolean"
                   },
                   "side": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderSide"
                   },
                   "positionSide": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PositionSide"
                   },
                   "stopPrice": {
                     "type": "string",
                     "x-decimal": true
                   },
                   "workingType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/WorkingType"
                   },
                   "priceProtect": {
                     "type": "boolean"
                   },
                   "origType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "priceMatch": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PriceMatch"
                   },
                   "selfTradePreventionMode": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/SelfTradePreventionMode"
                   },
                   "updateTime": {
                     "type": "integer",
@@ -5959,13 +5959,13 @@
                     "type": "boolean"
                   },
                   "side": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderSide"
                   },
                   "positionSide": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PositionSide"
                   },
                   "status": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderStatus"
                   },
                   "stopPrice": {
                     "type": "string",
@@ -5980,13 +5980,13 @@
                     "x-rust-type": "crate::Symbol"
                   },
                   "timeInForce": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/TimeInForce"
                   },
                   "type": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "origType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "activatePrice": {
                     "type": "string",
@@ -6001,16 +6001,16 @@
                     "format": "int64"
                   },
                   "workingType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/WorkingType"
                   },
                   "priceProtect": {
                     "type": "boolean"
                   },
                   "priceMatch": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PriceMatch"
                   },
                   "selfTradePreventionMode": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/SelfTradePreventionMode"
                   }
                 },
                 "required": [
@@ -6122,7 +6122,7 @@
                     "x-decimal": true
                   },
                   "origType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "price": {
                     "type": "string",
@@ -6132,13 +6132,13 @@
                     "type": "boolean"
                   },
                   "side": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderSide"
                   },
                   "positionSide": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PositionSide"
                   },
                   "status": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderStatus"
                   },
                   "stopPrice": {
                     "type": "string",
@@ -6160,10 +6160,10 @@
                     "format": "int64"
                   },
                   "timeInForce": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/TimeInForce"
                   },
                   "type": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "activatePrice": {
                     "type": "string",
@@ -6178,16 +6178,16 @@
                     "format": "int64"
                   },
                   "workingType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/WorkingType"
                   },
                   "priceProtect": {
                     "type": "boolean"
                   },
                   "priceMatch": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PriceMatch"
                   },
                   "selfTradePreventionMode": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/SelfTradePreventionMode"
                   }
                 },
                 "required": [
@@ -6450,7 +6450,7 @@
                       "x-decimal": true
                     },
                     "origType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "price": {
                       "type": "string",
@@ -6460,13 +6460,13 @@
                       "type": "boolean"
                     },
                     "side": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderSide"
                     },
                     "positionSide": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     },
                     "status": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderStatus"
                     },
                     "stopPrice": {
                       "type": "string",
@@ -6488,10 +6488,10 @@
                       "format": "int64"
                     },
                     "timeInForce": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/TimeInForce"
                     },
                     "type": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "activatePrice": {
                       "type": "string",
@@ -6506,16 +6506,16 @@
                       "format": "int64"
                     },
                     "workingType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/WorkingType"
                     },
                     "priceProtect": {
                       "type": "boolean"
                     },
                     "priceMatch": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PriceMatch"
                     },
                     "selfTradePreventionMode": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/SelfTradePreventionMode"
                     }
                   }
                 }
@@ -6808,7 +6808,7 @@
                       "format": "int64"
                     },
                     "positionSide": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     }
                   }
                 }
@@ -7116,7 +7116,7 @@
                       "type": "string"
                     },
                     "positionSide": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     },
                     "updateTime": {
                       "type": "integer",
@@ -7228,7 +7228,7 @@
                     "x-decimal": true
                   },
                   "origType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "price": {
                     "type": "string",
@@ -7238,13 +7238,13 @@
                     "type": "boolean"
                   },
                   "side": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderSide"
                   },
                   "positionSide": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PositionSide"
                   },
                   "status": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderStatus"
                   },
                   "stopPrice": {
                     "type": "string",
@@ -7266,10 +7266,10 @@
                     "format": "int64"
                   },
                   "timeInForce": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/TimeInForce"
                   },
                   "type": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "activatePrice": {
                     "type": "string",
@@ -7284,16 +7284,16 @@
                     "format": "int64"
                   },
                   "workingType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/WorkingType"
                   },
                   "priceProtect": {
                     "type": "boolean"
                   },
                   "priceMatch": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PriceMatch"
                   },
                   "selfTradePreventionMode": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/SelfTradePreventionMode"
                   }
                 }
               }
@@ -7411,7 +7411,7 @@
                       "x-rust-type": "crate::Symbol"
                     },
                     "status": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderStatus"
                     },
                     "clientOrderId": {
                       "type": "string",
@@ -7442,10 +7442,10 @@
                       "x-decimal": true
                     },
                     "timeInForce": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/TimeInForce"
                     },
                     "type": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "reduceOnly": {
                       "type": "boolean"
@@ -7454,23 +7454,23 @@
                       "type": "boolean"
                     },
                     "side": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderSide"
                     },
                     "positionSide": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     },
                     "stopPrice": {
                       "type": "string",
                       "x-decimal": true
                     },
                     "workingType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/WorkingType"
                     },
                     "priceProtect": {
                       "type": "boolean"
                     },
                     "origType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "time": {
                       "type": "integer",
@@ -7781,30 +7781,30 @@
                     "x-rust-type": "crate::ClientOrderId"
                   },
                   "algoType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/AlgoType"
                   },
                   "orderType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   },
                   "symbol": {
                     "type": "string",
                     "x-rust-type": "crate::Symbol"
                   },
                   "side": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderSide"
                   },
                   "positionSide": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PositionSide"
                   },
                   "timeInForce": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/TimeInForce"
                   },
                   "quantity": {
                     "type": "string",
                     "x-decimal": true
                   },
                   "algoStatus": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/AlgoStatus"
                   },
                   "triggerPrice": {
                     "type": "string",
@@ -7820,13 +7820,13 @@
                     "x-decimal-unavailable": "null"
                   },
                   "selfTradePreventionMode": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/SelfTradePreventionMode"
                   },
                   "workingType": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/WorkingType"
                   },
                   "priceMatch": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PriceMatch"
                   },
                   "closePosition": {
                     "type": "boolean"
@@ -8042,30 +8042,30 @@
                       "x-rust-type": "crate::ClientOrderId"
                     },
                     "algoType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/AlgoType"
                     },
                     "orderType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     },
                     "symbol": {
                       "type": "string",
                       "x-rust-type": "crate::Symbol"
                     },
                     "side": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderSide"
                     },
                     "positionSide": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     },
                     "timeInForce": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/TimeInForce"
                     },
                     "quantity": {
                       "type": "string",
                       "x-decimal": true
                     },
                     "algoStatus": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/AlgoStatus"
                     },
                     "triggerPrice": {
                       "type": "string",
@@ -8081,13 +8081,13 @@
                       "x-decimal-unavailable": "null"
                     },
                     "selfTradePreventionMode": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/SelfTradePreventionMode"
                     },
                     "workingType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/WorkingType"
                     },
                     "priceMatch": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PriceMatch"
                     },
                     "closePosition": {
                       "type": "boolean"
@@ -8155,7 +8155,7 @@
                       "x-decimal": true
                     },
                     "tpOrderType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/OrderType"
                     }
                   }
                 }
@@ -8200,6 +8200,182 @@
         ],
         "x-sources": [
           "https://developers.binance.info/docs/derivatives/coin-margined-futures/common-definition"
+        ]
+      },
+      "PriceMatch": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "OPPONENT",
+          "OPPONENT_5",
+          "OPPONENT_10",
+          "OPPONENT_20",
+          "QUEUE",
+          "QUEUE_5",
+          "QUEUE_10",
+          "QUEUE_20"
+        ],
+        "description": "Native `PriceMatch` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "WorkingType": {
+        "type": "string",
+        "enum": [
+          "MARK_PRICE",
+          "CONTRACT_PRICE"
+        ],
+        "description": "Native `WorkingType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "OrderType": {
+        "type": "string",
+        "enum": [
+          "LIMIT",
+          "MARKET",
+          "STOP",
+          "STOP_MARKET",
+          "TAKE_PROFIT",
+          "TAKE_PROFIT_MARKET",
+          "TRAILING_STOP_MARKET",
+          "LIQUIDATION"
+        ],
+        "description": "Native `OrderType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition",
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/user-data-streams"
+        ]
+      },
+      "PositionSide": {
+        "type": "string",
+        "enum": [
+          "BOTH",
+          "LONG",
+          "SHORT"
+        ],
+        "description": "Native `PositionSide` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "PARTIALLY_FILLED",
+          "FILLED",
+          "CANCELED",
+          "EXPIRED",
+          "EXPIRED_IN_MATCH"
+        ],
+        "description": "Native `OrderStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition",
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/user-data-streams"
+        ]
+      },
+      "OrderSide": {
+        "type": "string",
+        "enum": [
+          "BUY",
+          "SELL"
+        ],
+        "description": "Native `OrderSide` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "FilterType": {
+        "type": "string",
+        "enum": [
+          "PRICE_FILTER",
+          "LOT_SIZE",
+          "MARKET_LOT_SIZE",
+          "MAX_NUM_ORDERS",
+          "PERCENT_PRICE"
+        ],
+        "description": "Native `FilterType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "SelfTradePreventionMode": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "EXPIRE_TAKER",
+          "EXPIRE_BOTH",
+          "EXPIRE_MAKER"
+        ],
+        "description": "Native `SelfTradePreventionMode` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition",
+          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#new-order"
+        ]
+      },
+      "TimeInForce": {
+        "type": "string",
+        "enum": [
+          "GTC",
+          "IOC",
+          "FOK",
+          "GTX"
+        ],
+        "description": "Native `TimeInForce` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "AlgoType": {
+        "type": "string",
+        "enum": [
+          "CONDITIONAL"
+        ],
+        "description": "Native `AlgoType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice",
+          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade#new-algo-order"
+        ]
+      },
+      "AlgoStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "CANCELED",
+          "TRIGGERING",
+          "TRIGGERED",
+          "FINISHED",
+          "REJECTED",
+          "EXPIRED"
+        ],
+        "description": "Native `AlgoStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice",
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams"
+        ]
+      },
+      "RateLimitInterval": {
+        "type": "string",
+        "enum": [
+          "MINUTE"
+        ],
+        "description": "Native `RateLimitInterval` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "RateLimitType": {
+        "type": "string",
+        "enum": [
+          "REQUEST_WEIGHT",
+          "ORDERS"
+        ],
+        "description": "Native `RateLimitType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
         ]
       }
     }

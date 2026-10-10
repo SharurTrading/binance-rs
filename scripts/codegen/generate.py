@@ -57,10 +57,12 @@ def open_enum_variant(value):
     return variant
 
 
-def render_open_enum(name, values, sources, summary):
-    variants = [open_enum_variant(v) for v in values]
-    if len(set(variants)) != len(variants):
-        raise ValueError(('enum values share a variant spelling', PRODUCT, name))
+def render_open_enum(name, values, sources, summary, wire_type='string', names=()):
+    variants = list(names) if names else [open_enum_variant(v) for v in values]
+    if wire_type == 'integer':
+        return render_integer_enum(name, values, sources, summary, variants)
+    if len(set(variants)) != len(variants) or any(not re.fullmatch(r'[A-Z][A-Za-z0-9]*', v) or v == 'Unknown' for v in variants):
+        raise ValueError(('enum values share an invalid variant spelling', PRODUCT, name))
     return '\n'.join([f'/// {summary}', '///', '/// One variant per value documented at:', '///',
         *[f'/// - <{url}>' for url in sources], '///',
         '/// A value the venue sends that is not documented there decodes to `Unknown`',
@@ -84,6 +86,29 @@ def render_open_enum(name, values, sources, summary):
         '            _ => Self::Unknown(value),', '        })', '    }', '}'])
 
 
+def render_integer_enum(name, values, sources, summary, variants):
+    if len(set(variants)) != len(variants) or any(not re.fullmatch(r'[A-Z][A-Za-z0-9]*', v) or v == 'Unknown' for v in variants):
+        raise ValueError(('invalid integer enum variants', PRODUCT, name))
+    return '\n'.join([f'/// {summary}', '///', '/// Documented at:',
+        *[f'/// - <{url}>' for url in sources],
+        '#[derive(Clone, Debug, PartialEq, Eq, Hash)]', '#[non_exhaustive]', f'pub enum {name} {{',
+        *[f'    /// Venue code `{value}`.\n    {variants[i]},' for i, value in enumerate(values)],
+        '    /// Future native integer code, retained exactly.', '    Unknown(i64),', '}',
+        f'impl {name} {{', '    /// The exact native integer code.', '    #[must_use]',
+        '    pub fn value(&self) -> i64 { match self {',
+        *[f'        Self::{variants[i]} => {value},' for i, value in enumerate(values)],
+        '        Self::Unknown(value) => *value,', '    } }', '}',
+        f'impl serde::Serialize for {name} {{',
+        '    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {',
+        '        serializer.serialize_i64(self.value())', '    }', '}',
+        f"impl<'de> serde::Deserialize<'de> for {name} {{",
+        "    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {",
+        "        let value = <i64 as serde::Deserialize>::deserialize(deserializer)?;",
+        '        Ok(match value {',
+        *[f'            {value} => Self::{variants[i]},' for i, value in enumerate(values)],
+        '            _ => Self::Unknown(value),', '        })', '    }', '}'])
+
+
 def generate_enums():
     text = '\n\n'.join(render_open_enum(name, *OPEN_ENUMS[name]) for name in sorted(OPEN_ENUMS))
     write(CORE_TRADING/PRODUCT/'enums.rs', HEADER+'//! Generated venue enumerations; regenerate with scripts/codegen/generate.py.\n\n'+text+'\n')
@@ -104,17 +129,22 @@ class Models:
         # once per product; inline lists stay strings checked on the way out.
         name = schema.get('$ref', '').split('/')[-1]
         target = self.components.get(name, {}) if name else {}
-        if target.get('type') != 'string' or not target.get('enum'):
+        if target.get('type') not in ['string', 'integer'] or not target.get('enum'):
             return None
         if not target.get('x-sources') or not target.get('description'):
             raise ValueError(('venue enum needs its sources and summary', PRODUCT, name))
-        facts = (tuple(target['enum']), tuple(target['x-sources']), target['description'])
+        wire_type = target['type']
+        names = target.get('x-rust-variants', {})
+        if wire_type == 'integer' and not names:
+            raise ValueError(('integer enum needs native variant names', PRODUCT, name))
+        variants = tuple(names[str(v)] if str(v) in names else open_enum_variant(v) for v in target['enum'])
+        facts = (tuple(target['enum']), tuple(target['x-sources']), target['description'], wire_type, variants)
         if OPEN_ENUMS.setdefault(name, facts) != facts:
             raise ValueError(('venue enum defined differently within one product', PRODUCT, name))
         return 'super::enums::'+name
 
     def type(self, schema, name, response=True):
-        enum = self.open_enum(schema)
+        enum = self.open_enum(schema) if response else None
         if enum:
             return enum
         schema = self.resolve(schema)
@@ -659,7 +689,7 @@ def main():
     paths=[*(CORE_TRADING/p/f for p in ['usdm','spot','coinm'] for f in files), ROOT/'schema/coverage.json', ROOT/'schema/spot-coverage.json', ROOT/'schema/coinm-coverage.json']
     before={p:p.read_bytes() if p.exists() else None for p in paths}
     rest_products = ['wallet','convert','margin','options']
-    paths += [*(CORE_TRADING/p/f for p in rest_products for f in ['rest_models.rs','rest_requests.rs']),*(ROOT/'schema'/f'{p}-coverage.json' for p in rest_products),*(CORE_TRADING/'options'/f for f in ['stream_models.rs','stream_names.rs']),CORE_TRADING/'margin/stream_models.rs']
+    paths += [*(CORE_TRADING/p/f for p in rest_products for f in ['rest_models.rs','rest_requests.rs']),*(CORE_TRADING/p/'enums.rs' for p in rest_products),*(ROOT/'schema'/f'{p}-coverage.json' for p in rest_products),*(CORE_TRADING/'options'/f for f in ['stream_models.rs','stream_names.rs']),CORE_TRADING/'margin/stream_models.rs']
     before.update({p:p.read_bytes() if p.exists() else None for p in paths if p not in before})
     for PRODUCT in ['usdm','spot','coinm',*rest_products]:
         OPEN_ENUMS.clear()
@@ -672,8 +702,8 @@ def main():
             if PRODUCT == 'margin':
                 generate_margin_events()
                 product_files += ['stream_models.rs']
-            if OPEN_ENUMS:
-                raise ValueError(('venue enums need an enums module in', PRODUCT))
+            generate_enums()
+            product_files += ['enums.rs']
             write(ROOT/'schema'/f'{PRODUCT}-coverage.json',json.dumps(coverage,indent=2)+'\n')
             subprocess.run(['rustfmt','--edition','2024',*[str(CORE_TRADING/PRODUCT/f) for f in product_files]],check=True)
             print(PRODUCT+': '+', '.join(f'{len(v)} {k}' for k,v in coverage.items())+'.')

@@ -1114,7 +1114,7 @@ pub struct GetCloudMiningPaymentAndRefundHistoryResponseRowsItem {
     pub tran_id: Option<i64>,
     /// Exact `type` wire field.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_value: Option<i64>,
+    pub type_value: Option<super::enums::CloudMiningPaymentType>,
     /// Exact `asset` wire field.
     #[serde(rename = "asset")]
     pub asset: crate::Asset,
@@ -1123,7 +1123,7 @@ pub struct GetCloudMiningPaymentAndRefundHistoryResponseRowsItem {
     pub amount: Decimal,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<String>,
+    pub status: Option<super::enums::CloudMiningStatus>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -1221,7 +1221,7 @@ pub struct QueryUserUniversalTransferHistoryResponseRowsItem {
     pub amount: Decimal,
     /// Exact `type` wire field.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_value: Option<String>,
+    pub type_value: Option<super::enums::UniversalTransferType>,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
@@ -1749,7 +1749,7 @@ pub struct DepositHistoryResponseItem {
     pub network: Option<super::Network>,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<i64>,
+    pub status: Option<super::enums::DepositStatus>,
     /// Exact `address` wire field.
     #[serde(rename = "address", default, skip_serializing_if = "Option::is_none")]
     pub address: Option<crate::SensitiveString>,
@@ -1783,7 +1783,7 @@ pub struct DepositHistoryResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub transfer_type: Option<i64>,
+    pub transfer_type: Option<super::enums::TransferDirection>,
     /// Exact `confirmTimes` wire field.
     #[serde(
         rename = "confirmTimes",
@@ -1804,14 +1804,14 @@ pub struct DepositHistoryResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub wallet_type: Option<i64>,
+    pub wallet_type: Option<super::enums::WalletType>,
     /// Exact `travelRuleStatus` wire field.
     #[serde(
         rename = "travelRuleStatus",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub travel_rule_status: Option<i64>,
+    pub travel_rule_status: Option<super::enums::DepositTravelRuleStatus>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -1974,7 +1974,7 @@ pub struct WithdrawHistoryResponseItem {
     pub coin: crate::Asset,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<i64>,
+    pub status: Option<super::enums::WithdrawStatus>,
     /// Exact `address` wire field.
     #[serde(rename = "address", default, skip_serializing_if = "Option::is_none")]
     pub address: Option<crate::SensitiveString>,
@@ -1993,7 +1993,7 @@ pub struct WithdrawHistoryResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub transfer_type: Option<i64>,
+    pub transfer_type: Option<super::enums::TransferDirection>,
     /// Exact `withdrawOrderId` wire field.
     #[serde(
         rename = "withdrawOrderId",
@@ -2013,7 +2013,7 @@ pub struct WithdrawHistoryResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub wallet_type: Option<i64>,
+    pub wallet_type: Option<super::enums::WalletType>,
     /// Exact `txKey` wire field.
     #[serde(rename = "txKey", default, skip_serializing_if = "Option::is_none")]
     pub tx_key: Option<crate::SensitiveString>,
@@ -2060,7 +2060,7 @@ pub type GetSymbolsDelistScheduleForSpotResponse = Vec<GetSymbolsDelistScheduleF
 pub struct SystemStatusResponse {
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<i64>,
+    pub status: Option<super::enums::SystemStatus>,
     /// Exact `msg` wire field.
     #[serde(rename = "msg", default, skip_serializing_if = "Option::is_none")]
     pub msg: Option<crate::SensitiveString>,
@@ -2201,14 +2201,14 @@ pub struct DepositHistoryTravelRuleResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub travel_rule_status: Option<i64>,
+    pub travel_rule_status: Option<super::enums::TravelRuleStatus>,
     /// Exact `travelRuleStatusV2` wire field.
     #[serde(
         rename = "travelRuleStatusV2",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub travel_rule_status_v2: Option<String>,
+    pub travel_rule_status_v2: Option<super::enums::TravelRuleVerificationStatus>,
     /// Exact `address` wire field.
     #[serde(rename = "address", default, skip_serializing_if = "Option::is_none")]
     pub address: Option<crate::SensitiveString>,
@@ -2620,7 +2620,7 @@ pub struct WithdrawHistoryV1ResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub travel_rule_status: Option<i64>,
+    pub travel_rule_status: Option<super::enums::TravelRuleStatus>,
     /// Exact `address` wire field.
     #[serde(rename = "address", default, skip_serializing_if = "Option::is_none")]
     pub address: Option<crate::SensitiveString>,
@@ -2722,7 +2722,7 @@ pub struct WithdrawHistoryV2ResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub travel_rule_status: Option<i64>,
+    pub travel_rule_status: Option<super::enums::TravelRuleStatus>,
     /// Exact `address` wire field.
     #[serde(rename = "address", default, skip_serializing_if = "Option::is_none")]
     pub address: Option<crate::SensitiveString>,

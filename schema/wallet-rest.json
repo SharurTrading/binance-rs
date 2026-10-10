@@ -3,7 +3,208 @@
   "sha256": "bdad0a6ddab5a6e21fb5906c767664b99a3bc19cbae73479b29e8f9e0c6d2c1e",
   "checked": "2026-10-10",
   "components": {
-    "schemas": {}
+    "schemas": {
+      "SystemStatus": {
+        "type": "integer",
+        "enum": [
+          0,
+          1
+        ],
+        "description": "Native `SystemStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/legacy-docs/wallet/others/system-status"
+        ],
+        "x-rust-variants": {
+          "0": "Normal",
+          "1": "Maintenance"
+        }
+      },
+      "DepositTravelRuleStatus": {
+        "type": "integer",
+        "enum": [
+          0,
+          1
+        ],
+        "description": "Native `DepositTravelRuleStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/legacy-docs/wallet/capital/deposite-history"
+        ],
+        "x-rust-variants": {
+          "0": "Ready",
+          "1": "InformationRequired"
+        }
+      },
+      "WalletType": {
+        "type": "integer",
+        "enum": [
+          0,
+          1
+        ],
+        "description": "Native `WalletType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/legacy-docs/wallet/capital/withdraw-history"
+        ],
+        "x-rust-variants": {
+          "0": "Spot",
+          "1": "Funding"
+        }
+      },
+      "DepositStatus": {
+        "type": "integer",
+        "enum": [
+          0,
+          1,
+          2,
+          6,
+          7,
+          8
+        ],
+        "description": "Native `DepositStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/legacy-docs/wallet/capital/deposite-history"
+        ],
+        "x-rust-variants": {
+          "0": "Pending",
+          "1": "Success",
+          "2": "Rejected",
+          "6": "CreditedNotWithdrawable",
+          "7": "WrongDeposit",
+          "8": "WaitingUserConfirmation"
+        }
+      },
+      "CloudMiningStatus": {
+        "type": "string",
+        "enum": [
+          "S"
+        ],
+        "description": "Native `CloudMiningStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#get-cloud-mining-payment-and-refund-history"
+        ]
+      },
+      "CloudMiningPaymentType": {
+        "type": "integer",
+        "enum": [
+          248,
+          249
+        ],
+        "description": "Native `CloudMiningPaymentType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#get-cloud-mining-payment-and-refund-history"
+        ],
+        "x-rust-variants": {
+          "248": "Payment",
+          "249": "Refund"
+        }
+      },
+      "TravelRuleVerificationStatus": {
+        "type": "string",
+        "enum": [
+          "PASSED",
+          "PENDING",
+          "REJECTED"
+        ],
+        "description": "Native `TravelRuleVerificationStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#deposit-history-travel-rule"
+        ]
+      },
+      "TransferDirection": {
+        "type": "integer",
+        "enum": [
+          0,
+          1
+        ],
+        "description": "Native `TransferDirection` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/legacy-docs/wallet/capital/deposite-history",
+          "https://developers.binance.com/legacy-docs/wallet/capital/withdraw-history"
+        ],
+        "x-rust-variants": {
+          "0": "External",
+          "1": "Internal"
+        }
+      },
+      "WithdrawStatus": {
+        "type": "integer",
+        "enum": [
+          0,
+          2,
+          3,
+          4,
+          6
+        ],
+        "description": "Native `WithdrawStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/legacy-docs/wallet/capital/withdraw-history"
+        ],
+        "x-rust-variants": {
+          "0": "EmailSent",
+          "2": "AwaitingApproval",
+          "3": "Rejected",
+          "4": "Processing",
+          "6": "Completed"
+        }
+      },
+      "UniversalTransferType": {
+        "type": "string",
+        "enum": [
+          "MAIN_UMFUTURE",
+          "MAIN_CMFUTURE",
+          "MAIN_MARGIN",
+          "UMFUTURE_MAIN",
+          "UMFUTURE_MARGIN",
+          "CMFUTURE_MAIN",
+          "CMFUTURE_MARGIN",
+          "MARGIN_MAIN",
+          "MARGIN_UMFUTURE",
+          "MARGIN_CMFUTURE",
+          "ISOLATEDMARGIN_MARGIN",
+          "MARGIN_ISOLATEDMARGIN",
+          "ISOLATEDMARGIN_ISOLATEDMARGIN",
+          "MAIN_FUNDING",
+          "FUNDING_MAIN",
+          "FUNDING_UMFUTURE",
+          "UMFUTURE_FUNDING",
+          "MARGIN_FUNDING",
+          "FUNDING_MARGIN",
+          "FUNDING_CMFUTURE",
+          "CMFUTURE_FUNDING",
+          "MAIN_OPTION",
+          "OPTION_MAIN",
+          "UMFUTURE_OPTION",
+          "OPTION_UMFUTURE",
+          "MARGIN_OPTION",
+          "OPTION_MARGIN",
+          "FUNDING_OPTION",
+          "OPTION_FUNDING",
+          "MAIN_PORTFOLIO_MARGIN",
+          "PORTFOLIO_MARGIN_MAIN"
+        ],
+        "description": "Native `UniversalTransferType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#user-universal-transfer"
+        ]
+      },
+      "TravelRuleStatus": {
+        "type": "integer",
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "description": "Native `TravelRuleStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#deposit-history-travel-rule",
+          "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-history-v1"
+        ],
+        "x-rust-variants": {
+          "0": "Completed",
+          "1": "Pending",
+          "2": "Failed"
+        }
+      }
+    }
   },
   "operations": [
     {
@@ -1771,8 +1972,7 @@
                           "format": "int64"
                         },
                         "type": {
-                          "type": "integer",
-                          "format": "int64"
+                          "$ref": "#/components/schemas/CloudMiningPaymentType"
                         },
                         "asset": {
                           "type": "string",
@@ -1783,7 +1983,7 @@
                           "x-decimal": true
                         },
                         "status": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/CloudMiningStatus"
                         }
                       }
                     }
@@ -2124,7 +2324,7 @@
                           "x-decimal": true
                         },
                         "type": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/UniversalTransferType"
                         },
                         "status": {
                           "type": "string"
@@ -3094,8 +3294,7 @@
                       "x-rust-type": "super::Network"
                     },
                     "status": {
-                      "type": "integer",
-                      "format": "int64"
+                      "$ref": "#/components/schemas/DepositStatus"
                     },
                     "address": {
                       "type": "string",
@@ -3118,8 +3317,7 @@
                       "format": "int64"
                     },
                     "transferType": {
-                      "type": "integer",
-                      "format": "int64"
+                      "$ref": "#/components/schemas/TransferDirection"
                     },
                     "confirmTimes": {
                       "type": "string"
@@ -3129,12 +3327,10 @@
                       "format": "int64"
                     },
                     "walletType": {
-                      "type": "integer",
-                      "format": "int64"
+                      "$ref": "#/components/schemas/WalletType"
                     },
                     "travelRuleStatus": {
-                      "type": "integer",
-                      "format": "int64"
+                      "$ref": "#/components/schemas/DepositTravelRuleStatus"
                     }
                   }
                 }
@@ -3680,8 +3876,7 @@
                       "x-rust-type": "crate::Asset"
                     },
                     "status": {
-                      "type": "integer",
-                      "format": "int64"
+                      "$ref": "#/components/schemas/WithdrawStatus"
                     },
                     "address": {
                       "type": "string",
@@ -3699,8 +3894,7 @@
                       "x-rust-type": "super::Network"
                     },
                     "transferType": {
-                      "type": "integer",
-                      "format": "int64"
+                      "$ref": "#/components/schemas/TransferDirection"
                     },
                     "withdrawOrderId": {
                       "type": "string",
@@ -3715,8 +3909,7 @@
                       "format": "int64"
                     },
                     "walletType": {
-                      "type": "integer",
-                      "format": "int64"
+                      "$ref": "#/components/schemas/WalletType"
                     },
                     "txKey": {
                       "type": "string",
@@ -3811,8 +4004,7 @@
                 "type": "object",
                 "properties": {
                   "status": {
-                    "type": "integer",
-                    "format": "int64"
+                    "$ref": "#/components/schemas/SystemStatus"
                   },
                   "msg": {
                     "type": "string",
@@ -4250,11 +4442,10 @@
                       "format": "int64"
                     },
                     "travelRuleStatus": {
-                      "type": "integer",
-                      "format": "int64"
+                      "$ref": "#/components/schemas/TravelRuleStatus"
                     },
                     "travelRuleStatusV2": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/TravelRuleVerificationStatus"
                     },
                     "address": {
                       "type": "string",
@@ -5160,8 +5351,7 @@
                       "format": "int64"
                     },
                     "travelRuleStatus": {
-                      "type": "integer",
-                      "format": "int64"
+                      "$ref": "#/components/schemas/TravelRuleStatus"
                     },
                     "address": {
                       "type": "string",
@@ -5381,8 +5571,7 @@
                       "format": "int64"
                     },
                     "travelRuleStatus": {
-                      "type": "integer",
-                      "format": "int64"
+                      "$ref": "#/components/schemas/TravelRuleStatus"
                     },
                     "address": {
                       "type": "string",

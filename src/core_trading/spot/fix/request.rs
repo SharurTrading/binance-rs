@@ -142,6 +142,8 @@ impl RequestBuilder {
         Ok(self)
     }
     /// Validate required/conditional wire behavior before network admission.
+    /// Price and trigger price retain their exact sign; the venue's symbol filters
+    /// decide admissibility. Quantity, quote spend and iceberg size remain positive.
     ///
     /// # Errors
     /// Refuses role mismatch, missing caller identities, contradictory quantities,
@@ -241,10 +243,8 @@ fn order(fields: &Fields) -> Result<(), Error> {
         ));
     }
     positive(fields, if base { "OrderQty" } else { "CashOrderQty" })?;
-    for n in ["Price", "TriggerPrice", "MaxFloor"] {
-        if fields.get(n).is_some() {
-            positive(fields, n)?;
-        }
+    if fields.get("MaxFloor").is_some() {
+        positive(fields, "MaxFloor")?;
     }
     match code(fields, "OrdType") {
         Some("1") => (),

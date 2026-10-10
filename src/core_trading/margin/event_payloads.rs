@@ -29,6 +29,10 @@ impl From<Value> for UnknownMessage {
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum UserPayload {
+    /// Announced native margin level/status evidence, distinct from legacy risk events.
+    MarginLevelChange(Box<super::stream_models::MarginLevelChangeEvent>),
+    /// Announced native per-asset liability records, never a full account replacement.
+    LiabilityChange(Box<super::stream_models::LiabilityChangeEvent>),
     /// Cross-margin risk level and call status; no liquidation policy is selected.
     MarginLevelStatusChange(Box<super::stream_models::MarginLevelStatusChangeEvent>),
     /// Native asset principal and interest update, not a full account snapshot.
@@ -61,6 +65,12 @@ pub fn user_payload(value: Value) -> Result<UserPayload, crate::Error> {
         .and_then(Value::as_str)
         .ok_or(crate::Error::Gap("Margin event type required"))?;
     match kind {
+        "marginLevelChange" => {
+            serde_json::from_value(value).map(|v| UserPayload::MarginLevelChange(Box::new(v)))
+        }
+        "liabilityChange" => {
+            serde_json::from_value(value).map(|v| UserPayload::LiabilityChange(Box::new(v)))
+        }
         "MARGIN_LEVEL_STATUS_CHANGE" => {
             serde_json::from_value(value).map(|v| UserPayload::MarginLevelStatusChange(Box::new(v)))
         }

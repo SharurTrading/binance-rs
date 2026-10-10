@@ -21,11 +21,14 @@ impl Precision {
     /// [`PRICE_FILTER` `tickSize`](https://github.com/binance/binance-spot-api-docs/blob/master/filters.md#price_filter)
     /// and [`LOT_SIZE` `stepSize`](https://github.com/binance/binance-spot-api-docs/blob/master/filters.md#lot_size):
     /// the intervals a price or quantity moves by. They are not prices. A zero
-    /// tick size disables the rule and gives no exponent to encode with, and a
-    /// negative value is no interval.
+    /// tick size disables the rule and supplies no encoding exponent. Zero quantity
+    /// increments likewise supply no precision. Nonzero negative increments use their
+    /// magnitude, following the explicit [operator decision](https://github.com/SharurTrading/binance-rs/issues/74);
+    /// their sign does not change the exact decimal exponent. Native metadata is unchanged.
     ///
     /// # Errors
-    /// Refuses absent/invalid symbol or nonpositive price/quantity increments.
+    /// Refuses absent/invalid symbol or increments. Zero returns a typed validation
+    /// diagnostic identifying unavailable price or quantity precision; no exponent is invented.
     pub fn from_instrument(instrument: &Fields) -> Result<Self, Error> {
         let Some(Value::Symbol(symbol)) = instrument.get("Symbol") else {
             return Err(Error::Validation("FIX instrument symbol"));
@@ -36,16 +39,21 @@ impl Precision {
         let Some(Value::Quantity(qty)) = instrument.get("MinQtyIncrement") else {
             return Err(Error::Validation("FIX instrument quantity increment"));
         };
-        if *price <= Decimal::ZERO || *qty <= Decimal::ZERO {
+        if price.is_zero() {
             return Err(Error::Validation(
-                "FIX instrument increments must be positive",
+                "FIX price precision unavailable: price filter disabled",
+            ));
+        }
+        if qty.is_zero() {
+            return Err(Error::Validation(
+                "FIX quantity precision unavailable: zero increment",
             ));
         }
         Ok(Self {
             symbol: symbol.clone(),
-            price: -i8::try_from(price.normalize().scale())
+            price: -i8::try_from(price.abs().normalize().scale())
                 .map_err(|_| Error::Validation("FIX price precision"))?,
-            qty: -i8::try_from(qty.normalize().scale())
+            qty: -i8::try_from(qty.abs().normalize().scale())
                 .map_err(|_| Error::Validation("FIX quantity precision"))?,
         })
     }
@@ -394,4 +402,42 @@ fn mantissa(value: Decimal, exponent: i8) -> Result<i128, Error> {
         mantissa /= factor;
     }
     Ok(mantissa)
+}
+
+#[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    reason = "synthetic precision boundary assertions"
+)]
+mod precision_boundary_tests {
+    use super::*;
+    use crate::core_trading::spot::fix::Role;
+
+    #[test]
+    fn extreme_signed_increments_retain_native_precision_and_metadata() {
+        for price in [Decimal::MIN, Decimal::MAX] {
+            for quantity in [Decimal::MIN, Decimal::MAX] {
+                let instrument = Fields::new(Role::MarketData)
+                    .with("Symbol", Value::Symbol(Symbol::new("BTCUSDT").unwrap()))
+                    .unwrap()
+                    .with("MinPriceIncrement", Value::Price(price))
+                    .unwrap()
+                    .with("MinQtyIncrement", Value::Quantity(quantity))
+                    .unwrap();
+                let precision = Precision::from_instrument(&instrument).unwrap();
+                assert_eq!(precision.price, 0);
+                assert_eq!(precision.qty, 0);
+                assert_eq!(mantissa(Decimal::ONE, precision.price).unwrap(), 1);
+                assert_eq!(mantissa(Decimal::ONE, precision.qty).unwrap(), 1);
+                assert_eq!(
+                    instrument.get("MinPriceIncrement"),
+                    Some(&Value::Price(price))
+                );
+                assert_eq!(
+                    instrument.get("MinQtyIncrement"),
+                    Some(&Value::Quantity(quantity))
+                );
+            }
+        }
+    }
 }

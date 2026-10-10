@@ -3,7 +3,21 @@
   "sha256": "b73d1742126778707e132a51ace65df3e7fae277f72b5da1c63f699bb4229296",
   "checked": "2026-10-10",
   "components": {
-    "schemas": {}
+    "schemas": {
+      "OrderStatus": {
+        "type": "string",
+        "enum": [
+          "PROCESS",
+          "ACCEPT_SUCCESS",
+          "SUCCESS",
+          "FAIL"
+        ],
+        "description": "Native `OrderStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#accept-quote"
+        ]
+      }
+    }
   },
   "operations": [
     {
@@ -206,13 +220,7 @@
                     "format": "int64"
                   },
                   "orderStatus": {
-                    "type": "string",
-                    "enum": [
-                      "PROCESS",
-                      "ACCEPT_SUCCESS",
-                      "SUCCESS",
-                      "FAIL"
-                    ]
+                    "$ref": "#/components/schemas/OrderStatus"
                   }
                 },
                 "required": [
@@ -395,7 +403,7 @@
                           "x-rust-type": "super::OrderId"
                         },
                         "orderStatus": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderStatus"
                         },
                         "fromAsset": {
                           "type": "string",
@@ -512,7 +520,7 @@
                     "x-rust-type": "super::OrderId"
                   },
                   "orderStatus": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderStatus"
                   },
                   "fromAsset": {
                     "type": "string",
@@ -751,7 +759,7 @@
                           "x-rust-type": "super::OrderId"
                         },
                         "orderStatus": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderStatus"
                         },
                         "fromAsset": {
                           "type": "string",

@@ -637,6 +637,104 @@
             "outboundAccountPosition": "#/components/schemas/outboundAccountPosition"
           }
         }
+      },
+      "LiabilityChangeType": {
+        "type": "string",
+        "enum": [
+          "BORROW",
+          "REPAY",
+          "INTEREST",
+          "DEBT_CHANGE"
+        ],
+        "description": "Native liability-change kind announced for the Margin User Data Stream.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/margin-trading/change-log#2026-09-25"
+        ]
+      },
+      "marginLevelChange": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "marginLevelChange"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "l": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "s": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "l",
+          "s"
+        ],
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/margin-trading/change-log#2026-09-25"
+        ],
+        "x-announced-effective-date": "2026-10-14"
+      },
+      "liabilityChange": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "liabilityChange"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "t": {
+            "$ref": "#/components/schemas/LiabilityChangeType"
+          },
+          "L": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "p": {
+                  "type": "string",
+                  "x-decimal": true
+                },
+                "i": {
+                  "type": "string",
+                  "x-decimal": true
+                }
+              },
+              "required": [
+                "a",
+                "p",
+                "i"
+              ]
+            }
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "t",
+          "L"
+        ],
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/margin-trading/change-log#2026-09-25"
+        ],
+        "x-announced-effective-date": "2026-10-14"
       }
     }
   },

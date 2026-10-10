@@ -254,7 +254,7 @@
                               "x-decimal": true
                             },
                             "positionSide": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/PositionSide"
                             },
                             "positionAmt": {
                               "type": "string",
@@ -280,10 +280,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -497,7 +497,7 @@
                               "type": "string"
                             },
                             "positionSide": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/PositionSide"
                             },
                             "positionAmt": {
                               "type": "string",
@@ -542,10 +542,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -689,10 +689,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -836,10 +836,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1014,10 +1014,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1139,10 +1139,10 @@
                         "items": {
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -1212,10 +1212,10 @@
                         "items": {
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -1323,10 +1323,10 @@
                         "items": {
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -1380,10 +1380,10 @@
                         "items": {
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -1513,10 +1513,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1647,7 +1647,7 @@
                         "x-decimal": true
                       },
                       "origType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "price": {
                         "type": "string",
@@ -1657,13 +1657,13 @@
                         "type": "boolean"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "positionSide": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PositionSide"
                       },
                       "status": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "stopPrice": {
                         "type": "string",
@@ -1676,10 +1676,10 @@
                         "type": "string"
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "activatePrice": {
                         "type": "string",
@@ -1694,16 +1694,16 @@
                         "format": "int64"
                       },
                       "workingType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingType"
                       },
                       "priceProtect": {
                         "type": "boolean"
                       },
                       "priceMatch": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PriceMatch"
                       },
                       "selfTradePreventionMode": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/SelfTradePreventionMode"
                       },
                       "goodTillDate": {
                         "type": "integer",
@@ -1717,10 +1717,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1884,7 +1884,7 @@
                         "type": "string"
                       },
                       "status": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "clientOrderId": {
                         "type": "string"
@@ -1910,10 +1910,10 @@
                         "x-decimal": true
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "reduceOnly": {
                         "type": "boolean"
@@ -1922,29 +1922,29 @@
                         "type": "boolean"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "positionSide": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PositionSide"
                       },
                       "stopPrice": {
                         "type": "string",
                         "x-decimal": true
                       },
                       "workingType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingType"
                       },
                       "priceProtect": {
                         "type": "boolean"
                       },
                       "origType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "priceMatch": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PriceMatch"
                       },
                       "selfTradePreventionMode": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/SelfTradePreventionMode"
                       },
                       "goodTillDate": {
                         "type": "integer",
@@ -1962,10 +1962,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -2213,29 +2213,29 @@
                         "type": "string"
                       },
                       "algoType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/AlgoType"
                       },
                       "orderType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "symbol": {
                         "type": "string"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "positionSide": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PositionSide"
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "quantity": {
                         "type": "string",
                         "x-decimal": true
                       },
                       "algoStatus": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/AlgoStatus"
                       },
                       "triggerPrice": {
                         "type": "string",
@@ -2251,13 +2251,13 @@
                         "x-decimal-unavailable": "null"
                       },
                       "selfTradePreventionMode": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/SelfTradePreventionMode"
                       },
                       "workingType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingType"
                       },
                       "priceMatch": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PriceMatch"
                       },
                       "closePosition": {
                         "type": "boolean"
@@ -2292,10 +2292,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -2498,7 +2498,7 @@
                         "type": "string"
                       },
                       "status": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "clientOrderId": {
                         "type": "string"
@@ -2520,10 +2520,10 @@
                         "x-decimal": true
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "reduceOnly": {
                         "type": "boolean"
@@ -2532,29 +2532,29 @@
                         "type": "boolean"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "positionSide": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PositionSide"
                       },
                       "stopPrice": {
                         "type": "string",
                         "x-decimal": true
                       },
                       "workingType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingType"
                       },
                       "priceProtect": {
                         "type": "boolean"
                       },
                       "origType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "priceMatch": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PriceMatch"
                       },
                       "selfTradePreventionMode": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/SelfTradePreventionMode"
                       },
                       "goodTillDate": {
                         "type": "integer",
@@ -2572,10 +2572,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -2732,7 +2732,7 @@
                           "x-decimal": true
                         },
                         "positionSide": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/PositionSide"
                         },
                         "updateTime": {
                           "type": "integer",
@@ -2747,10 +2747,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -2859,7 +2859,7 @@
                           "type": "string"
                         },
                         "positionSide": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/PositionSide"
                         },
                         "positionAmt": {
                           "type": "string",
@@ -2940,10 +2940,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -3078,7 +3078,7 @@
                         "x-decimal": true
                       },
                       "origType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "price": {
                         "type": "string",
@@ -3088,13 +3088,13 @@
                         "type": "boolean"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "positionSide": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PositionSide"
                       },
                       "status": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "stopPrice": {
                         "type": "string",
@@ -3111,10 +3111,10 @@
                         "format": "int64"
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "activatePrice": {
                         "type": "string",
@@ -3129,16 +3129,16 @@
                         "format": "int64"
                       },
                       "workingType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingType"
                       },
                       "priceProtect": {
                         "type": "boolean"
                       },
                       "priceMatch": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PriceMatch"
                       },
                       "selfTradePreventionMode": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/SelfTradePreventionMode"
                       },
                       "goodTillDate": {
                         "type": "integer",
@@ -3225,10 +3225,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -3329,10 +3329,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -3433,10 +3433,10 @@
                     "items": {
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -3466,5 +3466,173 @@
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/user-data-streams#start-user-data-stream"
     }
   ],
-  "components": {}
+  "components": {
+    "schemas": {
+      "PriceMatch": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "OPPONENT",
+          "OPPONENT_5",
+          "OPPONENT_10",
+          "OPPONENT_20",
+          "QUEUE",
+          "QUEUE_5",
+          "QUEUE_10",
+          "QUEUE_20"
+        ],
+        "description": "Native `PriceMatch` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      },
+      "WorkingType": {
+        "type": "string",
+        "enum": [
+          "MARK_PRICE",
+          "CONTRACT_PRICE"
+        ],
+        "description": "Native `WorkingType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      },
+      "OrderType": {
+        "type": "string",
+        "enum": [
+          "LIMIT",
+          "MARKET",
+          "STOP",
+          "STOP_MARKET",
+          "TAKE_PROFIT",
+          "TAKE_PROFIT_MARKET",
+          "TRAILING_STOP_MARKET",
+          "LIQUIDATION"
+        ],
+        "description": "Native `OrderType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition",
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams"
+        ]
+      },
+      "PositionSide": {
+        "type": "string",
+        "enum": [
+          "BOTH",
+          "LONG",
+          "SHORT"
+        ],
+        "description": "Native `PositionSide` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "PARTIALLY_FILLED",
+          "FILLED",
+          "CANCELED",
+          "REJECTED",
+          "EXPIRED",
+          "EXPIRED_IN_MATCH"
+        ],
+        "description": "Native `OrderStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition",
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams"
+        ]
+      },
+      "OrderSide": {
+        "type": "string",
+        "enum": [
+          "BUY",
+          "SELL"
+        ],
+        "description": "Native `OrderSide` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      },
+      "SelfTradePreventionMode": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "EXPIRE_TAKER",
+          "EXPIRE_BOTH",
+          "EXPIRE_MAKER"
+        ],
+        "description": "Native `SelfTradePreventionMode` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition",
+          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade#new-order"
+        ]
+      },
+      "TimeInForce": {
+        "type": "string",
+        "enum": [
+          "GTC",
+          "IOC",
+          "FOK",
+          "GTX",
+          "GTD",
+          "RPI"
+        ],
+        "description": "Native `TimeInForce` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      },
+      "AlgoType": {
+        "type": "string",
+        "enum": [
+          "CONDITIONAL"
+        ],
+        "description": "Native `AlgoType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade#new-algo-order"
+        ]
+      },
+      "AlgoStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "CANCELED",
+          "TRIGGERING",
+          "TRIGGERED",
+          "FINISHED",
+          "REJECTED",
+          "EXPIRED"
+        ],
+        "description": "Native `AlgoStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams"
+        ]
+      },
+      "RateLimitInterval": {
+        "type": "string",
+        "enum": [
+          "SECOND",
+          "MINUTE"
+        ],
+        "description": "Native `RateLimitInterval` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition",
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/websocket-api-general-info"
+        ]
+      },
+      "RateLimitType": {
+        "type": "string",
+        "enum": [
+          "REQUEST_WEIGHT",
+          "ORDERS"
+        ],
+        "description": "Native `RateLimitType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      }
+    }
+  }
 }

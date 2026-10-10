@@ -147,7 +147,10 @@ async fn unknown_acceptance_status_is_preserved_without_claiming_execution() {
         .await
         .unwrap()
         .data;
-    assert_eq!(result.receipt.order_status, "FUTURE_STATUS");
+    assert!(matches!(
+        &result.receipt.order_status,
+        convert::enums::OrderStatus::Unknown(value) if value == "FUTURE_STATUS"
+    ));
     assert_eq!(result.outcome(), Outcome::Unknown);
     assert_eq!(result.quotation.from_asset.as_str(), "BTC");
     fixture.finish().await;
@@ -219,7 +222,7 @@ async fn accept_quote_status_enum_is_pinned_from_the_catalog() {
             .await
             .unwrap()
             .data;
-        assert_eq!(result.receipt.order_status, status);
+        assert_eq!(result.receipt.order_status.as_str(), status);
         assert_eq!(result.outcome(), expected);
         fixture.finish().await;
     }

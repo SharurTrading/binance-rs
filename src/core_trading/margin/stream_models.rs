@@ -846,3 +846,63 @@ pub struct TradeDataStreamEventsEventVariant7UpperBItem {
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
 }
+
+/// Provider-native `MarginLevelChangeEvent` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct MarginLevelChangeEvent {
+    /// Exact `e` wire field.
+    #[serde(rename = "e")]
+    pub e: String,
+    /// Exact `E` wire field.
+    #[serde(rename = "E")]
+    pub upper_e: i64,
+    /// Exact `l` wire field.
+    #[serde(rename = "l", deserialize_with = "super::wire::decimal")]
+    pub l: Decimal,
+    /// Exact `s` wire field.
+    #[serde(rename = "s")]
+    pub s: String,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `LiabilityChangeEvent` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct LiabilityChangeEvent {
+    /// Exact `e` wire field.
+    #[serde(rename = "e")]
+    pub e: String,
+    /// Exact `E` wire field.
+    #[serde(rename = "E")]
+    pub upper_e: i64,
+    /// Exact `t` wire field.
+    #[serde(rename = "t")]
+    pub t: super::enums::LiabilityChangeType,
+    /// Exact `L` wire field.
+    #[serde(rename = "L")]
+    pub upper_l: Vec<LiabilityChangeEventUpperLItem>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `LiabilityChangeEventUpperLItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct LiabilityChangeEventUpperLItem {
+    /// Exact `a` wire field.
+    #[serde(rename = "a")]
+    pub a: crate::Asset,
+    /// Exact `p` wire field.
+    #[serde(rename = "p", deserialize_with = "super::wire::decimal")]
+    pub p: Decimal,
+    /// Exact `i` wire field.
+    #[serde(rename = "i", deserialize_with = "super::wire::decimal")]
+    pub i: Decimal,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}

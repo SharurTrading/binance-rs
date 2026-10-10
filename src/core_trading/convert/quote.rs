@@ -37,11 +37,14 @@ impl Acceptance {
         status_outcome(&self.receipt.order_status)
     }
 }
-fn status_outcome(status: &str) -> Outcome {
+fn status_outcome(status: &super::enums::OrderStatus) -> Outcome {
+    use super::enums::OrderStatus;
     match status {
-        "PROCESS" | "ACCEPT_SUCCESS" | "SUCCESS" => Outcome::Accepted,
-        "FAIL" => Outcome::Rejected,
-        _ => Outcome::Unknown,
+        OrderStatus::Process | OrderStatus::AcceptSuccess | OrderStatus::Success => {
+            Outcome::Accepted
+        }
+        OrderStatus::Fail => Outcome::Rejected,
+        OrderStatus::Unknown(_) => Outcome::Unknown,
     }
 }
 /// Quote acceptance authority constructed from a venue receipt with explicit expiry.

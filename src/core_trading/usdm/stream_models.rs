@@ -102,13 +102,13 @@ pub struct AllMarketLiquidationOrderStreamsEventO {
     pub s: Option<String>,
     /// Exact `S` wire field.
     #[serde(rename = "S", default, skip_serializing_if = "Option::is_none")]
-    pub upper_s: Option<String>,
+    pub upper_s: Option<super::enums::OrderSide>,
     /// Exact `o` wire field.
     #[serde(rename = "o", default, skip_serializing_if = "Option::is_none")]
-    pub o: Option<String>,
+    pub o: Option<super::enums::OrderType>,
     /// Exact `f` wire field.
     #[serde(rename = "f", default, skip_serializing_if = "Option::is_none")]
-    pub f: Option<String>,
+    pub f: Option<super::enums::TimeInForce>,
     /// Exact `q` wire field.
     #[serde(
         rename = "q",
@@ -135,7 +135,7 @@ pub struct AllMarketLiquidationOrderStreamsEventO {
     pub ap: Option<Decimal>,
     /// Exact `X` wire field.
     #[serde(rename = "X", default, skip_serializing_if = "Option::is_none")]
-    pub upper_x: Option<String>,
+    pub upper_x: Option<super::enums::OrderStatus>,
     /// Exact `l` wire field.
     #[serde(
         rename = "l",
@@ -458,7 +458,7 @@ pub struct ContinuousContractKlineCandlestickStreamsEventK {
     pub upper_t: Option<i64>,
     /// Exact `i` wire field.
     #[serde(rename = "i", default, skip_serializing_if = "Option::is_none")]
-    pub i: Option<String>,
+    pub i: Option<super::enums::KlineInterval>,
     /// Exact `f` wire field.
     #[serde(rename = "f", default, skip_serializing_if = "Option::is_none")]
     pub f: Option<i64>,
@@ -841,7 +841,7 @@ pub struct KlineCandlestickStreamsEventK {
     pub s: Option<String>,
     /// Exact `i` wire field.
     #[serde(rename = "i", default, skip_serializing_if = "Option::is_none")]
-    pub i: Option<String>,
+    pub i: Option<super::enums::KlineInterval>,
     /// Exact `f` wire field.
     #[serde(rename = "f", default, skip_serializing_if = "Option::is_none")]
     pub f: Option<i64>,
@@ -953,13 +953,13 @@ pub struct LiquidationOrderStreamsEventO {
     pub s: Option<String>,
     /// Exact `S` wire field.
     #[serde(rename = "S", default, skip_serializing_if = "Option::is_none")]
-    pub upper_s: Option<String>,
+    pub upper_s: Option<super::enums::OrderSide>,
     /// Exact `o` wire field.
     #[serde(rename = "o", default, skip_serializing_if = "Option::is_none")]
-    pub o: Option<String>,
+    pub o: Option<super::enums::OrderType>,
     /// Exact `f` wire field.
     #[serde(rename = "f", default, skip_serializing_if = "Option::is_none")]
-    pub f: Option<String>,
+    pub f: Option<super::enums::TimeInForce>,
     /// Exact `q` wire field.
     #[serde(
         rename = "q",
@@ -986,7 +986,7 @@ pub struct LiquidationOrderStreamsEventO {
     pub ap: Option<Decimal>,
     /// Exact `X` wire field.
     #[serde(rename = "X", default, skip_serializing_if = "Option::is_none")]
-    pub upper_x: Option<String>,
+    pub upper_x: Option<super::enums::OrderStatus>,
     /// Exact `l` wire field.
     #[serde(
         rename = "l",
@@ -1581,7 +1581,7 @@ pub struct AccountUpdateEvent {
 pub struct AccountUpdateEventA {
     /// Exact `m` wire field.
     #[serde(rename = "m")]
-    pub m: String,
+    pub m: super::enums::AccountUpdateReason,
     /// Exact `B` wire field.
     #[serde(rename = "B", default, skip_serializing_if = "Option::is_none")]
     pub upper_b: Option<Vec<AccountUpdateEventAUpperBItem>>,
@@ -1648,11 +1648,16 @@ pub struct AccountUpdateEventAUpperPItem {
     #[serde(rename = "mt")]
     pub mt: String,
     /// Exact `iw` wire field.
-    #[serde(rename = "iw", deserialize_with = "super::wire::decimal")]
-    pub iw: Decimal,
+    #[serde(
+        rename = "iw",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub iw: Option<Decimal>,
     /// Exact `ps` wire field.
     #[serde(rename = "ps")]
-    pub ps: String,
+    pub ps: super::enums::PositionSide,
     /// Unknown future wire fields, retained without inventing defaults.
     #[serde(flatten)]
     pub extra: BTreeMap<String, serde_json::Value>,
@@ -1691,28 +1696,28 @@ pub struct AlgoUpdateEventO {
     pub aid: i64,
     /// Exact `at` wire field.
     #[serde(rename = "at", default, skip_serializing_if = "Option::is_none")]
-    pub at: Option<String>,
+    pub at: Option<super::enums::AlgoType>,
     /// Exact `o` wire field.
     #[serde(rename = "o")]
-    pub o: String,
+    pub o: super::enums::OrderType,
     /// Exact `s` wire field.
     #[serde(rename = "s")]
     pub s: String,
     /// Exact `S` wire field.
     #[serde(rename = "S")]
-    pub upper_s: String,
+    pub upper_s: super::enums::OrderSide,
     /// Exact `ps` wire field.
     #[serde(rename = "ps")]
-    pub ps: String,
+    pub ps: super::enums::PositionSide,
     /// Exact `f` wire field.
     #[serde(rename = "f", default, skip_serializing_if = "Option::is_none")]
-    pub f: Option<String>,
+    pub f: Option<super::enums::TimeInForce>,
     /// Exact `q` wire field.
     #[serde(rename = "q", deserialize_with = "super::wire::decimal")]
     pub q: Decimal,
     /// Exact `X` wire field.
     #[serde(rename = "X")]
-    pub upper_x: String,
+    pub upper_x: super::enums::AlgoStatus,
     /// Exact `ai` wire field.
     #[serde(rename = "ai", default, skip_serializing_if = "Option::is_none")]
     pub ai: Option<String>,
@@ -1734,7 +1739,7 @@ pub struct AlgoUpdateEventO {
     pub aq: Option<Decimal>,
     /// Exact `act` wire field.
     #[serde(rename = "act", default, skip_serializing_if = "Option::is_none")]
-    pub act: Option<String>,
+    pub act: Option<super::enums::OrderType>,
     /// Exact `tp` wire field.
     #[serde(
         rename = "tp",
@@ -1753,13 +1758,13 @@ pub struct AlgoUpdateEventO {
     pub p: Option<Decimal>,
     /// Exact `V` wire field.
     #[serde(rename = "V", default, skip_serializing_if = "Option::is_none")]
-    pub upper_v: Option<String>,
+    pub upper_v: Option<super::enums::SelfTradePreventionMode>,
     /// Exact `wt` wire field.
     #[serde(rename = "wt", default, skip_serializing_if = "Option::is_none")]
-    pub wt: Option<String>,
+    pub wt: Option<super::enums::WorkingType>,
     /// Exact `pm` wire field.
     #[serde(rename = "pm", default, skip_serializing_if = "Option::is_none")]
-    pub pm: Option<String>,
+    pub pm: Option<super::enums::PriceMatch>,
     /// Exact `cp` wire field.
     #[serde(rename = "cp", default, skip_serializing_if = "Option::is_none")]
     pub cp: Option<bool>,
@@ -1963,7 +1968,7 @@ pub struct MarginCallEventPItem {
     pub s: String,
     /// Exact `ps` wire field.
     #[serde(rename = "ps")]
-    pub ps: String,
+    pub ps: super::enums::PositionSide,
     /// Exact `pa` wire field.
     #[serde(rename = "pa", deserialize_with = "super::wire::decimal")]
     pub pa: Decimal,
@@ -1971,8 +1976,13 @@ pub struct MarginCallEventPItem {
     #[serde(rename = "mt")]
     pub mt: String,
     /// Exact `iw` wire field.
-    #[serde(rename = "iw")]
-    pub iw: String,
+    #[serde(
+        rename = "iw",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub iw: Option<Decimal>,
     /// Exact `mp` wire field.
     #[serde(rename = "mp", deserialize_with = "super::wire::decimal")]
     pub mp: Decimal,
@@ -2020,13 +2030,13 @@ pub struct OrderTradeUpdateEventO {
     pub c: String,
     /// Exact `S` wire field.
     #[serde(rename = "S")]
-    pub upper_s: String,
+    pub upper_s: super::enums::OrderSide,
     /// Exact `o` wire field.
     #[serde(rename = "o")]
-    pub o: String,
+    pub o: super::enums::OrderType,
     /// Exact `f` wire field.
     #[serde(rename = "f", default, skip_serializing_if = "Option::is_none")]
-    pub f: Option<String>,
+    pub f: Option<super::enums::TimeInForce>,
     /// Exact `q` wire field.
     #[serde(rename = "q", deserialize_with = "super::wire::decimal")]
     pub q: Decimal,
@@ -2051,10 +2061,10 @@ pub struct OrderTradeUpdateEventO {
     pub sp: Option<Decimal>,
     /// Exact `x` wire field.
     #[serde(rename = "x")]
-    pub x: String,
+    pub x: super::enums::ExecutionType,
     /// Exact `X` wire field.
     #[serde(rename = "X")]
-    pub upper_x: String,
+    pub upper_x: super::enums::OrderStatus,
     /// Exact `i` wire field.
     #[serde(rename = "i")]
     pub i: i64,
@@ -2111,13 +2121,13 @@ pub struct OrderTradeUpdateEventO {
     pub upper_r: Option<bool>,
     /// Exact `wt` wire field.
     #[serde(rename = "wt", default, skip_serializing_if = "Option::is_none")]
-    pub wt: Option<String>,
+    pub wt: Option<super::enums::WorkingType>,
     /// Exact `ot` wire field.
     #[serde(rename = "ot", default, skip_serializing_if = "Option::is_none")]
-    pub ot: Option<String>,
+    pub ot: Option<super::enums::OrderType>,
     /// Exact `ps` wire field.
     #[serde(rename = "ps")]
-    pub ps: String,
+    pub ps: super::enums::PositionSide,
     /// Exact `cp` wire field.
     #[serde(rename = "cp", default, skip_serializing_if = "Option::is_none")]
     pub cp: Option<bool>,
@@ -2156,10 +2166,10 @@ pub struct OrderTradeUpdateEventO {
     pub rp: Option<Decimal>,
     /// Exact `V` wire field.
     #[serde(rename = "V", default, skip_serializing_if = "Option::is_none")]
-    pub upper_v: Option<String>,
+    pub upper_v: Option<super::enums::SelfTradePreventionMode>,
     /// Exact `pm` wire field.
     #[serde(rename = "pm", default, skip_serializing_if = "Option::is_none")]
-    pub pm: Option<String>,
+    pub pm: Option<super::enums::PriceMatch>,
     /// Exact `gtd` wire field.
     #[serde(rename = "gtd", default, skip_serializing_if = "Option::is_none")]
     pub gtd: Option<i64>,
@@ -2249,7 +2259,7 @@ pub struct TradeLiteEvent {
     pub c: String,
     /// Exact `S` wire field.
     #[serde(rename = "S")]
-    pub upper_s: String,
+    pub upper_s: super::enums::OrderSide,
     /// Exact `L` wire field.
     #[serde(rename = "L", deserialize_with = "super::wire::decimal")]
     pub upper_l: Decimal,

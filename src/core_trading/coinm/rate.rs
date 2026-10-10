@@ -111,8 +111,14 @@ fn stated(
     item: &super::rest_models::ExchangeInformationResponseRateLimitsItem,
 ) -> crate::core::StatedLimit<'_> {
     crate::core::StatedLimit {
-        kind: item.rate_limit_type.as_deref(),
-        interval: item.interval.as_deref(),
+        kind: item
+            .rate_limit_type
+            .as_ref()
+            .map(super::enums::RateLimitType::as_str),
+        interval: item
+            .interval
+            .as_ref()
+            .map(super::enums::RateLimitInterval::as_str),
         interval_num: item.interval_num,
         limit: item.limit,
     }

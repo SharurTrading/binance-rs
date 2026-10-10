@@ -84,7 +84,13 @@ The client does not synchronize server time automatically, renew listen keys,
 reconnect, replay orders, or reconcile trading state. Inject adjusted clocks and
 perform those documented operations explicitly. A listen-key expiry event remains
 visible. Unknown user event kinds are retained; malformed known execution data is
-a gap. Known optional provider fields are `Option`, never invented zeroes. Request
+a gap. Known optional provider fields are `Option`, never invented zeroes. USD-M account
+positions and margin calls retain an absent isolated-wallet field (`iw`) as `None`;
+when supplied, it remains an exact decimal, including a reported zero. This follows
+the [official stream schema](https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-streams/1.0.0/schema.yaml),
+which leaves that conditional field optional. The deterministic fixtures exercise
+schema-permitted omission and malformed money through a real loopback socket;
+they do not claim captured live cross-margin events ([#69](https://github.com/SharurTrading/binance-rs/issues/69)). Request
 builders check protocol constraints; current symbol-dependent filters and market
 state remain caller/venue checks. No complete order-book or atomic account snapshot
 is promised. GTD expiry is rechecked against the injected venue clock before the wire.
@@ -108,7 +114,12 @@ financial annotations. Cumulative base/quote amounts, annualized basis, funding
 rates, withdrawable amounts and liquidation fees use Decimal. Documented empty
 funding/interest rates for delivery contracts, empty trailing fields on new algo
 receipts, and the algo iceberg `"null"` sentinel map to absent amounts rather than
-zero; other malformed financial strings fail. See
+zero; other malformed financial strings fail. USD-M Basis also documents an empty
+`annualizedBasisRate` for perpetual contracts: this decodes as `None`, distinct from
+an exact numeric zero. COIN-M Basis retains its numeric contract; its current
+example provides no evidence for an empty-rate sentinel. See
+[USD-M Basis](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/market-data#basis),
+[COIN-M Basis](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/market-data#basis),
 [wire corrections #23](https://github.com/SharurTrading/binance-rs/issues/23) and the
 [USD-M trade reference](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade).
 

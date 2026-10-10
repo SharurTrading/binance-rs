@@ -14,6 +14,8 @@ pub use identity::{
 mod authority;
 pub use authority::TradingSymbolCount;
 mod config;
+/// Provider-native response enumerations with exact unknown-value retention.
+pub mod enums;
 pub mod event_payloads;
 mod rate;
 pub mod rest_models;

@@ -824,3 +824,102 @@ async fn unsubscribe_release_peer(
         .unwrap();
     stream.shutdown().await.unwrap();
 }
+
+#[test]
+fn instrument_precision_uses_negative_increment_magnitudes_without_rounding() {
+    use binance_client::{
+        Symbol,
+        spot::fix::{CompId, Fields, Header, Precision, Timestamp, decode_sbe},
+    };
+    let header = Header::request(
+        CompId::new("CLIENT").unwrap(),
+        2,
+        Timestamp::from_micros(1_790_471_000_123_456).unwrap(),
+    )
+    .unwrap();
+    for (price_increment, qty_increment) in [
+        ("-0.00000001", "0.001"),
+        ("0.00000001", "-0.001"),
+        ("-0.00000001", "-0.001"),
+    ] {
+        let instrument = Fields::new(Role::MarketData)
+            .with("Symbol", Value::Symbol(Symbol::new("BTCUSDT").unwrap()))
+            .unwrap()
+            .with(
+                "MinPriceIncrement",
+                Value::Price(price_increment.parse().unwrap()),
+            )
+            .unwrap()
+            .with(
+                "MinQtyIncrement",
+                Value::Quantity(qty_increment.parse().unwrap()),
+            )
+            .unwrap();
+        let precision = Precision::from_instrument(&instrument).unwrap();
+        let request = limit_order("negative-increment", "123.00000001");
+        let bytes = request
+            .encode_sbe(&header, std::slice::from_ref(&precision))
+            .unwrap();
+        let message = decode_sbe(Role::OrderEntry, &bytes).unwrap();
+        assert_eq!(message.field("Price"), request.fields().get("Price"));
+        assert_eq!(message.field("OrderQty"), request.fields().get("OrderQty"));
+        assert!(
+            limit_order("rounded", "123.000000001")
+                .encode_sbe(&header, &[precision])
+                .is_err()
+        );
+        assert_eq!(
+            instrument.get("MinPriceIncrement"),
+            Some(&Value::Price(price_increment.parse().unwrap()))
+        );
+        assert_eq!(
+            instrument.get("MinQtyIncrement"),
+            Some(&Value::Quantity(qty_increment.parse().unwrap()))
+        );
+    }
+}
+
+#[test]
+fn disabled_increment_reports_precision_unavailable_instead_of_an_invented_exponent() {
+    use binance_client::{
+        Symbol,
+        spot::fix::{Fields, Precision},
+    };
+    for (price_increment, qty_increment, diagnostic) in [
+        (
+            "0",
+            "0.001",
+            "FIX price precision unavailable: price filter disabled",
+        ),
+        (
+            "0.01",
+            "0",
+            "FIX quantity precision unavailable: zero increment",
+        ),
+    ] {
+        let instrument = Fields::new(Role::MarketData)
+            .with("Symbol", Value::Symbol(Symbol::new("BTCUSDT").unwrap()))
+            .unwrap()
+            .with(
+                "MinPriceIncrement",
+                Value::Price(price_increment.parse().unwrap()),
+            )
+            .unwrap()
+            .with(
+                "MinQtyIncrement",
+                Value::Quantity(qty_increment.parse().unwrap()),
+            )
+            .unwrap();
+        let error = Precision::from_instrument(&instrument).unwrap_err();
+        assert!(matches!(error, binance_client::Error::Validation(reason) if reason == diagnostic));
+        assert_eq!(error.outcome(), Some(binance_client::Outcome::NotSent));
+        assert_eq!(
+            instrument.get("MinPriceIncrement"),
+            Some(&Value::Price(price_increment.parse().unwrap()))
+        );
+        assert_eq!(
+            instrument.get("MinQtyIncrement"),
+            Some(&Value::Quantity(qty_increment.parse().unwrap()))
+        );
+    }
+}

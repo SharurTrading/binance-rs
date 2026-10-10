@@ -226,13 +226,15 @@ impl Streams {
     /// Data for the added streams arrives in this generation, decoded like the
     /// streams named at connect. Ingress keeps accumulating while the call waits.
     /// The message is charged with pongs against the connection's documented
-    /// incoming-message ceiling. Nothing is resubscribed after a reconnect: a new
+    /// incoming-message ceiling, whose last slot stays reserved for a pong.
+    /// Nothing is resubscribed after a reconnect: a new
     /// generation carries only the streams its own `connect` and calls name.
     ///
     /// # Errors
     /// Unsent: an empty or duplicated set, a user-data socket,
     /// more than 1024 streams on the socket, an expired deadline, or
-    /// [`Error::Admission`] when the incoming-message ceiling is spent.
+    /// [`Error::Admission`] when the incoming-message ceiling has no slot a
+    /// control may take; its last slot stays reserved for a pong.
     /// [`Error::ControlRefused`] carries the venue's code when it refuses. A lost
     /// answer is [`crate::Outcome::Unknown`]; ask [`Streams::list_subscriptions`].
     pub async fn subscribe(&mut self, streams: &[Stream], deadline: Instant) -> Result<(), Error> {
@@ -253,7 +255,9 @@ impl Streams {
     ///
     /// # Errors
     /// Unsent: an empty or duplicated set, a stream this socket never subscribed,
-    /// a user-data socket, an expired deadline, or [`Error::Admission`].
+    /// a user-data socket, an expired deadline, or [`Error::Admission`] when the
+    /// incoming-message ceiling has no slot a control may take; its last slot
+    /// stays reserved for a pong.
     /// [`Error::ControlRefused`] carries the venue's code when it refuses. A lost
     /// answer is [`crate::Outcome::Unknown`] and the streams stay counted.
     pub async fn unsubscribe(
@@ -274,7 +278,9 @@ impl Streams {
     /// The venue's own list of this socket's subscriptions, from `LIST_SUBSCRIPTIONS`.
     ///
     /// # Errors
-    /// Unsent: a user-data socket, an expired deadline, or [`Error::Admission`].
+    /// Unsent: a user-data socket, an expired deadline, or [`Error::Admission`]
+    /// when the incoming-message ceiling has no slot a control may take; its
+    /// last slot stays reserved for a pong.
     /// [`Error::ControlRefused`] carries the venue's code when it refuses; a lost
     /// answer is [`crate::Outcome::ReadFailed`].
     pub async fn list_subscriptions(&self, deadline: Instant) -> Result<Vec<String>, Error> {

@@ -172,6 +172,15 @@ fn control_lost(control: StreamControl) -> Error {
     }
 }
 
+/// Which duty charges the connection's sliding incoming-message window.
+#[derive(Clone, Copy)]
+enum IncomingCharge {
+    /// The automatic answer to a venue ping; may claim the reserved last slot.
+    Pong,
+    /// An outgoing stream control; refused before it can take that slot.
+    Control,
+}
+
 pub(crate) struct SocketDriver {
     ws: WebSocketStream<MaybeTlsStream<TcpStream>>,
     commands: mpsc::UnboundedReceiver<Command>,
@@ -218,7 +227,8 @@ pub(crate) struct SocketPolicy {
     /// Venue-incoming message ceiling per sliding second, charged by every pong
     /// and every stream control message. Every call site supplies this from its
     /// route's documented connection duty cycle; no default arm derives it, so an
-    /// uncited limit cannot be hidden here.
+    /// uncited limit cannot be hidden here. The ceiling's last slot is reserved
+    /// for a pong, so a stream control is refused one charge early.
     pub incoming_limit: usize,
     pub time_unit: super::TimeUnit,
     pub binary_decoder: Option<BinaryDecoder>,
@@ -512,8 +522,10 @@ impl SocketDriver {
         }
     }
     /// Charge one venue-incoming message to the connection's sliding second, or
-    /// return how long until the oldest charge leaves the window.
-    fn charge_incoming(&mut self, now: Instant) -> Result<(), Duration> {
+    /// return how long until the oldest charge leaves the window. The window's
+    /// last slot stays reserved for a pong, so a stream control is refused one
+    /// charge early while a pong may still claim that slot.
+    fn charge_incoming(&mut self, now: Instant, charge: IncomingCharge) -> Result<(), Duration> {
         let window = Duration::from_secs(1);
         while self
             .incoming
@@ -522,7 +534,11 @@ impl SocketDriver {
         {
             self.incoming.pop_front();
         }
-        if self.incoming.len() >= self.incoming_limit {
+        let ceiling = match charge {
+            IncomingCharge::Pong => self.incoming_limit,
+            IncomingCharge::Control => self.incoming_limit.saturating_sub(1),
+        };
+        if self.incoming.len() >= ceiling {
             let oldest = self.incoming.front().copied().unwrap_or(now);
             return Err(window.saturating_sub(now.duration_since(oldest)));
         }
@@ -563,7 +579,7 @@ impl SocketDriver {
             }
         }
         .to_string();
-        if let Err(retry_after) = self.charge_incoming(Instant::now()) {
+        if let Err(retry_after) = self.charge_incoming(Instant::now(), IncomingCharge::Control) {
             let _ = reply.send(Err(Error::Admission { retry_after }));
             return Ok(());
         }
@@ -777,9 +793,11 @@ impl SocketDriver {
                         }
                     }
                     // The codec automatically sends the exact ping payload as a pong.
-                    // Pongs share the venue's incoming-message ceiling with control messages.
+                    // Pongs share the venue's incoming-message ceiling with control
+                    // messages, which are admitted one slot short of it so this
+                    // reserved slot is free for the pong a ping demands.
                     Some(Ok(message)) if message.is_ping()=>{
-                        if self.charge_incoming(Instant::now()).is_err() {Err(Error::Gap("documented ping/pong rate exceeded"))} else {
+                        if self.charge_incoming(Instant::now(), IncomingCharge::Pong).is_err() {Err(Error::Gap("documented ping/pong rate exceeded"))} else {
                             tokio::time::timeout(self.timeout,self.ws.flush()).await.map_err(|_|Error::Gap("pong timeout")).and_then(|v|v.map_err(|_|Error::Gap("pong failure")))
                         }
                     },

@@ -55,7 +55,8 @@ explicitly. Synthetic loopback fixtures check delivery and joined retirement.
 The authorized 2026-10-11 demo capture for [#69](https://github.com/SharurTrading/binance-rs/issues/69)
 recorded both legs of a one-way COIN-M cross-margin round trip: the venue supplied
 `iw` `0` — present with reported zero, not absent — and the exact `bep` break-even
-price; the recorded frames replay through the user-data socket in tests
+price; the frames are recorded with the venue's account-alias field redacted and
+replay through the user-data socket in tests
 (`tests/fixtures/coinm-cross-margin-account-update-2026-10-11.json`). A COIN-M `!contractInfo` push carries `bks` only on a bracket
 update, so a listing or settlement push decodes with `bks: None`, while an empty
 bracket list stays `Some([])`; `ct`, `dt`, `ot` and `cs` remain required in both

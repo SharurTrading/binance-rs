@@ -40,8 +40,20 @@ fn captured_usdm_cross_margin_update_decodes_exactly() {
         let decoded: usdm::stream_models::AccountUpdateEvent =
             serde_json::from_value(raw.clone()).unwrap();
         assert_eq!(decoded.a.m, usdm::enums::AccountUpdateReason::Order);
+        let raw_balance = &raw["a"]["B"][0];
         let balances = decoded.a.upper_b.as_ref().unwrap();
         assert_eq!(balances[0].a, "USDT");
+        for (field, decoded_balance) in [
+            ("wb", balances[0].wb),
+            ("cw", balances[0].cw),
+            ("bc", balances[0].bc),
+        ] {
+            assert_eq!(
+                decoded_balance,
+                binance_client::Decimal::from_str_exact(raw_balance[field].as_str().unwrap())
+                    .unwrap()
+            );
+        }
         let raw_position = &raw["a"]["P"][0];
         let position = &decoded.a.upper_p.as_ref().unwrap()[0];
         assert_eq!(position.s, "BTCUSDT");
@@ -51,6 +63,21 @@ fn captured_usdm_cross_margin_update_decodes_exactly() {
         assert_eq!(
             position.pa,
             binance_client::Decimal::from_str_exact(pa).unwrap()
+        );
+        // The exact break-even price survives the capture on this market too.
+        assert_eq!(
+            position.bep,
+            Some(
+                binance_client::Decimal::from_str_exact(raw_position["bep"].as_str().unwrap())
+                    .unwrap()
+            )
+        );
+        // The margin asset is retained evidence even while untyped.
+        assert!(
+            position
+                .extra
+                .get("ma")
+                .is_some_and(serde_json::Value::is_string)
         );
         for field in ["ep", "cr", "up"] {
             let exact =
@@ -82,9 +109,24 @@ fn captured_coinm_cross_margin_update_decodes_exactly() {
         assert_eq!(raw["e"], "ACCOUNT_UPDATE");
         let decoded: coinm::stream_models::AccountUpdateEvent =
             serde_json::from_value(raw.clone()).unwrap();
+        // The venue's account-alias field is redacted before recording; its
+        // absence is part of the fixture contract.
+        assert_eq!(decoded.i, None);
         assert_eq!(decoded.a.m, Some(coinm::enums::AccountUpdateReason::Order));
+        let raw_balance = &raw["a"]["B"][0];
         let balances = decoded.a.upper_b.as_ref().unwrap();
         assert_eq!(balances[0].a.as_str(), "BTC");
+        for (field, decoded_balance) in [
+            ("wb", balances[0].wb),
+            ("cw", balances[0].cw),
+            ("bc", balances[0].bc),
+        ] {
+            assert_eq!(
+                decoded_balance,
+                binance_client::Decimal::from_str_exact(raw_balance[field].as_str().unwrap())
+                    .unwrap()
+            );
+        }
         let raw_position = &raw["a"]["P"][0];
         let position = &decoded.a.upper_p.as_ref().unwrap()[0];
         assert_eq!(position.s.as_str(), "BTCUSD_PERP");
@@ -102,6 +144,14 @@ fn captured_coinm_cross_margin_update_decodes_exactly() {
                 binance_client::Decimal::from_str_exact(raw_position["bep"].as_str().unwrap())
                     .unwrap()
             )
+        );
+        // The margin asset is retained evidence even while untyped.
+        assert!(
+            position
+                .extra
+                .as_value()
+                .get("ma")
+                .is_some_and(serde_json::Value::is_string)
         );
         for field in ["ep", "cr", "up"] {
             let exact =
@@ -122,7 +172,7 @@ fn captured_coinm_cross_margin_update_decodes_exactly() {
 // The recorded demo evidence replays through the real user-data socket path:
 // every captured frame is delivered in source order, none becomes a gap.
 macro_rules! captured_wallet_socket {
-    ($test:ident, $market:ident, $fixture:literal) => {
+    ($test:ident, $market:ident, $fixture:literal, $expected_pas:expr) => {
         #[tokio::test]
         async fn $test() {
             use binance_client::$market::{Config, Environment, StreamEvent, Streams, event_payloads::UserPayload, streams::StreamPayload};
@@ -157,6 +207,7 @@ macro_rules! captured_wallet_socket {
             let driver = tokio::spawn(driver.run());
             let generation = stream.generation();
             assert!(matches!(stream.recv().await, Some(StreamEvent::Established(g)) if g == generation));
+            let mut delivered_pas = Vec::new();
             for _ in &raws {
                 let Some(StreamEvent::Data { generation: g, payload: StreamPayload::User(UserPayload::AccountUpdate(update)) }) = stream.recv().await else {
                     panic!("captured cross-margin evidence became a socket gap");
@@ -165,8 +216,11 @@ macro_rules! captured_wallet_socket {
                 for position in update.a.upper_p.as_ref().unwrap() {
                     assert_eq!(position.mt, "cross");
                     assert_eq!(position.iw, Some(binance_client::Decimal::ZERO));
+                    delivered_pas.push(position.pa.to_string());
                 }
             }
+            // Source order is part of ingress, not just frame count.
+            assert_eq!(delivered_pas, $expected_pas);
             stream.close().await.unwrap();
             assert!(matches!(stream.recv().await, Some(StreamEvent::Retired(g)) if g == generation));
             driver.await.unwrap().unwrap();
@@ -177,12 +231,14 @@ macro_rules! captured_wallet_socket {
 captured_wallet_socket!(
     usdm_captured_cross_margin_evidence_replays_through_the_user_data_socket,
     usdm,
-    "fixtures/usdm-cross-margin-account-update-2026-10-11.json"
+    "fixtures/usdm-cross-margin-account-update-2026-10-11.json",
+    vec!["0.001", "0"]
 );
 captured_wallet_socket!(
     coinm_captured_cross_margin_evidence_replays_through_the_user_data_socket,
     coinm,
-    "fixtures/coinm-cross-margin-account-update-2026-10-11.json"
+    "fixtures/coinm-cross-margin-account-update-2026-10-11.json",
+    vec!["1", "0"]
 );
 
 #[test]

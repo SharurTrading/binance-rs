@@ -21,10 +21,13 @@ fn coinm_contract_info_settlement_without_brackets_decodes() {
         event.ps.as_ref().map(binance_client::Symbol::as_str),
         Some("BTCUSD")
     );
-    assert_eq!(event.ct, "CURRENT_QUARTER");
+    assert_eq!(event.ct, coinm::enums::ContractType::CurrentQuarter);
     assert_eq!(event.dt, 1_798_185_600_000);
     assert_eq!(event.ot, 1_782_979_200_000);
-    assert_eq!(event.cs, "SETTLING");
+    assert_eq!(
+        event.cs,
+        coinm::enums::ContractStatus::Unknown("SETTLING".to_owned())
+    );
     assert_eq!(event.st, Some(2));
     assert_eq!(event.bks, None);
 }
@@ -65,10 +68,10 @@ fn usdm_contract_info_listing_without_brackets_decodes() {
     }))
     .unwrap();
     assert_eq!(event.s, "BTCUSDT_261225");
-    assert_eq!(event.ct, "CURRENT_QUARTER");
+    assert_eq!(event.ct, usdm::enums::ContractType::CurrentQuarter);
     assert_eq!(event.dt, 1_798_185_600_000);
     assert_eq!(event.ot, 1_782_979_200_000);
-    assert_eq!(event.cs, "PENDING_TRADING");
+    assert_eq!(event.cs, usdm::enums::ContractStatus::PendingTrading);
     assert_eq!(event.st, Some(1));
     assert_eq!(event.bks, None);
 }

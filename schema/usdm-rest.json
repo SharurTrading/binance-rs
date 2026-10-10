@@ -2776,7 +2776,7 @@
                       "x-decimal": true
                     },
                     "contractType": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/ContractType"
                     },
                     "basisRate": {
                       "type": "string",
@@ -3290,7 +3290,7 @@
                           "type": "string"
                         },
                         "contractType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ContractType"
                         },
                         "deliveryDate": {
                           "type": "integer",
@@ -3301,7 +3301,7 @@
                           "format": "int64"
                         },
                         "status": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ContractStatus"
                         },
                         "maintMarginPercent": {
                           "type": "string",
@@ -3514,11 +3514,7 @@
                       "x-decimal": true
                     },
                     "rateType": {
-                      "type": "string",
-                      "enum": [
-                        "Regular",
-                        "Special"
-                      ]
+                      "$ref": "#/components/schemas/FundingRateType"
                     }
                   },
                   "type": "object"
@@ -11147,5 +11143,55 @@
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/user-data-streams#start-user-data-stream"
     }
   ],
-  "components": {}
+  "components": {
+    "schemas": {
+      "ContractStatus": {
+        "type": "string",
+        "description": "Contract status (`status` in exchange information, `cs` on the contract info stream).",
+        "enum": [
+          "PENDING_TRADING",
+          "TRADING",
+          "PRE_DELIVERING",
+          "DELIVERING",
+          "DELIVERED",
+          "PRE_SETTLE",
+          "SETTLING",
+          "CLOSE",
+          "TRADING_HALT",
+          "TRADING_CANCEL_ONLY"
+        ],
+        "x-sources": [
+          "https://developers.binance.info/docs/derivatives/usds-margined-futures/common-definition"
+        ]
+      },
+      "ContractType": {
+        "type": "string",
+        "description": "Contract type (`contractType`, and `ct` on the contract info and continuous kline streams).",
+        "enum": [
+          "PERPETUAL",
+          "CURRENT_MONTH",
+          "NEXT_MONTH",
+          "CURRENT_QUARTER",
+          "NEXT_QUARTER",
+          "PERPETUAL_DELIVERING",
+          "TRADIFI_PERPETUAL"
+        ],
+        "x-sources": [
+          "https://developers.binance.info/docs/derivatives/usds-margined-futures/common-definition",
+          "https://developers.binance.info/docs/derivatives/usds-margined-futures/market-data/rest-api/Continuous-Contract-Kline-Candlestick-Data"
+        ]
+      },
+      "FundingRateType": {
+        "type": "string",
+        "description": "Funding rate type (`rateType` in funding rate history).",
+        "enum": [
+          "Regular",
+          "Special"
+        ],
+        "x-sources": [
+          "https://developers.binance.info/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-History"
+        ]
+      }
+    }
+  }
 }

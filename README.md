@@ -117,8 +117,14 @@ Financial fields use `Decimal`, parsed without floats or silent rounding. Future
 depth arrays apply the same exact parser to every price and quantity token; values
 outside Decimal coefficient or scale limits fail decoding. Request
 builders validate required/conditional inputs on `build()` and again at dispatch.
-Outgoing enum values are checked; incoming enum strings and unknown fields remain
-open to provider additions. Callers use current exchange filters to check tick,
+Outgoing enum values are checked; unknown incoming fields remain open to provider
+additions. Contract status and contract type (USDⓈ-M and COIN-M), Spot symbol status
+and the USDⓈ-M funding rate type decode to typed enums in each product's `enums`
+module: one variant per documented value, with the exact venue spelling kept on
+encode, and `Unknown(String)` holding any value the venue's pages do not list.
+Mapping these to trading meaning is the consumer's. Other enum-valued fields remain
+strings ([#77](https://github.com/SharurTrading/binance-rs/issues/77),
+[#78](https://github.com/SharurTrading/binance-rs/issues/78)). Callers use current exchange filters to check tick,
 lot, notional, and other symbol-dependent rules; precision digits are not tick sizes.
 
 ## Execution and ownership

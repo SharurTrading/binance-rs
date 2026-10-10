@@ -12498,7 +12498,7 @@
                   "x-rust-type": "crate::Symbol"
                 },
                 "status": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/SymbolStatus"
                 },
                 "baseAsset": {
                   "type": "string",
@@ -13022,6 +13022,20 @@
           {
             "$ref": "#/components/schemas/outboundAccountPosition"
           }
+        ]
+      },
+      "SymbolStatus": {
+        "type": "string",
+        "description": "Symbol status (`status` in exchange information).",
+        "enum": [
+          "TRADING",
+          "END_OF_DAY",
+          "HALT",
+          "BREAK",
+          "CANCEL_ONLY"
+        ],
+        "x-sources": [
+          "https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#symbol-status-status"
         ]
       }
     }

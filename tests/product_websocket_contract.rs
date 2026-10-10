@@ -340,8 +340,12 @@ async fn coinm_contract_info_without_brackets_is_delivered_without_a_gap() {
     assert_eq!(
         delivered,
         [
-            ("SETTLING".to_owned(), None),
-            ("TRADING".to_owned(), Some(1))
+            // COIN-M does not document `SETTLING`; it is kept, not refused.
+            (
+                coinm::enums::ContractStatus::Unknown("SETTLING".to_owned()),
+                None
+            ),
+            (coinm::enums::ContractStatus::Trading, Some(1))
         ]
     );
     events.close().await.unwrap();

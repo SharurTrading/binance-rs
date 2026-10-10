@@ -310,7 +310,7 @@ pub struct ContinuousContractKlineCandlestickStreamsEvent {
     pub ps: Option<crate::Symbol>,
     /// Exact `ct` wire field.
     #[serde(rename = "ct")]
-    pub ct: String,
+    pub ct: super::enums::ContractType,
     /// Exact `k` wire field.
     #[serde(rename = "k")]
     pub k: ContinuousContractKlineCandlestickStreamsEventK,
@@ -434,7 +434,7 @@ pub struct ContractInfoStreamEvent {
     pub ps: Option<crate::Symbol>,
     /// Exact `ct` wire field.
     #[serde(rename = "ct")]
-    pub ct: String,
+    pub ct: super::enums::ContractType,
     /// Exact `dt` wire field.
     #[serde(rename = "dt")]
     pub dt: i64,
@@ -443,7 +443,7 @@ pub struct ContractInfoStreamEvent {
     pub ot: i64,
     /// Exact `cs` wire field.
     #[serde(rename = "cs")]
-    pub cs: String,
+    pub cs: super::enums::ContractStatus,
     /// Exact `bks` wire field.
     #[serde(rename = "bks", default, skip_serializing_if = "Option::is_none")]
     pub bks: Option<Vec<ContractInfoStreamEventBksItem>>,

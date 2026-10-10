@@ -282,7 +282,9 @@ impl Streams {
     ///
     /// # Errors
     /// Unsent: an empty or duplicated set, a stream this socket never subscribed,
-    /// a user-data socket, an expired deadline, or [`Error::Admission`].
+    /// a user-data socket, an expired deadline, or [`Error::Admission`] when the
+    /// incoming-message ceiling has no slot a control may take; its last slot
+    /// stays reserved for a pong.
     /// [`Error::ControlRefused`] carries the venue's code when it refuses. A lost
     /// answer is [`crate::Outcome::Unknown`] and the streams stay counted.
     pub async fn unsubscribe(
@@ -303,7 +305,9 @@ impl Streams {
     /// The venue's own list of this socket's subscriptions, from `LIST_SUBSCRIPTIONS`.
     ///
     /// # Errors
-    /// Unsent: a user-data socket, an expired deadline, or [`Error::Admission`].
+    /// Unsent: a user-data socket, an expired deadline, or [`Error::Admission`]
+    /// when the incoming-message ceiling has no slot a control may take; its
+    /// last slot stays reserved for a pong.
     /// [`Error::ControlRefused`] carries the venue's code when it refuses; a lost
     /// answer is [`crate::Outcome::ReadFailed`].
     pub async fn list_subscriptions(&self, deadline: Instant) -> Result<Vec<String>, Error> {

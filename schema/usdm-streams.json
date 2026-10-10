@@ -4483,7 +4483,7 @@
                         "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-streams/1.0.0/schema.yaml",
                         "checked": "2026-10-11",
                         "issue": "https://github.com/SharurTrading/binance-rs/issues/69",
-                        "reason": "Official schema leaves this conditional isolated-position field optional; no client-only required constraint."
+                        "reason": "Official schema leaves this conditional isolated-position field optional; no client-only required constraint. The 2026-10-11 authorized demo capture for issue #69 (one-way cross-margin round trip, tests/fixtures/usdm-cross-margin-account-update-2026-10-11.json) observed the venue supplying iw 0 on every cross-margin position push: present with reported zero rather than absent."
                       }
                     },
                     "ps": {
@@ -4826,7 +4826,7 @@
                     "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-streams/1.0.0/schema.yaml",
                     "checked": "2026-10-11",
                     "issue": "https://github.com/SharurTrading/binance-rs/issues/69",
-                    "reason": "Official schema leaves this conditional isolated-position field optional; no client-only required constraint."
+                    "reason": "Official schema leaves this conditional isolated-position field optional; no client-only required constraint. The 2026-10-11 authorized demo capture for issue #69 observed ACCOUNT_UPDATE pushes only; margin-call iw stays schema-optional with no live capture."
                   }
                 },
                 "mp": {

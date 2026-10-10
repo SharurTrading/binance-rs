@@ -89,8 +89,13 @@ positions and margin calls retain an absent isolated-wallet field (`iw`) as `Non
 when supplied, it remains an exact decimal, including a reported zero. This follows
 the [official stream schema](https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-streams/1.0.0/schema.yaml),
 which leaves that conditional field optional. The deterministic fixtures exercise
-schema-permitted omission and malformed money through a real loopback socket;
-they do not claim captured live cross-margin events ([#69](https://github.com/SharurTrading/binance-rs/issues/69)). Request
+schema-permitted omission and malformed money through a real loopback socket.
+A dated authorized demo capture additionally replays the recorded cross-margin pushes
+themselves: on 2026-10-11, one-way cross-margin round trips on both the USD-M and
+COIN-M demo environments supplied `iw` as a reported zero on every position update
+rather than omitting the field, with every money value staying exact
+([#69](https://github.com/SharurTrading/binance-rs/issues/69),
+`tests/fixtures/*-cross-margin-account-update-2026-10-11.json`). Request
 builders check protocol constraints; current symbol-dependent filters and market
 state remain caller/venue checks. No complete order-book or atomic account snapshot
 is promised. GTD expiry is rechecked against the injected venue clock before the wire.

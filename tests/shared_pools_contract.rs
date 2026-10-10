@@ -1063,6 +1063,7 @@ async fn sapi_products_share_ip_cooldown_before_any_later_send() {
     let margin = margin::RestClient::new(
         margin::Config::with_pools(&pools)
             .unwrap()
+            .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())
             .clock(clock)
             .rest_url(&unused.url)
             .unwrap(),

@@ -1059,7 +1059,7 @@ async fn sapi_products_share_ip_cooldown_before_any_later_send() {
         )
         .await
         .unwrap_err();
-    assert_refused(&error, Duration::from_secs(60));
+    assert_refused(&error, Duration::from_mins(1));
     let margin = margin::RestClient::new(
         margin::Config::with_pools(&pools)
             .unwrap()
@@ -1075,7 +1075,7 @@ async fn sapi_products_share_ip_cooldown_before_any_later_send() {
         )
         .await
         .unwrap_err();
-    assert_refused(&error, Duration::from_secs(60));
+    assert_refused(&error, Duration::from_mins(1));
     assert_eq!(unused.connections_accepted(), 0);
     banned.finish().await;
     unused.finish().await;

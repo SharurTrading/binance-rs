@@ -140,7 +140,9 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
   incoming-message ceiling with pongs and are refused unsent past it. A reconnect
   resubscribes nothing: membership is the caller's.
 - Depth events and snapshots keep their update IDs (`U`, `u`, Futures `pu`,
-  `lastUpdateId`) and exact levels. Synchronising a local book from them is the
+  `lastUpdateId`) and exact levels. A level's price is signed and kept as sent,
+  zero and negative included; Futures refuse only a negative quantity, which the
+  venue documents as absolute. Synchronising a local book from them is the
   consumer's; the client builds no book. Every finite snapshot remains partial.
 
 HMAC, RSA PKCS#8, Ed25519 PKCS#8, and external signers are supported. WebSocket

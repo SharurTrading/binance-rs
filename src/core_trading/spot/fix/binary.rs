@@ -17,6 +17,13 @@ pub struct Precision {
 impl Precision {
     /// Retain native symbol and decimal increments from one `InstrumentList` entry.
     ///
+    /// The increments are the venue's
+    /// [`PRICE_FILTER` `tickSize`](https://github.com/binance/binance-spot-api-docs/blob/master/filters.md#price_filter)
+    /// and [`LOT_SIZE` `stepSize`](https://github.com/binance/binance-spot-api-docs/blob/master/filters.md#lot_size):
+    /// the intervals a price or quantity moves by. They are not prices. A zero
+    /// tick size disables the rule and gives no exponent to encode with, and a
+    /// negative value is no interval.
+    ///
     /// # Errors
     /// Refuses absent/invalid symbol or nonpositive price/quantity increments.
     pub fn from_instrument(instrument: &Fields) -> Result<Self, Error> {

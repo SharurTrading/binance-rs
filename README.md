@@ -217,6 +217,11 @@ endpoint weight counters remain independent. Margin WebSocket API uses the Spot
 pool. Options uses its own pool and native exchange-information limits.
 `with_pools` selects an explicit registry for these products.
 
+A registry owns no clock. Every client drawn from one registry must be given one
+clock, the same `Arc<dyn Clock>` or wall time for all (the default), because each
+client charges the pool's fixed, aligned windows at the instant its own `Config::clock`
+reports; clients with different clocks charge different windows of one pool.
+
 Each `Config::new` keeps its own account owner; clone a product `Config` to share
 budgets between its REST and WebSocket clients. Across products or credentials of
 one account, name the account with an `AccountKey` (see

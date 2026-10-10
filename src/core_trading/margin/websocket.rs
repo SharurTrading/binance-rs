@@ -77,6 +77,10 @@ impl WsConfig {
         })
     }
     /// Use a caller's signing/expiry clock.
+    ///
+    /// Clients sharing one [`WeightPools`](crate::WeightPools) registry must share one
+    /// clock (the same `Arc<dyn Clock>`, or wall time for all): each charges the pool's
+    /// fixed, aligned windows at the instant its own clock reports.
     #[must_use]
     pub fn clock(mut self, value: Arc<dyn Clock>) -> Self {
         self.clock = value;

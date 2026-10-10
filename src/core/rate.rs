@@ -584,6 +584,11 @@ impl PoolKey {
 /// The registry also keeps one account owner per venue pool, environment and
 /// [`AccountKey`] for configurations drawn with a key; an unkeyed configuration gets
 /// an account owner of its own.
+///
+/// A registry owns no clock. Clients drawn from one registry must be given one clock:
+/// the same `Arc<dyn Clock>`, or wall time for all. Each client charges the pool's
+/// fixed, aligned venue windows at the instant its own `Config::clock` reports, so
+/// clients with different clocks charge different windows of one pool.
 #[derive(Default)]
 pub struct WeightPools {
     pools: Mutex<Registry>,

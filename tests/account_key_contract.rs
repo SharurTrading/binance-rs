@@ -349,10 +349,14 @@ fn margin_quota(limit: u64) -> margin::rest_models::QueryCurrentMarginOrderCount
     serde_json::from_value(serde_json::json!([{"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":limit,"count":0}])).unwrap()
 }
 
-fn margin_client(config: margin::Config, fixture: &HttpFixture) -> margin::RestClient {
+fn margin_client(
+    config: margin::Config,
+    fixture: &HttpFixture,
+    clock: &Arc<ManualClock>,
+) -> margin::RestClient {
     margin::RestClient::new(
         config
-            .clock(ManualClock::at(MINUTE_START))
+            .clock(clock.clone())
             .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())
             .rest_url(&fixture.url)
             .unwrap(),
@@ -380,6 +384,7 @@ async fn margin_place(client: &margin::RestClient) -> Result<(), Error> {
 #[tokio::test]
 async fn margin_clients_of_one_key_share_its_native_order_windows() {
     let pools = WeightPools::new();
+    let clock = ManualClock::at(MINUTE_START);
     let key = AccountKey::new("account-one");
     let venue = HttpFixture::new(
         200,
@@ -393,22 +398,25 @@ async fn margin_clients_of_one_key_share_its_native_order_windows() {
     let first = margin_client(
         margin::Config::with_pools_for_account(&pools, &key)
             .unwrap()
-            .clock(ManualClock::at(MINUTE_START))
+            .clock(clock.clone())
             .order_limits(&margin_quota(1))
             .unwrap(),
         &venue,
+        &clock,
     );
     let same_key = margin_client(
         margin::Config::with_pools_for_account(&pools, &key).unwrap(),
         &venue,
+        &clock,
     );
     let other_key = margin_client(
         margin::Config::with_pools_for_account(&pools, &AccountKey::new("account-two"))
             .unwrap()
-            .clock(ManualClock::at(MINUTE_START))
+            .clock(clock.clone())
             .order_limits(&margin_quota(1))
             .unwrap(),
         &venue,
+        &clock,
     );
     margin_place(&first).await.unwrap();
     assert_refused(
@@ -417,7 +425,7 @@ async fn margin_clients_of_one_key_share_its_native_order_windows() {
     );
     margin_place(&other_key).await.unwrap();
     // An unkeyed client has its own owner, with no quota installed on it.
-    let unkeyed = margin_client(margin::Config::with_pools(&pools).unwrap(), &venue);
+    let unkeyed = margin_client(margin::Config::with_pools(&pools).unwrap(), &venue, &clock);
     assert_eq!(
         margin_place(&unkeyed).await.unwrap_err().outcome(),
         Some(Outcome::NotSent)

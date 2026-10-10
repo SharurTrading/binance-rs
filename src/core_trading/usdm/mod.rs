@@ -4,8 +4,9 @@
 //! USDⓈ-M Futures: linear contract, account, and transport semantics.
 //!
 //! All operations use caller deadlines. The library never retries a mutation.
-//! Construct `Config` with an explicit demo/production environment, and share
-//! its budgets across clients. WebSocket drivers run on caller-owned tasks.
+//! Construct `Config` with an explicit demo/production environment; it draws on
+//! the process's IP weight pool for that environment. WebSocket drivers run on
+//! caller-owned tasks.
 
 mod config;
 pub mod event_payloads;

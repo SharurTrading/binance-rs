@@ -100,7 +100,8 @@ impl Config {
         self.clock = clock;
         self
     }
-    /// Share documented IP/account budgets across HTTP and WebSocket clients.
+    /// Replace the drawn pool with an explicit IP/account owner, isolating this
+    /// client from every pool; clone the owner to share it across clients.
     #[must_use]
     pub fn budgets(mut self, budgets: Budgets) -> Self {
         self.budgets = budgets;

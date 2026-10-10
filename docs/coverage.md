@@ -53,7 +53,11 @@ attempts, including concurrent clones/accounts, weighted REST requests, WebSocke
 handshakes, and shared REST/WebSocket order limits. Injected clocks check exact
 interval boundaries and cooldown expiry; local fixtures count outbound attempts.
 Additional quotas cover funding, history, hourly/daily conversion, and calendar-month
-downloads. These checks prove local admission invariants, not live venue throughput.
+downloads. Shared-pool contracts check that clients of one venue pool and environment
+share its IP weight, that Spot and futures and demo and production never share, that a
+stated exchange information limit replaces the baseline, and that venue holds reach
+every client of the pool while an explicit owner stays isolated. These checks prove
+local admission invariants, not live venue throughput.
 
 The separately invoked credential-free Futures demo probes passed on 2026-09-27:
 REST ping/server time/exchange metadata, WebSocket API depth, and routed Public depth

@@ -174,11 +174,11 @@ async fn clients_of_one_pool_and_environment_share_its_weight() {
             .old_trades_lookup(&prints, deadline())
             .await
             .unwrap_err(),
-        Duration::from_secs(60),
+        Duration::from_mins(1),
     );
     assert_refused(
         &coinm_time(&inverse).await.unwrap_err(),
-        Duration::from_secs(60),
+        Duration::from_mins(1),
     );
     assert_eq!(usdm_venue.connections_accepted(), 12);
     assert_eq!(coinm_venue.connections_accepted(), 0);
@@ -210,7 +210,7 @@ async fn spot_and_futures_pools_never_share() {
     spot_time(&spot_spender).await.unwrap();
     assert_refused(
         &spot_time(&spot_spender).await.unwrap_err(),
-        Duration::from_secs(60),
+        Duration::from_mins(1),
     );
     let usdm_after_spot = usdm_client(
         usdm::Config::with_pools(usdm::Environment::Production, &after_spot).unwrap(),
@@ -228,7 +228,7 @@ async fn spot_and_futures_pools_never_share() {
     coinm_time(&futures_spender).await.unwrap();
     assert_refused(
         &coinm_time(&futures_spender).await.unwrap_err(),
-        Duration::from_secs(60),
+        Duration::from_mins(1),
     );
     let spot_after_futures = spot_client(
         spot::Config::with_pools(spot::Environment::Production, &after_futures).unwrap(),
@@ -270,7 +270,7 @@ async fn demo_and_production_pools_never_share() {
     );
     assert_refused(
         &coinm_time(&other_demo).await.unwrap_err(),
-        Duration::from_secs(60),
+        Duration::from_mins(1),
     );
 
     let spot_spent = HttpFixture::new(
@@ -335,7 +335,7 @@ async fn a_stated_request_weight_limit_replaces_the_baseline() {
     usdm_time(&reader).await.unwrap();
     assert_refused(
         &coinm_time(&other).await.unwrap_err(),
-        Duration::from_secs(60),
+        Duration::from_mins(1),
     );
     assert_eq!(exchange.connections_accepted(), 2);
     assert_eq!(venue.connections_accepted(), 1);
@@ -377,7 +377,7 @@ async fn a_stated_raw_request_limit_replaces_the_spot_baseline() {
     spot_time(&other).await.unwrap();
     assert_refused(
         &spot_time(&other).await.unwrap_err(),
-        Duration::from_secs(300),
+        Duration::from_mins(5),
     );
     assert_eq!(venue.connections_accepted(), 1);
     exchange.finish().await;
@@ -519,7 +519,7 @@ async fn an_explicit_budgets_owner_keeps_a_client_isolated() {
     coinm_time(&isolated).await.unwrap();
     assert_refused(
         &coinm_time(&isolated).await.unwrap_err(),
-        Duration::from_secs(60),
+        Duration::from_mins(1),
     );
     assert_eq!(venue.connections_accepted(), 1);
     spent.finish().await;

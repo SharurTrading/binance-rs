@@ -9,6 +9,7 @@
     reason = "local fixture assertions"
 )]
 
+use binance_client::WeightPools;
 use binance_client::{Credentials, Decimal, Error, Outcome, RequestId, Symbol, coinm, spot, usdm};
 use futures_util::{SinkExt, StreamExt};
 use serde_json::{Value, json};
@@ -72,7 +73,7 @@ async fn spot_api_signature_subscription_delivers_partial_balances_and_shutdown_
         }
         finish(peer).await;
     });
-    let config = spot::Config::with_pools(spot::Environment::Demo, &binance_client::WeightPools::new())
+    let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
         .unwrap()
         .websocket_url(&url)
         .unwrap()
@@ -155,7 +156,7 @@ async fn spot_user_data_retains_another_products_event_name_as_unknown() {
         .unwrap();
         finish(peer).await;
     });
-    let config = spot::Config::with_pools(spot::Environment::Demo, &binance_client::WeightPools::new())
+    let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
         .unwrap()
         .websocket_url(&url)
         .unwrap()
@@ -210,7 +211,7 @@ async fn spot_late_order_reply_keeps_original_caller_and_generation_after_timeou
         peer.send(Message::text(json!({"id":request["id"],"status":200,"result":{"orderId":9,"clientOrderId":"caller &/订单"}}).to_string())).await.unwrap();
         finish(peer).await;
     });
-    let config = spot::Config::with_pools(spot::Environment::Demo, &binance_client::WeightPools::new())
+    let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
         .unwrap()
         .websocket_url(&url)
         .unwrap()
@@ -283,7 +284,7 @@ async fn coinm_market_stream_uses_plain_combined_path_and_joins_retirement() {
         peer.send(Message::text(json!({"stream":"btcusd_perp@depth@100ms","data":{"e":"depthUpdate","E":1,"T":1,"s":"BTCUSD_PERP","U":1,"u":2,"pu":0,"b":[],"a":[]}}).to_string())).await.unwrap();
         finish(peer).await;
     });
-    let config = coinm::Config::with_pools(coinm::Environment::Demo, &binance_client::WeightPools::new())
+    let config = coinm::Config::with_pools(coinm::Environment::Demo, &WeightPools::new())
         .unwrap()
         .streams_url(&url)
         .unwrap();
@@ -323,7 +324,7 @@ async fn usdm_unknown_stream_name_is_retained_and_keeps_the_generation_alive() {
         peer.send(Message::text(json!({"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":2,"T":2,"s":"BTCUSDT","U":3,"u":3,"pu":2,"b":[],"a":[]}}).to_string())).await.unwrap();
         finish(peer).await;
     });
-    let config = usdm::Config::with_pools(usdm::Environment::Demo, &binance_client::WeightPools::new())
+    let config = usdm::Config::with_pools(usdm::Environment::Demo, &WeightPools::new())
         .unwrap()
         .streams_url(&url)
         .unwrap();
@@ -388,7 +389,7 @@ async fn coinm_unknown_stream_name_is_retained_and_keeps_the_generation_alive() 
         peer.send(Message::text(json!({"stream":"btcusd_perp@depth@100ms","data":{"e":"depthUpdate","E":1,"T":1,"s":"BTCUSD_PERP","U":1,"u":2,"pu":0,"b":[],"a":[]}}).to_string())).await.unwrap();
         finish(peer).await;
     });
-    let config = coinm::Config::with_pools(coinm::Environment::Demo, &binance_client::WeightPools::new())
+    let config = coinm::Config::with_pools(coinm::Environment::Demo, &WeightPools::new())
         .unwrap()
         .streams_url(&url)
         .unwrap();
@@ -440,7 +441,7 @@ async fn spot_unknown_stream_name_is_retained_and_keeps_the_generation_alive() {
         peer.send(Message::text(json!({"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":1,"s":"BTCUSDT","U":1,"u":2,"b":[["1","2"]],"a":[]}}).to_string())).await.unwrap();
         finish(peer).await;
     });
-    let config = spot::Config::with_pools(spot::Environment::Demo, &binance_client::WeightPools::new())
+    let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
         .unwrap()
         .streams_url(&url)
         .unwrap();
@@ -492,7 +493,7 @@ async fn spot_late_cancel_replace_preserves_both_legs_and_microsecond_generation
         peer.send(Message::text(json!({"id":request["id"],"status":409,"error":{"code":-2021,"data":{"cancelResult":"SUCCESS","newOrderResult":"FAILURE","cancelResponse":{"orderId":9,"clientOrderId":"cancel"},"newOrderResponse":{"code":-2010}}}}).to_string())).await.unwrap();
         finish(peer).await;
     });
-    let config = spot::Config::with_pools(spot::Environment::Demo, &binance_client::WeightPools::new())
+    let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
         .unwrap()
         .time_unit(binance_client::TimeUnit::Microseconds)
         .clock(std::sync::Arc::new(support::FixedClock(1_700_000_001_000)))

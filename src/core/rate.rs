@@ -8,7 +8,8 @@ use std::{
     time::Duration,
 };
 
-/// Venue-sourced initial rate limits. Replace with exchangeInfo evidence when available.
+/// Venue-sourced initial rate limits; stated exchange information limits replace the
+/// minute weight and raw-request figures.
 #[derive(Clone, Debug)]
 #[non_exhaustive]
 pub struct BudgetLimits {
@@ -44,8 +45,8 @@ impl BudgetLimits {
             shared_request_weight: false,
         }
     }
-    /// COIN-M's current shared UM/CM limits after the June 2026 integration.
-    /// Reuse the same `Budgets` owner for both Futures products on one IP/account.
+    /// COIN-M's current shared UM/CM limits after the June 2026 integration; the
+    /// futures pool every USDⓈ-M and COIN-M `Config::new` draws on starts here.
     #[must_use]
     pub fn coinm() -> Self {
         Self {
@@ -499,7 +500,9 @@ pub(crate) enum PoolEnvironment {
     Production,
 }
 
-/// One IP weight pool per venue pool and environment.
+/// One IP weight pool per venue pool and environment: Spot's own, and USDⓈ-M with
+/// COIN-M together. `Config::new` draws on the process's registry; a registry built
+/// here is independent of it and of every other.
 #[derive(Default)]
 pub struct WeightPools {
     pools: Mutex<BTreeMap<(VenuePool, PoolEnvironment), Budgets>>,

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
+use binance_client::WeightPools;
 use binance_client::usdm::{Config, Environment};
 use binance_client::{Clock, Credentials, Error};
 use std::{
@@ -25,7 +26,7 @@ impl Clock for FixedClock {
     }
 }
 pub fn config() -> Config {
-    Config::with_pools(Environment::Demo, &binance_client::WeightPools::new())
+    Config::with_pools(Environment::Demo, &WeightPools::new())
         .unwrap()
         .clock(Arc::new(FixedClock(1_700_000_001_000)))
         .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap())

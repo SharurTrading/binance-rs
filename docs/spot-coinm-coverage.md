@@ -59,6 +59,7 @@ Authoritative behavior references:
 - [Current UM/CM integration](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice)
 - [COIN-M WebSocket API](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/websocket-api-general-info)
 - [COIN-M market/user socket routes](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/websocket-market-streams/Connect)
+- [COIN-M live subscribing, unsubscribing and listing streams](https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-market-streams/Live-Subscribing-Unsubscribing-to-streams)
 - [COIN-M depth continuity](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/websocket-market-streams/How-to-manage-a-local-order-book-correctly)
 
 ## Product semantics
@@ -96,6 +97,21 @@ Spot market sockets use the combined `/stream` route. COIN-M keeps its own plain
 combined `/stream` and private `/ws/<listenKey>` routes rather than adopting the
 USDⓈ-M Public/Market/Private prefixes. Socket queue lag does not cause dropping,
 resnapshot, or retirement. Malformed known events and real transport loss are gaps.
+
+Both products' market sockets connect with any number of streams, including none,
+and change membership on the open socket through `subscribe`, `unsubscribe` and
+`list_subscriptions`: the documented `SUBSCRIBE`, `UNSUBSCRIBE` and
+`LIST_SUBSCRIPTIONS` control messages, in the same wire shape as USDⓈ-M (see the
+[USDⓈ-M market streams](coverage.md#market-streams) table). Each generation numbers
+its control messages from 1; Spot accepts a 64-bit signed integer `id` and COIN-M an
+unsigned one, so ids stay within both. A refusal (`{"code":c,"msg":m}`) is
+`Error::ControlRefused`. Control messages and pongs share the connection's
+documented incoming-message ceiling — Spot 5 a second, where "a message" is a ping,
+a pong or a JSON control message; COIN-M 10 a second — and a control message past
+it is refused unsent with `Error::Admission`. The documented 1,024 streams per
+socket bound connect and subscribe together. A lost answer is `Outcome::Unknown`
+and its late arrival is a `StreamEvent::LateControl`. User-data sockets refuse
+membership changes. Nothing is resubscribed after a reconnect.
 
 Spot diff-depth events keep `U` and `u`; COIN-M events also keep `pu`. Depth replies
 keep `lastUpdateId`. Bridging a snapshot to the update stream is the consumer's;

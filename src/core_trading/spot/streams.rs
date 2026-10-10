@@ -8,9 +8,10 @@ use super::{
     event_payloads::{MarketPayload, market_payload},
 };
 use crate::Error;
+use crate::core::control::{self, Membership};
 use crate::core::socket::{QueueStats, SocketEvents};
 use crate::core::{Socket, SocketEvent};
-use std::collections::BTreeMap;
+use tokio::time::Instant;
 
 /// Binance's distinct market-data and execution endpoint routes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -48,12 +49,20 @@ impl Stream {
     }
 }
 
+fn pairs(streams: &[Stream]) -> Vec<(&str, &'static str)> {
+    streams.iter().map(|s| (s.name.as_str(), s.kind)).collect()
+}
+
+fn names(streams: &[Stream]) -> Vec<&str> {
+    streams.iter().map(|s| s.name.as_str()).collect()
+}
+
 /// Lossless, single-consumer ingress for one routed socket generation.
 pub struct Streams {
     time_unit: crate::TimeUnit,
     socket: Socket,
     events: SocketEvents,
-    kinds: BTreeMap<String, &'static str>,
+    membership: Membership,
 }
 impl Streams {
     /// Timestamp units for every data payload and shutdown notice in this generation.
@@ -62,39 +71,26 @@ impl Streams {
         self.time_unit
     }
 
-    /// Connect a set of market subscriptions without spawning a task.
+    /// Connect one market socket without spawning a task.
+    ///
+    /// `streams` may be empty: the socket then carries no stream until
+    /// [`Streams::subscribe`] adds one.
     ///
     /// # Errors
-    /// Refuses mixed routes, duplicate names, or more than Binance's documented
-    /// 1024 subscriptions per socket. Open distinct sockets for distinct routes.
+    /// Refuses duplicate names or more than Binance's documented 1024 subscriptions
+    /// per socket.
     pub async fn connect(
         config: Config,
         streams: &[Stream],
     ) -> Result<(Self, ConnectionDriver), Error> {
-        let route = streams
-            .first()
-            .ok_or(Error::Validation("empty subscription set"))?
-            .route;
-        if streams.len() > 1024 {
-            return Err(Error::Validation("documented 1024 streams per socket"));
-        }
-        let mut kinds = BTreeMap::new();
-        for s in streams {
-            if s.route != route || kinds.insert(s.name.clone(), s.kind).is_some() {
-                return Err(Error::Validation("mixed routes or duplicate streams"));
-            }
-        }
+        let membership = Membership::connect(&pairs(streams))?;
         let mut url = config.streams.clone();
         url.set_path("/stream");
         super::config::apply_time_unit(&mut url, config.time_unit);
-        url.query_pairs_mut().append_pair(
-            "streams",
-            &streams
-                .iter()
-                .map(|s| s.name.as_str())
-                .collect::<Vec<_>>()
-                .join("/"),
-        );
+        if !streams.is_empty() {
+            url.query_pairs_mut()
+                .append_pair("streams", &names(streams).join("/"));
+        }
         let (socket, events, driver) = Socket::connect_with_policy(
             url,
             None,
@@ -106,11 +102,11 @@ impl Streams {
                     connections: 1,
                     ..Default::default()
                 },
-                // Documented raw-stream connection duty cycle: "WebSocket
-                // connections have a limit of 5 incoming messages per second"
-                // (Spot WebSocket Market Streams, General WSS Information;
-                // verified 2026-10-03).
-                ping_limit: 5,
+                // Documented connection duty cycle: "WebSocket connections have
+                // a limit of 5 incoming messages per second", each a ping, a pong
+                // or a JSON control message (Spot WebSocket Streams, WebSocket
+                // Limits; verified 2026-10-10).
+                incoming_limit: 5,
                 time_unit: config.time_unit,
                 binary_decoder: None,
                 api_key_header: false,
@@ -122,7 +118,7 @@ impl Streams {
                 time_unit: config.time_unit,
                 socket,
                 events,
-                kinds,
+                membership,
             },
             ConnectionDriver { inner: driver },
         ))
@@ -155,7 +151,7 @@ impl Streams {
                 }
                 let decoded = {
                     let name = value.get("stream").and_then(serde_json::Value::as_str);
-                    let kind = name.and_then(|name| self.kinds.get(name)).copied();
+                    let kind = name.and_then(|name| self.membership.kind(name));
                     match (name, kind, value.get("data")) {
                         (Some(name), Some(kind), Some(data)) => market_payload(kind, data.clone())
                             .map(|payload| StreamPayload::Market {
@@ -187,8 +183,77 @@ impl Streams {
                 generation,
                 error: Error::Gap("unexpected market request response"),
             },
+            SocketEvent::ControlLate {
+                generation,
+                control,
+                streams,
+                result,
+            } => StreamEvent::LateControl {
+                generation,
+                control,
+                streams,
+                result,
+            },
         })
     }
+    /// Add `streams` to this open socket with one `SUBSCRIBE` control message.
+    ///
+    /// Data for the added streams arrives in this generation, decoded like the
+    /// streams named at connect. Ingress keeps accumulating while the call waits.
+    /// The message is charged with pongs against the connection's documented
+    /// incoming-message ceiling. Nothing is resubscribed after a reconnect: a new
+    /// generation carries only the streams its own `connect` and calls name.
+    ///
+    /// # Errors
+    /// Unsent: an empty or duplicated set, a user-data socket,
+    /// more than 1024 streams on the socket, an expired deadline, or
+    /// [`Error::Admission`] when the incoming-message ceiling is spent.
+    /// [`Error::ControlRefused`] carries the venue's code when it refuses. A lost
+    /// answer is [`crate::Outcome::Unknown`]; ask [`Streams::list_subscriptions`].
+    pub async fn subscribe(&mut self, streams: &[Stream], deadline: Instant) -> Result<(), Error> {
+        control::subscribe(
+            &self.socket,
+            &mut self.membership,
+            &pairs(streams),
+            deadline,
+        )
+        .await
+    }
+
+    /// Remove `streams` from this open socket with one `UNSUBSCRIBE` control message.
+    ///
+    /// The generation stays open. Frames the venue sent before it applied the
+    /// change are still delivered and decoded.
+    ///
+    /// # Errors
+    /// Unsent: an empty or duplicated set, a stream this socket never subscribed,
+    /// a user-data socket, an expired deadline, or [`Error::Admission`].
+    /// [`Error::ControlRefused`] carries the venue's code when it refuses. A lost
+    /// answer is [`crate::Outcome::Unknown`] and the streams stay counted.
+    pub async fn unsubscribe(
+        &mut self,
+        streams: &[Stream],
+        deadline: Instant,
+    ) -> Result<(), Error> {
+        control::unsubscribe(
+            &self.socket,
+            &mut self.membership,
+            &names(streams),
+            deadline,
+        )
+        .await
+    }
+
+    /// The venue's own list of this socket's subscriptions, from `LIST_SUBSCRIPTIONS`.
+    ///
+    /// # Errors
+    /// Unsent: a user-data socket, an expired deadline, or [`Error::Admission`].
+    /// [`Error::ControlRefused`] carries the venue's code when it refuses; a lost
+    /// answer is [`crate::Outcome::ReadFailed`].
+    pub async fn list_subscriptions(&self, deadline: Instant) -> Result<Vec<String>, Error> {
+        control::list(&self.socket, deadline).await
+    }
+
     /// Request retirement, drain through `Retired`, and join the caller-owned driver.
     ///
     /// # Errors
@@ -249,6 +314,18 @@ pub enum StreamEvent {
         generation: u64,
         /// Provider event timestamp in this generation's `Streams::time_unit`.
         event_time: i64,
+    },
+    /// A control answer that arrived after its caller stopped waiting.
+    LateControl {
+        /// Original socket generation.
+        generation: u64,
+        /// The control message this answers.
+        control: crate::StreamControl,
+        /// Stream names the message carried; empty for a list.
+        streams: Vec<String>,
+        /// `None` for a confirmed `SUBSCRIBE` or `UNSUBSCRIBE`, the venue's list
+        /// for `LIST_SUBSCRIPTIONS`, or the venue's refusal.
+        result: Result<Option<Vec<String>>, Error>,
     },
     /// Terminal boundary after the generation's accepted prefix.
     Retired(u64),

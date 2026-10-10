@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
+pub(crate) mod control;
 mod credentials;
 pub(crate) mod error;
 pub(crate) mod http;
@@ -11,6 +12,7 @@ pub(crate) mod sapi;
 pub(crate) mod socket;
 mod time;
 
+pub use control::StreamControl;
 pub use credentials::{Credentials, Signer};
 pub use error::{
     Error, OperationLeg, Outcome, PartialOperation, RateEvidence, Response, ResponseMeta,

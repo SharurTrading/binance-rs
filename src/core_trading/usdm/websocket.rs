@@ -55,7 +55,7 @@ impl WsClient {
                 // documented API-socket family budget (spot WebSocket API and
                 // SBE streams count client PING/PONG/JSON frames against
                 // "5 requests per second"), bounding this driver's pong stream.
-                ping_limit: 5,
+                incoming_limit: 5,
                 time_unit: crate::core::TimeUnit::Milliseconds,
                 binary_decoder: None,
                 api_key_header: false,
@@ -246,6 +246,11 @@ impl ApiEvents {
             SocketEvent::Established(g) => ApiEvent::Established(g),
             SocketEvent::Retired(g) => ApiEvent::Retired(g),
             SocketEvent::Gap { generation, error } => ApiEvent::Gap { generation, error },
+            // This connection never sends stream control messages.
+            SocketEvent::ControlLate { generation, .. } => ApiEvent::Gap {
+                generation,
+                error: Error::Gap("unexpected stream control answer"),
+            },
             SocketEvent::Data { generation, value } => ApiEvent::Unknown {
                 generation,
                 payload: value.into(),

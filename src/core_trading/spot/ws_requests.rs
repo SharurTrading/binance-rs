@@ -6688,16 +6688,21 @@ impl super::WsClient {
     }
 
     /// [exchangeInfo](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general).
+    /// Adopts counted IP limits for every client sharing this pool.
     ///
     /// # Errors
     /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    /// A counted limit without a positive value returns [`Error::Gap`] and leaves
+    /// the pool's limits unchanged; the attempt remains charged.
     pub async fn exchange_info(
         &self,
         request: &ExchangeInfo,
         id: crate::RequestId,
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::ws_models::ExchangeInfoResponse>, Error> {
-        self.execute(request, id, deadline).await
+        let response = self.execute(request, id, deadline).await?;
+        super::rate::adopt_stated_ws_limits(self, &response.data)?;
+        Ok(response)
     }
 
     /// [executionRules](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general).

@@ -41,9 +41,10 @@ pub struct WindowUsage {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct PoolUsage {
-    /// `REQUEST_WEIGHT` per minute. On a pool that counts REST and WebSocket API
-    /// weight together, which every pool drawn from [`crate::WeightPools`] does,
-    /// it counts both.
+    /// REST `REQUEST_WEIGHT` per minute. Spot and Options count WebSocket API
+    /// weight here too; the futures pool counts COIN-M WebSocket API weight here,
+    /// while USDⓈ-M WebSocket API weight has a counter of its own, not reported
+    /// here (issue #97).
     pub request_weight: WindowUsage,
     /// `RAW_REQUESTS` per five minutes, where the pool counts them (Spot).
     pub raw_requests: Option<WindowUsage>,

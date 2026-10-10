@@ -104,7 +104,9 @@ impl Config {
             streams: crate::core::validate_url(streams, true)?,
             credentials: None,
             clock: Arc::new(SystemClock),
-            budgets: pools.draw(VenuePool::Futures, pool, account)?,
+            budgets: pools
+                .draw(VenuePool::Futures, pool, account)?
+                .websocket_weight_on_rest(),
             timeout: Duration::from_secs(10),
             proxy: None,
         })
@@ -153,9 +155,12 @@ impl Config {
     }
     /// Replace the drawn pool with an explicit IP/account owner, isolating this
     /// client from every pool; clone the owner to share it across clients.
+    ///
+    /// COIN-M WebSocket API weight shares the REST weight counter, so this client
+    /// charges it there whatever the owner's [`crate::BudgetLimits`] say.
     #[must_use]
     pub fn budgets(mut self, budgets: Budgets) -> Self {
-        self.budgets = budgets;
+        self.budgets = budgets.websocket_weight_on_rest();
         self
     }
     /// Set the per-attempt transport timeout. No automatic retry is performed.

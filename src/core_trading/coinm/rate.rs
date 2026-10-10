@@ -31,7 +31,23 @@ pub(crate) fn cost(
         "getDownloadIdForFuturesTransactionHistory" => 6,
         _ => 0,
     };
-    if !op.path.starts_with("/dapi/") && !op.path.starts_with("/futures/") {
+    if op.path.starts_with("/dapi/") {
+        // Whether these count against the USDⓈ-M WebSocket API limit, as USDⓈ-M's
+        // REST order requests do, is unstated; they are charged there too.
+        if matches!(
+            op.name,
+            "newOrder"
+                | "newAlgoOrder"
+                | "modifyOrder"
+                | "cancelOrder"
+                | "cancelAlgoOrder"
+                | "placeMultipleOrders"
+                | "modifyMultipleOrders"
+                | "cancelMultipleOrders"
+        ) {
+            c.ws_weight = c.weight;
+        }
+    } else if !op.path.starts_with("/futures/") {
         c.ws_weight = c.weight;
         c.weight = 0;
     }

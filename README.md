@@ -204,7 +204,47 @@ positive limit is refused as `Error::Gap` and leaves the pool unchanged; of two
 statements of one window in a reply, the stricter binds. Every `X-MBX-USED-WEIGHT-1M` raises
 the pool's count, and a `Retry-After` or `418` holds every client of the pool. A
 request the pool cannot take is refused unsent as `Error::Admission` with its retry
-delay. The futures pool counts REST and WebSocket API weight together.
+delay.
+
+### Futures WebSocket API weight
+
+The futures pool keeps two minute weight counters: REST weight, which USDⓈ-M and
+COIN-M share, and the USDⓈ-M WebSocket API's own. The
+[USDⓈ-M WebSocket API](https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-api-general-info)
+states: "The WebSocket API IP weight limit (shared across `ws-fapi` and
+`ws-fapi-mm`) is **not** shared with the REST API IP weight limit (`fapi`,
+`fapi-mm`). The only overlap is that REST single/batch order place/modify/cancel
+requests are counted against the same limit as WebSocket API requests." The
+[COIN-M WebSocket API](https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-api-general-info)
+states: "Rate limits are the same as on REST API and are shared with REST API." The
+[UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice),
+A.3, states: "Requests on either fapi or dapi count against the same
+X-MBX-USED-WEIGHT-1M counter."
+
+| Traffic | REST weight | USDⓈ-M WebSocket API weight |
+| --- | :---: | :---: |
+| USDⓈ-M REST | Yes | No |
+| USDⓈ-M REST single/batch order place, modify and cancel | Yes | Yes |
+| USDⓈ-M WebSocket API, handshake included | No | Yes |
+| COIN-M REST | Yes | No |
+| COIN-M REST single/batch order place, modify and cancel | Yes | Yes, conservatively |
+| COIN-M WebSocket API, handshake included | Yes | Yes, conservatively |
+
+`X-MBX-USED-WEIGHT-1M` raises REST weight. A USDⓈ-M WebSocket API reply's
+`rateLimits` count raises the WebSocket API counter; a COIN-M reply's raises REST
+weight. A COIN-M client counts its WebSocket API weight on REST weight with any
+budget owner, including an explicit one.
+
+> [!NOTE]
+> The documentation does not say whether COIN-M WebSocket API requests or COIN-M
+> REST order requests also count against the USDⓈ-M WebSocket API limit. The client
+> takes the conservative reading and charges them there too, so COIN-M traffic can
+> only lower what USDⓈ-M WebSocket API clients may send. USDⓈ-M WebSocket API weight
+> is never charged to REST weight: the notice puts COIN-M REST on the one REST
+> counter that the USDⓈ-M WebSocket API limit is stated not to share.
+
+`pool_usage()` reports REST weight only; reporting the WebSocket API counter is
+tracked in [#97](https://github.com/SharurTrading/binance-rs/issues/97).
 
 Spot's [WebSocket exchange information](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general)
 updates the same IP owner as REST, including clients configured separately from
@@ -383,7 +423,7 @@ injected clock:
 
 | Field | Meaning |
 | --- | --- |
-| `request_weight` | `REQUEST_WEIGHT` per minute; on every drawn pool it counts REST and WebSocket API weight together |
+| `request_weight` | `REQUEST_WEIGHT` per minute. Spot and Options count REST and WebSocket API weight here together; the futures pool counts REST weight and COIN-M WebSocket API weight, not USDⓈ-M WebSocket API weight ([Futures WebSocket API weight](#futures-websocket-api-weight)) |
 | `raw_requests` | `RAW_REQUESTS` per five minutes, where the pool counts them (Spot) |
 | `key` | The pool read, as `pool_key()` names it; `None` for an explicit owner |
 | `limit`, `source` | The latest stated limit (`LimitSource::Stated`), or the documented baseline until a client of the pool reads exchange information (`LimitSource::Documented`) |

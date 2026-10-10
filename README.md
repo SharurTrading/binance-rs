@@ -251,12 +251,14 @@ each configuration gets an account owner of its own, so sharing stays explicit.
 | Order counts per ten seconds, minute and day, including `X-MBX-ORDER-COUNT-*` a reply reports | Spot, Futures, Options |
 | USDⓈ-M conversion quote and USDⓈ-M and COIN-M monthly download quotas | Futures |
 | UID endpoint weight and Margin's native order windows, including those `order_limits` installs | SAPI |
+| FIX order windows a `LimitResponse` reports, and FIX connection limits | Spot |
 
 | Configuration | Keyed constructors |
 | --- | --- |
 | `spot::Config`, `usdm::Config`, `coinm::Config`, `options::Config` | `new_for_account(environment, &key)`, `with_pools_for_account(environment, &pools, &key)` |
 | `wallet::Config`, `convert::Config`, `margin::Config` | `new_for_account(&key)`, `with_pools_for_account(&pools, &key)` |
 | `margin::WsConfig` | `new_for_account(&key)`, `with_pools_for_account(&pools, &key)` |
+| `spot::fix::AccountBudgets` | `new_for_account(environment, &key)`, `with_pools_for_account(environment, &pools, &key)` |
 
 Each pool keeps its own owner per key: a key shared by a Spot and a USDⓈ-M client
 names one account in each pool, not one owner across pools. `budgets` still
@@ -269,6 +271,25 @@ use binance_client::{AccountKey, Error};
 let account = AccountKey::new("main-account");
 let um = usdm::Config::new_for_account(usdm::Environment::Production, &account)?;
 let cm = coinm::Config::new_for_account(coinm::Environment::Production, &account)?;
+# Ok::<(), Error>(())
+```
+
+A Spot FIX session joins the same account through its `AccountBudgets`. A scope
+drawn for a key counts its orders against the Spot owner that `spot::Config` of
+that key, registry and environment shares, so REST, WebSocket API and FIX orders
+draw on one count, and order limits a FIX `LimitResponse` reports hold the key's
+REST and WebSocket API clients too. It keeps the Spot pool's IP state. Every scope
+drawn for the key shares one set of FIX connection limits, which Binance
+[counts per account](https://github.com/binance/binance-spot-api-docs/blob/master/fix-api.md#connection-limits)
+for FIX and FIX SBE alike. `AccountBudgets::new` still takes an explicit owner.
+
+```rust
+use binance_client::core_trading::spot::{self, fix::AccountBudgets};
+use binance_client::{AccountKey, Error};
+
+let account = AccountKey::new("main-account");
+let rest = spot::Config::new_for_account(spot::Environment::Production, &account)?;
+let fix = AccountBudgets::new_for_account(spot::Environment::Production, &account)?;
 # Ok::<(), Error>(())
 ```
 

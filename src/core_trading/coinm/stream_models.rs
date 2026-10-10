@@ -445,8 +445,8 @@ pub struct ContractInfoStreamEvent {
     #[serde(rename = "cs")]
     pub cs: String,
     /// Exact `bks` wire field.
-    #[serde(rename = "bks")]
-    pub bks: Vec<ContractInfoStreamEventBksItem>,
+    #[serde(rename = "bks", default, skip_serializing_if = "Option::is_none")]
+    pub bks: Option<Vec<ContractInfoStreamEventBksItem>>,
     /// Exact `st` wire field.
     #[serde(rename = "st", default, skip_serializing_if = "Option::is_none")]
     pub st: Option<i64>,

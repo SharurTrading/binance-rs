@@ -305,6 +305,51 @@ async fn coinm_market_stream_uses_plain_combined_path_and_joins_retirement() {
     driver.await.unwrap().unwrap();
     server.await.unwrap();
 }
+
+#[tokio::test]
+async fn coinm_contract_info_without_brackets_is_delivered_without_a_gap() {
+    let (l, url) = listener().await;
+    let server = tokio::spawn(async move {
+        let (stream, _) = l.accept().await.unwrap();
+        let (_, mut peer) = ServerBuilder::new().accept(stream).await.unwrap();
+        peer.send(Message::text(json!({"stream":"!contractInfo","data":{"e":"contractInfo","E":1,"s":"BTCUSD_261225","ps":"BTCUSD","ct":"CURRENT_QUARTER","dt":1_798_185_600_000_i64,"ot":1_782_979_200_000_i64,"cs":"SETTLING","st":2}}).to_string())).await.unwrap();
+        peer.send(Message::text(json!({"stream":"!contractInfo","data":{"e":"contractInfo","E":2,"s":"BTCUSD_PERP","ps":"BTCUSD","ct":"PERPETUAL","dt":4_133_404_800_000_i64,"ot":1_597_042_800_000_i64,"cs":"TRADING","bks":[{"bs":1,"bnf":0,"bnc":5,"mmr":0.004,"cf":0,"mi":101,"ma":125}],"st":2}}).to_string())).await.unwrap();
+        finish(peer).await;
+    });
+    let (mut events, driver) =
+        coinm_market(&url, &[coinm::Stream::contract_info_stream().unwrap()]).await;
+    let driver = tokio::spawn(driver.run());
+    let generation = events.generation();
+    assert!(
+        matches!(events.recv().await,Some(coinm::StreamEvent::Established(g)) if g==generation)
+    );
+    let mut delivered = Vec::new();
+    for _ in 0..2 {
+        match events.recv().await.unwrap() {
+            coinm::StreamEvent::Data {
+                generation: g,
+                payload:
+                    coinm::streams::StreamPayload::Market {
+                        payload: coinm::event_payloads::MarketPayload::ContractInfoStream(row),
+                        ..
+                    },
+            } if g == generation => delivered.push((row.cs.clone(), row.bks.map(|b| b.len()))),
+            other => panic!("unexpected event {other:?}"),
+        }
+    }
+    assert_eq!(
+        delivered,
+        [
+            ("SETTLING".to_owned(), None),
+            ("TRADING".to_owned(), Some(1))
+        ]
+    );
+    events.close().await.unwrap();
+    assert!(matches!(events.recv().await,Some(coinm::StreamEvent::Retired(g)) if g==generation));
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+
 #[tokio::test]
 async fn usdm_unknown_stream_name_is_retained_and_keeps_the_generation_alive() {
     let (l, url) = listener().await;

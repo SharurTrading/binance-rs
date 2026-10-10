@@ -108,6 +108,11 @@ zero; other malformed financial strings fail. See
 [wire corrections #23](https://github.com/SharurTrading/binance-rs/issues/23) and the
 [USD-M trade reference](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade).
 
+The `!contractInfo` push matches COIN-M: `ct`, `dt`, `ot` and `cs` are required,
+while `bks`, sent only on a bracket update, and `st` stay optional. A `ps` field,
+which the USD-M page does not document, is retained with unknown fields. See the
+[USD-M contract info stream](https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-market-streams/Contract-Info-Stream).
+
 ## REST operations
 
 | Operation | Method | Path |

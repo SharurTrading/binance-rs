@@ -105,6 +105,15 @@ pub(crate) struct Cost {
     pub quote: bool,
     pub download: u8,
 }
+impl Cost {
+    /// The weight this cost charges a pool's minute weight window.
+    ///
+    /// REST requests carry their weight in `weight`; WebSocket API requests in
+    /// `ws_weight`, which a pool counting both together charges the same window.
+    pub(crate) fn request_weight(&self) -> u64 {
+        self.weight.max(self.ws_weight)
+    }
+}
 
 #[derive(Default)]
 pub(super) struct State {
@@ -121,6 +130,13 @@ pub(super) struct State {
     stated_raw_requests_per_five_minutes: Option<u64>,
 }
 impl State {
+    /// The count of `name` in the window of `window` milliseconds holding `now`.
+    fn current(&self, name: &str, window: u64, now: u64) -> u64 {
+        match self.counts.get(name) {
+            Some(&(bucket, count)) if bucket == now / window => count,
+            _ => 0,
+        }
+    }
     pub(super) fn check_cooldown(&self, now: u64) -> Result<(), Error> {
         if self.cooldown_timing_unknown {
             return Err(Error::CooldownTimingUnknown);
@@ -186,18 +202,13 @@ impl Budgets {
     }
     fn ip_cost(&self, ip: &State, c: Cost) -> Vec<(&'static str, u64, u64, u64)> {
         let weight = if self.limits.shared_request_weight {
-            c.weight.max(c.ws_weight)
+            c.request_weight()
         } else {
             c.weight
         };
-        let weight_limit = ip
-            .stated_weight_per_minute
-            .unwrap_or(self.limits.weight_per_minute);
+        let (weight_limit, _) = self.weight_limit(ip);
         let mut ip_cost = vec![("weight", 60_000, weight_limit, weight)];
-        if let Some(limit) = ip
-            .stated_raw_requests_per_five_minutes
-            .or(self.limits.raw_requests_per_five_minutes)
-        {
+        if let Some((limit, _)) = self.raw_request_limit(ip) {
             ip_cost.push(("raw", 300_000, limit, c.raw_requests));
         }
         if let Some(limit) = self.limits.connections_per_five_minutes {
@@ -271,9 +282,7 @@ impl Budgets {
             (&account, &account_cost),
         ] {
             for &(name, window, limit, amount) in costs {
-                let (start, count) = state.counts.get(name).copied().unwrap_or_default();
-                let bucket = now / window;
-                let count = if start == bucket { count } else { 0 };
+                let count = state.current(name, window, now);
                 if count.checked_add(amount).is_none_or(|v| v > limit) {
                     return Err(Error::Admission {
                         retry_after: Duration::from_millis(window - now % window),
@@ -630,6 +639,9 @@ fn monthly_download(
     }
     Ok(Some((key, bucket)))
 }
+
+mod usage;
+pub use usage::{LimitSource, PoolUsage, WindowUsage};
 
 #[cfg(test)]
 mod capacity_tests;

@@ -91,6 +91,16 @@ impl Config {
         self.clock = clock;
         self
     }
+    /// The IP windows of the pool this configuration's clients draw on, read at
+    /// its clock: each window's limit, whether the venue stated it, and what the
+    /// pool has spent. It reports; admission alone decides what is sent.
+    ///
+    /// # Errors
+    /// Returns the clock's error, or a configuration error if the pool's lock is
+    /// poisoned.
+    pub fn pool_usage(&self) -> Result<crate::PoolUsage, Error> {
+        self.budgets.usage(self.clock.now_millis()?)
+    }
     /// Replace the drawn pool with an explicit IP/account owner, isolating this
     /// client from every pool; clone the owner to share it across clients.
     #[must_use]

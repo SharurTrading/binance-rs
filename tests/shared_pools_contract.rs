@@ -525,3 +525,493 @@ async fn an_explicit_budgets_owner_keeps_a_client_isolated() {
     spent.finish().await;
     venue.finish().await;
 }
+
+/// What each market's pool reports of itself, and the weight a request reports
+/// before it is sent. Futures klines and depth weights follow the `limit` tables of
+/// the USDⓈ-M and COIN-M market data pages; Spot depth follows the Spot REST
+/// `/api/v3/depth` table (<https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#order-book>).
+mod pool_report {
+    use super::*;
+    use binance_client::{LimitSource, WindowUsage};
+
+    /// An exchange information reply stating only an account limit.
+    const ORDERS_ONLY: &str = r#"{"rateLimits":[
+        {"rateLimitType":"ORDERS","interval":"MINUTE","intervalNum":1,"limit":1200}
+    ],"symbols":[]}"#;
+
+    fn assert_window(
+        window: &WindowUsage,
+        interval: Duration,
+        limit: u64,
+        source: LimitSource,
+        used: u64,
+        resets_in: Duration,
+    ) {
+        assert_eq!(window.interval, interval, "{window:?}");
+        assert_eq!(window.limit, limit, "{window:?}");
+        assert_eq!(window.source, source, "{window:?}");
+        assert_eq!(window.used, used, "{window:?}");
+        assert_eq!(window.resets_in, resets_in, "{window:?}");
+    }
+
+    async fn used_weight(count: u64) -> HttpFixture {
+        HttpFixture::new(
+            200,
+            &format!("X-MBX-USED-WEIGHT-1M: {count}\r\n"),
+            "{\"serverTime\":1}",
+            None,
+            false,
+        )
+        .await
+    }
+
+    mod spot {
+        use super::*;
+        use binance_client::spot::{self, Config, Environment, rest_requests};
+
+        const START: u64 = FIVE_MINUTE_START + 15_000;
+
+        fn config(pools: &WeightPools, clock: &Arc<ManualClock>) -> Config {
+            Config::with_pools(Environment::Production, pools)
+                .unwrap()
+                .clock(clock.clone())
+        }
+
+        #[tokio::test]
+        async fn the_pool_reports_the_fallback_limit_until_exchange_information_states_one() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let config = config(&pools, &clock);
+            let before = config.pool_usage().unwrap();
+            assert_window(
+                &before.request_weight,
+                Duration::from_mins(1),
+                6000,
+                LimitSource::Documented,
+                0,
+                Duration::from_secs(45),
+            );
+            assert_window(
+                &before.raw_requests.unwrap(),
+                Duration::from_mins(5),
+                300_000,
+                LimitSource::Documented,
+                0,
+                Duration::from_secs(285),
+            );
+
+            let exchange = HttpFixture::new(200, "", ORDERS_ONLY, None, false).await;
+            spot_client(config.clone(), &exchange, &clock)
+                .exchange_info(&rest_requests::ExchangeInfo::new(), deadline())
+                .await
+                .unwrap();
+            let after = config.pool_usage().unwrap();
+            assert_window(
+                &after.request_weight,
+                Duration::from_mins(1),
+                6000,
+                LimitSource::Documented,
+                20,
+                Duration::from_secs(45),
+            );
+            assert_window(
+                &after.raw_requests.unwrap(),
+                Duration::from_mins(5),
+                300_000,
+                LimitSource::Documented,
+                1,
+                Duration::from_secs(285),
+            );
+            exchange.finish().await;
+        }
+
+        #[tokio::test]
+        async fn a_stated_limit_replaces_the_fallback_in_the_report() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let exchange = HttpFixture::new(
+                200,
+                "",
+                r#"{"rateLimits":[
+                    {"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":1200},
+                    {"rateLimitType":"RAW_REQUESTS","interval":"MINUTE","intervalNum":5,"limit":61000}
+                ],"symbols":[]}"#,
+                None,
+                false,
+            )
+            .await;
+            spot_client(config(&pools, &clock), &exchange, &clock)
+                .exchange_info(&rest_requests::ExchangeInfo::new(), deadline())
+                .await
+                .unwrap();
+            // Another configuration drawn from the same pool reads the stated figures.
+            let report = config(&pools, &clock).pool_usage().unwrap();
+            assert_window(
+                &report.request_weight,
+                Duration::from_mins(1),
+                1200,
+                LimitSource::Stated,
+                20,
+                Duration::from_secs(45),
+            );
+            assert_window(
+                &report.raw_requests.unwrap(),
+                Duration::from_mins(5),
+                61_000,
+                LimitSource::Stated,
+                1,
+                Duration::from_secs(285),
+            );
+            exchange.finish().await;
+        }
+
+        #[tokio::test]
+        async fn usage_follows_the_used_weight_header() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let venue = used_weight(1500).await;
+            let client = spot_client(config(&pools, &clock), &venue, &clock);
+            spot_time(&client).await.unwrap();
+            assert_window(
+                &client.pool_usage().unwrap().request_weight,
+                Duration::from_mins(1),
+                6000,
+                LimitSource::Documented,
+                1500,
+                Duration::from_secs(45),
+            );
+            clock.set(START + 45_000);
+            assert_window(
+                &client.pool_usage().unwrap().request_weight,
+                Duration::from_mins(1),
+                6000,
+                LimitSource::Documented,
+                0,
+                Duration::from_mins(1),
+            );
+            venue.finish().await;
+        }
+
+        #[tokio::test]
+        async fn a_requests_reported_weight_is_the_weight_it_is_charged() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let venue = HttpFixture::new(
+                200,
+                "",
+                r#"{"lastUpdateId":1,"bids":[],"asks":[]}"#,
+                None,
+                false,
+            )
+            .await;
+            let client = spot_client(config(&pools, &clock), &venue, &clock);
+            let shallow = rest_requests::Depth::new()
+                .symbol(Symbol::new("BTCUSDT").unwrap())
+                .limit(100);
+            let deep = shallow.clone().limit(5000);
+            assert_eq!(shallow.weight().unwrap(), 5);
+            assert_eq!(deep.weight().unwrap(), 250);
+
+            client.depth(&shallow, deadline()).await.unwrap();
+            assert_eq!(client.pool_usage().unwrap().request_weight.used, 5);
+            client.depth(&deep, deadline()).await.unwrap();
+            let report = client.pool_usage().unwrap();
+            assert_eq!(report.request_weight.used, 255);
+            assert_eq!(report.raw_requests.unwrap().used, 2);
+            venue.finish().await;
+        }
+
+        fn spot_client(
+            config: Config,
+            fixture: &HttpFixture,
+            clock: &Arc<ManualClock>,
+        ) -> spot::RestClient {
+            super::super::spot_client(config, fixture, clock)
+        }
+    }
+
+    mod usdm {
+        use super::*;
+        use binance_client::usdm::{self, Config, Environment, rest_requests};
+
+        const START: u64 = MINUTE_START + 15_000;
+
+        fn config(pools: &WeightPools, clock: &Arc<ManualClock>) -> Config {
+            Config::with_pools(Environment::Production, pools)
+                .unwrap()
+                .clock(clock.clone())
+        }
+
+        fn client(
+            config: Config,
+            fixture: &HttpFixture,
+            clock: &Arc<ManualClock>,
+        ) -> usdm::RestClient {
+            super::super::usdm_client(config, fixture, clock)
+        }
+
+        #[tokio::test]
+        async fn the_pool_reports_the_fallback_limit_until_exchange_information_states_one() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let config = config(&pools, &clock);
+            let before = config.pool_usage().unwrap();
+            assert_window(
+                &before.request_weight,
+                Duration::from_mins(1),
+                2400,
+                LimitSource::Documented,
+                0,
+                Duration::from_secs(45),
+            );
+            assert_eq!(before.raw_requests, None);
+
+            let exchange = HttpFixture::new(200, "", ORDERS_ONLY, None, false).await;
+            client(config.clone(), &exchange, &clock)
+                .exchange_information(&rest_requests::ExchangeInformation::new(), deadline())
+                .await
+                .unwrap();
+            assert_window(
+                &config.pool_usage().unwrap().request_weight,
+                Duration::from_mins(1),
+                2400,
+                LimitSource::Documented,
+                1,
+                Duration::from_secs(45),
+            );
+            exchange.finish().await;
+        }
+
+        #[tokio::test]
+        async fn a_stated_limit_replaces_the_fallback_in_the_report() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let exchange = HttpFixture::new(
+                200,
+                "",
+                r#"{"rateLimits":[
+                    {"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":1200}
+                ],"symbols":[]}"#,
+                None,
+                false,
+            )
+            .await;
+            client(config(&pools, &clock), &exchange, &clock)
+                .exchange_information(&rest_requests::ExchangeInformation::new(), deadline())
+                .await
+                .unwrap();
+            let report = config(&pools, &clock).pool_usage().unwrap();
+            assert_window(
+                &report.request_weight,
+                Duration::from_mins(1),
+                1200,
+                LimitSource::Stated,
+                1,
+                Duration::from_secs(45),
+            );
+            assert_eq!(report.raw_requests, None);
+            exchange.finish().await;
+        }
+
+        #[tokio::test]
+        async fn usage_follows_the_used_weight_header() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let venue = used_weight(1500).await;
+            let client = client(config(&pools, &clock), &venue, &clock);
+            usdm_time(&client).await.unwrap();
+            assert_window(
+                &client.pool_usage().unwrap().request_weight,
+                Duration::from_mins(1),
+                2400,
+                LimitSource::Documented,
+                1500,
+                Duration::from_secs(45),
+            );
+            clock.set(START + 45_000);
+            assert_eq!(client.pool_usage().unwrap().request_weight.used, 0);
+            venue.finish().await;
+        }
+
+        #[tokio::test]
+        async fn a_requests_reported_weight_is_the_weight_it_is_charged() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let venue = HttpFixture::new(200, "", "[]", None, false).await;
+            let client = client(config(&pools, &clock), &venue, &clock);
+            let bars = rest_requests::KlineCandlestickData::new()
+                .symbol(Symbol::new("BTCUSDT").unwrap())
+                .interval("1m")
+                .limit(1000);
+            let more = bars.clone().limit(1001);
+            assert_eq!(bars.weight().unwrap(), 5);
+            assert_eq!(more.weight().unwrap(), 10);
+
+            client
+                .kline_candlestick_data(&bars, deadline())
+                .await
+                .unwrap();
+            assert_eq!(client.pool_usage().unwrap().request_weight.used, 5);
+            client
+                .kline_candlestick_data(&more, deadline())
+                .await
+                .unwrap();
+            assert_eq!(client.pool_usage().unwrap().request_weight.used, 15);
+
+            // A depth the venue documents no weight for is refused, unsent and uncharged.
+            let odd = rest_requests::OrderBook::new()
+                .symbol(Symbol::new("BTCUSDT").unwrap())
+                .limit(7);
+            assert!(matches!(odd.weight(), Err(Error::Validation(_))));
+            assert!(matches!(
+                client.order_book(&odd, deadline()).await,
+                Err(Error::Validation(_))
+            ));
+            assert_eq!(client.pool_usage().unwrap().request_weight.used, 15);
+            assert_eq!(venue.connections_accepted(), 2);
+            venue.finish().await;
+        }
+    }
+
+    mod coinm {
+        use super::*;
+        use binance_client::coinm::{self, Config, Environment, rest_requests};
+
+        const START: u64 = MINUTE_START + 15_000;
+
+        fn config(pools: &WeightPools, clock: &Arc<ManualClock>) -> Config {
+            Config::with_pools(Environment::Production, pools)
+                .unwrap()
+                .clock(clock.clone())
+        }
+
+        fn client(
+            config: Config,
+            fixture: &HttpFixture,
+            clock: &Arc<ManualClock>,
+        ) -> coinm::RestClient {
+            super::super::coinm_client(config, fixture, clock)
+        }
+
+        #[tokio::test]
+        async fn the_pool_reports_the_fallback_limit_until_exchange_information_states_one() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let config = config(&pools, &clock);
+            let before = config.pool_usage().unwrap();
+            assert_window(
+                &before.request_weight,
+                Duration::from_mins(1),
+                2400,
+                LimitSource::Documented,
+                0,
+                Duration::from_secs(45),
+            );
+            assert_eq!(before.raw_requests, None);
+
+            let exchange = HttpFixture::new(200, "", ORDERS_ONLY, None, false).await;
+            client(config.clone(), &exchange, &clock)
+                .exchange_information(&rest_requests::ExchangeInformation::new(), deadline())
+                .await
+                .unwrap();
+            assert_window(
+                &config.pool_usage().unwrap().request_weight,
+                Duration::from_mins(1),
+                2400,
+                LimitSource::Documented,
+                1,
+                Duration::from_secs(45),
+            );
+            exchange.finish().await;
+        }
+
+        #[tokio::test]
+        async fn a_stated_limit_replaces_the_fallback_in_the_report() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let exchange = HttpFixture::new(
+                200,
+                "",
+                r#"{"rateLimits":[
+                    {"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":1200}
+                ],"symbols":[]}"#,
+                None,
+                false,
+            )
+            .await;
+            client(config(&pools, &clock), &exchange, &clock)
+                .exchange_information(&rest_requests::ExchangeInformation::new(), deadline())
+                .await
+                .unwrap();
+            let report = config(&pools, &clock).pool_usage().unwrap();
+            assert_window(
+                &report.request_weight,
+                Duration::from_mins(1),
+                1200,
+                LimitSource::Stated,
+                1,
+                Duration::from_secs(45),
+            );
+            assert_eq!(report.raw_requests, None);
+            exchange.finish().await;
+        }
+
+        #[tokio::test]
+        async fn usage_follows_the_used_weight_header() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let venue = used_weight(1500).await;
+            let client = client(config(&pools, &clock), &venue, &clock);
+            coinm_time(&client).await.unwrap();
+            assert_window(
+                &client.pool_usage().unwrap().request_weight,
+                Duration::from_mins(1),
+                2400,
+                LimitSource::Documented,
+                1500,
+                Duration::from_secs(45),
+            );
+            clock.set(START + 45_000);
+            assert_eq!(client.pool_usage().unwrap().request_weight.used, 0);
+            venue.finish().await;
+        }
+
+        #[tokio::test]
+        async fn a_requests_reported_weight_is_the_weight_it_is_charged() {
+            let pools = WeightPools::new();
+            let clock = ManualClock::at(START);
+            let venue = HttpFixture::new(200, "", "[]", None, false).await;
+            let client = client(config(&pools, &clock), &venue, &clock);
+            let bars = rest_requests::KlineCandlestickData::new()
+                .symbol(Symbol::new("BTCUSD_PERP").unwrap())
+                .interval("1m")
+                .limit(99);
+            let more = bars.clone().limit(500);
+            assert_eq!(bars.weight().unwrap(), 1);
+            assert_eq!(more.weight().unwrap(), 5);
+
+            client
+                .kline_candlestick_data(&bars, deadline())
+                .await
+                .unwrap();
+            assert_eq!(client.pool_usage().unwrap().request_weight.used, 1);
+            client
+                .kline_candlestick_data(&more, deadline())
+                .await
+                .unwrap();
+            assert_eq!(client.pool_usage().unwrap().request_weight.used, 6);
+
+            let odd = rest_requests::OrderBook::new()
+                .symbol(Symbol::new("BTCUSD_PERP").unwrap())
+                .limit(7);
+            assert!(matches!(odd.weight(), Err(Error::Validation(_))));
+            assert!(matches!(
+                client.order_book(&odd, deadline()).await,
+                Err(Error::Validation(_))
+            ));
+            assert_eq!(client.pool_usage().unwrap().request_weight.used, 6);
+            assert_eq!(venue.connections_accepted(), 2);
+            venue.finish().await;
+        }
+    }
+}

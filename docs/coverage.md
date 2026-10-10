@@ -57,7 +57,11 @@ Additional quotas cover funding, history, hourly/daily conversion, and calendar-
 downloads. Shared-pool contracts check that clients of one venue pool and environment
 share its IP weight, that Spot and futures and demo and production never share, that a
 stated exchange information limit replaces the baseline, and that venue holds reach
-every client of the pool while an explicit owner stays isolated. These checks prove
+every client of the pool while an explicit owner stays isolated. Pool-report
+contracts check, in each market, that `pool_usage()` reports the documented limit
+until exchange information states one and the stated limit after, that its usage
+follows `X-MBX-USED-WEIGHT-1M`, and that a request's `weight()` is the weight its
+admission charges, parameter by parameter. These checks prove
 local admission invariants, not live venue throughput.
 
 The separately invoked credential-free Futures demo probes passed on 2026-09-27:

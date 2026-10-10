@@ -33,6 +33,15 @@ pub struct RestClient {
     pub(crate) inner: crate::core::HttpClient,
 }
 impl RestClient {
+    /// The IP windows of the pool this client draws on, read at its clock; see
+    /// [`Config::pool_usage`].
+    ///
+    /// # Errors
+    /// Returns the clock's error, or a configuration error if the pool's lock is
+    /// poisoned.
+    pub fn pool_usage(&self) -> Result<crate::PoolUsage, crate::Error> {
+        self.inner.pool_usage()
+    }
     /// Create a transport without starting a runtime or performing network I/O.
     ///
     /// # Errors

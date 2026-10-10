@@ -88,7 +88,7 @@ pub(crate) enum SocketEvent {
 
 enum Command {
     Call {
-        op: Operation,
+        op: Box<Operation>,
         params: BTreeMap<String, Value>,
         cost: Box<Cost>,
         id: RequestId,
@@ -288,7 +288,7 @@ impl Socket {
         let (reply, rx) = oneshot::channel();
         self.tx
             .send(Command::Call {
-                op,
+                op: Box::new(op),
                 params,
                 cost: Box::new(cost),
                 id,
@@ -377,7 +377,13 @@ impl SocketDriver {
                 }
                 let client_order_ids = super::request::order_ids(&params);
                 let prepare = (|| {
+                    if op.security == Security::Unresolved {
+                        return Err(Error::Configuration(
+                            "endpoint authentication contract unresolved",
+                        ));
+                    }
                     let now = self.clock.now_millis()?;
+                    cost.validate_authority(op.name, now)?;
                     (op.validate_time)(&params, now)?;
                     if op.security != Security::Public {
                         let credentials = self
@@ -405,7 +411,9 @@ impl SocketDriver {
                     let body=serde_json::to_string(&serde_json::json!({"id":id.as_str(),"method":op.path.trim_start_matches('/'),"params":params}))
                         .map_err(|_|Error::Validation("WebSocket encoding"))?;
                     self.budgets.admit(*cost, now)?;
-                    (op.validate_time)(&params, self.clock.now_millis()?)?;
+                    let authority_time = self.clock.now_millis()?;
+                    (op.validate_time)(&params, authority_time)?;
+                    cost.validate_authority(op.name, authority_time)?;
                     if deadline <= Instant::now() {
                         return Err(Error::Expired(op.name));
                     }
@@ -424,7 +432,7 @@ impl SocketDriver {
                         admitted_at,
                         weight: cost.ws_weight,
                         client_order_ids,
-                        op,
+                        op: *op,
                         id,
                         deadline,
                         reply: Some(reply),

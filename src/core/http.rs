@@ -105,6 +105,11 @@ impl HttpClient {
         request: &R,
         deadline: Instant,
     ) -> Result<reqwest::Request, Error> {
+        if op.security == Security::Unresolved {
+            return Err(Error::Configuration(
+                "endpoint authentication contract unresolved",
+            ));
+        }
         let mut params = request::parameters(request)?;
         let timestamp = self.clock.now_millis()?;
         (op.validate_time)(&params, timestamp)?;
@@ -257,14 +262,19 @@ impl HttpClient {
                 outcome,
                 meta: Some(Box::new(meta.clone())),
             })?;
-        let value = self
-            .decode_body(&body, status, binary_content)
-            .map_err(|_| Error::Transport {
-                client_order_ids: client_order_ids.clone(),
-                operation: op.name,
-                outcome,
-                meta: Some(Box::new(meta.clone())),
-            })?;
+        let decoded = if R::EMPTY_RESPONSE && (200..300).contains(&status) && body.is_empty() {
+            // An explicitly documented no-data receipt, not recovery from a decode
+            // failure. Nonempty malformed bodies and every error still fail normally.
+            Ok(serde_json::json!({}))
+        } else {
+            self.decode_body(&body, status, binary_content)
+        };
+        let value = decoded.map_err(|_| Error::Transport {
+            client_order_ids: client_order_ids.clone(),
+            operation: op.name,
+            outcome,
+            meta: Some(Box::new(meta.clone())),
+        })?;
         if (200..300).contains(&status)
             && value
                 .get("code")

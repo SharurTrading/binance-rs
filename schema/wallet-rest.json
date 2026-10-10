@@ -1,7 +1,7 @@
 {
   "source": "https://developers.binance.info/en/docs/catalog/core-trading-wallet/api/rest-api/1.0.0/schema.yaml",
-  "sha256": "632d21db5cfdda81a16e58ca5c51db041e457de9c6ebca38b3cbcb426d0d7d54",
-  "checked": "2026-09-27",
+  "sha256": "bdad0a6ddab5a6e21fb5906c767664b99a3bc19cbae73479b29e8f9e0c6d2c1e",
+  "checked": "2026-10-10",
   "components": {
     "schemas": {}
   },

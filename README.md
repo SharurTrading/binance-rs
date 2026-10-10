@@ -15,7 +15,7 @@ SharurTrading. This project is not affiliated with or endorsed by Binance.
 > public probes do not establish live trading readiness. `publish = false` remains
 > in force.
 
-Five separate JSON product clients are available under `binance_client::core_trading`:
+Seven separate JSON product clients are available under `binance_client::core_trading`:
 
 | Product | REST | WebSocket API | Market streams | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
@@ -24,12 +24,19 @@ Five separate JSON product clients are available under `binance_client::core_tra
 | Wallet | 50 | — | — | — |
 | Convert | 9 | — | — | — |
 | COIN-M (initial coverage) | 63 | 10 + 3 session methods | 19 | 7 |
+| Margin | 66 bindings | Listen-token subscription | Risk/execution streams | Native Margin events |
+| Options | 44 | — | 10 | 6 |
 
 [USDⓈ-M coverage](docs/coverage.md) and
 [Spot/COIN-M coverage](docs/spot-coinm-coverage.md), and
 [Wallet coverage](docs/wallet-coverage.md), and
-[Convert coverage](docs/convert-coverage.md) record official sources and
-verification limits. Advanced Spot JSON bindings include order lists, SOR, amend,
+[Convert coverage](docs/convert-coverage.md),
+[Margin coverage](docs/margin-coverage.md), and
+[Options coverage](docs/options-coverage.md) record official sources and
+verification limits. Margin has 64 currently dispatchable REST operations; the
+October 14 query is date-gated and token issuance awaits authoritative authentication
+details tracked in [issue #76](https://github.com/SharurTrading/binance-rs/issues/76).
+Advanced Spot JSON bindings include order lists, SOR, amend,
 cancel/replace partial evidence, and explicit microsecond units. COIN-M migrated
 algo evidence remains tracked in
 [issue #11](https://github.com/SharurTrading/binance-rs/issues/11).
@@ -51,6 +58,8 @@ src/
     ├── usdm/: linear Futures models, requests, streams, depth bootstrap
     ├── wallet/: native balances, networks, withdrawals, SAPI endpoint scopes
     ├── convert/: native quote/limit amounts, expiry authority, SAPI endpoint scopes
+    ├── margin/: cross/isolated balances, borrowing, orders, execution/risk events
+    ├── options/: native option contracts, Greeks, orders, routed streams
     ├── spot/: balances, base quantity/quote spend, depth bootstrap, FIX and SBE
     └── coinm/: inverse Futures models, requests, streams, depth bootstrap
 ```
@@ -159,6 +168,11 @@ WebSocket lifecycles.
 ## Budgets
 
 Clone a product `Config` to share budgets between its REST and WebSocket clients.
+Margin, Wallet and Convert can share an explicit `Budgets::sapi()` owner; endpoint
+IP/UID weight scopes stay independent, including Margin's additional per-IP
+leverage request cap. Options requires caller-supplied budgets, with
+`options::budget_limits` validating the venue's own exchange metadata. Unsupported
+rate intervals fail explicitly rather than silently borrowing Futures limits.
 Across accounts on the same IP, use one `Budgets` owner and `for_account()`; reuse
 that account owner for every credential/client of the account. Spot shares REST/WS
 weight, daily/ten-second order counts, and connection-attempt limits. Successful

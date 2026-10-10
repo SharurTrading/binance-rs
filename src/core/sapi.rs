@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-//! SAPI endpoint budgets: Wallet/Convert general-info defines independent
+//! SAPI endpoint budgets: Wallet/Convert/Margin general-info defines independent
 //! endpoint counters, IP 12,000/minute or UID 180,000/minute.
 use super::{Budgets, Cost, Error, RateEvidence};
 use std::time::Duration;
@@ -11,20 +11,149 @@ pub(crate) struct SapiCost {
     pub uid: bool,
     pub weight: u64,
     pub requests_per_second: Option<u64>,
+    /// Additional per-IP request cap, independent of the endpoint weight scope.
+    pub requests_per_minute: Option<u64>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sapi_orders_require_authority_and_refuse_without_partial_weight_charge() {
+        let budgets = Budgets::sapi().unwrap();
+        let cost = SapiCost {
+            endpoint: "/sapi/v1/margin/order",
+            uid: true,
+            weight: 6,
+            requests_per_second: None,
+            requests_per_minute: None,
+        };
+        let order = Cost {
+            orders10: 1,
+            ..Cost::default()
+        };
+        assert!(matches!(
+            budgets.admit_sapi(cost, order, 120_000),
+            Err(Error::Configuration(_))
+        ));
+        assert!(budgets.account.lock().unwrap().endpoints.is_empty());
+        budgets
+            .observe_sapi_order_windows(&[(10_000, 0, 1)], 120_000)
+            .unwrap();
+        budgets.admit_sapi(cost, order, 120_001).unwrap();
+        let clone = budgets.clone();
+        assert!(matches!(
+            clone.admit_sapi(cost, order, 120_002),
+            Err(Error::Admission { .. })
+        ));
+        assert_eq!(
+            budgets.account.lock().unwrap().endpoints[&(cost.endpoint, 60_000)].1,
+            6
+        );
+        let other = budgets.for_account();
+        assert!(matches!(
+            other.admit_sapi(cost, order, 120_002),
+            Err(Error::Configuration(_))
+        ));
+        // Invalid observations never replace valid evidence or partly install quotas.
+        assert!(
+            budgets
+                .observe_sapi_order_windows(&[(60_000, 0, 100), (0, 0, 1)], 120_003)
+                .is_err()
+        );
+        assert_eq!(budgets.account.lock().unwrap().sapi_order_windows.len(), 1);
+        let evidence = RateEvidence {
+            counters: [("x-mbx-order-count-10s".into(), 1)].into(),
+            ..RateEvidence::default()
+        };
+        budgets.admit_sapi(cost, order, 130_000).unwrap();
+        budgets
+            .observe_cost(
+                Cost {
+                    sapi: Some(cost),
+                    ..order
+                },
+                &evidence,
+                140_000,
+                200,
+            )
+            .unwrap();
+        assert!(matches!(
+            budgets.admit_sapi(cost, order, 140_001),
+            Err(Error::Admission { .. })
+        ));
+    }
+
+    #[test]
+    fn uid_weight_and_ip_request_cap_are_independent_and_atomic() {
+        let budgets = Budgets::sapi().unwrap();
+        let cost = SapiCost {
+            endpoint: "/sapi/v1/margin/max-leverage",
+            uid: true,
+            weight: 3000,
+            requests_per_second: None,
+            requests_per_minute: Some(1),
+        };
+        budgets.admit_sapi(cost, Cost::default(), 120_000).unwrap();
+        let other_account = budgets.for_account();
+        assert!(matches!(
+            other_account.admit_sapi(cost, Cost::default(), 120_001),
+            Err(Error::Admission { .. })
+        ));
+        assert!(other_account.account.lock().unwrap().endpoints.is_empty());
+        let account = budgets.account.lock().unwrap();
+        assert_eq!(account.endpoints[&(cost.endpoint, 60_000)].1, 3000);
+        drop(account);
+        budgets.admit_sapi(cost, Cost::default(), 180_000).unwrap();
+    }
 }
 impl Budgets {
-    pub(crate) fn admit_sapi(&self, cost: SapiCost, now: u64) -> Result<(), Error> {
-        {
-            let ip = self
-                .ip
-                .lock()
-                .map_err(|_| Error::Configuration("IP budget poisoned"))?;
-            ip.check_cooldown(now)?;
-        }
-        let owner = if cost.uid { &self.account } else { &self.ip };
-        let mut state = owner
+    pub(crate) fn admit_sapi(&self, cost: SapiCost, attempt: Cost, now: u64) -> Result<(), Error> {
+        // Same lock order as aggregate admission. Validate both authorities before
+        // charging either; a UID weight reservation cannot bypass an IP request cap.
+        let mut ip = self
+            .ip
+            .lock()
+            .map_err(|_| Error::Configuration("IP budget poisoned"))?;
+        let mut account = self
+            .account
             .lock()
             .map_err(|_| Error::Configuration("SAPI budget poisoned"))?;
+        ip.check_cooldown(now)?;
+        let placements = attempt
+            .orders10
+            .max(attempt.orders60)
+            .max(attempt.orders_day);
+        if placements > 0 && account.sapi_order_windows.is_empty() {
+            return Err(Error::Configuration(
+                "Margin order quota authority required",
+            ));
+        }
+        for (&window, &(bucket, count, limit)) in &account.sapi_order_windows {
+            let count = if bucket == now / window { count } else { 0 };
+            if placements > 0 && count.checked_add(placements).is_none_or(|v| v > limit) {
+                return Err(Error::Admission {
+                    retry_after: Duration::from_millis(window - now % window),
+                });
+            }
+        }
+        if let Some(limit) = cost.requests_per_minute {
+            if limit == 0 {
+                return Err(Error::Configuration("zero SAPI request cap"));
+            }
+            let (bucket, count) = ip
+                .endpoint_ip_requests
+                .get(cost.endpoint)
+                .copied()
+                .unwrap_or_default();
+            if bucket == now / 60_000 && count >= limit {
+                return Err(Error::Admission {
+                    retry_after: Duration::from_millis(60_000 - now % 60_000),
+                });
+            }
+        }
+        let state = if cost.uid { &mut account } else { &mut ip };
         if let Some(&until) = state.endpoint_cooldown.get(cost.endpoint)
             && now < until
         {
@@ -61,6 +190,63 @@ impl Budgets {
                 .1
                 .checked_add(amount)
                 .ok_or(Error::Configuration("SAPI budget overflow"))?;
+        }
+        if cost.requests_per_minute.is_some() {
+            let current = ip.endpoint_ip_requests.entry(cost.endpoint).or_default();
+            if current.0 != now / 60_000 {
+                *current = (now / 60_000, 0);
+            }
+            current.1 = current
+                .1
+                .checked_add(1)
+                .ok_or(Error::Configuration("SAPI request budget overflow"))?;
+        }
+        if placements > 0 {
+            for (&window, current) in &mut account.sapi_order_windows {
+                if current.0 != now / window {
+                    current.0 = now / window;
+                    current.1 = 0;
+                }
+                current.1 = current
+                    .1
+                    .checked_add(placements)
+                    .ok_or(Error::Configuration("Margin order budget overflow"))?;
+            }
+        }
+        Ok(())
+    }
+    /// Install native Margin order quotas only after validating the entire observation.
+    pub(crate) fn observe_sapi_order_windows(
+        &self,
+        windows: &[(u64, u64, u64)],
+        now: u64,
+    ) -> Result<(), Error> {
+        if windows.is_empty()
+            || windows
+                .iter()
+                .any(|(window, _, limit)| *window == 0 || *limit == 0)
+        {
+            return Err(Error::Gap("missing Margin order quota evidence"));
+        }
+        let mut account = self
+            .account
+            .lock()
+            .map_err(|_| Error::Configuration("account budget poisoned"))?;
+        let mut observed = std::collections::BTreeMap::<u64, (u64, u64)>::new();
+        for &(window, count, limit) in windows {
+            let entry = observed.entry(window).or_insert((count, limit));
+            entry.0 = entry.0.max(count);
+            entry.1 = entry.1.min(limit);
+        }
+        for (window, (count, limit)) in observed {
+            let previous = account
+                .sapi_order_windows
+                .get(&window)
+                .filter(|(bucket, _, _)| *bucket == now / window)
+                .map_or(0, |(_, count, _)| *count);
+            account
+                .sapi_order_windows
+                .insert(window, (now / window, count.max(previous), limit));
         }
         Ok(())
     }
@@ -106,6 +292,37 @@ impl Budgets {
                 *current = (*current).max(until);
             }
         }
+        let mut account = self
+            .account
+            .lock()
+            .map_err(|_| Error::Configuration("account budget poisoned"))?;
+        for (name, &count) in &e.counters {
+            let Some(interval) = name.strip_prefix("x-mbx-order-count-") else {
+                continue;
+            };
+            let unit = match interval.as_bytes().last() {
+                Some(b's') => 1000_u64,
+                Some(b'm') => 60_000,
+                Some(b'h') => 3_600_000,
+                Some(b'd') => 86_400_000,
+                _ => continue, // Unknown header evidence remains in ResponseMeta.
+            };
+            let Some(window) = interval
+                .get(..interval.len().saturating_sub(1))
+                .and_then(|n| n.parse::<u64>().ok())
+                .and_then(|n| n.checked_mul(unit))
+                .filter(|window| *window > 0)
+            else {
+                continue;
+            };
+            if let Some(current) = account.sapi_order_windows.get_mut(&window) {
+                if current.0 != now / window {
+                    current.0 = now / window;
+                    current.1 = 0;
+                }
+                current.1 = current.1.max(count);
+            }
+        }
         Ok(())
     }
 }
@@ -148,7 +365,7 @@ impl Config {
         self.clock = value;
         self
     }
-    /// Share IP/UID scopes across every Wallet/Convert client for this account.
+    /// Share IP/UID scopes across every Wallet/Convert/Margin client for this account.
     #[must_use]
     pub fn budgets(mut self, value: Budgets) -> Self {
         self.budgets = value;

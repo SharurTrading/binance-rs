@@ -1,0 +1,330 @@
+{
+  "rest": [
+    {
+      "name": "accountFundingFlow",
+      "method": "GET",
+      "path": "/eapi/v1/bill",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/account#account-funding-flow"
+    },
+    {
+      "name": "optionMarginAccountInformation",
+      "method": "GET",
+      "path": "/eapi/v1/marginAccount",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/account#option-margin-account-information"
+    },
+    {
+      "name": "checkServerTime",
+      "method": "GET",
+      "path": "/eapi/v1/time",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#check-server-time"
+    },
+    {
+      "name": "exchangeInformation",
+      "method": "GET",
+      "path": "/eapi/v1/exchangeInfo",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#exchange-information"
+    },
+    {
+      "name": "historicalExerciseRecords",
+      "method": "GET",
+      "path": "/eapi/v1/exerciseHistory",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#historical-exercise-records"
+    },
+    {
+      "name": "indexPrice",
+      "method": "GET",
+      "path": "/eapi/v1/index",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#index-price"
+    },
+    {
+      "name": "klineCandlestickData",
+      "method": "GET",
+      "path": "/eapi/v1/klines",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#kline-candlestick-data"
+    },
+    {
+      "name": "openInterest",
+      "method": "GET",
+      "path": "/eapi/v1/openInterest",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#open-interest"
+    },
+    {
+      "name": "optionMarkPrice",
+      "method": "GET",
+      "path": "/eapi/v1/mark",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#option-mark-price"
+    },
+    {
+      "name": "orderBook",
+      "method": "GET",
+      "path": "/eapi/v1/depth",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#order-book"
+    },
+    {
+      "name": "recentBlockTradesList",
+      "method": "GET",
+      "path": "/eapi/v1/blockTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#recent-block-trades-list"
+    },
+    {
+      "name": "recentTradesList",
+      "method": "GET",
+      "path": "/eapi/v1/trades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#recent-trades-list"
+    },
+    {
+      "name": "testConnectivity",
+      "method": "GET",
+      "path": "/eapi/v1/ping",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#test-connectivity"
+    },
+    {
+      "name": "ticker24hrPriceChangeStatistics",
+      "method": "GET",
+      "path": "/eapi/v1/ticker",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#ticker24hr-price-change-statistics"
+    },
+    {
+      "name": "acceptBlockTradeOrder",
+      "method": "POST",
+      "path": "/eapi/v1/block/order/execute",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#accept-block-trade-order"
+    },
+    {
+      "name": "queryBlockTradeDetails",
+      "method": "GET",
+      "path": "/eapi/v1/block/order/execute",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#query-block-trade-details"
+    },
+    {
+      "name": "accountBlockTradeList",
+      "method": "GET",
+      "path": "/eapi/v1/block/user-trades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#account-block-trade-list"
+    },
+    {
+      "name": "cancelBlockTradeOrder",
+      "method": "DELETE",
+      "path": "/eapi/v1/block/order/create",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#cancel-block-trade-order"
+    },
+    {
+      "name": "extendBlockTradeOrder",
+      "method": "PUT",
+      "path": "/eapi/v1/block/order/create",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#extend-block-trade-order"
+    },
+    {
+      "name": "newBlockTradeOrder",
+      "method": "POST",
+      "path": "/eapi/v1/block/order/create",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#new-block-trade-order"
+    },
+    {
+      "name": "queryBlockTradeOrder",
+      "method": "GET",
+      "path": "/eapi/v1/block/order/orders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#query-block-trade-order"
+    },
+    {
+      "name": "autoCancelAllOpenOrders",
+      "method": "POST",
+      "path": "/eapi/v1/countdownCancelAllHeartBeat",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#auto-cancel-all-open-orders"
+    },
+    {
+      "name": "getAutoCancelAllOpenOrders",
+      "method": "GET",
+      "path": "/eapi/v1/countdownCancelAll",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#get-auto-cancel-all-open-orders"
+    },
+    {
+      "name": "setAutoCancelAllOpenOrders",
+      "method": "POST",
+      "path": "/eapi/v1/countdownCancelAll",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#set-auto-cancel-all-open-orders"
+    },
+    {
+      "name": "getMarketMakerProtectionConfig",
+      "method": "GET",
+      "path": "/eapi/v1/mmp",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#get-market-maker-protection-config"
+    },
+    {
+      "name": "resetMarketMakerProtectionConfig",
+      "method": "POST",
+      "path": "/eapi/v1/mmpReset",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#reset-market-maker-protection-config"
+    },
+    {
+      "name": "setMarketMakerProtectionConfig",
+      "method": "POST",
+      "path": "/eapi/v1/mmpSet",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#set-market-maker-protection-config"
+    },
+    {
+      "name": "accountTradeList",
+      "method": "GET",
+      "path": "/eapi/v1/userTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#account-trade-list"
+    },
+    {
+      "name": "cancelAllOptionOrdersByUnderlying",
+      "method": "DELETE",
+      "path": "/eapi/v1/allOpenOrdersByUnderlying",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#cancel-all-option-orders-by-underlying"
+    },
+    {
+      "name": "cancelAllOptionOrdersOnSpecificSymbol",
+      "method": "DELETE",
+      "path": "/eapi/v1/allOpenOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#cancel-all-option-orders-on-specific-symbol"
+    },
+    {
+      "name": "cancelMultipleOptionOrders",
+      "method": "DELETE",
+      "path": "/eapi/v1/batchOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#cancel-multiple-option-orders"
+    },
+    {
+      "name": "placeMultipleOrders",
+      "method": "POST",
+      "path": "/eapi/v1/batchOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#place-multiple-orders"
+    },
+    {
+      "name": "cancelOptionOrder",
+      "method": "DELETE",
+      "path": "/eapi/v1/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#cancel-option-order"
+    },
+    {
+      "name": "newOrder",
+      "method": "POST",
+      "path": "/eapi/v1/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#new-order"
+    },
+    {
+      "name": "querySingleOrder",
+      "method": "GET",
+      "path": "/eapi/v1/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#query-single-order"
+    },
+    {
+      "name": "optionPositionInformation",
+      "method": "GET",
+      "path": "/eapi/v1/position",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#option-position-information"
+    },
+    {
+      "name": "queryCurrentOpenOptionOrders",
+      "method": "GET",
+      "path": "/eapi/v1/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#query-current-open-option-orders"
+    },
+    {
+      "name": "queryOptionOrderHistory",
+      "method": "GET",
+      "path": "/eapi/v1/historyOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#query-option-order-history"
+    },
+    {
+      "name": "tradfiOptionsContract",
+      "method": "POST",
+      "path": "/eapi/v1/stock/contract",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#tradfi-options-contract"
+    },
+    {
+      "name": "userCommission",
+      "method": "GET",
+      "path": "/eapi/v1/commission",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#user-commission"
+    },
+    {
+      "name": "userExerciseRecord",
+      "method": "GET",
+      "path": "/eapi/v1/exerciseRecord",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#user-exercise-record"
+    },
+    {
+      "name": "closeUserDataStream",
+      "method": "DELETE",
+      "path": "/eapi/v1/listenKey",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/user-data-streams#close-user-data-stream"
+    },
+    {
+      "name": "keepaliveUserDataStream",
+      "method": "PUT",
+      "path": "/eapi/v1/listenKey",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/user-data-streams#keepalive-user-data-stream"
+    },
+    {
+      "name": "startUserDataStream",
+      "method": "POST",
+      "path": "/eapi/v1/listenKey",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/user-data-streams#start-user-data-stream"
+    }
+  ],
+  "streams": [
+    {
+      "name": "IndexPriceStreams",
+      "path": "/!index@arr",
+      "route": "market",
+      "type": "Vec<IndexPriceStreamsEventItem>"
+    },
+    {
+      "name": "KlineCandlestickStreams",
+      "path": "/{symbol}@kline_{interval}",
+      "route": "market",
+      "type": "KlineCandlestickStreamsEvent"
+    },
+    {
+      "name": "OptionMarkPrice",
+      "path": "/{underlying}@optionMarkPrice",
+      "route": "market",
+      "type": "Vec<OptionMarkPriceEventItem>"
+    },
+    {
+      "name": "NewSymbolInfo",
+      "path": "/!optionSymbol",
+      "route": "market",
+      "type": "NewSymbolInfoEvent"
+    },
+    {
+      "name": "OpenInterest",
+      "path": "/{underlying}@openInterest@{expirationDate}",
+      "route": "market",
+      "type": "Vec<OpenInterestEventItem>"
+    },
+    {
+      "name": "DiffBookDepthStreams",
+      "path": "/{symbol}@depth@{updateSpeed}",
+      "route": "public",
+      "type": "DiffBookDepthStreamsEvent"
+    },
+    {
+      "name": "IndividualSymbolBookTickerStreams",
+      "path": "/{symbol}@bookTicker",
+      "route": "public",
+      "type": "IndividualSymbolBookTickerStreamsEvent"
+    },
+    {
+      "name": "PartialBookDepthStreams",
+      "path": "/{symbol}@depth{level}@{updateSpeed}",
+      "route": "public",
+      "type": "PartialBookDepthStreamsEvent"
+    },
+    {
+      "name": "Hour24Ticker",
+      "path": "/{symbol}@optionTicker{expirationDate}",
+      "route": "public",
+      "type": "Hour24TickerEvent"
+    },
+    {
+      "name": "TradeStreams",
+      "path": "/{symbol}@optionTrade",
+      "route": "public",
+      "type": "TradeStreamsEvent"
+    }
+  ]
+}

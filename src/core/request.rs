@@ -11,6 +11,8 @@ pub(crate) enum Security {
     Public,
     Key,
     Signed,
+    /// No authoritative authentication contract: dispatch must refuse unsent.
+    Unresolved,
 }
 
 #[derive(Clone, Copy)]
@@ -25,6 +27,8 @@ pub(crate) struct Operation {
     /// page annotates one (for example Wallet `withdrawHistory`); admission
     /// derives its bucket from this pinned fact instead of a local constant.
     pub requests_per_second: Option<u64>,
+    /// Additional documented per-IP minute request cap, independent of UID weight.
+    pub requests_per_minute: Option<u64>,
     pub success_weight: Option<u64>,
     pub partial: Option<fn(u16, &Value) -> Option<super::error::PartialOperation>>,
     pub definitive: fn(u16, &Value) -> bool,
@@ -34,6 +38,8 @@ pub(crate) struct Operation {
 pub(crate) trait Request: Serialize + Send + Sync {
     type Response: DeserializeOwned + Send + 'static;
     const OP: Operation;
+    /// Only explicit provider no-data contracts permit a successful empty body.
+    const EMPTY_RESPONSE: bool = false;
     fn validate(&self) -> Result<(), Error>;
     fn validate_authority(&self, _now: u64) -> Result<(), Error> {
         Ok(())
@@ -78,14 +84,23 @@ pub(crate) fn order_ids(p: &BTreeMap<String, Value>) -> BTreeMap<String, String>
                     || field == "clientAlgoId"
                     || field == "withdrawOrderId"
                     || field == "clientId"
+                    || field == "clientOrderId"
+                    || field.starts_with("clientOrderIds[")
+                    || field == "blockOrderMatchingKey"
                     || field == "quoteId"
                     || field == "orderId"
+                    || field.starts_with("orderIds[")
                     || field.starts_with("origClientOrderIdList[")
                 {
                     ids.insert(path.to_owned(), id.clone());
                 }
             }
-            Value::Number(id) if path.rsplit('.').next() == Some("orderId") => {
+            Value::Number(id)
+                if path
+                    .rsplit('.')
+                    .next()
+                    .is_some_and(|field| field == "orderId" || field.starts_with("orderIds[")) =>
+            {
                 ids.insert(path.to_owned(), id.to_string());
             }
             _ => (),
@@ -200,6 +215,36 @@ mod tests {
                 ("batchOrders[1].origClientOrderId".into(), "b".into()),
                 ("origClientOrderIdList[0]".into(), "c".into()),
                 ("origClientOrderIdList[1]".into(), "d".into()),
+            ])
+        );
+    }
+
+    #[test]
+    fn options_reconciliation_preserves_native_client_ids_and_cancel_lists() {
+        let p = BTreeMap::from([
+            ("clientOrderId".into(), serde_json::json!("options-caller")),
+            (
+                "clientOrderIds".into(),
+                serde_json::json!(["first", "second"]),
+            ),
+            (
+                "blockOrderMatchingKey".into(),
+                serde_json::json!("matching-key"),
+            ),
+            (
+                "orderIds".into(),
+                serde_json::json!([9_007_199_254_740_993_i64, "0007"]),
+            ),
+        ]);
+        assert_eq!(
+            order_ids(&p),
+            BTreeMap::from([
+                ("clientOrderId".into(), "options-caller".into()),
+                ("clientOrderIds[0]".into(), "first".into()),
+                ("clientOrderIds[1]".into(), "second".into()),
+                ("blockOrderMatchingKey".into(), "matching-key".into()),
+                ("orderIds[0]".into(), "9007199254740993".into()),
+                ("orderIds[1]".into(), "0007".into()),
             ])
         );
     }

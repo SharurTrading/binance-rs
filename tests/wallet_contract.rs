@@ -112,8 +112,8 @@ async fn endpoint_weight_headers_survive_truncated_withdrawal_without_retry() {
 async fn definitive_codes_match_the_pinned_error_code_snapshot() {
     // Machine-checks schema/wallet-error-codes.json: every pinned definitive
     // code must classify as a definitive refusal below 500, every pinned
-    // never-definitive code (retryable, unknown-execution, rate, and the
-    // retired -1002) must stay ambiguous, and every 5xx stays ambiguous.
+    // never-definitive code (retryable, unknown-execution, rate, and future
+    // codes) must stay ambiguous, and every 5xx stays ambiguous.
     let snapshot = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/schema/wallet-error-codes.json"
@@ -385,5 +385,93 @@ fn native_network_identity_is_validated_without_inferring_asset() {
     assert_eq!(
         serde_json::to_value(request).unwrap()["network"],
         "SYNTHETIC_NETWORK"
+    );
+}
+
+#[test]
+fn snapshot_and_travel_rule_queries_enforce_their_native_history_windows() {
+    let snapshot = wallet::rest_requests::DailyAccountSnapshot::new()
+        .type_value("SPOT")
+        .start_time(0);
+    assert!(snapshot.clone().end_time(2_591_999_999).build().is_ok());
+    assert!(snapshot.end_time(2_592_000_000).build().is_err());
+    let history = wallet::rest_requests::WithdrawHistoryV1::new().start_time(0);
+    assert!(history.clone().end_time(7_775_999_999).build().is_ok());
+    assert!(history.end_time(7_776_000_000).build().is_err());
+    assert!(
+        wallet::rest_requests::WithdrawHistoryV2::new()
+            .start_time(0)
+            .end_time(7_776_000_001)
+            .build()
+            .is_err()
+    );
+}
+
+#[test]
+fn travel_rule_deposits_and_withdrawal_ids_keep_documented_history_bounds() {
+    assert!(
+        wallet::rest_requests::DepositHistoryTravelRule::new()
+            .start_time(0)
+            .end_time(7_776_000_000)
+            .build()
+            .is_err()
+    );
+    assert!(
+        wallet::rest_requests::DepositHistoryV2::new()
+            .start_time(0)
+            .end_time(7_776_000_000)
+            .build()
+            .is_err()
+    );
+    assert!(
+        wallet::rest_requests::WithdrawHistoryV2::new()
+            .withdraw_order_id(wallet::WithdrawalId::new("caller-withdrawal").unwrap())
+            .start_time(0)
+            .end_time(604_800_000)
+            .build()
+            .is_err()
+    );
+}
+
+#[tokio::test]
+async fn invalid_history_window_is_refused_before_dispatch() {
+    let fixture = HttpFixture::new(200, "", "{}", None, false).await;
+    let client = wallet::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+    let request = wallet::rest_requests::DailyAccountSnapshot::new()
+        .type_value("SPOT")
+        .start_time(0)
+        .end_time(2_592_000_000);
+    let error = client
+        .daily_account_snapshot(&request, deadline())
+        .await
+        .unwrap_err();
+    assert_eq!(error.outcome(), Some(Outcome::NotSent));
+    assert_eq!(fixture.connections_accepted(), 0);
+    fixture.finish().await;
+}
+
+#[test]
+fn travel_rule_v2_withdrawal_identity_lists_follow_the_documented_bound() {
+    let ids = (1..=46)
+        .map(|id| id.to_string())
+        .collect::<Vec<_>>()
+        .join(",");
+    assert!(
+        wallet::rest_requests::WithdrawHistoryV2::new()
+            .tr_id(ids.clone())
+            .build()
+            .is_err()
+    );
+    assert!(
+        wallet::rest_requests::WithdrawHistoryV2::new()
+            .tx_id(binance_client::SensitiveString::new(ids))
+            .build()
+            .is_err()
+    );
+    assert!(
+        wallet::rest_requests::WithdrawHistoryV2::new()
+            .tr_id("1,,2")
+            .build()
+            .is_err()
     );
 }

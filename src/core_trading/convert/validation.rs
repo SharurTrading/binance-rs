@@ -60,9 +60,9 @@ pub(crate) fn validate_time(p: &BTreeMap<String, Value>, _now: u64) -> Result<()
 // Convert's own error-code page documents these definitive request refusals;
 // its general-info keeps all 5xx outcomes unknown, regardless of a familiar
 // code. Pinned in schema/convert-error-codes.json against the product's
-// documented error-code page (verified 2026-10-03), which no longer lists
-// -1002 (folded into the ambiguous -1001 family). The matching-engine
-// rejection codes -2010/-2011 are Convert's only divergence from Wallet.
+// documented error-code page (verified 2026-10-10), which explicitly documents
+// -1002 UNAUTHORIZED. The matching-engine rejection codes -2010/-2011 are
+// Convert's only divergence from Wallet.
 pub(crate) fn definitive(status: u16, value: &Value) -> bool {
     status < 500
         && value
@@ -71,7 +71,8 @@ pub(crate) fn definitive(status: u16, value: &Value) -> bool {
             .is_some_and(|code| {
                 matches!(
                     code,
-                    -1020
+                    -1002
+                        | -1020
                         | -1021
                         | -1022
                         | -1100

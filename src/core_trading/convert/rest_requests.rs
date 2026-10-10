@@ -53,6 +53,7 @@ impl Request for ListAllConvertPairs {
         mutation: false,
         weight: 3000,
         requests_per_second: None,
+        requests_per_minute: None,
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
@@ -105,6 +106,7 @@ impl Request for QueryOrderQuantityPrecisionPerAsset {
         mutation: false,
         weight: 100,
         requests_per_second: None,
+        requests_per_minute: None,
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
@@ -134,6 +136,7 @@ pub(crate) const ACCEPT_QUOTE_OPERATION: Operation = Operation {
     mutation: true,
     weight: 500,
     requests_per_second: None,
+    requests_per_minute: None,
     validate_time: super::validation::validate_time,
     definitive: super::validation::definitive,
     success_weight: None,
@@ -186,6 +189,7 @@ impl Request for CancelLimitOrder {
         mutation: true,
         weight: 200,
         requests_per_second: None,
+        requests_per_minute: None,
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
@@ -267,6 +271,7 @@ impl Request for GetConvertTradeHistory {
         mutation: false,
         weight: 3000,
         requests_per_second: None,
+        requests_per_minute: None,
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
@@ -294,7 +299,7 @@ impl Request for GetConvertTradeHistory {
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct OrderStatus {
     #[serde(rename = "orderId", skip_serializing_if = "Option::is_none")]
-    order_id: Option<super::OrderId>,
+    order_id: Option<super::AcceptanceOrderId>,
     #[serde(rename = "quoteId", skip_serializing_if = "Option::is_none")]
     quote_id: Option<super::QuoteId>,
 }
@@ -306,7 +311,7 @@ impl OrderStatus {
     }
     /// Set the provider `orderId` parameter.
     #[must_use]
-    pub fn order_id(mut self, value: super::OrderId) -> Self {
+    pub fn order_id(mut self, value: super::AcceptanceOrderId) -> Self {
         self.order_id = Some(value);
         self
     }
@@ -335,6 +340,7 @@ impl Request for OrderStatus {
         mutation: false,
         weight: 100,
         requests_per_second: None,
+        requests_per_minute: None,
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
@@ -451,6 +457,7 @@ impl Request for PlaceLimitOrder {
         mutation: true,
         weight: 500,
         requests_per_second: None,
+        requests_per_minute: None,
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
@@ -529,6 +536,7 @@ impl Request for QueryLimitOpenOrders {
         mutation: false,
         weight: 3000,
         requests_per_second: None,
+        requests_per_minute: None,
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,
@@ -634,6 +642,7 @@ impl Request for SendQuoteRequest {
         mutation: true,
         weight: 200,
         requests_per_second: None,
+        requests_per_minute: None,
         validate_time: super::validation::validate_time,
         definitive: super::validation::definitive,
         success_weight: None,

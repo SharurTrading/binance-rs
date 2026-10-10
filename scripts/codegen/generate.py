@@ -146,13 +146,19 @@ class Models:
                     value='value.into()' if typ=='String' else 'value'
                     setters += [f'    /// Set `{key}`.', '    #[must_use]',f'    pub fn {field}(mut self,value:{arg})->Self {{ self.{field}=Some({value});self }}']
                 op='newOrder' if name.startswith('PlaceMultipleOrders') else 'modifyOrder' if name.startswith('ModifyMultipleOrders') else 'nestedInput'
-                self.defs[name]='\n'.join([f'/// Validated nested request builder for `{name}`.', '#[derive(Clone, Debug, Default, Serialize)]', f'pub struct {name} {{',*fields,'}', f'impl {name} {{', '    /// Start this nested request builder.', '    #[must_use]', '    pub fn new()->Self {Self::default()}',*setters,'    /// Validate required and conditional provider parameters.', '    ///', '    /// # Errors', '    /// Refuses missing or contradictory input.',f'    pub fn build(self)->Result<Self,crate::Error> {{ super::validation::validate({lit(op)}, &crate::core::parameters(&self)?)?; Ok(self) }}','}'])
+                validation=f'super::validation::validate({lit(op)}, &crate::core::parameters(&self)?)?;'
+                if PRODUCT in ['margin','options']:
+                    required='&['+', '.join(lit(k) for k in sorted(schema.get('required',[])))+']'
+                    enums='&['+', '.join('('+lit(k)+', &['+', '.join(lit(str(v)) for v in s['enum'])+'])' for k,s in props.items() if s.get('enum'))+']'
+                    bounds='&['+', '.join('('+lit(k)+', '+format(s.get('minimum',-9223372036854775808),'_')+', '+format(s.get('maximum',9223372036854775807),'_')+')' for k,s in props.items() if s.get('type')=='integer' and ('minimum' in s or 'maximum' in s))+']'
+                    validation=f'let p=crate::core::parameters(&self)?;crate::core::validate_parameters(&p,{required},{enums},{bounds})?;super::validation::validate({lit(op)},&p)?;'
+                self.defs[name]='\n'.join([f'/// Validated nested request builder for `{name}`.', '#[derive(Clone, Debug, Default, Serialize)]', f'pub struct {name} {{',*fields,'}', f'impl {name} {{', '    /// Start this nested request builder.', '    #[must_use]', '    pub fn new()->Self {Self::default()}',*setters,'    /// Validate required and conditional provider parameters.', '    ///', '    /// # Errors', '    /// Refuses missing or contradictory input.',f'    pub fn build(self)->Result<Self,crate::Error> {{ {validation} Ok(self) }}','}'])
             return name
         if not props:
             additional = schema.get('additionalProperties')
             if isinstance(additional, dict):
                 return 'BTreeMap<'+schema.get('x-rust-key-type','String')+', '+self.type(additional, name+'Value', response)+'>'
-            if response and PRODUCT in ['wallet','convert']:
+            if response and PRODUCT in ['wallet','convert','margin','options']:
                 self.defs[name]='\n'.join([f'/// Provider empty object receipt with retained future fields.', '#[derive(Clone,Debug,PartialEq,Serialize,Deserialize)]', '#[non_exhaustive]',f'pub struct {name} {{', '    /// Future fields; never logged implicitly.', '    #[serde(flatten)]','    pub extra:super::event_payloads::UnknownMessage,','}'])
                 return name
             return 'BTreeMap<String, serde_json::Value>'
@@ -166,7 +172,7 @@ class Models:
             # accidentally deserialize as an all-optional successful order.
             if 'code' in props:
                 required.add('code')
-            if 'orderId' in props and name!='TestOrderResponse':
+            if 'orderId' in props and name!='TestOrderResponse' and not props['orderId'].get('nullable'):
                 required.add('orderId')
             if PRODUCT != 'usdm' and 'orderListId' in props and 'orders' in props:
                 required.update(['orderListId', 'orders'])
@@ -193,8 +199,9 @@ class Models:
             fields += ['    /// Unknown future wire fields, retained without inventing defaults; avoid logging.',
                 '    #[serde(flatten)]', f'    pub extra: {extra},'] if PRODUCT != 'usdm' else ['    /// Unknown future wire fields, retained without inventing defaults.',
                 '    #[serde(flatten)]', '    pub extra: BTreeMap<String, serde_json::Value>,']
+            bool_exception=['#[allow(clippy::struct_excessive_bools, reason = "independent provider wire flags must retain their native meaning")]'] if PRODUCT in ['margin','options'] and sum(self.type(v,name+pascal(k),response)=='bool' for k,v in props.items()) > 3 else []
             self.defs[name] = '\n'.join([f'/// Provider-native `{name}` payload.',
-                '#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]', '#[non_exhaustive]',
+                '#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]', '#[non_exhaustive]', *bool_exception,
                 f'pub struct {name} {{', *fields, '}'])
         return name
 
@@ -212,22 +219,25 @@ def request_fields(op, kind):
         s = content.get('schema', {})
         props.update(s.get('properties', {}))
         required.update(s.get('required', []))
-    for key in ['apiKey', 'signature', 'timestamp']:
+    auth_fields = ['signature', 'timestamp'] if PRODUCT == 'margin' and kind == 'rest' else ['apiKey', 'signature', 'timestamp']
+    for key in auth_fields:
         props.pop(key, None)
         required.discard(key)
     if op['operationId'] in ['newOrder', 'testOrder', 'orderPlace', 'orderTest']:
-        required.add('newClientOrderId')
+        required.add('clientOrderId' if PRODUCT == 'options' else 'newClientOrderId')
     if op['operationId'] == 'newAlgoOrder':
         required.add('clientAlgoId')
     return props, required
 
 
 def request_type(models, schema, name, field):
+    if PRODUCT in ['margin','options'] and schema.get('x-rust-type'):
+        return schema['x-rust-type']
     if schema.get('enum'):
         # Open response enums are strings; outgoing enum values are validated.
         return 'String'
     if field in ['symbol', 'pair', 'fromSymbol', 'toSymbol']:
-        return 'Symbol'
+            return 'Symbol'
     if field.lower().endswith('clientorderid') or field in ['clientAlgoId','origClientAlgoId']:
         return 'ClientOrderId'
     if field == 'listenKey':
@@ -279,7 +289,7 @@ def generate(kind):
                 enums.append('('+lit(key)+', &['+', '.join(lit(str(v)) for v in s['enum'])+'])')
             if typ=='i64' and ('minimum' in s or 'maximum' in s):
                 bounds.append('('+lit(key)+', '+format(s.get('minimum',-9223372036854775808),'_')+', '+format(s.get('maximum',9223372036854775807),'_')+')')
-        security = 'Signed' if op.get('x-signed') else 'Key' if op.get('x-security-type') in ['MARKET_DATA','USER_STREAM'] else 'Public'
+        security = 'Unresolved' if op.get('x-security-type') == 'UNRESOLVED' else 'Signed' if op.get('x-signed') else 'Key' if op.get('x-security-type') in ['MARKET_DATA','USER_STREAM'] else 'Public'
         mutation = op['method']!='GET' if kind=='rest' else op['path'] in ['/order.place','/order.modify','/order.cancel','/algoOrder.place','/algoOrder.cancel','/userDataStream.start','/userDataStream.stop','/userDataStream.ping']
         if PRODUCT == 'spot' and kind == 'ws':
             mutation = op['tags'][0] == 'trade' or op['operationId'] in ['userDataStreamSubscribe','userDataStreamSubscribeSignature','userDataStreamUnsubscribe']
@@ -292,12 +302,16 @@ def generate(kind):
         partial = 'Some(super::validation::partial)' if op.get('x-partial-result') else 'None'
         rps = op.get('x-requests-per-second')
         requests_per_second = f'Some({rps})' if rps is not None else 'None'
-        op_expr = f'Operation {{ name: {lit(op["operationId"])}, path: {lit(op["path"])}, method: {lit(op["method"])}, security: Security::{security}, mutation: {str(mutation).lower()}, weight: {op.get("x-ip-weight",op.get("x-uid-weight",0))}, requests_per_second: {requests_per_second}, validate_time: super::validation::validate_time, definitive: super::validation::definitive, success_weight: {success_weight}, partial: {partial} }}'
+        rpm = op.get('x-requests-per-minute')
+        requests_per_minute = f'Some({rpm})' if rpm is not None else 'None'
+        time_validator = op.get('x-time-validator','super::validation::validate_time')
+        op_expr = f'Operation {{ name: {lit(op["operationId"])}, path: {lit(op["path"])}, method: {lit(op["method"])}, security: Security::{security}, mutation: {str(mutation).lower()}, weight: {op.get("x-ip-weight",op.get("x-uid-weight",0))}, requests_per_second: {requests_per_second}, requests_per_minute: {requests_per_minute}, validate_time: {time_validator}, definitive: super::validation::definitive, success_weight: {success_weight}, partial: {partial} }}'
         required_rust='&['+', '.join(lit(v) for v in sorted(required))+']'
         validation=f'let p = parameters(self)?; validate_parameters(&p, {required_rust}, &[{", ".join(enums)}], &[{", ".join(bounds)}])?; super::validation::validate({lit(op["operationId"])}, &p)'
         if PRODUCT == 'convert' and op['operationId']=='acceptQuote':
             requests.append(f'/// Canonical quote acceptance operation facts.\npub(crate) const ACCEPT_QUOTE_OPERATION:Operation={op_expr};\npub use super::quote::AcceptQuote;')
         else:
+            empty_response = ['    const EMPTY_RESPONSE: bool = true;'] if op.get('x-empty-response') else []
             requests.append('\n'.join([f'/// Validated request builder for [`{op["operationId"]}`]({op["source"]}).',
                 '#[derive(Clone, Debug, Default, Serialize)]',f'pub struct {name} {{',*fields,'}',
                 f'impl {name} {{','    /// Start a request builder. Required inputs are checked by `build` and by dispatch.',
@@ -305,7 +319,7 @@ def generate(kind):
                 '    /// Validate this request before dispatch.', '    ///', '    /// # Errors',
                 '    /// Refuses missing, invalid, or contradictory provider parameters.',
                 '    pub fn build(self) -> Result<Self, Error> { self.validate()?; Ok(self) }','}',
-                f'impl Request for {name} {{', f'    type Response = super::{kind}_models::{response_type};',
+                f'impl Request for {name} {{', f'    type Response = super::{kind}_models::{response_type};',*empty_response,
                 f'    const OP: Operation = {op_expr};',f'    fn validate(&self) -> Result<(), Error> {{ {validation} }}',
                 '    fn cost(&self) -> Result<crate::core::Cost, Error> { super::rate::cost(Self::OP, &parameters(self)?) }','}']))
         method=snake(op['operationId'])
@@ -326,12 +340,23 @@ def generate(kind):
         if PRODUCT == 'convert' and op['operationId'] == 'acceptQuote':
             return_type='super::Acceptance'
             call='let response=self.inner.execute(request,deadline).await?;Ok(crate::Response{data:super::Acceptance{quotation:request.quotation().clone(),receipt:response.data},meta:response.meta})'
+        if PRODUCT == 'margin' and op['operationId'] in ['queryMaxBorrow','queryMaxTransferOutAmount']:
+            wrapper, field = ('BorrowCapacity','capacity') if op['operationId']=='queryMaxBorrow' else ('TransferCapacity','available')
+            return_type='super::'+wrapper
+            call=f'let asset=request.asset.clone().ok_or(Error::Validation("asset provenance required"))?;let response=self.inner.execute(request,deadline).await?;Ok(crate::Response{{data:super::{wrapper}{{asset,isolated_symbol:request.isolated_symbol.clone(),{field}:response.data}},meta:response.meta}})'
+        if PRODUCT == 'margin' and op['operationId'] == 'createUserListenToken':
+            return_type='super::ListenToken'
+            call='request.validate()?;let scope=if request.is_isolated==Some(true){super::AccountScope::Isolated(request.symbol.clone().ok_or(Error::Validation("isolated token symbol required"))?)}else{super::AccountScope::Cross};let response=self.inner.execute(request,deadline).await?;Ok(crate::Response{data:super::ListenToken{scope,receipt:response.data},meta:response.meta})'
         methods.append('\n'.join([f'    /// [{op["operationId"]}]({op["source"]}).',
             '    ///', '    /// # Errors', '    /// Returns input/admission errors before sending, or typed venue/transport evidence.',
             f'    pub async fn {method}({args}) -> Result<crate::Response<{return_type}>, Error> {{ {call} }}']))
         coverage_entry={'name':op['operationId'],'method':op['method'],'path':op['path'],'source':op['source']}
         if rps is not None:
             coverage_entry['requests_per_second']=rps
+        if rpm is not None:
+            coverage_entry['requests_per_minute']=rpm
+        if op.get('x-effective-from') is not None:
+            coverage_entry['effective_from']=op['x-effective-from']
         coverage.append(coverage_entry)
     common='use std::collections::BTreeMap;\nuse serde::{Serialize, Deserialize};\nuse crate::{Decimal, Symbol, ClientOrderId, SensitiveString};\nuse super::wire::{PriceLevel, Kline};\n'
     # Output only necessary imports to keep strict lint gates unchanged.
@@ -367,10 +392,12 @@ def generate_streams():
         args=[]; replacements=[]
         for param in params:
             key=param['name'];field=snake(key)
-            typ='&Symbol' if key in ['symbol','pair'] else '&str'
+            typ='&Symbol' if key in ['symbol','pair'] else '&crate::Symbol' if PRODUCT == 'options' and key == 'underlying' else '&str'
             args.append(f'{field}: {typ}')
-            value=f'{field}.as_str()' if typ=='&Symbol' else field
-            if key in ['symbol','pair']: value+=' .to_lowercase().as_str()'
+            value=f'{field}.as_str()' if typ in ['&Symbol','&crate::Symbol'] else field
+            if key in ['symbol','pair','underlying']: value+=' .to_lowercase().as_str()'
+            if PRODUCT == 'options' and typ == '&str' and param.get('required',False):
+                replacements.append(f'if {field}.is_empty() {{ return Err(Error::Validation("required stream parameter")); }}')
             replacements.append(f'name=name.replace({lit("{"+key+"}")}, {value});')
             choices=param.get('schema',{}).get('enum')
             if choices:
@@ -388,8 +415,22 @@ def generate_streams():
     for line,token in [('use std::collections::BTreeMap;','BTreeMap'),('use crate::Decimal;','Decimal'),('use crate::Symbol;','Symbol'),('use crate::ClientOrderId;','ClientOrderId'),('use crate::SensitiveString;','SensitiveString'),('use super::wire::PriceLevel;','PriceLevel'),('use super::wire::Kline;','Kline')]:
         if re.search(r'(?<!::)\b'+re.escape(token)+r'\b',text):imports.append('use super::ClientOrderId;' if PRODUCT == 'spot' and token == 'ClientOrderId' else line)
     write((CORE_TRADING/PRODUCT/'stream_models.rs'), HEADER+'//! Generated market and user-data event payloads.\n\n'+'\n'.join(imports)+'\n\n'+text+'\n')
-    write((CORE_TRADING/PRODUCT/'stream_names.rs'), HEADER+'//! Generated constructors for every documented market stream.\n\nuse crate::{Error, Symbol};\nuse super::streams::{Stream, Route};\n\nimpl Stream {\n'+'\n\n'.join(methods)+'\n}\n')
+    stream_imports = 'use crate::Error;\nuse super::Symbol;' if PRODUCT == 'options' else 'use crate::{Error, Symbol};'
+    write((CORE_TRADING/PRODUCT/'stream_names.rs'), HEADER+'//! Generated constructors for every documented market stream.\n\n'+stream_imports+'\nuse super::streams::{Stream, Route};\n\nimpl Stream {\n'+'\n\n'.join(methods)+'\n}\n')
     return [{'name':n,'path':p,'route':r,'type':t} for n,p,r,t in names]
+
+
+def generate_margin_events():
+    """Margin uses execution/risk sockets, without invented market stream names."""
+    snap=json.loads((ROOT/'schema/margin-streams.json').read_text())
+    models=Models(snap['components']['schemas'])
+    for name,schema in snap['components']['schemas'].items():
+        models.type(schema,pascal(name)+'Event')
+    text='\n\n'.join(models.defs.values())
+    imports=['use serde::{Serialize, Deserialize};']
+    for line,token in [('use crate::Decimal;','Decimal'),('use crate::Symbol;','Symbol'),('use crate::ClientOrderId;','ClientOrderId'),('use crate::SensitiveString;','SensitiveString')]:
+        if re.search(r'(?<!::)\b'+token+r'\b',text):imports.append(line)
+    write(CORE_TRADING/'margin/stream_models.rs',HEADER+'//! Generated native Margin risk and execution payloads.\n\n'+'\n'.join(imports)+'\n\n'+text+'\n')
 
 
 def generate_events(coverage):
@@ -534,14 +575,22 @@ def main():
     files=['rest_models.rs','rest_requests.rs','ws_models.rs','ws_requests.rs','stream_models.rs','stream_names.rs','event_payloads.rs']
     paths=[*(CORE_TRADING/p/f for p in ['usdm','spot','coinm'] for f in files), ROOT/'schema/coverage.json', ROOT/'schema/spot-coverage.json', ROOT/'schema/coinm-coverage.json']
     before={p:p.read_bytes() if p.exists() else None for p in paths}
-    paths += [*(CORE_TRADING/p/f for p in ['wallet','convert'] for f in ['rest_models.rs','rest_requests.rs']),*(ROOT/'schema'/f'{p}-coverage.json' for p in ['wallet','convert'])]
+    rest_products = ['wallet','convert','margin','options']
+    paths += [*(CORE_TRADING/p/f for p in rest_products for f in ['rest_models.rs','rest_requests.rs']),*(ROOT/'schema'/f'{p}-coverage.json' for p in rest_products),*(CORE_TRADING/'options'/f for f in ['stream_models.rs','stream_names.rs']),CORE_TRADING/'margin/stream_models.rs']
     before.update({p:p.read_bytes() if p.exists() else None for p in paths if p not in before})
-    for PRODUCT in ['usdm','spot','coinm','wallet','convert']:
-        if PRODUCT in ['wallet','convert']:
+    for PRODUCT in ['usdm','spot','coinm',*rest_products]:
+        if PRODUCT in rest_products:
             coverage={'rest':generate('rest')}
+            product_files=['rest_models.rs','rest_requests.rs']
+            if PRODUCT == 'options':
+                coverage['streams']=generate_streams()
+                product_files += ['stream_models.rs','stream_names.rs']
+            if PRODUCT == 'margin':
+                generate_margin_events()
+                product_files += ['stream_models.rs']
             write(ROOT/'schema'/f'{PRODUCT}-coverage.json',json.dumps(coverage,indent=2)+'\n')
-            subprocess.run(['rustfmt','--edition','2024',*[str(CORE_TRADING/PRODUCT/f) for f in ['rest_models.rs','rest_requests.rs']]],check=True)
-            print(PRODUCT+': '+str(len(coverage['rest']))+' rest.')
+            subprocess.run(['rustfmt','--edition','2024',*[str(CORE_TRADING/PRODUCT/f) for f in product_files]],check=True)
+            print(PRODUCT+': '+', '.join(f'{len(v)} {k}' for k,v in coverage.items())+'.')
             continue
         coverage={kind:generate(kind) for kind in ['rest','ws']}
         coverage['streams']=generate_streams()

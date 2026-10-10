@@ -1,0 +1,401 @@
+{
+  "rest": [
+    {
+      "name": "adjustCrossMarginMaxLeverage",
+      "method": "POST",
+      "path": "/sapi/v1/margin/max-leverage",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#adjust-cross-margin-max-leverage",
+      "requests_per_minute": 1
+    },
+    {
+      "name": "disableIsolatedMarginAccount",
+      "method": "DELETE",
+      "path": "/sapi/v1/margin/isolated/account",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#disable-isolated-margin-account"
+    },
+    {
+      "name": "enableIsolatedMarginAccount",
+      "method": "POST",
+      "path": "/sapi/v1/margin/isolated/account",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#enable-isolated-margin-account"
+    },
+    {
+      "name": "queryIsolatedMarginAccountInfo",
+      "method": "GET",
+      "path": "/sapi/v1/margin/isolated/account",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#query-isolated-margin-account-info"
+    },
+    {
+      "name": "getBnbBurnStatus",
+      "method": "GET",
+      "path": "/sapi/v1/bnbBurn",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#get-bnb-burn-status"
+    },
+    {
+      "name": "getSummaryOfMarginAccount",
+      "method": "GET",
+      "path": "/sapi/v1/margin/tradeCoeff",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#get-summary-of-margin-account"
+    },
+    {
+      "name": "queryCrossIsolatedMarginCapitalFlow",
+      "method": "GET",
+      "path": "/sapi/v1/margin/capital-flow",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#query-cross-isolated-margin-capital-flow"
+    },
+    {
+      "name": "queryCrossMarginAccountDetails",
+      "method": "GET",
+      "path": "/sapi/v1/margin/account",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#query-cross-margin-account-details"
+    },
+    {
+      "name": "queryCrossMarginFeeData",
+      "method": "GET",
+      "path": "/sapi/v1/margin/crossMarginData",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#query-cross-margin-fee-data"
+    },
+    {
+      "name": "queryEnabledIsolatedMarginAccountLimit",
+      "method": "GET",
+      "path": "/sapi/v1/margin/isolated/accountLimit",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#query-enabled-isolated-margin-account-limit"
+    },
+    {
+      "name": "queryIsolatedMarginFeeData",
+      "method": "GET",
+      "path": "/sapi/v1/margin/isolatedMarginData",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/account#query-isolated-margin-fee-data"
+    },
+    {
+      "name": "getFutureHourlyInterestRate",
+      "method": "GET",
+      "path": "/sapi/v1/margin/next-hourly-interest-rate",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/borrow-repay#get-future-hourly-interest-rate"
+    },
+    {
+      "name": "getInterestHistory",
+      "method": "GET",
+      "path": "/sapi/v1/margin/interestHistory",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/borrow-repay#get-interest-history"
+    },
+    {
+      "name": "marginAccountBorrowRepay",
+      "method": "POST",
+      "path": "/sapi/v1/margin/borrow-repay",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/borrow-repay#margin-account-borrow-repay"
+    },
+    {
+      "name": "queryBorrowRepayRecordsInMarginAccount",
+      "method": "GET",
+      "path": "/sapi/v1/margin/borrow-repay",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/borrow-repay#query-borrow-repay-records-in-margin-account"
+    },
+    {
+      "name": "queryMarginInterestRateHistory",
+      "method": "GET",
+      "path": "/sapi/v1/margin/interestRateHistory",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/borrow-repay#query-margin-interest-rate-history"
+    },
+    {
+      "name": "queryMaxBorrow",
+      "method": "GET",
+      "path": "/sapi/v1/margin/maxBorrowable",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/borrow-repay#query-max-borrow"
+    },
+    {
+      "name": "crossMarginCollateralRatio",
+      "method": "GET",
+      "path": "/sapi/v1/margin/crossMarginCollateralRatio",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#cross-margin-collateral-ratio"
+    },
+    {
+      "name": "getAllCrossMarginPairs",
+      "method": "GET",
+      "path": "/sapi/v1/margin/allPairs",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#get-all-cross-margin-pairs"
+    },
+    {
+      "name": "getAllIsolatedMarginSymbol",
+      "method": "GET",
+      "path": "/sapi/v1/margin/isolated/allPairs",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#get-all-isolated-margin-symbol"
+    },
+    {
+      "name": "getAllMarginAssets",
+      "method": "GET",
+      "path": "/sapi/v1/margin/allAssets",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#get-all-margin-assets"
+    },
+    {
+      "name": "getDelistSchedule",
+      "method": "GET",
+      "path": "/sapi/v1/margin/delist-schedule",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#get-delist-schedule"
+    },
+    {
+      "name": "getLimitPricePairs",
+      "method": "GET",
+      "path": "/sapi/v1/margin/limit-price-pairs",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#get-limit-price-pairs"
+    },
+    {
+      "name": "getListSchedule",
+      "method": "GET",
+      "path": "/sapi/v1/margin/list-schedule",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#get-list-schedule"
+    },
+    {
+      "name": "getMarginAssetRiskBasedLiquidationRatio",
+      "method": "GET",
+      "path": "/sapi/v1/margin/risk-based-liquidation-ratio",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#get-margin-asset-risk-based-liquidation-ratio"
+    },
+    {
+      "name": "getMarginRestrictedAssets",
+      "method": "GET",
+      "path": "/sapi/v1/margin/restricted-asset",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#get-margin-restricted-assets"
+    },
+    {
+      "name": "queryIsolatedMarginTierData",
+      "method": "GET",
+      "path": "/sapi/v1/margin/isolatedMarginTier",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#query-isolated-margin-tier-data"
+    },
+    {
+      "name": "queryMarginAvailableInventory",
+      "method": "GET",
+      "path": "/sapi/v1/margin/available-inventory",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#query-margin-available-inventory"
+    },
+    {
+      "name": "queryMarginPriceindex",
+      "method": "GET",
+      "path": "/sapi/v1/margin/priceIndex",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/market-data#query-margin-priceindex"
+    },
+    {
+      "name": "closeUserDataStream",
+      "method": "DELETE",
+      "path": "/sapi/v1/margin/listen-key",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/user-data-stream#close-user-data-stream"
+    },
+    {
+      "name": "keepaliveUserDataStream",
+      "method": "PUT",
+      "path": "/sapi/v1/margin/listen-key",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/user-data-stream#keepalive-user-data-stream"
+    },
+    {
+      "name": "startUserDataStream",
+      "method": "POST",
+      "path": "/sapi/v1/margin/listen-key",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/user-data-stream#start-user-data-stream"
+    },
+    {
+      "name": "createSpecialKey",
+      "method": "POST",
+      "path": "/sapi/v1/margin/apiKey",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#create-special-key"
+    },
+    {
+      "name": "deleteSpecialKey",
+      "method": "DELETE",
+      "path": "/sapi/v1/margin/apiKey",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#delete-special-key"
+    },
+    {
+      "name": "querySpecialKey",
+      "method": "GET",
+      "path": "/sapi/v1/margin/apiKey",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-special-key"
+    },
+    {
+      "name": "editIpForSpecialKey",
+      "method": "PUT",
+      "path": "/sapi/v1/margin/apiKey/ip",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#edit-ip-for-special-key"
+    },
+    {
+      "name": "exitSpecialKeyMode",
+      "method": "POST",
+      "path": "/sapi/v1/margin/exit-special-key-mode",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#exit-special-key-mode"
+    },
+    {
+      "name": "getForceLiquidationRecord",
+      "method": "GET",
+      "path": "/sapi/v1/margin/forceLiquidationRec",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#get-force-liquidation-record"
+    },
+    {
+      "name": "getSmallLiabilityExchangeCoinList",
+      "method": "GET",
+      "path": "/sapi/v1/margin/exchange-small-liability",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#get-small-liability-exchange-coin-list"
+    },
+    {
+      "name": "smallLiabilityExchange",
+      "method": "POST",
+      "path": "/sapi/v1/margin/exchange-small-liability",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#small-liability-exchange"
+    },
+    {
+      "name": "getSmallLiabilityExchangeHistory",
+      "method": "GET",
+      "path": "/sapi/v1/margin/exchange-small-liability-history",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#get-small-liability-exchange-history"
+    },
+    {
+      "name": "marginAccountCancelAllOpenOrdersOnASymbol",
+      "method": "DELETE",
+      "path": "/sapi/v1/margin/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#margin-account-cancel-all-open-orders-on-asymbol"
+    },
+    {
+      "name": "queryMarginAccountsOpenOrders",
+      "method": "GET",
+      "path": "/sapi/v1/margin/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-margin-accounts-open-orders"
+    },
+    {
+      "name": "marginAccountCancelOco",
+      "method": "DELETE",
+      "path": "/sapi/v1/margin/orderList",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#margin-account-cancel-oco"
+    },
+    {
+      "name": "queryMarginAccountsOco",
+      "method": "GET",
+      "path": "/sapi/v1/margin/orderList",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-margin-accounts-oco"
+    },
+    {
+      "name": "marginAccountCancelOrder",
+      "method": "DELETE",
+      "path": "/sapi/v1/margin/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#margin-account-cancel-order"
+    },
+    {
+      "name": "marginAccountNewOrder",
+      "method": "POST",
+      "path": "/sapi/v1/margin/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#margin-account-new-order"
+    },
+    {
+      "name": "queryMarginAccountsOrder",
+      "method": "GET",
+      "path": "/sapi/v1/margin/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-margin-accounts-order"
+    },
+    {
+      "name": "marginAccountNewOco",
+      "method": "POST",
+      "path": "/sapi/v1/margin/order/oco",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#margin-account-new-oco"
+    },
+    {
+      "name": "marginAccountNewOto",
+      "method": "POST",
+      "path": "/sapi/v1/margin/order/oto",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#margin-account-new-oto"
+    },
+    {
+      "name": "marginAccountNewOtoco",
+      "method": "POST",
+      "path": "/sapi/v1/margin/order/otoco",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#margin-account-new-otoco"
+    },
+    {
+      "name": "marginManualLiquidation",
+      "method": "POST",
+      "path": "/sapi/v1/margin/manual-liquidation",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#margin-manual-liquidation"
+    },
+    {
+      "name": "queryCurrentMarginOrderCountUsage",
+      "method": "GET",
+      "path": "/sapi/v1/margin/rateLimit/order",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-current-margin-order-count-usage"
+    },
+    {
+      "name": "queryMarginAccountsAllOco",
+      "method": "GET",
+      "path": "/sapi/v1/margin/allOrderList",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-margin-accounts-all-oco"
+    },
+    {
+      "name": "queryMarginAccountsAllOrders",
+      "method": "GET",
+      "path": "/sapi/v1/margin/allOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-margin-accounts-all-orders"
+    },
+    {
+      "name": "queryMarginAccountsOpenOco",
+      "method": "GET",
+      "path": "/sapi/v1/margin/openOrderList",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-margin-accounts-open-oco"
+    },
+    {
+      "name": "queryMarginAccountsOpenOtootocoOrderLists",
+      "method": "GET",
+      "path": "/sapi/v1/margin/oto/openOrderList",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-margin-accounts-open-otootoco-order-lists"
+    },
+    {
+      "name": "queryMarginAccountsTradeList",
+      "method": "GET",
+      "path": "/sapi/v1/margin/myTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-margin-accounts-trade-list"
+    },
+    {
+      "name": "queryPreventedMatches",
+      "method": "GET",
+      "path": "/sapi/v1/margin/myPreventedMatches",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-prevented-matches"
+    },
+    {
+      "name": "querySpecialKeyList",
+      "method": "GET",
+      "path": "/sapi/v1/margin/api-key-list",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-special-key-list"
+    },
+    {
+      "name": "queryLiquidationLoan",
+      "method": "GET",
+      "path": "/sapi/v1/margin/liquidation-loan",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-liquidation-loan"
+    },
+    {
+      "name": "liquidationLoanRepay",
+      "method": "POST",
+      "path": "/sapi/v1/margin/liquidation-loan/repay",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#liquidation-loan-repay"
+    },
+    {
+      "name": "queryLiquidationLoanRepayHistory",
+      "method": "GET",
+      "path": "/sapi/v1/margin/liquidation-loan/repay-history",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade#query-liquidation-loan-repay-history"
+    },
+    {
+      "name": "getCrossMarginTransferHistory",
+      "method": "GET",
+      "path": "/sapi/v1/margin/transfer",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/transfer#get-cross-margin-transfer-history"
+    },
+    {
+      "name": "queryMaxTransferOutAmount",
+      "method": "GET",
+      "path": "/sapi/v1/margin/maxTransferable",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/transfer#query-max-transfer-out-amount"
+    },
+    {
+      "name": "createUserListenToken",
+      "method": "POST",
+      "path": "/sapi/v1/userListenToken",
+      "source": "https://developers.binance.com/en/docs/products/margin-trading/listen-token-data-stream"
+    }
+  ]
+}

@@ -65,9 +65,8 @@ pub(crate) fn validate_time(p: &BTreeMap<String, Value>, _now: u64) -> Result<()
 }
 // Wallet error-code documentation is independent evidence; unknown/5xx remain
 // ambiguous. Pinned in schema/wallet-error-codes.json against the product's
-// documented error-code page (verified 2026-10-03), which no longer lists
-// -1002: that legacy unauthorized message is folded into the ambiguous -1001
-// DISCONNECTED family, so an undocumentented -1002 body stays unknown.
+// documented error-code page (verified 2026-10-10). Explicit unauthorized
+// refusals (-1002) remain distinct from unknown-execution/disconnect evidence.
 pub(crate) fn definitive(status: u16, value: &Value) -> bool {
     status < 500
         && value
@@ -76,7 +75,8 @@ pub(crate) fn definitive(status: u16, value: &Value) -> bool {
             .is_some_and(|code| {
                 matches!(
                     code,
-                    -1020
+                    -1002
+                        | -1020
                         | -1021
                         | -1022
                         | -1100
@@ -114,11 +114,17 @@ fn validate_history(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> 
         .zip(p.get("startTime").and_then(Value::as_i64))
         .and_then(|(end, start)| end.checked_sub(start));
     let limit = match op {
-        "depositHistory" | "withdrawHistory" => Some(if p.contains_key("withdrawOrderId") {
-            604_800_000
-        } else {
-            7_776_000_000
-        }),
+        "depositHistory" | "withdrawHistory" | "withdrawHistoryV2" => {
+            Some(if p.contains_key("withdrawOrderId") {
+                604_800_000
+            } else {
+                7_776_000_000
+            })
+        }
+        "dailyAccountSnapshot" => Some(2_592_000_000),
+        "depositHistoryTravelRule" | "depositHistoryV2" | "withdrawHistoryV1" => {
+            Some(7_776_000_000)
+        }
         "assetDividendRecord" => Some(15_552_000_000),
         _ => None,
     };
@@ -127,10 +133,17 @@ fn validate_history(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> 
     {
         return Err(Error::Validation("Wallet history interval"));
     }
-    if let Some(ids) = p.get("idList").and_then(Value::as_str)
-        && (ids.split(',').count() > 45 || ids.split(',').any(str::is_empty))
-    {
-        return Err(Error::Validation("withdrawal history id list"));
+    let identity_keys: &[&str] = if op == "withdrawHistoryV2" {
+        &["trId", "txId"]
+    } else {
+        &["idList"]
+    };
+    for key in identity_keys {
+        if let Some(ids) = p.get(*key).and_then(Value::as_str)
+            && (ids.split(',').count() > 45 || ids.split(',').any(str::is_empty))
+        {
+            return Err(Error::Validation("withdrawal history id list"));
+        }
     }
     Ok(())
 }

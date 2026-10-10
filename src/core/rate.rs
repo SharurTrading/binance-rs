@@ -91,6 +91,8 @@ impl BudgetLimits {
 
 #[derive(Clone, Copy, Default)]
 pub(crate) struct Cost {
+    /// Caller-retained venue authority, never serialized into the wire request.
+    pub authority_expiry: Option<u64>,
     pub sapi: Option<super::sapi::SapiCost>,
     pub weight: u64,
     pub orders10: u64,
@@ -104,6 +106,14 @@ pub(crate) struct Cost {
     pub quote: bool,
     pub download: u8,
 }
+impl Cost {
+    pub(crate) fn validate_authority(self, operation: &'static str, now: u64) -> Result<(), Error> {
+        if self.authority_expiry.is_some_and(|expiry| now >= expiry) {
+            return Err(Error::Expired(operation));
+        }
+        Ok(())
+    }
+}
 
 #[derive(Default)]
 pub(super) struct State {
@@ -113,7 +123,10 @@ pub(super) struct State {
     pub(super) cooldown_timing_unknown: bool,
     observed_weight: (u64, u64),
     order_windows: BTreeMap<u64, (u64, u64, u64)>,
+    /// Margin venue order quotas are distinct from Spot/Futures/FIX evidence.
+    pub(super) sapi_order_windows: BTreeMap<u64, (u64, u64, u64)>,
     pub(super) endpoints: BTreeMap<(&'static str, u64), (u64, u64)>,
+    pub(super) endpoint_ip_requests: BTreeMap<&'static str, (u64, u64)>,
     pub(super) endpoint_cooldown: BTreeMap<&'static str, u64>,
 }
 impl State {
@@ -203,7 +216,7 @@ impl Budgets {
     }
     pub(crate) fn admit(&self, c: Cost, now: u64) -> Result<(), Error> {
         if let Some(cost) = c.sapi {
-            return self.admit_sapi(cost, now);
+            return self.admit_sapi(cost, c, now);
         }
         let mut ip = self
             .ip

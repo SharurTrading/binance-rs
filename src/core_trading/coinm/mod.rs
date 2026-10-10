@@ -10,7 +10,6 @@
 //! Construct `Config` with an explicit demo/production environment, and share
 //! its budgets across clients. WebSocket drivers run on caller-owned tasks.
 
-pub mod book;
 mod config;
 pub mod event_payloads;
 mod rate;

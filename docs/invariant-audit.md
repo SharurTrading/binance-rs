@@ -44,7 +44,7 @@ Each entry records the owner, the call-path invariant, and the required outcome.
 - `http.rs` post-response clock fallback to the attempt's own pre-send reading: a real reading, never an invented epoch, and propagating a clock failure there would discard the received answer (R3's rule); documented in place.
 - `fix/config.rs` `set_port` discard: unreachable by construction — the endpoint is built with an explicit port and `endpoint()` refuses any URL without one.
 - Documented sentinels (empty algo fields, `"null"` iceberg, empty delivery funding/interest) map to absence, not zero; orders, balances, commissions, and position fields retain exact `Decimal` or exact text with no defaults; request builders omit unset parameters rather than defaulting them.
-- Order-book bootstrap (`usdm/coinm/spot book.rs`): gaps force a blocking `Gap` state, no mirror claims completeness, and no gap becomes invented depth. Deferred observability: [issue #36](https://github.com/SharurTrading/binance-rs/issues/36).
+- Order-book bootstrap (`usdm/coinm/spot book.rs`): gaps force a blocking `Gap` state, no mirror claims completeness, and no gap becomes invented depth. Deferred observability: [issue #36](https://github.com/SharurTrading/binance-rs/issues/36). The mirror has since been removed; depth synchronisation is the consumer's under BN-BOOK-01.
 - `Decimal`/quantity parsing refuses malformed strings everywhere; no `Option<Decimal>` collapses to zero anywhere in the response surface.
 - Rate admission's fixed-window counters are a documented model layered with a venue-observed floor; the outstanding framing ambiguities and evidence gaps are the issues below.
 

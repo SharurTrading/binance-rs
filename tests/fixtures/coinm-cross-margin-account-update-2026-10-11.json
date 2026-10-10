@@ -8,20 +8,20 @@
   "events": [
     {
       "phase": "open",
-      "raw": "{\"E\":1791668301247,\"T\":1791668301247,\"a\":{\"B\":[{\"a\":\"BTC\",\"bc\":\"0\",\"cw\":\"0.00999831\",\"wb\":\"0.00999831\"}],\"P\":[{\"bep\":\"82988.78224336\",\"cr\":\"-0.00000025\",\"ep\":\"82955.6\",\"iw\":\"0\",\"ma\":\"BTC\",\"mt\":\"cross\",\"pa\":\"1\",\"ps\":\"BOTH\",\"s\":\"BTCUSD_PERP\",\"up\":\"0\"}],\"m\":\"ORDER\"},\"e\":\"ACCOUNT_UPDATE\"}"
+      "raw": "{\"E\":1791669971626,\"T\":1791669971625,\"a\":{\"B\":[{\"a\":\"BTC\",\"bc\":\"0\",\"cw\":\"0.00999723\",\"wb\":\"0.00999723\"}],\"P\":[{\"bep\":\"82978.37807935\",\"cr\":\"-0.00000037\",\"ep\":\"82945.2\",\"iw\":\"0\",\"ma\":\"BTC\",\"mt\":\"cross\",\"pa\":\"1\",\"ps\":\"BOTH\",\"s\":\"BTCUSD_PERP\",\"up\":\"-0.00000012\"}],\"m\":\"ORDER\"},\"e\":\"ACCOUNT_UPDATE\"}"
     },
     {
       "phase": "close",
-      "raw": "{\"E\":1791668302306,\"T\":1791668302305,\"a\":{\"B\":[{\"a\":\"BTC\",\"bc\":\"0\",\"cw\":\"0.00999771\",\"wb\":\"0.00999771\"}],\"P\":[{\"bep\":\"0\",\"cr\":\"-0.00000037\",\"ep\":\"0\",\"iw\":\"0\",\"ma\":\"BTC\",\"mt\":\"cross\",\"pa\":\"0\",\"ps\":\"BOTH\",\"s\":\"BTCUSD_PERP\",\"up\":\"0\"}],\"m\":\"ORDER\"},\"e\":\"ACCOUNT_UPDATE\"}"
+      "raw": "{\"E\":1791669972718,\"T\":1791669972717,\"a\":{\"B\":[{\"a\":\"BTC\",\"bc\":\"0\",\"cw\":\"0.0099966\",\"wb\":\"0.0099966\"}],\"P\":[{\"bep\":\"0\",\"cr\":\"-0.00000052\",\"ep\":\"0\",\"iw\":\"0\",\"ma\":\"BTC\",\"mt\":\"cross\",\"pa\":\"0\",\"ps\":\"BOTH\",\"s\":\"BTCUSD_PERP\",\"up\":\"0\"}],\"m\":\"ORDER\"},\"e\":\"ACCOUNT_UPDATE\"}"
     }
   ],
   "market": "coinm",
-  "observedAtUnixSeconds": 1791668304,
+  "observedAtUnixSeconds": 1791669975,
   "phaseAttribution": "phase labels capture-session attribution; a delayed venue push is attributed to the leg that observed it.",
   "positionMode": "one-way",
   "restMarginType": "cross",
   "run": "issue-69-coinm-cross-margin-account-update",
-  "scrub": "No API key, secret, signed URL or listen key is recorded. The venue-supplied account-alias field i was redacted before recording; every other byte is as captured.",
+  "scrub": "No API key, secret, signed URL or listen key is recorded. An account-alias field, when present on the wire, is removed and the frame re-serialized; every other member keeps its captured value.",
   "symbol": "BTCUSD_PERP",
   "tradedQuantity": "1"
 }

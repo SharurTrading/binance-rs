@@ -8,16 +8,19 @@
 //! operator's explicit authorization (BN-VALIDATE-01): each probe places and
 //! fully closes one minimal demo market position on its market. Credentials
 //! are read from the environment (`TEST_KEY`, `TEST_SECRET`); they, the listen
-//! key, signed URLs and authentication payloads are never logged. Frames are
-//! recorded with the venue's account-alias field `i` redacted before anything
-//! is retained; no API key, secret, signed URL or listen key is ever recorded.
+//! key, signed URLs and authentication payloads are never logged. An
+//! account-alias field, when present on the wire, is removed and the frame
+//! re-serialized before anything is retained; no API key, secret, signed URL
+//! or listen key is ever recorded.
 //!
 //! Cleanup is owned on every exit path, not only the happy one (BN-ORDER-01:
 //! a timeout or failed read does not cancel the open order): after the open
-//! order is accepted, the round trip returns a typed result and an
-//! unconditional cleanup routine reads the venue, flattens any held position
-//! reduce-only, cancels stray orders, closes the listen key and the socket,
-//! and prints the final held state before the probe surfaces its own failure.
+//! order is accepted, the round trip returns a typed result — malformed
+//! frames and unconfirmed fills are errors, never panics or unbounded waits —
+//! and an unconditional cleanup routine reads the venue, flattens any held
+//! position reduce-only, cancels stray orders, closes the listen key and the
+//! socket, and prints the final held state. The cleanup outcome is then
+//! verified: the probe fails rather than passing while holding venue state.
 
 #[cfg(test)]
 mod tests {
@@ -79,7 +82,9 @@ mod tests {
     /// Read frames until `stop` accepts the accumulated evidence, a frame
     /// timeout passes with no traffic, or a safety cap is reached. Every
     /// `ACCOUNT_UPDATE` and `MARGIN_CALL` frame is recorded with the venue's
-    /// account-alias field `i` removed; every other byte is as captured.
+    /// account-alias field `i` removed and the frame re-serialized; every
+    /// other member keeps its captured value. A frame that is not valid JSON
+    /// is a typed error, never a panic, so the caller's cleanup still runs.
     ///
     /// A `phase` label is capture-session attribution: a delayed venue push is
     /// attributed to the leg that observed it, not to venue causality.
@@ -87,11 +92,11 @@ mod tests {
         stream: &mut DemoStream,
         phase: &'static str,
         mut stop: impl FnMut(&[CapturedFrame]) -> bool,
-    ) -> Vec<CapturedFrame> {
+    ) -> Result<Vec<CapturedFrame>, String> {
         let mut frames = Vec::new();
         for _ in 0..100 {
             if stop(&frames) {
-                return frames;
+                return Ok(frames);
             }
             let Ok(Some(Ok(message))) =
                 tokio::time::timeout(Duration::from_secs(30), stream.next()).await
@@ -101,7 +106,8 @@ mod tests {
             let Some(text) = message.as_text() else {
                 continue;
             };
-            let mut value: Value = serde_json::from_str(text).expect("demo frame is JSON");
+            let mut value: Value = serde_json::from_str(text)
+                .map_err(|error| format!("malformed venue frame: {error}"))?;
             match value.get("e").and_then(Value::as_str) {
                 Some("ACCOUNT_UPDATE" | "MARGIN_CALL") => {
                     if value
@@ -122,7 +128,7 @@ mod tests {
                 _ => println!("{phase}: unrecorded frame kind"),
             }
         }
-        frames
+        Ok(frames)
     }
 
     fn position_entries(frame: &CapturedFrame, symbol: &str) -> Vec<Value> {
@@ -170,8 +176,8 @@ mod tests {
         use binance_client::usdm::{
             Config, Environment, RestClient,
             rest_requests::{
-                ChangeMarginType, GetCurrentPositionMode, NewOrder, PositionInformationV2,
-                StartUserDataStream,
+                ChangeMarginType, CurrentAllOpenOrders, GetCurrentPositionMode, NewOrder,
+                PositionInformationV2, StartUserDataStream,
             },
         };
         let symbol = Symbol::new("BTCUSDT").unwrap();
@@ -267,7 +273,8 @@ mod tests {
                         .any(|entry| entry["pa"].as_str().is_some_and(|pa| pa != "0"))
                 })
             })
-            .await;
+            .await
+            .map_err(|error| format!("open leg: {error}"))?;
             if !frames.iter().any(|frame| {
                 position_entries(frame, "BTCUSDT")
                     .iter()
@@ -276,30 +283,38 @@ mod tests {
                 return Err("no open-leg ACCOUNT_UPDATE observed".to_owned());
             }
 
-            // A slow fill is resolved by venue reads, never by assumption.
-            let (held_amt, margin_type) = loop {
-                let positions = client
-                    .position_information_v2(
-                        &PositionInformationV2::new()
-                            .symbol(symbol.clone())
-                            .build()
-                            .unwrap(),
-                        deadline(),
-                    )
-                    .await
-                    .map_err(|error| format!("position read: {error}"))?;
-                if let Some(found) = positions
-                    .data
-                    .iter()
-                    .find(|item| item.position_amt.unwrap_or(Decimal::ZERO) != Decimal::ZERO)
+            // A slow fill is resolved by bounded venue reads, never by an
+            // unbounded wait or an assumption.
+            let (held_amt, margin_type) =
                 {
-                    break (
-                        found.position_amt.unwrap_or(Decimal::ZERO),
-                        found.margin_type.clone(),
-                    );
-                }
-                tokio::time::sleep(Duration::from_secs(1)).await;
-            };
+                    let mut confirmed = None;
+                    for _ in 0..15 {
+                        let positions = client
+                            .position_information_v2(
+                                &PositionInformationV2::new()
+                                    .symbol(symbol.clone())
+                                    .build()
+                                    .unwrap(),
+                                deadline(),
+                            )
+                            .await
+                            .map_err(|error| format!("position read: {error}"))?;
+                        if let Some(found) = positions.data.iter().find(|item| {
+                            item.position_amt.unwrap_or(Decimal::ZERO) != Decimal::ZERO
+                        }) {
+                            confirmed = Some((
+                                found.position_amt.unwrap_or(Decimal::ZERO),
+                                found.margin_type.clone(),
+                            ));
+                            break;
+                        }
+                        tokio::time::sleep(Duration::from_secs(1)).await;
+                    }
+                    confirmed.ok_or_else(|| {
+                        "venue reads did not confirm the demo position within the bounded 15s wait"
+                            .to_owned()
+                    })?
+                };
             let margin_type = margin_type.unwrap_or_else(|| "absent".to_owned());
             println!("held {held_amt} with marginType {margin_type}");
             if margin_type != "cross" {
@@ -329,7 +344,8 @@ mod tests {
                         .any(|entry| entry["pa"].as_str() == Some("0"))
                 })
             })
-            .await;
+            .await
+            .map_err(|error| format!("close leg: {error}"))?;
             if !close_frames.iter().any(|frame| {
                 position_entries(frame, "BTCUSDT")
                     .iter()
@@ -342,8 +358,42 @@ mod tests {
         }
         .await;
 
-        // Owned cleanup runs on every exit, success or failure.
+        // Owned cleanup runs on every exit, success or failure, and its
+        // outcome is verified: the probe fails rather than passing while
+        // holding venue state.
         usdm_owned_cleanup(&client, &symbol, dual, &mut stream).await;
+        let after = client
+            .position_information_v2(
+                &PositionInformationV2::new()
+                    .symbol(symbol.clone())
+                    .build()
+                    .unwrap(),
+                deadline(),
+            )
+            .await
+            .unwrap()
+            .data;
+        assert!(
+            after
+                .iter()
+                .all(|item| item.position_amt.unwrap_or(Decimal::ZERO) == Decimal::ZERO),
+            "demo position not flat after owned cleanup"
+        );
+        let open = client
+            .current_all_open_orders(
+                &CurrentAllOpenOrders::new()
+                    .symbol(symbol.clone())
+                    .build()
+                    .unwrap(),
+                deadline(),
+            )
+            .await
+            .unwrap()
+            .data;
+        assert!(
+            open.is_empty(),
+            "demo orders remain open after owned cleanup"
+        );
         let (frames, margin_type) = capture.expect("demo capture round trip");
 
         write_fixture(
@@ -352,7 +402,7 @@ mod tests {
                 "run": "issue-69-usdm-cross-margin-account-update",
                 "observedAtUnixSeconds": SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
                 "credentialed": true,
-                "scrub": "No API key, secret, signed URL or listen key is recorded; the recorded USD-M ACCOUNT_UPDATE frames carry no account-identifier field.",
+                "scrub": "No API key, secret, signed URL or listen key is recorded. An account-alias field, when present on the wire, is removed and the frame re-serialized; every other member keeps its captured value.",
                 "phaseAttribution": "phase labels capture-session attribution; a delayed venue push is attributed to the leg that observed it.",
                 "environment": {
                     "rest": "https://demo-fapi.binance.com",
@@ -445,6 +495,8 @@ mod tests {
                     Err(error) => println!("cleanup: close refused: {error}"),
                 }
             }
+            // Let the closing fills settle before the next venue read.
+            tokio::time::sleep(Duration::from_secs(1)).await;
         }
         match client
             .cancel_all_open_orders(
@@ -495,8 +547,8 @@ mod tests {
         use binance_client::coinm::{
             Config, Environment, RestClient,
             rest_requests::{
-                ChangeMarginType, GetCurrentPositionMode, NewOrder, PositionInformation,
-                StartUserDataStream,
+                ChangeMarginType, CurrentAllOpenOrders, GetCurrentPositionMode, NewOrder,
+                PositionInformation, StartUserDataStream,
             },
         };
         let symbol = Symbol::new("BTCUSD_PERP").unwrap();
@@ -589,7 +641,8 @@ mod tests {
                         .any(|entry| entry["pa"].as_str().is_some_and(|pa| pa != "0"))
                 })
             })
-            .await;
+            .await
+            .map_err(|error| format!("open leg: {error}"))?;
             if !frames.iter().any(|frame| {
                 position_entries(frame, "BTCUSD_PERP")
                     .iter()
@@ -598,33 +651,43 @@ mod tests {
                 return Err("no open-leg ACCOUNT_UPDATE observed".to_owned());
             }
 
-            let (held_amt, margin_type) = loop {
-                let positions = client
-                    .position_information(
-                        &PositionInformation::new()
-                            .pair(Symbol::new("BTCUSD").unwrap())
-                            .build()
-                            .unwrap(),
-                        deadline(),
-                    )
-                    .await
-                    .map_err(|error| format!("position read: {error}"))?;
-                if let Some(found) = positions
-                    .data
-                    .into_iter()
-                    .filter(|item| {
-                        item.symbol
-                            .as_ref()
-                            .is_some_and(|s| s.as_str() == "BTCUSD_PERP")
-                    })
-                    .find(|item| item.position_amt.unwrap_or(Decimal::ZERO) != Decimal::ZERO)
-                {
-                    break (
-                        found.position_amt.unwrap_or(Decimal::ZERO),
-                        found.margin_type,
-                    );
+            // A slow fill is resolved by bounded venue reads, never by an
+            // unbounded wait or an assumption.
+            let (held_amt, margin_type) = {
+                let mut confirmed = None;
+                for _ in 0..15 {
+                    let positions = client
+                        .position_information(
+                            &PositionInformation::new()
+                                .pair(Symbol::new("BTCUSD").unwrap())
+                                .build()
+                                .unwrap(),
+                            deadline(),
+                        )
+                        .await
+                        .map_err(|error| format!("position read: {error}"))?;
+                    if let Some(found) = positions
+                        .data
+                        .into_iter()
+                        .filter(|item| {
+                            item.symbol
+                                .as_ref()
+                                .is_some_and(|s| s.as_str() == "BTCUSD_PERP")
+                        })
+                        .find(|item| item.position_amt.unwrap_or(Decimal::ZERO) != Decimal::ZERO)
+                    {
+                        confirmed = Some((
+                            found.position_amt.unwrap_or(Decimal::ZERO),
+                            found.margin_type,
+                        ));
+                        break;
+                    }
+                    tokio::time::sleep(Duration::from_secs(1)).await;
                 }
-                tokio::time::sleep(Duration::from_secs(1)).await;
+                confirmed.ok_or_else(|| {
+                    "venue reads did not confirm the demo position within the bounded 15s wait"
+                        .to_owned()
+                })?
             };
             let margin_type = margin_type.unwrap_or_else(|| "absent".to_owned());
             println!("held {held_amt} with marginType {margin_type}");
@@ -655,7 +718,8 @@ mod tests {
                         .any(|entry| entry["pa"].as_str() == Some("0"))
                 })
             })
-            .await;
+            .await
+            .map_err(|error| format!("close leg: {error}"))?;
             if !close_frames.iter().any(|frame| {
                 position_entries(frame, "BTCUSD_PERP")
                     .iter()
@@ -668,7 +732,47 @@ mod tests {
         }
         .await;
 
+        // Owned cleanup runs on every exit, success or failure, and its
+        // outcome is verified: the probe fails rather than passing while
+        // holding venue state.
         coinm_owned_cleanup(&client, &symbol, dual, &mut stream).await;
+        let after = client
+            .position_information(
+                &PositionInformation::new()
+                    .pair(Symbol::new("BTCUSD").unwrap())
+                    .build()
+                    .unwrap(),
+                deadline(),
+            )
+            .await
+            .unwrap()
+            .data;
+        assert!(
+            after
+                .iter()
+                .filter(|item| {
+                    item.symbol
+                        .as_ref()
+                        .is_some_and(|s| s.as_str() == "BTCUSD_PERP")
+                })
+                .all(|item| item.position_amt.unwrap_or(Decimal::ZERO) == Decimal::ZERO),
+            "demo position not flat after owned cleanup"
+        );
+        let open = client
+            .current_all_open_orders(
+                &CurrentAllOpenOrders::new()
+                    .symbol(symbol.clone())
+                    .build()
+                    .unwrap(),
+                deadline(),
+            )
+            .await
+            .unwrap()
+            .data;
+        assert!(
+            open.is_empty(),
+            "demo orders remain open after owned cleanup"
+        );
         let (frames, margin_type) = capture.expect("demo capture round trip");
 
         write_fixture(
@@ -677,7 +781,7 @@ mod tests {
                 "run": "issue-69-coinm-cross-margin-account-update",
                 "observedAtUnixSeconds": SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
                 "credentialed": true,
-                "scrub": "No API key, secret, signed URL or listen key is recorded. The venue-supplied account-alias field i was redacted before recording; every other byte is as captured.",
+                "scrub": "No API key, secret, signed URL or listen key is recorded. An account-alias field, when present on the wire, is removed and the frame re-serialized; every other member keeps its captured value.",
                 "phaseAttribution": "phase labels capture-session attribution; a delayed venue push is attributed to the leg that observed it.",
                 "environment": {
                     "rest": "https://demo-dapi.binance.com",
@@ -773,6 +877,8 @@ mod tests {
                     Err(error) => println!("cleanup: close refused: {error}"),
                 }
             }
+            // Let the closing fills settle before the next venue read.
+            tokio::time::sleep(Duration::from_secs(1)).await;
         }
         match client
             .cancel_all_open_orders(

@@ -124,3 +124,27 @@ fn stated(
         limit: item.limit,
     }
 }
+
+/// Adopt the same counted windows from a WebSocket `exchangeInfo` result as REST.
+/// Validates the entire statement before changing either limit.
+pub(crate) fn adopt_stated_ws_limits(
+    client: &super::WsClient,
+    reply: &super::ws_models::ExchangeInfoResponse,
+) -> Result<(), Error> {
+    client
+        .budgets
+        .adopt_stated(reply.rate_limits.iter().flatten().map(|item| {
+            crate::core::StatedLimit {
+                kind: item
+                    .rate_limit_type
+                    .as_ref()
+                    .map(super::enums::RateLimitType::as_str),
+                interval: item
+                    .interval
+                    .as_ref()
+                    .map(super::enums::RateLimitInterval::as_str),
+                interval_num: item.interval_num,
+                limit: item.limit,
+            }
+        }))
+}

@@ -195,7 +195,8 @@ that venue pool and environment, so every client counts against one weight limit
 | Options | Options | 2,400 | [Options rate limiters](https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition) |
 
 Demo and production never share a pool. Each pool starts at its documented baseline;
-every REST exchange information reply hands its `rateLimits` to the pool, and the
+every REST exchange information reply and Spot WebSocket API `exchangeInfo`
+result hands its `rateLimits` to the pool, and the
 latest stated `REQUEST_WEIGHT` per minute (and Spot's `RAW_REQUESTS` per five
 minutes) replaces it for every client of the pool. A counted window stated without a
 positive limit is refused as `Error::Gap` and leaves the pool unchanged. `ORDERS`
@@ -203,6 +204,13 @@ entries are account limits and are not adopted. Every `X-MBX-USED-WEIGHT-1M` rai
 the pool's count, and a `Retry-After` or `418` holds every client of the pool. A
 request the pool cannot take is refused unsent as `Error::Admission` with its retry
 delay. The futures pool counts REST and WebSocket API weight together.
+
+Spot's [WebSocket exchange information](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general)
+updates the same IP owner as REST, including clients configured separately from
+the same registry. The whole counted statement is validated before either limit
+changes; a missing, null, zero or negative counted limit returns `Error::Gap`,
+preserving the prior limits and every charged attempt. Other implemented
+WebSocket API catalogs offer no exchange-information method.
 
 Wallet, Convert and Margin REST draw from a separate process SAPI IP pool; their
 endpoint weight counters remain independent. Margin WebSocket API uses the Spot

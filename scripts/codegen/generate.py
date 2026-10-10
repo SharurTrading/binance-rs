@@ -443,6 +443,8 @@ def generate(kind):
         # Exchange information states the venue's own IP limits; its pool adopts them.
         if kind == 'rest' and (PRODUCT, op['operationId']) in [('spot', 'exchangeInfo'), ('usdm', 'exchangeInformation'), ('coinm', 'exchangeInformation'), ('options', 'exchangeInformation')]:
             call='let response=self.inner.execute(request,deadline).await?;super::rate::adopt_stated_limits(&self.inner,&response.data)?;Ok(response)'
+        if kind == 'ws' and (PRODUCT, op['operationId']) == ('spot', 'exchangeInfo'):
+            call='let response=self.execute(request,id,deadline).await?;super::rate::adopt_stated_ws_limits(self,&response.data)?;Ok(response)'
         if PRODUCT == 'wallet' and op['operationId'] in ['queryUserWalletBalance','dustConvert','dustConvertibleAssets']:
             context,field,wrapper = {'queryUserWalletBalance':('quote_asset','wallets','QuotedWalletBalance'), 'dustConvert':('target_asset','receipt','DustConversion'), 'dustConvertibleAssets':('target_asset','assets','ConvertibleDust')}[op['operationId']]
             return_type='super::'+wrapper
@@ -460,8 +462,12 @@ def generate(kind):
         if PRODUCT == 'margin' and op['operationId'] == 'createUserListenToken':
             return_type='super::ListenToken'
             call='request.validate()?;let scope=if request.is_isolated==Some(true){super::AccountScope::Isolated(request.symbol.clone().ok_or(Error::Validation("isolated token symbol required"))?)}else{super::AccountScope::Cross};let response=self.inner.execute(request,deadline).await?;Ok(crate::Response{data:super::ListenToken{scope,receipt:response.data},meta:response.meta})'
-        methods.append('\n'.join([f'    /// [{op["operationId"]}]({op["source"]}).',
+        limit_docs = ['    /// Adopts counted IP limits for every client sharing this pool.'] if kind == 'ws' and (PRODUCT, op['operationId']) == ('spot', 'exchangeInfo') else []
+        limit_errors = ['    /// A counted limit without a positive value returns [`Error::Gap`] and leaves',
+            '    /// the pool\'s limits unchanged; the attempt remains charged.'] if limit_docs else []
+        methods.append('\n'.join([f'    /// [{op["operationId"]}]({op["source"]}).', *limit_docs,
             '    ///', '    /// # Errors', '    /// Returns input/admission errors before sending, or typed venue/transport evidence.',
+            *limit_errors,
             f'    pub async fn {method}({args}) -> Result<crate::Response<{return_type}>, Error> {{ {call} }}']))
         coverage_entry={'name':op['operationId'],'method':op['method'],'path':op['path'],'source':op['source']}
         if rps is not None:

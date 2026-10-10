@@ -31,6 +31,7 @@ impl ConnectionDriver {
 #[derive(Clone)]
 pub struct WsClient {
     pub(crate) socket: Socket,
+    pub(crate) budgets: crate::Budgets,
 }
 impl WsClient {
     /// Connect with production SBE schema 3:4 responses and JSON requests.
@@ -58,6 +59,7 @@ impl WsClient {
         binary_decoder: Option<crate::core::socket::BinaryDecoder>,
     ) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
         super::config::apply_time_unit(&mut config.websocket, config.time_unit);
+        let budgets = config.budgets.clone();
         let (socket, events, driver) = Socket::connect_with_policy(
             config.websocket,
             config.credentials,
@@ -83,7 +85,7 @@ impl WsClient {
         )
         .await?;
         Ok((
-            Self { socket },
+            Self { socket, budgets },
             ApiEvents {
                 inner: events,
                 time_unit: config.time_unit,

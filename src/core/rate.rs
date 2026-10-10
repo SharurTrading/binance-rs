@@ -628,7 +628,8 @@ impl PoolKey {
 ///
 /// The registry also keeps one account owner per venue pool, environment and
 /// [`AccountKey`] for configurations drawn with a key; an unkeyed configuration gets
-/// an account owner of its own.
+/// an account owner of its own. A Spot FIX account scope drawn with a key is kept
+/// the same way and is built on that key's Spot account owner.
 ///
 /// A registry owns no clock. Clients drawn from one registry must be given one clock:
 /// the same `Arc<dyn Clock>`, or wall time for all. Each client charges the pool's
@@ -642,6 +643,7 @@ pub struct WeightPools {
 struct Registry {
     ip: BTreeMap<PoolKey, Budgets>,
     accounts: BTreeMap<(PoolKey, AccountKey), Budgets>,
+    fix: BTreeMap<(PoolKey, AccountKey), crate::spot::fix::AccountBudgets>,
 }
 impl std::fmt::Debug for WeightPools {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -692,6 +694,27 @@ impl WeightPools {
             .accounts
             .entry((key, account.clone()))
             .or_insert_with(|| root.for_account())
+            .clone())
+    }
+    /// The Spot FIX account scope this registry keeps for `account` in
+    /// `environment`. It is built on the Spot account owner [`Self::draw`] returns
+    /// for that key, so its sessions share order counts with the key's Spot clients
+    /// and the pool's IP state, and every scope drawn for the key shares one set of
+    /// FIX connection limits.
+    pub(crate) fn draw_fix(
+        &self,
+        environment: PoolEnvironment,
+        account: &AccountKey,
+    ) -> Result<crate::spot::fix::AccountBudgets, Error> {
+        let spot = self.draw(VenuePool::Spot, environment, Some(account))?;
+        let mut registry = self
+            .pools
+            .lock()
+            .map_err(|_| Error::Configuration("weight pools poisoned"))?;
+        Ok(registry
+            .fix
+            .entry((PoolKey::new(VenuePool::Spot, environment), account.clone()))
+            .or_insert_with(|| crate::spot::fix::AccountBudgets::new(spot))
             .clone())
     }
 }

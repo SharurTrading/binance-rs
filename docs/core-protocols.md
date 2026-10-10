@@ -106,14 +106,25 @@ including reused wire IDs and late replies. Successful cancel/replace legs and
 independent rejection records remain separate source-ordered evidence; one record
 never completes the other leg. Future status/error codes cannot prove acceptance.
 
-`AccountBudgets` must be shared across sessions for the same account and takes the
-account's existing Spot owner, sharing order counts with HTTP/WebSocket clients.
+`AccountBudgets` must be shared across sessions for the same account. Binance tracks
+the unfilled order count per account and
+[shares it across all IP addresses, API keys and APIs](https://github.com/binance/binance-spot-api-docs/blob/master/faqs/order_count_decrement.md),
+so the scope counts orders against the account's Spot owner, shared with its
+HTTP/WebSocket clients. `AccountBudgets::new` takes that owner explicitly.
+`AccountBudgets::with_pools_for_account(environment, &pools, &key)`, or
+`new_for_account(environment, &key)` for the process's registry, returns the scope
+the registry keeps for an `AccountKey`: it is built on the Spot account owner that
+`spot::Config::with_pools_for_account` draws for the same key, keeps the Spot pool's
+IP state, and is the same scope, with the same connection limits, for every draw of
+that key. Connection limits are per account and shared between FIX and FIX SBE
+([connection limits](https://github.com/binance/binance-spot-api-docs/blob/master/fix-api.md#connection-limits)).
 Every outbound application/control attempt counts against role-specific message
 quotas. Account connection attempts, concurrent connections and unique components
 use the documented role limits. Closed connections retain their count for two
 heartbeat intervals; unclean closure also retains component exclusion. Native
-LimitResponse count/max/interval evidence constrains future sends. Counter floors
-are held for a full observed interval instead of guessing its reset origin.
+LimitResponse count/max/interval evidence constrains future sends, of this session
+and of every client sharing its Spot owner. Counter floors are held for a full
+observed interval instead of guessing its reset origin.
 
 FIX market subscriptions reserve the documented 1000-stream allowance. The venue
 contract defines no success acknowledgment for an unsubscribe - only a
@@ -139,7 +150,9 @@ recursive envelopes, REST/WS negotiation, correlated replies, bans, binary ingre
 ping servicing and ordered retirement. `tests/fix_contract.rs` exercises framing,
 required/financial evidence, commission assets, future-code uncertainty, exact
 binary encoding, both binary session modes, Logon signing, reused IDs, control
-servicing and joined teardown. Private controlled-time tests reproduce queued
+servicing and joined teardown. `tests/fix_account_key_contract.rs` shows a keyed
+scope sharing order counts, `LimitResponse` order windows and connection limits
+with its key, and IP state with its pool. Private controlled-time tests reproduce queued
 expiration/cancellation, heartbeat probes, observed quota floors and delayed leases.
 These tests establish their named invariants, not exhaustive venue conformance.
 

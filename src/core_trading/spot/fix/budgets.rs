@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 use super::{CompId, Role};
-use crate::{Budgets, Error};
+use crate::{AccountKey, Budgets, Error, PoolEnvironment, WeightPools, spot::Environment};
 use std::{
     collections::{BTreeMap, VecDeque},
     sync::{Arc, Mutex},
@@ -10,8 +10,14 @@ use std::{
 };
 use tokio::time::Instant;
 
-/// Explicit account owner shared by all FIX sessions accessing that account.
-/// The supplied Spot owner also shares order counts with JSON/SBE clients.
+/// The account scope shared by every FIX session of one account: its FIX
+/// connection limits, and the Spot account owner its orders count against.
+///
+/// Binance counts a Spot account's unfilled orders across all API keys and APIs, FIX
+/// included, so the Spot owner should be the one the account's REST and WebSocket API
+/// clients use. [`Self::new`] takes that owner explicitly;
+/// [`Self::with_pools_for_account`] draws it for an [`AccountKey`], the owner every
+/// Spot configuration given that key shares. Clone a scope to share it.
 #[derive(Clone)]
 pub struct AccountBudgets {
     pub(super) spot: Budgets,
@@ -47,6 +53,38 @@ impl AccountBudgets {
             spot,
             state: Arc::default(),
         }
+    }
+    /// The FIX account scope the process's registry keeps for `account` in the
+    /// Spot pool of `environment`; see [`Self::with_pools_for_account`].
+    ///
+    /// # Errors
+    /// Returns a configuration error if the registry's lock is poisoned.
+    pub fn new_for_account(environment: Environment, account: &AccountKey) -> Result<Self, Error> {
+        Self::with_pools_for_account(environment, WeightPools::process(), account)
+    }
+    /// The FIX account scope `pools` keeps for `account` in the Spot pool of
+    /// `environment`.
+    ///
+    /// Its orders count against the account owner that
+    /// [`spot::Config::with_pools_for_account`](crate::spot::Config::with_pools_for_account)
+    /// draws for the same registry, environment and key: FIX, REST and WebSocket API
+    /// orders share one count, and `LimitResponse` order limits a session observes
+    /// hold the key's Spot clients too. It keeps the pool's shared IP state. Every
+    /// scope drawn for the key shares one set of FIX connection limits. Choose the
+    /// environment of the endpoint the sessions connect to.
+    ///
+    /// # Errors
+    /// Returns a configuration error if the registry's lock is poisoned.
+    pub fn with_pools_for_account(
+        environment: Environment,
+        pools: &WeightPools,
+        account: &AccountKey,
+    ) -> Result<Self, Error> {
+        let pool = match environment {
+            Environment::Demo => PoolEnvironment::Demo,
+            Environment::Production => PoolEnvironment::Production,
+        };
+        pools.draw_fix(pool, account)
     }
     pub(super) fn connect(
         &self,

@@ -9,7 +9,6 @@
 //! reads. Streams expose generation boundaries and caller-owned driver teardown.
 //! Private balance/position events update only the listed assets and contracts.
 
-pub mod book;
 mod config;
 pub mod event_payloads;
 mod identity;

@@ -58,11 +58,13 @@ quota types/intervals fail before changing accepted authority. Order windows and
 reported count floors are shared by the account owner, independently of SAPI
 endpoint weight. Clones share
 budgets; `for_account` retains the common IP owner and creates a new UID owner.
-Callers can share one explicit budget owner across Margin, Wallet, Convert
-and socket transports. For sharing with WebSocket clients, select
-`Budgets::new(BudgetLimits::spot())` to include the documented API weight and
-connection limits; the SAPI-only owner has no WS connection ceiling. Margin
-account order windows retain independent native authority under either owner.
+Margin REST uses SAPI endpoint scopes independent of the Spot aggregate IP pool.
+The WebSocket API defaults to the process Spot production IP weight/connection
+pool, shared with production Spot clients. `WsConfig::with_pools` selects an
+explicit registry, including independent synthetic fixture pools. An explicit
+`Budgets::new(BudgetLimits::spot())` owner can include the documented API weight
+and connection limits while also carrying independent SAPI endpoint scopes.
+Margin account order windows retain native authority under either owner.
 Headers update originating scope before body reads;
 `Retry-After` and 418 bans remain evidence. Missing ban timing cannot authorize
 a new send. No mutation retries, hidden queues, runtime or credential acquisition
@@ -108,7 +110,9 @@ catalog. Execution reports, balance deltas, partial free/locked updates,
 order-list status, listen-key expiry and token termination remain visible.
 Unknown events retain original evidence; malformed known events produce an
 explicit gap. Every event and late reply retains its socket generation;
-late subscription replies retain caller correlation and quota metadata.
+late subscription replies retain caller correlation and quota metadata. Unexpected
+raw stream-control answers retain control kind, caller streams and the complete
+result alongside an explicit typed failure; Margin exposes no raw control API.
 Ingress is unbounded and source ordered with depth, oldest-item age and progress
 metrics. Age/backlog and ordinary silence never claim a continuity gap.
 Drivers are returned to the caller: run them on the caller's runtime, request

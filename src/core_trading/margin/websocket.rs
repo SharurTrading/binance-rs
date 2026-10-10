@@ -7,15 +7,17 @@ use super::{
     event_payloads::{UnknownMessage, UserPayload, user_payload},
 };
 use crate::core::socket::{QueueStats, SocketDriver, SocketEvents, SocketPolicy};
-use crate::core::{Cost, Operation, Security, Socket, SocketEvent};
+use crate::core::{Cost, Operation, PoolEnvironment, Security, Socket, SocketEvent, VenuePool};
 use crate::{
-    BudgetLimits, Budgets, Clock, Error, RequestId, Response, SensitiveString, SystemClock,
+    Budgets, Clock, Error, RequestId, Response, SensitiveString, StreamControl, SystemClock,
+    WeightPools,
 };
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, time::Duration};
 
 /// Explicit production Margin socket endpoints and caller-owned connection budgets.
-/// Share the same budgets with SAPI clients to share IP cooldown and account evidence.
+/// The API weight/connection owner defaults to the process Spot production pool.
+/// SAPI REST has independent endpoint scopes; explicit `budgets` selects another owner.
 #[derive(Clone)]
 pub struct WsConfig {
     api: url::Url,
@@ -30,11 +32,20 @@ impl WsConfig {
     /// # Errors
     /// Returns invalid endpoint or venue-budget configuration errors.
     pub fn new() -> Result<Self, Error> {
+        Self::with_pools(WeightPools::process())
+    }
+    /// Configure production routes with an explicit Spot production IP registry.
+    /// Use an independent registry for synthetic fixtures; clients sharing this registry
+    /// share API weight and connection admission with other Spot clients drawn from it.
+    ///
+    /// # Errors
+    /// Returns invalid endpoint or venue-budget configuration errors.
+    pub fn with_pools(pools: &WeightPools) -> Result<Self, Error> {
         Ok(Self {
             api: crate::core::validate_url("wss://ws-api.binance.com:443/ws-api/v3", true)?,
             risk: crate::core::validate_url("wss://margin-stream.binance.com", true)?,
             clock: Arc::new(SystemClock),
-            budgets: Budgets::new(BudgetLimits::spot())?,
+            budgets: pools.draw(VenuePool::Spot, PoolEnvironment::Production)?,
             timeout: Duration::from_secs(10),
         })
     }
@@ -44,7 +55,8 @@ impl WsConfig {
         self.clock = value;
         self
     }
-    /// Share caller-owned budgets across Margin transports using common IP/account scopes.
+    /// Select an explicit API weight/connection owner. Margin SAPI endpoint scopes
+    /// remain independent of Spot aggregate weight, including under a common owner.
     #[must_use]
     pub fn budgets(mut self, value: Budgets) -> Self {
         self.budgets = value;
@@ -195,7 +207,7 @@ impl WsClient {
                     ws_weight: 2,
                     ..Cost::default()
                 },
-                ping_limit: 5,
+                incoming_limit: 5,
                 time_unit: crate::TimeUnit::Milliseconds,
                 binary_decoder: None,
                 api_key_header: false,
@@ -260,6 +272,8 @@ impl WsClient {
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum ApiEvent {
+    /// Unexpected transport control evidence with an explicit typed invariant failure.
+    UnexpectedControl(UnexpectedControl),
     /// Socket established; this does not establish account state continuity.
     Established(u64),
     /// Native Margin partial update or execution evidence.
@@ -297,6 +311,30 @@ pub enum ApiEvent {
     /// Accepted generation prefix drained before this terminal boundary.
     Retired(u64),
 }
+/// Accepted stream-control evidence on a Margin socket that exposes no control API.
+/// Preserve the complete answer and report a typed failure; retire after the accepted prefix.
+#[non_exhaustive]
+pub struct UnexpectedControl {
+    /// Socket generation that accepted this answer.
+    pub generation: u64,
+    /// Native control kind retained without reinterpretation.
+    pub control: StreamControl,
+    /// Original caller stream identities.
+    pub streams: Vec<String>,
+    /// Venue/control outcome retained even when it failed.
+    pub result: Result<Option<Vec<String>>, Error>,
+    /// Explicit local boundary failure; this is never a successful Margin operation.
+    pub error: Error,
+}
+impl std::fmt::Debug for UnexpectedControl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("UnexpectedControl")
+            .field("generation", &self.generation)
+            .field("control", &self.control)
+            .field("error", &self.error)
+            .finish_non_exhaustive()
+    }
+}
 /// Single consumer preserving all accepted Margin user events in source order.
 pub struct ApiEvents {
     inner: SocketEvents,
@@ -305,6 +343,21 @@ impl ApiEvents {
     /// Receive the next event; after shutdown drain the accepted prefix through retirement.
     pub async fn recv(&mut self) -> Option<ApiEvent> {
         Some(match self.inner.recv().await? {
+            SocketEvent::ControlLate {
+                generation,
+                control,
+                streams,
+                result,
+            } => {
+                self.inner.stop();
+                ApiEvent::UnexpectedControl(UnexpectedControl {
+                    generation,
+                    control,
+                    streams,
+                    result,
+                    error: Error::Gap("unexpected Margin API stream control answer"),
+                })
+            }
             SocketEvent::Established(g) => ApiEvent::Established(g),
             SocketEvent::Retired(g) => ApiEvent::Retired(g),
             SocketEvent::Gap { generation, error } => ApiEvent::Gap { generation, error },
@@ -395,7 +448,7 @@ impl RiskStream {
                     connections: 1,
                     ..Cost::default()
                 },
-                ping_limit: 5,
+                incoming_limit: 5,
                 time_unit: crate::TimeUnit::Milliseconds,
                 binary_decoder: None,
                 api_key_header: false,
@@ -407,6 +460,21 @@ impl RiskStream {
     /// Receive every accepted risk event in source order; malformed known records gap.
     pub async fn recv(&mut self) -> Option<RiskEvent> {
         Some(match self.events.recv().await? {
+            SocketEvent::ControlLate {
+                generation,
+                control,
+                streams,
+                result,
+            } => {
+                self.events.stop();
+                RiskEvent::UnexpectedControl(UnexpectedControl {
+                    generation,
+                    control,
+                    streams,
+                    result,
+                    error: Error::Gap("unexpected Margin risk stream control answer"),
+                })
+            }
             SocketEvent::Established(g) => RiskEvent::Established(g),
             SocketEvent::Retired(g) => RiskEvent::Retired(g),
             SocketEvent::Gap { generation, error } => RiskEvent::Gap { generation, error },
@@ -453,6 +521,8 @@ impl RiskStream {
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum RiskEvent {
+    /// Unexpected transport control evidence with an explicit typed invariant failure.
+    UnexpectedControl(UnexpectedControl),
     /// Risk socket established, without a complete account-state claim.
     Established(u64),
     /// Partial cross-margin risk fact with asset and principal/interest evidence.

@@ -3,7 +3,7 @@
 
 use super::{
     Budgets, Clock, Cost, Credentials, Error, Operation, Outcome, RateEvidence, RequestId,
-    ResponseMeta, Security,
+    ResponseMeta, Security, StreamControl,
 };
 use futures_util::{SinkExt, StreamExt};
 use serde_json::Value;
@@ -83,8 +83,17 @@ pub(crate) enum SocketEvent {
         generation: u64,
         error: Error,
     },
+    /// A stream control answer that arrived after its caller stopped waiting.
+    ControlLate {
+        generation: u64,
+        control: StreamControl,
+        streams: Vec<String>,
+        result: Result<Option<Vec<String>>, Error>,
+    },
     Retired(u64),
 }
+
+type ControlReply = oneshot::Sender<Result<Option<Vec<String>>, Error>>;
 
 enum Command {
     Call {
@@ -94,6 +103,12 @@ enum Command {
         id: RequestId,
         deadline: Instant,
         reply: oneshot::Sender<Result<(Value, ResponseMeta), Error>>,
+    },
+    Control {
+        control: StreamControl,
+        streams: Vec<String>,
+        deadline: Instant,
+        reply: ControlReply,
     },
     Close(oneshot::Sender<()>),
 }
@@ -141,6 +156,22 @@ struct Pending {
     reply: Option<oneshot::Sender<Result<(Value, ResponseMeta), Error>>>,
 }
 
+struct PendingControl {
+    control: StreamControl,
+    streams: Vec<String>,
+    deadline: Instant,
+    reply: Option<ControlReply>,
+}
+
+fn control_lost(control: StreamControl) -> Error {
+    Error::Transport {
+        client_order_ids: BTreeMap::new(),
+        operation: control.method(),
+        outcome: control.lost_outcome(),
+        meta: None,
+    }
+}
+
 pub(crate) struct SocketDriver {
     ws: WebSocketStream<MaybeTlsStream<TcpStream>>,
     commands: mpsc::UnboundedReceiver<Command>,
@@ -153,7 +184,11 @@ pub(crate) struct SocketDriver {
     stats: Arc<Mutex<QueueMetrics>>,
     generation: u64,
     lifetime: Instant,
-    ping_limit: usize,
+    incoming_limit: usize,
+    // Venue-incoming messages (pongs and control messages) sent in the last second.
+    incoming: VecDeque<Instant>,
+    next_control: u64,
+    controls: BTreeMap<u64, PendingControl>,
     time_unit: super::TimeUnit,
     binary_decoder: Option<BinaryDecoder>,
     binary_timestamps: bool,
@@ -180,10 +215,11 @@ pub(crate) fn tls_config() -> Result<rustls::ClientConfig, Error> {
 /// Product-sourced connection/control admission, independent of wire models.
 pub(crate) struct SocketPolicy {
     pub handshake: Cost,
-    /// Received-ping servicing ceiling per sliding second. Every call site
-    /// supplies this from its route's documented connection duty cycle; no
-    /// default arm derives it, so an uncited limit cannot be hidden here.
-    pub ping_limit: usize,
+    /// Venue-incoming message ceiling per sliding second, charged by every pong
+    /// and every stream control message. Every call site supplies this from its
+    /// route's documented connection duty cycle; no default arm derives it, so an
+    /// uncited limit cannot be hidden here.
+    pub incoming_limit: usize,
     pub time_unit: super::TimeUnit,
     pub binary_decoder: Option<BinaryDecoder>,
     pub api_key_header: bool,
@@ -266,7 +302,10 @@ impl Socket {
             stats,
             generation,
             lifetime: Instant::now() + Duration::from_hours(24),
-            ping_limit: policy.ping_limit,
+            incoming_limit: policy.incoming_limit,
+            incoming: VecDeque::new(),
+            next_control: 1,
+            controls: BTreeMap::new(),
             time_unit: policy.time_unit,
             binary_decoder: policy.binary_decoder,
             binary_timestamps: policy.binary_decoder.is_some(),
@@ -311,6 +350,29 @@ impl Socket {
             },
             meta: None,
         })?
+    }
+    /// Send one stream control message and wait for its correlated answer.
+    pub async fn control(
+        &self,
+        control: StreamControl,
+        streams: Vec<String>,
+        deadline: Instant,
+    ) -> Result<Option<Vec<String>>, Error> {
+        let (reply, rx) = oneshot::channel();
+        self.tx
+            .send(Command::Control {
+                control,
+                streams,
+                deadline,
+                reply,
+            })
+            .map_err(|_| Error::Transport {
+                client_order_ids: BTreeMap::new(),
+                operation: control.method(),
+                outcome: Outcome::NotSent,
+                meta: None,
+            })?;
+        rx.await.map_err(|_| control_lost(control))?
     }
     pub async fn close(&self) -> Result<(), Error> {
         let (tx, rx) = oneshot::channel();
@@ -359,6 +421,12 @@ impl SocketDriver {
                 let _ = reply.send(());
                 Ok(())
             }
+            Command::Control {
+                control,
+                streams,
+                deadline,
+                reply,
+            } => self.send_control(control, streams, deadline, reply).await,
             Command::Call {
                 op,
                 mut params,
@@ -448,8 +516,114 @@ impl SocketDriver {
             }
         }
     }
+    /// Charge one venue-incoming message to the connection's sliding second, or
+    /// return how long until the oldest charge leaves the window.
+    fn charge_incoming(&mut self, now: Instant) -> Result<(), Duration> {
+        let window = Duration::from_secs(1);
+        while self
+            .incoming
+            .front()
+            .is_some_and(|sent| now.duration_since(*sent) >= window)
+        {
+            self.incoming.pop_front();
+        }
+        if self.incoming.len() >= self.incoming_limit {
+            let oldest = self.incoming.front().copied().unwrap_or(now);
+            return Err(window.saturating_sub(now.duration_since(oldest)));
+        }
+        self.incoming.push_back(now);
+        Ok(())
+    }
+    async fn send_control(
+        &mut self,
+        control: StreamControl,
+        streams: Vec<String>,
+        deadline: Instant,
+        reply: ControlReply,
+    ) -> Result<(), Error> {
+        if deadline <= Instant::now() || reply.is_closed() {
+            let _ = reply.send(Err(Error::Expired(control.method())));
+            return Ok(());
+        }
+        // Spot accepts a 64-bit signed integer id and the futures venues an
+        // unsigned one, so ids stay within both.
+        let id = self.next_control;
+        let Some(next) = id
+            .checked_add(1)
+            .filter(|next| i64::try_from(*next).is_ok())
+        else {
+            let _ = reply.send(Err(Error::NotSent {
+                client_order_ids: BTreeMap::new(),
+                operation: control.method(),
+                reason: "stream control ids exhausted for this generation",
+            }));
+            return Ok(());
+        };
+        let body = match control {
+            StreamControl::ListSubscriptions => {
+                serde_json::json!({"method": control.method(), "id": id})
+            }
+            StreamControl::Subscribe | StreamControl::Unsubscribe => {
+                serde_json::json!({"method": control.method(), "params": streams, "id": id})
+            }
+        }
+        .to_string();
+        if let Err(retry_after) = self.charge_incoming(Instant::now()) {
+            let _ = reply.send(Err(Error::Admission { retry_after }));
+            return Ok(());
+        }
+        self.next_control = next;
+        self.controls.insert(
+            id,
+            PendingControl {
+                control,
+                streams,
+                deadline,
+                reply: Some(reply),
+            },
+        );
+        tokio::select! {
+            ()=self.stop.cancelled()=>Err(Error::Closed),
+            value=tokio::time::timeout_at(deadline.min(Instant::now().checked_add(self.timeout).ok_or(Error::Configuration("socket timeout range"))?),self.ws.send(Message::text(body)))=>{
+                value.map_err(|_|Error::Gap("WebSocket send timeout"))?.map_err(|_|Error::Gap("WebSocket send failure"))
+            }
+        }
+    }
+    /// Deliver one correlated control answer, or surface it as a late answer.
+    fn settle_control(&mut self, id: u64, value: &Value) -> Result<(), Error> {
+        let Some(mut pending) = self.controls.remove(&id) else {
+            return Ok(());
+        };
+        let (result, malformed) = match pending.control.answer(value) {
+            Some(result) => (result, false),
+            None => (Err(control_lost(pending.control)), true),
+        };
+        let unanswered = match pending.reply.take() {
+            Some(reply) => reply.send(result).err(),
+            None => Some(result),
+        };
+        if let Some(result) = unanswered {
+            self.emit(SocketEvent::ControlLate {
+                generation: self.generation,
+                control: pending.control,
+                streams: pending.streams,
+                result,
+            })?;
+        }
+        if malformed {
+            return Err(Error::Gap("malformed stream control answer"));
+        }
+        Ok(())
+    }
     fn expire(&mut self) {
         let now = Instant::now();
+        for p in self.controls.values_mut() {
+            if p.deadline <= now
+                && let Some(reply) = p.reply.take()
+            {
+                let _ = reply.send(Err(control_lost(p.control)));
+            }
+        }
         for p in self.pending.values_mut() {
             if p.deadline <= now
                 && let Some(reply) = p.reply.take()
@@ -477,6 +651,11 @@ impl SocketDriver {
             && value.get("id").is_none_or(Value::is_null)
         {
             return Err(Error::Gap("WebSocket authentication revoked"));
+        }
+        if let Some(id) = value.get("id").and_then(Value::as_u64)
+            && self.controls.contains_key(&id)
+        {
+            return self.settle_control(id, &value);
         }
         let id = value.get("id").and_then(Value::as_str).map(str::to_owned);
         if let Some(id) = id
@@ -565,7 +744,6 @@ impl SocketDriver {
         let lifetime = self.lifetime;
         let mut failure = None;
         let mut refusal = None;
-        let mut pings: VecDeque<Instant> = VecDeque::new();
         loop {
             if self.stop.is_cancelled() {
                 break;
@@ -576,6 +754,12 @@ impl SocketDriver {
                 .values()
                 .filter(|p| p.reply.is_some())
                 .map(|p| p.deadline)
+                .chain(
+                    self.controls
+                        .values()
+                        .filter(|p| p.reply.is_some())
+                        .map(|p| p.deadline),
+                )
                 .min()
                 .unwrap_or(lifetime)
                 .min(lifetime);
@@ -598,11 +782,9 @@ impl SocketDriver {
                         }
                     }
                     // The codec automatically sends the exact ping payload as a pong.
+                    // Pongs share the venue's incoming-message ceiling with control messages.
                     Some(Ok(message)) if message.is_ping()=>{
-                        let now=Instant::now();
-                        while pings.front().is_some_and(|p|now.duration_since(*p)>=Duration::from_secs(1)) {pings.pop_front();}
-                        if pings.len()>=self.ping_limit {Err(Error::Gap("documented ping/pong rate exceeded"))} else {
-                            pings.push_back(now);
+                        if self.charge_incoming(Instant::now()).is_err() {Err(Error::Gap("documented ping/pong rate exceeded"))} else {
                             tokio::time::timeout(self.timeout,self.ws.flush()).await.map_err(|_|Error::Gap("pong timeout")).and_then(|v|v.map_err(|_|Error::Gap("pong failure")))
                         }
                     },
@@ -652,6 +834,11 @@ impl SocketDriver {
                 }));
             }
         }
+        for (_, mut p) in std::mem::take(&mut self.controls) {
+            if let Some(reply) = p.reply.take() {
+                let _ = reply.send(Err(control_lost(p.control)));
+            }
+        }
         if !matches!(
             failure,
             Some(Error::Gap("documented ping/pong rate exceeded"))
@@ -671,6 +858,13 @@ impl SocketDriver {
                     let _ = reply.send(Err(Error::NotSent {
                         client_order_ids: super::request::order_ids(&params),
                         operation: op.name,
+                        reason: "socket generation retired before send",
+                    }));
+                }
+                Command::Control { control, reply, .. } => {
+                    let _ = reply.send(Err(Error::NotSent {
+                        client_order_ids: BTreeMap::new(),
+                        operation: control.method(),
                         reason: "socket generation retired before send",
                     }));
                 }

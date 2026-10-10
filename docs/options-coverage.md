@@ -19,9 +19,7 @@ Protocol facts were checked on 2026-10-10 against the official
 [general information](https://developers.binance.com/en/docs/products/derivatives-trading-options/general-info),
 [error codes](https://developers.binance.com/en/docs/products/derivatives-trading-options/error-code),
 [stream connection contract](https://developers.binance.com/en/docs/products/derivatives-trading-options/websocket-market-streams/Connect),
-[user-data semantics](https://developers.binance.com/en/docs/products/derivatives-trading-options/user-data-streams),
-and the Options-specific
-[depth bootstrap sequence](https://developers.binance.com/en/docs/products/derivatives-trading-options/websocket-market-streams/How-to-manage-a-local-order-book-correctly).
+[user-data semantics](https://developers.binance.com/en/docs/products/derivatives-trading-options/user-data-streams).
 
 Pinned source digests and normalized wire facts live in `schema/options-rest.json`,
 `schema/options-streams.json`, and `schema/options-error-codes.json`; generated
@@ -75,7 +73,7 @@ older than that window and leaves the boundary day to the venue; operator
 timestamps are preserved exactly. Order history follows its documented five-day
 window.
 
-## Streams and depth
+## Streams and depth evidence
 
 The public and market routes are `/public/stream` and `/market/stream`; execution
 uses `/private/ws/<listenKey>`. Distinct routes use distinct sockets. The current
@@ -95,13 +93,10 @@ and reconnection. Renewal does not assert continuity. Unknown future events are
 retained with redacted diagnostics. No undocumented WebSocket trading API is
 exposed.
 
-The pure depth helper buffers updates without a capacity cutoff, establishes the
-Options-documented snapshot bridge, and verifies each subsequent `pu` link.
-Zero quantities delete levels, including levels absent from the finite snapshot.
-A real link/generation/symbol mismatch returns a gap and makes the view unproven.
-Snapshot installation is transactional: failure preserves previously accepted
-buffered evidence so newer venue evidence can recover it. The mirror always
-reports finite-snapshot partial depth and never invents unseen orders.
+Native depth payloads retain exact signed price/quantity pairs, snapshot
+`lastUpdateId`, and stream `U`, `u`, and `pu` evidence. Finite snapshot rows remain
+the venue's supplied rows. Consumers own depth bootstrap, continuity checks, and
+any local book construction.
 
 ## Validation
 
@@ -109,6 +104,6 @@ Credential-free public contracts cover native identity and required order inputs
 exact and malformed decimals, batch partial evidence, partial balance identity,
 native rate authority, single-attempt body loss and error-code classification,
 source-ordered private ingress and joined retirement, native required nested
-inputs, history admission, and depth bootstrap/recovery
-with more than a thousand buffered updates. All network fixtures are loopback.
+inputs, history admission, and native depth snapshot/update IDs and signed exact
+decimals. All network fixtures are loopback.
 Live mutation or credentialed verification is not performed by normal tests.

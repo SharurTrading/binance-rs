@@ -26,6 +26,17 @@ pub(crate) fn parse_decimal(value: &Value) -> Result<Decimal, &'static str> {
         .map_err(|_| "invalid or unrepresentable decimal")
 }
 
+pub(crate) fn decimal_rows<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<Vec<Decimal>>, D::Error> {
+    Vec::<Vec<Value>>::deserialize(d)?
+        .into_iter()
+        .map(|row| {
+            row.iter()
+                .map(|value| parse_decimal(value).map_err(serde::de::Error::custom))
+                .collect()
+        })
+        .collect()
+}
+
 pub(crate) fn decimal<'de, D: Deserializer<'de>>(d: D) -> Result<Decimal, D::Error> {
     parse_decimal(&Value::deserialize(d)?).map_err(serde::de::Error::custom)
 }
@@ -65,7 +76,7 @@ pub(crate) fn decimal_option_null_string<'de, D: Deserializer<'de>>(
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct PriceLevel {
-    /// Price of this level.
+    /// Signed price of this level, exactly as sent; zero and negative prices are kept.
     pub price: Decimal,
     /// Absolute quantity at this level, not a delta.
     pub quantity: Decimal,
@@ -73,10 +84,14 @@ pub struct PriceLevel {
 impl PriceLevel {
     /// Construct a Futures price level without rounding.
     ///
+    /// The price is signed: the venue states no sign for a level price, so its
+    /// sign is the consumer's to judge. The venue documents each level's quantity
+    /// as [the absolute quantity for a price level](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/websocket-market-streams/How-to-manage-a-local-order-book-correctly).
+    ///
     /// # Errors
-    /// Refuses non-positive Futures prices and negative quantities.
+    /// Refuses a negative quantity, which an absolute level quantity cannot be.
     pub fn new(price: Decimal, quantity: Decimal) -> Result<Self, Error> {
-        if price <= Decimal::ZERO || quantity < Decimal::ZERO {
+        if quantity < Decimal::ZERO {
             return Err(Error::Validation("price level"));
         }
         Ok(Self { price, quantity })

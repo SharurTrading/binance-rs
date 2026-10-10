@@ -110,7 +110,7 @@ pub mod stream_models;
 mod websocket;
 pub use websocket::{
     ApiEvent, ApiEvents, ConnectionDriver, RiskEvent, RiskStream, SubscribeToken, Subscription,
-    WsClient, WsConfig,
+    UnexpectedControl, WsClient, WsConfig,
 };
 /// Native margin account scope, preserved from token request provenance.
 #[derive(Clone, Debug, PartialEq, Eq)]

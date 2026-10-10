@@ -557,8 +557,13 @@ pub struct ReferencePriceEvent {
     #[serde(rename = "s")]
     pub s: crate::Symbol,
     /// Exact `r` wire field.
-    #[serde(rename = "r", deserialize_with = "super::wire::decimal")]
-    pub r: Decimal,
+    #[serde(
+        rename = "r",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub r: Option<Decimal>,
     /// Exact `t` wire field.
     #[serde(rename = "t")]
     pub t: i64,

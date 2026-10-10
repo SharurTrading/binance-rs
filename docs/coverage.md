@@ -36,6 +36,7 @@ of the protocol implementation; regenerating DTOs alone cannot establish correct
 - [General REST behavior and 503 outcomes](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/general-info)
 - [WebSocket API signing, session authentication, and budget scope](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/websocket-api-general-info)
 - [Current stream routes and control limits](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/websocket-market-streams/Connect)
+- [Live subscribing, unsubscribing and listing streams](https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-market-streams/Live-Subscribing-Unsubscribing-to-streams)
 - [Futures snapshot/update depth procedure](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/websocket-market-streams/How-to-manage-a-local-order-book-correctly)
 - [User-data lifecycle and event semantics](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams)
 - [Portfolio Margin Pro's separate account/API boundary](https://developers.binance.com/en/docs/products/derivatives-trading-portfolio-margin-pro/quick-start)
@@ -53,11 +54,20 @@ attempts, including concurrent clones/accounts, weighted REST requests, WebSocke
 handshakes, and shared REST/WebSocket order limits. Injected clocks check exact
 interval boundaries and cooldown expiry; local fixtures count outbound attempts.
 Additional quotas cover funding, history, hourly/daily conversion, and calendar-month
-downloads. These checks prove local admission invariants, not live venue throughput.
+downloads. Shared-pool contracts check that clients of one venue pool and environment
+share its IP weight, that Spot and futures and demo and production never share, that a
+stated exchange information limit replaces the baseline, and that venue holds reach
+every client of the pool while an explicit owner stays isolated. Pool-report
+contracts check, in each market, that `pool_usage()` reports the documented limit
+until exchange information states one and the stated limit after, that its usage
+follows `X-MBX-USED-WEIGHT-1M`, and that a request's `weight()` is the weight its
+admission charges, parameter by parameter. These checks prove
+local admission invariants, not live venue throughput.
 
 The separately invoked credential-free Futures demo probes passed on 2026-09-27:
 REST ping/server time/exchange metadata, WebSocket API depth, and routed Public depth
-stream. Separately authorized account probes on the same date passed signed USD-M
+stream. On 2026-10-10 the demo Market route accepted a socket with no streams, then
+answered `SUBSCRIBE` with `result: null` and `LIST_SUBSCRIPTIONS` with the added name. Separately authorized account probes on the same date passed signed USD-M
 REST balance/account reads, signed WebSocket balance reads, and one post-only
 placement/cancellation over each transport. Queries confirmed both owned orders
 canceled with zero fills and preserved caller IDs. These probes establish basic demo
@@ -97,6 +107,11 @@ receipts, and the algo iceberg `"null"` sentinel map to absent amounts rather th
 zero; other malformed financial strings fail. See
 [wire corrections #23](https://github.com/SharurTrading/binance-rs/issues/23) and the
 [USD-M trade reference](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade).
+
+The `!contractInfo` push matches COIN-M: `ct`, `dt`, `ot` and `cs` are required,
+while `bks`, sent only on a bracket update, and `st` stay optional. A `ps` field,
+which the USD-M page does not document, is retained with unknown fields. See the
+[USD-M contract info stream](https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-market-streams/Contract-Info-Stream).
 
 ## REST operations
 
@@ -225,6 +240,25 @@ zero; other malformed financial strings fail. See
 | Session | `session.logout` |
 
 ## Market streams
+
+A routed `Streams` socket connects to `/public/stream` or `/market/stream`, with
+any number of its route's streams including none. `subscribe`, `unsubscribe` and
+`list_subscriptions` send the documented `SUBSCRIBE`, `UNSUBSCRIBE` and
+`LIST_SUBSCRIPTIONS` control messages on the open socket, verified 2026-10-10:
+
+| Message | Request | Success | Refusal |
+| --- | --- | --- | --- |
+| `SUBSCRIBE` | `{"method":"SUBSCRIBE","params":[names],"id":n}` | `{"result":null,"id":n}` | `{"code":c,"msg":m}` → `Error::ControlRefused` |
+| `UNSUBSCRIBE` | `{"method":"UNSUBSCRIBE","params":[names],"id":n}` | `{"result":null,"id":n}` | as above |
+| `LIST_SUBSCRIPTIONS` | `{"method":"LIST_SUBSCRIPTIONS","id":n}` | `{"result":[names],"id":n}` | as above |
+
+The venue requires an unsigned integer `id`; the client numbers each generation's
+control messages from 1. A stream of the other route is refused unsent, as at
+connect. Control messages and pongs share the connection's documented ceiling of
+10 incoming messages a second; a control message past it is refused unsent with
+`Error::Admission`. The documented 1,024 streams per socket bound connect and
+subscribe together. A lost answer is `Outcome::Unknown` and its late arrival is a
+`StreamEvent::LateControl`. Nothing is resubscribed after a reconnect.
 
 | Stream | Route | Name template |
 | --- | --- | --- |

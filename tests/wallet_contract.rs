@@ -16,7 +16,7 @@ use std::sync::{
 };
 use support::{FixedClock, HttpFixture, deadline};
 fn config() -> wallet::Config {
-    wallet::Config::new()
+    wallet::Config::with_pools(&binance_client::WeightPools::new())
         .unwrap()
         .clock(Arc::new(FixedClock(1_700_000_001_000)))
         .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())
@@ -165,7 +165,7 @@ async fn withdraw_history_per_second_cap_is_derived_from_the_pinned_interval() {
     let clock = Arc::new(ManualClock(AtomicU64::new(60_000)));
     let fixture = HttpFixture::new(200, "", "[]", None, false).await;
     let client = wallet::RestClient::new(
-        wallet::Config::new()
+        wallet::Config::with_pools(&binance_client::WeightPools::new())
             .unwrap()
             .clock(clock.clone())
             .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())

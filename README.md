@@ -55,13 +55,14 @@ accounting belong to consumers. There is no dependency on a consuming platform.
 src/
 ├── core/: shared identities, credentials, time, transport and rate budgets
 └── core_trading/
-    ├── usdm/: linear Futures models, requests, streams, depth bootstrap
+    ├── usdm/: linear Futures models, requests, streams
     ├── wallet/: native balances, networks, withdrawals, SAPI endpoint scopes
     ├── convert/: native quote/limit amounts, expiry authority, SAPI endpoint scopes
     ├── margin/: cross/isolated balances, borrowing, orders, execution/risk events
     ├── options/: native option contracts, Greeks, orders, routed streams
-    ├── spot/: balances, base quantity/quote spend, depth bootstrap, FIX and SBE
-    └── coinm/: inverse Futures models, requests, streams, depth bootstrap
+    ├── spot/: balances, base quantity/quote spend, depth updates, FIX and SBE
+    └── coinm/: inverse Futures models, requests, streams, depth updates
+
 ```
 
 `core_trading` groups the existing products within this single crate. Future API
@@ -111,7 +112,9 @@ async fn main() -> Result<(), Error> {
 }
 ```
 
-Financial fields use `Decimal`, parsed without floats or silent rounding. Request
+Financial fields use `Decimal`, parsed without floats or silent rounding. Futures
+depth arrays apply the same exact parser to every price and quantity token; values
+outside Decimal coefficient or scale limits fail decoding. Request
 builders validate required/conditional inputs on `build()` and again at dispatch.
 Outgoing enum values are checked; incoming enum strings and unknown fields remain
 open to provider additions. Callers use current exchange filters to check tick,
@@ -140,9 +143,17 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
   Spot execution events arrive through WebSocket API subscriptions; Futures use
   listen keys. Renewal and reconnect are explicit caller operations; no automatic
   replay, recovery, credential loading, or hidden continuity claim.
-- Each product has a `DepthBook`: Spot bridges snapshot + 1; Futures retain `pu`
-  continuity. Bootstrap events are retained and real gaps are explicit. Every
-  finite snapshot remains partial.
+- A market socket may connect with no streams. `subscribe`, `unsubscribe` and
+  `list_subscriptions` send the venue's `SUBSCRIBE`, `UNSUBSCRIBE` and
+  `LIST_SUBSCRIPTIONS` control messages on the open socket, within the same
+  generation, in Spot, USDⓈ-M (per route) and COIN-M. They share the documented
+  incoming-message ceiling with pongs and are refused unsent past it. A reconnect
+  resubscribes nothing: membership is the caller's.
+- Depth events and snapshots keep their update IDs (`U`, `u`, Futures `pu`,
+  `lastUpdateId`) and exact levels. A level's price is signed and kept as sent,
+  zero and negative included; Futures refuse only a negative quantity, which the
+  venue documents as absolute. Synchronising a local book from them is the
+  consumer's; the client builds no book. Every finite snapshot remains partial.
 
 HMAC, RSA PKCS#8, Ed25519 PKCS#8, and external signers are supported. WebSocket
 session logon requires Ed25519. TLS is required except exact loopback fixtures;
@@ -167,43 +178,95 @@ WebSocket lifecycles.
 
 ## Budgets
 
-Clone a product `Config` to share budgets between its REST and WebSocket clients.
-Margin, Wallet and Convert can share an explicit `Budgets::sapi()` owner; endpoint
-IP/UID weight scopes stay independent, including Margin's additional per-IP
-leverage request cap. Options requires caller-supplied budgets, with
-`options::budget_limits` validating the venue's own exchange metadata. Unsupported
-rate intervals fail explicitly rather than silently borrowing Futures limits.
-Across accounts on the same IP, use one `Budgets` owner and `for_account()`; reuse
-that account owner for every credential/client of the account. Spot shares REST/WS
-weight, daily/ten-second order counts, and connection-attempt limits. Successful
-ordinary Spot submits/cancels release the documented weight reservation; failures
-remain charged and observed venue counters are never reduced.
+Spot and Futures `Config::new` draw their IP budgets from the process's pool for
+that venue pool and environment, so every client counts against one weight limit:
 
-UM and CM share IP/account limits after the current integration. Configure an
-explicit common owner for both products:
+| Pool | Products | Baseline minute weight | Source |
+| --- | --- | ---: | --- |
+| Spot | Spot | 6,000 | [Spot rate limiters](https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#rate-limiters-ratelimittype) |
+| Futures | USDⓈ-M and COIN-M together | 2,400 | [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice), A.3 |
+
+Demo and production never share a pool. Each pool starts at its documented baseline;
+every REST exchange information reply hands its `rateLimits` to the pool, and the
+latest stated `REQUEST_WEIGHT` per minute (and Spot's `RAW_REQUESTS` per five
+minutes) replaces it for every client of the pool. A counted window stated without a
+positive limit is refused as `Error::Gap` and leaves the pool unchanged. `ORDERS`
+entries are account limits and are not adopted. Every `X-MBX-USED-WEIGHT-1M` raises
+the pool's count, and a `Retry-After` or `418` holds every client of the pool. A
+request the pool cannot take is refused unsent as `Error::Admission` with its retry
+delay. The futures pool counts REST and WebSocket API weight together.
+
+Wallet, Convert and Margin REST draw from a separate process SAPI IP pool; their
+endpoint weight counters remain independent. Margin WebSocket API uses the Spot
+pool. `with_pools` selects an explicit registry for these products. Options
+requires caller-supplied budgets derived from its native exchange information.
+
+Each `Config::new` keeps its own account owner; clone a product `Config` to share
+budgets between its REST and WebSocket clients. Across products or credentials of
+one account, pass one account owner explicitly. Spot shares REST/WS weight,
+daily/ten-second order counts, and connection-attempt limits. Successful ordinary
+Spot submits/cancels release the documented weight reservation; failures remain
+charged and observed venue counters are never reduced.
+
+`Config::budgets` replaces the drawn pool with an explicit owner, isolating the
+client from every pool. `Config::with_pools` draws from a registry the caller builds
+instead of the process's, so tests can share a pool without touching it:
 
 ```rust
 use binance_client::core_trading::{coinm, usdm};
-use binance_client::{BudgetLimits, Budgets, Error};
+use binance_client::{Error, WeightPools};
 
-let budgets = Budgets::new(BudgetLimits::coinm())?;
-let um = usdm::Config::new(usdm::Environment::Production)?.budgets(budgets.clone());
-let cm = coinm::Config::new(coinm::Environment::Production)?.budgets(budgets);
+let pools = WeightPools::new();
+let um = usdm::Config::with_pools(usdm::Environment::Production, &pools)?;
+let cm = coinm::Config::with_pools(coinm::Environment::Production, &pools)?;
 # Ok::<(), Error>(())
 ```
 
-Independent `Config::new` values do not coordinate IP usage automatically. The
-existing USDⓈ-M default preserves its separate REST/WS reservation baseline;
-use the shared owner above when combining Futures products.
+### Reading a pool and a request's weight
 
-Baseline limits are conservative documented values, with demo REST limits from
-exchange metadata. Configure `BudgetLimits` from current venue evidence. USDⓈ-M
+The client reports what it measures and decides nothing with it. `pool_usage()` on
+a product `Config` or `RestClient` reads the pool that client draws on, at its
+injected clock:
+
+| Field | Meaning |
+| --- | --- |
+| `request_weight` | `REQUEST_WEIGHT` per minute; on every drawn pool it counts REST and WebSocket API weight together |
+| `raw_requests` | `RAW_REQUESTS` per five minutes, where the pool counts them (Spot) |
+| `limit`, `source` | The latest stated limit (`LimitSource::Stated`), or the documented baseline until a client of the pool reads exchange information (`LimitSource::Documented`) |
+| `used` | Spent in the current window: the pool's own count, raised to `X-MBX-USED-WEIGHT-1M` whenever a reply reports more |
+| `interval`, `resets_in` | The window's length and the time until it starts again, aligned to the epoch as the venue's windows are |
+
+Every Spot, USDⓈ-M and COIN-M REST request builder has `weight()`: the weight
+admission will charge that request against the minute window, read before it is
+sent. It follows the parameters exactly as admission does (`limit` for klines and
+depth, `symbol` or `symbols` for tickers and open orders), and refuses what dispatch
+would refuse before admission. Fixed weights come from each catalog's `x-ip-weight`
+in `schema/`; parameter-dependent weights are each product's `rate.rs` tables, from
+the same pages. A Spot submit or cancel the venue documents as free on success is
+charged its reservation and released once it succeeds.
+
+```rust
+use binance_client::core_trading::usdm::{self, rest_requests::KlineCandlestickData};
+use binance_client::{Error, Symbol};
+
+let config = usdm::Config::new(usdm::Environment::Production)?;
+let pool = config.pool_usage()?;
+let bars = KlineCandlestickData::new()
+    .symbol(Symbol::new("BTCUSDT")?)
+    .interval("1m")
+    .limit(1000);
+let fits = pool.request_weight.used + bars.weight()? <= pool.request_weight.limit;
+# Ok::<(), Error>(())
+```
+
+Explicit `BudgetLimits` owners start from conservative documented values. USDⓈ-M
 also tracks its documented funding/history, conversion, and monthly download-job limits. External
 clients and frontend usage can consume the same budgets; local admission cannot
 guarantee venue acceptance. It never waits, retries, or sends a command after expiry. The catalog omits
-USDⓈ-M `testOrder` quota weights; the client conservatively reserves one IP unit and one
-order slot pending [verification #4](https://github.com/SharurTrading/binance-rs/issues/4).
-That validation endpoint does not submit to the matching engine.
+USDⓈ-M `testOrder` quota weights; an authorized demo probe
+([verification #4](https://github.com/SharurTrading/binance-rs/issues/4)) found it charges
+no IP weight and one slot on each order limit, which the client charges. That validation
+endpoint does not submit to the matching engine.
 
 ## Development and verification
 
@@ -232,7 +295,7 @@ Read-only demo probes are ignored by default and require explicit invocation:
 cargo test --test demo_read_only -- --ignored
 ```
 
-These probes verify public metadata/depth only. They do not prove authenticated
+These probes verify public metadata, depth and USDⓈ-M stream membership only. They do not prove authenticated
 execution, account modes, or all long-tail endpoints work on demo or production.
 Human review and separately authorized demo trading are required before claiming
 execution readiness. There are no credentials or captured user data in the fixtures.

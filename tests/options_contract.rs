@@ -203,57 +203,41 @@ fn options_budget_authority_is_native_and_unsupported_intervals_are_refused() {
     assert!(options::budget_limits(&info("HOUR")).is_err());
 }
 
-fn depth(
-    first: i64,
-    last: i64,
-    previous: i64,
-    bids: &serde_json::Value,
-) -> options::stream_models::DiffBookDepthStreamsEvent {
-    serde_json::from_value(json!({"e":"depthUpdate","E":1,"T":1,"s":"BTC-261030-90000-C","U":first,"u":last,"pu":previous,"b":bids,"a":[]})).unwrap()
-}
-fn snapshot(id: i64) -> options::rest_models::OrderBookResponse {
-    serde_json::from_value(json!({"lastUpdateId":id,"T":1,"bids":[["1","2"]],"asks":[]})).unwrap()
-}
-
 #[test]
-fn options_depth_bootstrap_buffers_without_cutoff_and_reports_true_chain_gap() {
-    use options::book::{BookState, DepthBook};
-    let mut book = DepthBook::new(options::Symbol::new("BTC-261030-90000-C").unwrap(), 7);
-    for id in 10..2010 {
-        book.update(7, depth(id, id, id - 1, &json!([["1", "2"]])))
-            .unwrap();
-    }
-    book.snapshot(&snapshot(10)).unwrap();
-    assert_eq!(book.state(), BookState::Ready);
-    assert_eq!(book.last_update_id(), Some(2009));
-    assert!(book.is_partial());
+fn options_depth_events_retain_native_ids_and_signed_exact_levels() {
+    let value = json!({"e":"depthUpdate","E":1,"T":2,"s":"BTC-261030-90000-C",
+        "U":10,"u":11,"pu":9,"b":[["-1.25000001","0"]],"a":[["0","-2.75"]]});
+    let event: options::stream_models::DiffBookDepthStreamsEvent =
+        serde_json::from_value(value.clone()).unwrap();
+    assert_eq!((event.upper_u, event.u, event.pu), (10, 11, 9));
+    assert_eq!(event.b[0].price, Decimal::new(-125_000_001, 8));
+    assert_eq!(event.b[0].quantity, Decimal::ZERO);
+    assert_eq!(event.a[0].price, Decimal::ZERO);
+    assert_eq!(event.a[0].quantity, Decimal::new(-275, 2));
+    let mut missing = value;
+    missing.as_object_mut().unwrap().remove("pu");
     assert!(
-        book.update(7, depth(2010, 2010, 2008, &json!([["1", "3"]])))
+        serde_json::from_value::<options::stream_models::DiffBookDepthStreamsEvent>(missing)
             .is_err()
     );
-    assert_eq!(book.state(), BookState::Gap);
-    assert!(book.bids().is_err());
 }
 
 #[test]
-fn failed_options_snapshot_preserves_accepted_pending_evidence_for_recovery() {
-    use options::book::{BookState, DepthBook};
-    let mut book = DepthBook::new(options::Symbol::new("BTC-261030-90000-C").unwrap(), 7);
-    book.update(7, depth(10, 10, 9, &json!([["1", "4"]])))
-        .unwrap();
-    book.update(7, depth(11, 11, 8, &json!([["1", "5"]])))
-        .unwrap();
-    book.update(7, depth(12, 12, 11, &json!([["1", "6"]])))
-        .unwrap();
-    assert_eq!(book.pending_updates(), 3);
-    assert!(book.snapshot(&snapshot(10)).is_err());
-    assert_eq!(book.pending_updates(), 3);
-    assert_eq!(book.state(), BookState::Gap);
-    // Retry with newer venue evidence: the stale broken link is discarded,
-    // while the originally accepted bridging update is still present.
-    book.snapshot(&snapshot(12)).unwrap();
-    assert_eq!(book.last_update_id(), Some(12));
-    assert_eq!(book.bids().unwrap()[&Decimal::ONE], Decimal::new(6, 0));
+fn options_depth_snapshots_retain_finite_venue_evidence_and_refuse_bad_decimals() {
+    let value = json!({"lastUpdateId":12,"T":2,"bids":[["-1.25","2.75000001"]],"asks":[]});
+    let snapshot: options::rest_models::OrderBookResponse =
+        serde_json::from_value(value.clone()).unwrap();
+    assert_eq!(snapshot.last_update_id, 12);
+    assert_eq!(snapshot.bids[0].price, Decimal::new(-125, 2));
+    assert_eq!(snapshot.bids[0].quantity, Decimal::new(275_000_001, 8));
+    assert!(snapshot.asks.is_empty());
+    let mut missing = value.clone();
+    missing.as_object_mut().unwrap().remove("lastUpdateId");
+    assert!(serde_json::from_value::<options::rest_models::OrderBookResponse>(missing).is_err());
+    let mut malformed = value;
+    malformed["bids"] = json!([["0.00000000000000000000000000001", "1"]]);
+    assert!(serde_json::from_value::<options::rest_models::OrderBookResponse>(malformed).is_err());
+    assert!(serde_json::from_value::<options::wire::PriceLevel>(json!(["1", "2", "3"])).is_err());
 }
 
 #[tokio::test]

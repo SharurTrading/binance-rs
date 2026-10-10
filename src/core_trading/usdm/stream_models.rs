@@ -557,17 +557,17 @@ pub struct ContractInfoStreamEvent {
     #[serde(rename = "s")]
     pub s: String,
     /// Exact `ct` wire field.
-    #[serde(rename = "ct", default, skip_serializing_if = "Option::is_none")]
-    pub ct: Option<String>,
+    #[serde(rename = "ct")]
+    pub ct: String,
     /// Exact `dt` wire field.
-    #[serde(rename = "dt", default, skip_serializing_if = "Option::is_none")]
-    pub dt: Option<i64>,
+    #[serde(rename = "dt")]
+    pub dt: i64,
     /// Exact `ot` wire field.
-    #[serde(rename = "ot", default, skip_serializing_if = "Option::is_none")]
-    pub ot: Option<i64>,
+    #[serde(rename = "ot")]
+    pub ot: i64,
     /// Exact `cs` wire field.
-    #[serde(rename = "cs", default, skip_serializing_if = "Option::is_none")]
-    pub cs: Option<String>,
+    #[serde(rename = "cs")]
+    pub cs: String,
     /// Exact `bks` wire field.
     #[serde(rename = "bks", default, skip_serializing_if = "Option::is_none")]
     pub bks: Option<Vec<ContractInfoStreamEventBksItem>>,
@@ -1445,10 +1445,10 @@ pub struct PartialBookDepthStreamsEvent {
     #[serde(rename = "pu")]
     pub pu: i64,
     /// Exact `b` wire field.
-    #[serde(rename = "b")]
+    #[serde(rename = "b", deserialize_with = "super::wire::decimal_rows")]
     pub b: Vec<Vec<Decimal>>,
     /// Exact `a` wire field.
-    #[serde(rename = "a")]
+    #[serde(rename = "a", deserialize_with = "super::wire::decimal_rows")]
     pub a: Vec<Vec<Decimal>>,
     /// Exact `ps` wire field.
     #[serde(rename = "ps", default, skip_serializing_if = "Option::is_none")]

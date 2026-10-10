@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
+pub(crate) mod control;
 mod credentials;
 pub(crate) mod error;
 pub(crate) mod http;
@@ -11,6 +12,7 @@ pub(crate) mod sapi;
 pub(crate) mod socket;
 mod time;
 
+pub use control::StreamControl;
 pub use credentials::{Credentials, Signer};
 pub use error::{
     Error, OperationLeg, Outcome, PartialOperation, RateEvidence, Response, ResponseMeta,
@@ -18,8 +20,8 @@ pub use error::{
 };
 pub(crate) use http::HttpClient;
 pub use identity::{Asset, ClientOrderId, RequestId, SensitiveString, Symbol};
-pub(crate) use rate::Cost;
-pub use rate::{BudgetLimits, Budgets};
+pub use rate::{BudgetLimits, Budgets, LimitSource, PoolUsage, WeightPools, WindowUsage};
+pub(crate) use rate::{Cost, PoolEnvironment, StatedLimit, VenuePool};
 pub(crate) use request::{Operation, Request, Security};
 pub(crate) use request::{parameters, validate_parameters};
 pub(crate) use socket::{Socket, SocketEvent};

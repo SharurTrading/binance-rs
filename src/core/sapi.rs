@@ -340,15 +340,24 @@ pub struct Config {
 }
 impl Config {
     /// Configure the documented production SAPI host without network I/O.
+    /// Uses the process SAPI IP pool with a distinct account owner; override
+    /// `budgets` to share the same account across clients.
     ///
     /// # Errors
     /// Returns invalid endpoint or budget configuration errors.
     pub fn new() -> Result<Self, Error> {
+        Self::with_pools(super::WeightPools::process())
+    }
+    /// Select an explicit SAPI IP pool registry, keeping a distinct account owner.
+    ///
+    /// # Errors
+    /// Returns endpoint or budget configuration failures.
+    pub fn with_pools(pools: &super::WeightPools) -> Result<Self, Error> {
         Ok(Self {
             rest: super::validate_url("https://api.binance.com", false)?,
             credentials: None,
             clock: std::sync::Arc::new(super::SystemClock),
-            budgets: Budgets::sapi()?,
+            budgets: pools.draw(super::VenuePool::Sapi, super::PoolEnvironment::Production)?,
             timeout: Duration::from_secs(10),
             proxy: None,
         })

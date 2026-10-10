@@ -14,8 +14,9 @@ use margin::ClientOrderId;
 use std::sync::Arc;
 use support::{FixedClock, HttpFixture, deadline};
 fn config() -> margin::Config {
-    margin::Config::new()
+    margin::Config::with_pools(&binance_client::WeightPools::new())
         .unwrap()
+        .budgets(binance_client::Budgets::new(binance_client::BudgetLimits::spot()).unwrap())
         .clock(Arc::new(FixedClock(1000)))
         .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())
         .order_limits(&serde_json::from_str(r#"[{"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":10000,"count":0}]"#).unwrap()).unwrap()
@@ -61,7 +62,7 @@ fn isolated_borrow_requires_symbol_and_positive_amount() {
 }
 #[test]
 fn cross_balance_requires_native_asset_and_exact_financial_evidence() {
-    let body = r#"{"borrowEnabled":true,"marginLevel":"2","totalAssetOfBtc":"1","totalLiabilityOfBtc":"0.1","totalNetAssetOfBtc":"0.9","tradeEnabled":true,"transferEnabled":true,"accountType":"MARGIN_1","userAssets":[{"asset":"BTC","borrowed":"0.1000000000000000000000000001","free":"0.2","interest":"0.001","locked":"0.3","netAsset":"0.399"}]}"#;
+    let body = r#"{"created":true,"borrowEnabled":true,"marginLevel":"2","totalAssetOfBtc":"1","totalLiabilityOfBtc":"0.1","totalNetAssetOfBtc":"0.9","tradeEnabled":true,"transferInEnabled":true,"transferOutEnabled":true,"accountType":"MARGIN_1","userAssets":[{"asset":"BTC","borrowed":"0.1000000000000000000000000001","free":"0.2","interest":"0.001","locked":"0.3","netAsset":"0.399"}]}"#;
     let response: margin::rest_models::QueryCrossMarginAccountDetailsResponse =
         serde_json::from_str(body).unwrap();
     assert_eq!(response.user_assets[0].asset.as_str(), "BTC");
@@ -281,7 +282,7 @@ fn every_placement_leg_requires_its_own_caller_identity() {
 }
 #[tokio::test]
 async fn per_ip_leverage_cap_applies_across_accounts_and_clones() {
-    let budgets = binance_client::Budgets::sapi().unwrap();
+    let budgets = binance_client::Budgets::new(binance_client::BudgetLimits::spot()).unwrap();
     let fixture = HttpFixture::new(200, "", r#"{"success":true}"#, None, false).await;
     let first = margin::RestClient::new(
         config()
@@ -333,7 +334,7 @@ fn inventory_decimal_and_nullable_pending_order_evidence_are_preserved() {
         )
         .is_err()
     );
-    let body = r#"[{"orderListId":1,"contingencyType":"OTO","listStatusType":"EXEC_STARTED","listOrderStatus":"EXECUTING","listClientOrderId":"caller-list","transactionTime":123,"symbol":"BTCUSDT","orders":[{"orderId":null,"status":"PENDING_NEW","clientOrderId":"caller-pending"}]}]"#;
+    let body = r#"[{"orderListId":1,"contingencyType":"OTO","listStatusType":"EXEC_STARTED","listOrderStatus":"EXECUTING","listClientOrderId":"caller-list","transactionTime":123,"symbol":"BTCUSDT","orders":[{"symbol":"BTCUSDT","orderId":null,"status":"PENDING_NEW","clientOrderId":"caller-pending"}]}]"#;
     let value: margin::rest_models::QueryMarginAccountsOpenOtootocoOrderListsResponse =
         serde_json::from_str(body).unwrap();
     assert_eq!(value[0].orders[0].order_id, None);
@@ -479,7 +480,7 @@ mod sockets {
             assert!(ws.next().await.unwrap().unwrap().is_close());
             ws.flush().await.unwrap();
         });
-        let config = margin::WsConfig::new()
+        let config = margin::WsConfig::with_pools(&binance_client::WeightPools::new())
             .unwrap()
             .api_url(&url)
             .unwrap()
@@ -530,7 +531,7 @@ mod sockets {
             .unwrap();
             finish(ws).await;
         });
-        let config = margin::WsConfig::new()
+        let config = margin::WsConfig::with_pools(&binance_client::WeightPools::new())
             .unwrap()
             .api_url(&url)
             .unwrap()
@@ -558,6 +559,9 @@ mod sockets {
             call.await.unwrap().unwrap_err().outcome(),
             Some(Outcome::Unknown)
         );
+        // The controlled deadline has elapsed. Real socket I/O must not let paused
+        // time automatically advance to the documented 24-hour generation expiry.
+        tokio::time::resume();
         answer.send(()).unwrap();
         let event = events.recv().await.unwrap();
         let margin::ApiEvent::Late {
@@ -594,7 +598,7 @@ mod sockets {
             ws.send(Message::text(json!({"e":"USER_LIABILITY_CHANGE","E":125,"a":"ETH","t":"BORROW","p":"NaN","i":"0"}).to_string())).await.unwrap();
             finish(ws).await;
         });
-        let config = margin::WsConfig::new()
+        let config = margin::WsConfig::with_pools(&binance_client::WeightPools::new())
             .unwrap()
             .risk_url(&url)
             .unwrap()
@@ -782,8 +786,9 @@ async fn order_placements_require_native_authority_but_reads_remain_available() 
     )
     .await;
     let client = margin::RestClient::new(
-        margin::Config::new()
+        margin::Config::with_pools(&binance_client::WeightPools::new())
             .unwrap()
+            .budgets(binance_client::Budgets::new(binance_client::BudgetLimits::spot()).unwrap())
             .clock(Arc::new(FixedClock(1000)))
             .credentials(Credentials::hmac("synthetic", "synthetic").unwrap())
             .rest_url(&fixture.url)
@@ -820,7 +825,7 @@ async fn native_order_limits_share_account_owners_and_apply_remote_count_floors(
         false,
     )
     .await;
-    let budgets = binance_client::Budgets::sapi().unwrap();
+    let budgets = binance_client::Budgets::new(binance_client::BudgetLimits::spot()).unwrap();
     let configured = config()
         .budgets(budgets.clone())
         .order_limits(&quota(2, 0))

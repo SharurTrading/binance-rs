@@ -3,6 +3,7 @@
 
 //! Input identity and credential redaction contracts.
 
+use binance_client::WeightPools;
 use binance_client::{ClientOrderId, Credentials, Symbol};
 
 #[test]
@@ -28,19 +29,19 @@ fn unrepresentable_configured_timeouts_are_refused_before_io() {
     use binance_client::{coinm, convert, spot, usdm, wallet};
     let huge = std::time::Duration::MAX;
     assert!(
-        usdm::Config::new(usdm::Environment::Demo)
+        usdm::Config::with_pools(usdm::Environment::Demo, &WeightPools::new())
             .unwrap()
             .timeout(huge)
             .is_err()
     );
     assert!(
-        coinm::Config::new(coinm::Environment::Demo)
+        coinm::Config::with_pools(coinm::Environment::Demo, &WeightPools::new())
             .unwrap()
             .timeout(huge)
             .is_err()
     );
     assert!(
-        spot::Config::new(spot::Environment::Demo)
+        spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
             .unwrap()
             .timeout(huge)
             .is_err()

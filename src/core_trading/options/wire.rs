@@ -3,7 +3,7 @@
 
 //! Exact wire primitives and batch outcomes.
 
-use crate::{Decimal, Error, Outcome, SensitiveString};
+use crate::{Decimal, Outcome, SensitiveString};
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::DeserializeOwned};
 use serde_json::Value;
 
@@ -42,29 +42,23 @@ pub(crate) fn decimal_option<'de, D: Deserializer<'de>>(d: D) -> Result<Option<D
 pub struct PriceLevel {
     /// Price of this level.
     pub price: Decimal,
-    /// Absolute quantity at this level, not a delta.
+    /// Provider quantity at this level, preserving its exact sign.
     pub quantity: Decimal,
 }
 impl PriceLevel {
-    /// Construct a Options price level without rounding.
-    ///
-    /// # Errors
-    /// Refuses non-positive Options prices and negative quantities.
-    pub fn new(price: Decimal, quantity: Decimal) -> Result<Self, Error> {
-        if price <= Decimal::ZERO || quantity < Decimal::ZERO {
-            return Err(Error::Validation("price level"));
-        }
-        Ok(Self { price, quantity })
+    /// Preserve exact provider prices and quantities, including their signs.
+    #[must_use]
+    pub fn new(price: Decimal, quantity: Decimal) -> Self {
+        Self { price, quantity }
     }
 }
 impl<'de> Deserialize<'de> for PriceLevel {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         let [price, quantity] = <[Value; 2]>::deserialize(d)?;
-        Self::new(
+        Ok(Self::new(
             parse_decimal(&price).map_err(serde::de::Error::custom)?,
             parse_decimal(&quantity).map_err(serde::de::Error::custom)?,
-        )
-        .map_err(serde::de::Error::custom)
+        ))
     }
 }
 impl Serialize for PriceLevel {
@@ -73,7 +67,7 @@ impl Serialize for PriceLevel {
     }
 }
 
-/// A Options REST candlestick's documented twelve columns.
+/// An Options REST candlestick's documented twelve columns.
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub struct Kline {

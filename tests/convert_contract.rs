@@ -16,7 +16,7 @@ use std::sync::{
 };
 use support::{FixedClock, HttpFixture, deadline};
 fn config() -> convert::Config {
-    convert::Config::new()
+    convert::Config::with_pools(&binance_client::WeightPools::new())
         .unwrap()
         .clock(Arc::new(FixedClock(1000)))
         .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())

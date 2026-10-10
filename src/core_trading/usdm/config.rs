@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-use crate::{BudgetLimits, Budgets, Clock, Credentials, Error, SystemClock};
+use crate::core::{PoolEnvironment, VenuePool};
+use crate::{Budgets, Clock, Credentials, Error, SystemClock, WeightPools};
 use std::{sync::Arc, time::Duration};
 
 /// Explicit endpoint environments; no silent production fallback.
@@ -38,21 +39,33 @@ impl std::fmt::Debug for Config {
 impl Config {
     /// Select demo or production endpoints explicitly.
     ///
+    /// The IP budget is the process's pool for this venue pool and environment,
+    /// shared with every other client drawn from it; the account owner is this
+    /// configuration's own. [`Config::budgets`] replaces both.
+    ///
     /// # Errors
     /// Returns a configuration error if an endpoint or venue budget is invalid.
     pub fn new(environment: Environment) -> Result<Self, Error> {
-        let (rest, websocket, streams, weight) = match environment {
+        Self::with_pools(environment, WeightPools::process())
+    }
+    /// Select endpoints like [`Config::new`], drawing the IP budget from `pools`
+    /// instead of the process's registry.
+    ///
+    /// # Errors
+    /// Returns a configuration error if an endpoint or venue budget is invalid.
+    pub fn with_pools(environment: Environment, pools: &WeightPools) -> Result<Self, Error> {
+        let (rest, websocket, streams, pool) = match environment {
             Environment::Demo => (
                 "https://demo-fapi.binance.com",
                 "wss://testnet.binancefuture.com/ws-fapi/v1",
                 "wss://demo-fstream.binance.com",
-                6000,
+                PoolEnvironment::Demo,
             ),
             Environment::Production => (
                 "https://fapi.binance.com",
                 "wss://ws-fapi.binance.com/ws-fapi/v1",
                 "wss://fstream.binance.com",
-                2400,
+                PoolEnvironment::Production,
             ),
         };
         Ok(Self {
@@ -61,7 +74,7 @@ impl Config {
             streams: crate::core::validate_url(streams, true)?,
             credentials: None,
             clock: Arc::new(SystemClock),
-            budgets: Budgets::new(BudgetLimits::usdm().weight_per_minute(weight))?,
+            budgets: pools.draw(VenuePool::Futures, pool)?,
             timeout: Duration::from_secs(10),
             proxy: None,
         })
@@ -78,7 +91,18 @@ impl Config {
         self.clock = clock;
         self
     }
-    /// Share documented IP/account budgets across HTTP and WebSocket clients.
+    /// The IP windows of the pool this configuration's clients draw on, read at
+    /// its clock: each window's limit, whether the venue stated it, and what the
+    /// pool has spent. It reports; admission alone decides what is sent.
+    ///
+    /// # Errors
+    /// Returns the clock's error, or a configuration error if the pool's lock is
+    /// poisoned.
+    pub fn pool_usage(&self) -> Result<crate::PoolUsage, Error> {
+        self.budgets.usage(self.clock.now_millis()?)
+    }
+    /// Replace the drawn pool with an explicit IP/account owner, isolating this
+    /// client from every pool; clone the owner to share it across clients.
     #[must_use]
     pub fn budgets(mut self, budgets: Budgets) -> Self {
         self.budgets = budgets;

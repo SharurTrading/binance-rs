@@ -445,8 +445,8 @@ pub struct ContractInfoStreamEvent {
     #[serde(rename = "cs")]
     pub cs: String,
     /// Exact `bks` wire field.
-    #[serde(rename = "bks")]
-    pub bks: Vec<ContractInfoStreamEventBksItem>,
+    #[serde(rename = "bks", default, skip_serializing_if = "Option::is_none")]
+    pub bks: Option<Vec<ContractInfoStreamEventBksItem>>,
     /// Exact `st` wire field.
     #[serde(rename = "st", default, skip_serializing_if = "Option::is_none")]
     pub st: Option<i64>,
@@ -1258,10 +1258,10 @@ pub struct PartialBookDepthStreamsEvent {
     #[serde(rename = "pu")]
     pub pu: i64,
     /// Exact `b` wire field.
-    #[serde(rename = "b")]
+    #[serde(rename = "b", deserialize_with = "super::wire::decimal_rows")]
     pub b: Vec<Vec<Decimal>>,
     /// Exact `a` wire field.
-    #[serde(rename = "a")]
+    #[serde(rename = "a", deserialize_with = "super::wire::decimal_rows")]
     pub a: Vec<Vec<Decimal>>,
     /// Exact `st` wire field.
     #[serde(rename = "st", default, skip_serializing_if = "Option::is_none")]

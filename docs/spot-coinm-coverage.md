@@ -47,6 +47,15 @@ Malformed or unrepresentable position amounts fail decoding, and absent optional
 amounts remain absent. USD-M WebSocket position V2 applies the same exact parsing
 to its own native `positionAmt` field.
 
+Stream fields the venue documents as conditional decode as absent rather than
+refusing the frame. A COIN-M `!contractInfo` push carries `bks` only on a bracket
+update, so a listing or settlement push decodes with `bks: None`, while an empty
+bracket list stays `Some([])`; `ct`, `dt`, `ot` and `cs` remain required in both
+Futures markets. Spot `@referencePrice` sends `r` as `null` when there is no
+reference price, which decodes as `None`. Sources:
+[COIN-M contract info stream](https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-market-streams/Contract-Info-Stream)
+and [Spot reference price streams](https://developers.binance.com/en/docs/products/spot/web-socket-streams#reference-price-streams).
+
 Authoritative behavior references:
 
 - [Spot changelog](https://developers.binance.com/en/docs/products/spot/CHANGELOG)
@@ -59,6 +68,7 @@ Authoritative behavior references:
 - [Current UM/CM integration](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice)
 - [COIN-M WebSocket API](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/websocket-api-general-info)
 - [COIN-M market/user socket routes](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/websocket-market-streams/Connect)
+- [COIN-M live subscribing, unsubscribing and listing streams](https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-market-streams/Live-Subscribing-Unsubscribing-to-streams)
 - [COIN-M depth continuity](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/websocket-market-streams/How-to-manage-a-local-order-book-correctly)
 
 ## Product semantics
@@ -97,21 +107,38 @@ combined `/stream` and private `/ws/<listenKey>` routes rather than adopting the
 USDⓈ-M Public/Market/Private prefixes. Socket queue lag does not cause dropping,
 resnapshot, or retirement. Malformed known events and real transport loss are gaps.
 
-Spot depth discards updates at/below the snapshot/update ID and bridges the next
-ID (`U <= last + 1 <= u`). COIN-M uses its documented snapshot bridge and subsequent
-`pu` chain. Both retain all bootstrap updates and expose finite, partial depth.
+Both products' market sockets connect with any number of streams, including none,
+and change membership on the open socket through `subscribe`, `unsubscribe` and
+`list_subscriptions`: the documented `SUBSCRIBE`, `UNSUBSCRIBE` and
+`LIST_SUBSCRIPTIONS` control messages, in the same wire shape as USDⓈ-M (see the
+[USDⓈ-M market streams](coverage.md#market-streams) table). Each generation numbers
+its control messages from 1; Spot accepts a 64-bit signed integer `id` and COIN-M an
+unsigned one, so ids stay within both. A refusal (`{"code":c,"msg":m}`) is
+`Error::ControlRefused`. Control messages and pongs share the connection's
+documented incoming-message ceiling — Spot 5 a second, where "a message" is a ping,
+a pong or a JSON control message; COIN-M 10 a second — and a control message past
+it is refused unsent with `Error::Admission`. The documented 1,024 streams per
+socket bound connect and subscribe together. A lost answer is `Outcome::Unknown`
+and its late arrival is a `StreamEvent::LateControl`. User-data sockets refuse
+membership changes. Nothing is resubscribed after a reconnect.
+
+Spot diff-depth events keep `U` and `u`; COIN-M events also keep `pu`. Depth replies
+keep `lastUpdateId`. Bridging a snapshot to the update stream is the consumer's;
+neither product builds a local book, and every finite snapshot remains partial.
 Price-only COIN-M candles retain ignored columns without inventing contract volume.
 Neither computes portfolio equity or normalizes unlike settlement assets.
 
 Spot budgets share REST/WebSocket weight, account ten-second/daily order counts,
 REST raw requests, and connection attempts. Successful ordinary submits/cancels
 release only their own admission-interval weight reservation, never observed
-venue usage. Failed/ambiguous responses retain the reservation. UM/CM clients must
-receive the same `Budgets::new(BudgetLimits::coinm())` owner to share current
-IP/account limits. COIN-M download jobs enforce their own eight-per-calendar-month
+venue usage. Failed/ambiguous responses retain the reservation. UM/CM clients from
+`Config::new` share one futures IP pool per environment; an account shared across
+them still needs one explicit owner. COIN-M download jobs enforce their own eight-per-calendar-month
 endpoint quotas and do not borrow USDⓈ-M download quotas. Clones share budgets; `for_account()` retains a common IP owner.
 Quota evidence/cooldowns survive failed response bodies. Admission does not wait
-or retry, and expired queued commands cannot send late.
+or retry, and expired queued commands cannot send late. Both products report their
+pool through `pool_usage()` and each REST request's admission weight through
+`weight()`, as USDⓈ-M does; the report decides nothing.
 
 ## Verification and remaining work
 

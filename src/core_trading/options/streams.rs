@@ -109,7 +109,7 @@ impl Streams {
                 // "WebSocket connections have a limit of 10 incoming messages
                 // per second" (Options WebSocket Market Streams, Connect;
                 // verified 2026-10-10).
-                ping_limit: 10,
+                incoming_limit: 10,
                 time_unit: crate::core::TimeUnit::Milliseconds,
                 binary_decoder: None,
                 api_key_header: false,
@@ -157,7 +157,7 @@ impl Streams {
                 // market route: 10 venue-incoming messages per second bound the
                 // pong stream this driver emits (Options WebSocket Market
                 // Streams, Connect; verified 2026-10-10).
-                ping_limit: 10,
+                incoming_limit: 10,
                 time_unit: crate::core::TimeUnit::Milliseconds,
                 binary_decoder: None,
                 api_key_header: false,
@@ -221,6 +221,21 @@ impl Streams {
                     error: Error::Gap("unexpected Options stream request response"),
                 }
             }
+            SocketEvent::ControlLate {
+                generation,
+                control,
+                streams,
+                result,
+            } => {
+                self.events.stop();
+                StreamEvent::UnexpectedControl {
+                    generation,
+                    error: Error::Gap("unexpected Options stream control response"),
+                    control,
+                    streams,
+                    result,
+                }
+            }
         })
     }
     /// Request retirement, drain through `Retired`, and join the caller-owned driver.
@@ -278,6 +293,20 @@ pub enum StreamEvent {
         generation: u64,
         /// Typed cause.
         error: Error,
+    },
+    /// Unexpected control evidence on a generation without an Options control API.
+    /// The transport retires after preserving its accepted prefix and this failure.
+    UnexpectedControl {
+        /// Original socket generation.
+        generation: u64,
+        /// Typed protocol failure; this record does not imply control success.
+        error: Error,
+        /// Native control method that produced the unexpected answer.
+        control: crate::StreamControl,
+        /// Exact stream identities carried by the control request.
+        streams: Vec<String>,
+        /// Native late answer, including its venue refusal or subscription list.
+        result: Result<Option<Vec<String>>, Error>,
     },
     /// Terminal boundary after the generation's accepted prefix.
     Retired(u64),

@@ -187,6 +187,16 @@ pub enum Error {
         /// Metadata received before failure, including header counters.
         meta: Option<Box<ResponseMeta>>,
     },
+    /// The venue refused a market-stream control message; nothing in it took effect.
+    #[error("{operation} refused by the venue with code {code}")]
+    ControlRefused {
+        /// Control method, such as `SUBSCRIBE`.
+        operation: &'static str,
+        /// Venue error code, including unknown future codes.
+        code: i64,
+        /// The venue's own explanation, when it sent one.
+        message: Option<String>,
+    },
     /// Correlation ID reused in a socket generation.
     #[error("duplicate WebSocket request ID")]
     DuplicateRequestId,
@@ -221,6 +231,7 @@ impl Error {
         match self {
             Self::Venue(e) => Some(e.outcome),
             Self::Transport { outcome, .. } => Some(*outcome),
+            Self::ControlRefused { .. } => Some(Outcome::Rejected),
             Self::Gap(_)
             | Self::BinaryDecode { .. }
             | Self::FixDecode { .. }

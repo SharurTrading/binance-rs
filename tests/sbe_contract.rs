@@ -7,6 +7,7 @@
     clippy::panic,
     reason = "synthetic protocol assertions"
 )]
+use binance_client::WeightPools;
 use binance_client::{
     Decimal,
     spot::sbe::{MarketEvent, decode_market},
@@ -430,7 +431,7 @@ async fn rest_sbe_negotiation_preserves_units_and_refuses_successful_json_fallba
             stream.write_all(format!("HTTP/1.1 200 OK\r\nContent-Type: {kind}\r\nContent-Length: {}\r\nx-mbx-used-weight-1m: 42\r\nConnection: close\r\n\r\n",body.len()).as_bytes()).await.unwrap();
             stream.write_all(&body).await.unwrap();
         });
-        let config = spot::Config::new(spot::Environment::Demo)
+        let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
             .unwrap()
             .rest_url(&endpoint)
             .unwrap();
@@ -512,7 +513,7 @@ async fn websocket_sbe_uses_binary_correlated_replies_and_explicit_format_overri
             }
         }
     });
-    let config = spot::Config::new(spot::Environment::Demo)
+    let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
         .unwrap()
         .websocket_url(&endpoint)
         .unwrap();
@@ -574,7 +575,7 @@ async fn binary_api_refuses_json_success_and_a_ban_without_retry_timing() {
             );
             peer.flush().await.unwrap();
         });
-        let config = spot::Config::new(spot::Environment::Demo)
+        let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
             .unwrap()
             .websocket_url(&endpoint)
             .unwrap();
@@ -634,7 +635,7 @@ async fn malformed_binary_mutation_retains_ids_status_rates_and_never_retries() 
         false,
     )
     .await;
-    let config = spot::Config::new(spot::Environment::Demo)
+    let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
         .unwrap()
         .rest_url(&fixture.url)
         .unwrap()

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-use crate::{Budgets, Clock, Credentials, Error};
+use crate::{Budgets, Clock, Credentials, Error, WeightPools};
 use std::{sync::Arc, time::Duration};
 /// Margin production REST configuration with explicit native account order authority.
 /// Reads need no order quota configuration. Placements refuse until `order_limits`
@@ -18,6 +18,16 @@ impl Config {
     pub fn new() -> Result<Self, Error> {
         Ok(Self {
             inner: crate::core::sapi::Config::new()?,
+        })
+    }
+    /// Draw independent SAPI endpoint IP authority from the explicit registry.
+    /// Configurations sharing `pools` share SAPI endpoint quotas and cooldown evidence.
+    ///
+    /// # Errors
+    /// Returns endpoint or shared-pool configuration failures.
+    pub fn with_pools(pools: &WeightPools) -> Result<Self, Error> {
+        Ok(Self {
+            inner: crate::core::sapi::Config::with_pools(pools)?,
         })
     }
     /// Attach caller-acquired signing credentials.

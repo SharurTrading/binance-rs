@@ -76,12 +76,14 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
   counters, and both legs of cancel/replace results. Unknown future codes do not
   imply definitive rejection. Never erase evidence behind a generic string error.
 - **BN-RATE-01:** Documented venue budgets govern every outbound attempt, including
-  retries, subscriptions, and control traffic. Client clones share budgets; make
-  sharing across clients explicit for common IP/account scopes. Apply provider
-  cooldown evidence. Admission may refuse with a typed result before acceptance.
-  Recheck time-sensitive authority immediately before sending. Queued expiration
-  returns an outcome and prevents a late send. Preserve causal order while promptly
-  servicing cancellation and shutdown. No arbitrary account or subscription ceilings.
+  retries, subscriptions, and control traffic. Client clones share budgets. Every
+  client of a venue pool and environment shares one IP pool in the process unless
+  given its own; sharing an account scope across clients stays explicit. Apply
+  provider cooldown evidence. Admission may refuse with a typed result before
+  acceptance. Recheck time-sensitive authority immediately before sending. Queued
+  expiration returns an outcome and prevents a late send. Preserve causal order while
+  promptly servicing cancellation and shutdown. No arbitrary account or subscription
+  ceilings.
 - **BN-INGRESS-01:** Retain every accepted inbound event in source order without
   fixed queue capacities. Expose queue depth, oldest-item age, and progress as lag
   diagnostics. Backlog or an old timestamp alone is not lost continuity and must not
@@ -94,10 +96,10 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
   no silent continuity claim. Pending requests retain late-answer attribution for
   their semantic lifetime. Cancellation cannot authorize replay on a new socket.
   Ordinary silence never proves failure. Honor documented ping/pong requirements.
-- **BN-BOOK-01:** Any depth bootstrap follows Binance's documented snapshot/update-ID
-  sequence. Preserve updates during bootstrap without a capacity cutoff. Explicitly
-  report a real gap and the limits of a finite venue snapshot. Do not claim a complete
-  book from a truncated response or invent depth beyond the venue's evidence.
+- **BN-BOOK-01:** Depth events and snapshots keep their update IDs; synchronisation
+  is the consumer's. Preserve `U`, `u`, and Futures `pu` on diff-depth events and
+  `lastUpdateId` on depth replies, with exact decimal levels. Do not build, bridge,
+  or claim a local order book.
 - **BN-VALIDATE-01:** Normal CI is deterministic, synthetic, and credential-free.
   Test network failures locally, including truncated responses, partial outcomes,
   delayed replies, rate admission, cancellation, and reconnect overlap. Use controlled
@@ -106,6 +108,28 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
 - **BN-FOLLOWUP-01:** Complete a discovered follow-up in the same change or track it
   in a repository issue and cite that issue wherever the work is deferred. A deferred
   blocker remains a blocker. Product scope declarations do not claim implementation.
+- **PROC-DEP-DECIDE:** A dependency finding is an organization decision before it is
+  anything external. Whenever work in any SharurTrading repository finds that a
+  dependency — crate, library, framework, toolchain, or service — may be defective,
+  unsafe, or wrongly chosen, including any dependency behavior that makes a
+  repository's own law impossible to follow (hidden retries that defeat mutation
+  rules, hidden runtimes that defeat runtime ownership, silent pooling that defeats
+  admission control, or any behavior that compromises secret handling,
+  cancellation, or ordering guarantees), the discovering agent files an issue in
+  the affected repository — or in the platform repository when the finding spans
+  repositories — and does nothing else externally. That issue carries the evidence
+  (pinned versions, dependency-source citations, affected rule IDs) and the
+  operator's requirements; it does not prescribe an upstream fix. Engagement
+  outside the SharurTrading organization — opening, commenting on, or reacting to
+  issues or pull requests in any third-party repository — is an operator decision
+  under PROC-DECIDE, taken only after the internal issue exists and the
+  organization has investigated depth and blast radius. An agent may draft the
+  upstream report when the operator asks, but never publishes it: no agent opens
+  an out-of-organization issue on its own initiative, no matter how obvious the
+  upstream responsibility, how small the fix appears, or how certain the defect.
+  If the internal investigation concludes the fault is upstream, the outcome is a
+  recommendation recorded on the internal issue, and external filing remains the
+  operator's act. Canonical text: SharurPlatform PR #1007.
 
 ## Rust coding standards
 

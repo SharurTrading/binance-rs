@@ -75,7 +75,7 @@ impl WsClient {
                 // `ping frame` every 20 seconds" and client frames stay within
                 // the 5-requests-per-second family limit (verified 2026-10-03),
                 // bounding this driver's pong stream.
-                ping_limit: 5,
+                incoming_limit: 5,
                 time_unit: config.time_unit,
                 binary_decoder,
                 api_key_header: false,
@@ -293,6 +293,11 @@ impl ApiEvents {
             SocketEvent::Established(g) => ApiEvent::Established(g),
             SocketEvent::Retired(g) => ApiEvent::Retired(g),
             SocketEvent::Gap { generation, error } => ApiEvent::Gap { generation, error },
+            // This connection never sends stream control messages.
+            SocketEvent::ControlLate { generation, .. } => ApiEvent::Gap {
+                generation,
+                error: Error::Gap("unexpected stream control answer"),
+            },
             SocketEvent::Data { generation, value } => {
                 let notice = value.get("event").unwrap_or(&value);
                 if notice.get("e").and_then(serde_json::Value::as_str) == Some("serverShutdown") {

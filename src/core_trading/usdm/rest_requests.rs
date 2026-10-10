@@ -39,6 +39,15 @@ impl AccountInformationV2 {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for AccountInformationV2 {
     type Response = super::rest_models::AccountInformationV2Response;
@@ -96,6 +105,15 @@ impl AccountInformationV3 {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for AccountInformationV3 {
@@ -155,6 +173,15 @@ impl FuturesAccountBalanceV2 {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for FuturesAccountBalanceV2 {
     type Response = super::rest_models::FuturesAccountBalanceV2Response;
@@ -213,6 +240,15 @@ impl FuturesAccountBalanceV3 {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for FuturesAccountBalanceV3 {
     type Response = super::rest_models::FuturesAccountBalanceV3Response;
@@ -270,6 +306,15 @@ impl FuturesAccountConfiguration {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for FuturesAccountConfiguration {
@@ -337,6 +382,15 @@ impl FuturesTradingQuantitativeRulesIndicators {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for FuturesTradingQuantitativeRulesIndicators {
     type Response = super::rest_models::FuturesTradingQuantitativeRulesIndicatorsResponse;
@@ -394,6 +448,15 @@ impl GetBnbBurnStatus {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for GetBnbBurnStatus {
@@ -461,6 +524,15 @@ impl ToggleBnbBurnOnFuturesTrade {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for ToggleBnbBurnOnFuturesTrade {
     type Response = super::rest_models::ToggleBnbBurnOnFuturesTradeResponse;
@@ -518,6 +590,15 @@ impl GetCurrentMultiAssetsMode {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for GetCurrentMultiAssetsMode {
@@ -585,6 +666,15 @@ impl ChangeMultiAssetsMode {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for ChangeMultiAssetsMode {
     type Response = super::rest_models::ChangeMultiAssetsModeResponse;
@@ -642,6 +732,15 @@ impl GetCurrentPositionMode {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for GetCurrentPositionMode {
@@ -708,6 +807,15 @@ impl ChangePositionMode {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for ChangePositionMode {
@@ -783,6 +891,15 @@ impl GetDownloadIdForFuturesOrderHistory {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for GetDownloadIdForFuturesOrderHistory {
     type Response = super::rest_models::GetDownloadIdForFuturesOrderHistoryResponse;
@@ -856,6 +973,15 @@ impl GetDownloadIdForFuturesTradeHistory {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for GetDownloadIdForFuturesTradeHistory {
@@ -931,6 +1057,15 @@ impl GetDownloadIdForFuturesTransactionHistory {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for GetDownloadIdForFuturesTransactionHistory {
     type Response = super::rest_models::GetDownloadIdForFuturesTransactionHistoryResponse;
@@ -996,6 +1131,15 @@ impl GetFuturesOrderHistoryDownloadLinkById {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for GetFuturesOrderHistoryDownloadLinkById {
@@ -1063,6 +1207,15 @@ impl GetFuturesTradeDownloadLinkById {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for GetFuturesTradeDownloadLinkById {
     type Response = super::rest_models::GetFuturesTradeDownloadLinkByIdResponse;
@@ -1128,6 +1281,15 @@ impl GetFuturesTransactionHistoryDownloadLinkById {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for GetFuturesTransactionHistoryDownloadLinkById {
@@ -1235,6 +1397,15 @@ impl GetIncomeHistory {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for GetIncomeHistory {
     type Response = super::rest_models::GetIncomeHistoryResponse;
@@ -1331,6 +1502,15 @@ impl NotionalAndLeverageBrackets {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for NotionalAndLeverageBrackets {
     type Response = super::rest_models::NotionalAndLeverageBracketsResponse;
@@ -1388,6 +1568,15 @@ impl QueryUserRateLimit {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for QueryUserRateLimit {
@@ -1455,6 +1644,15 @@ impl SymbolConfiguration {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for SymbolConfiguration {
     type Response = super::rest_models::SymbolConfigurationResponse;
@@ -1520,6 +1718,15 @@ impl UserCommissionRate {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for UserCommissionRate {
@@ -1587,6 +1794,15 @@ impl AcceptTheOfferedQuote {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for AcceptTheOfferedQuote {
     type Response = super::rest_models::AcceptTheOfferedQuoteResponse;
@@ -1653,6 +1869,15 @@ impl ListAllConvertPairs {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for ListAllConvertPairs {
     type Response = super::rest_models::ListAllConvertPairsResponse;
@@ -1713,6 +1938,15 @@ impl OrderStatus {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for OrderStatus {
@@ -1807,6 +2041,15 @@ impl SendQuoteRequest {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for SendQuoteRequest {
     type Response = super::rest_models::SendQuoteRequestResponse;
@@ -1864,6 +2107,15 @@ impl AdlRisk {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for AdlRisk {
@@ -1958,6 +2210,15 @@ impl Basis {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for Basis {
     type Response = super::rest_models::BasisResponse;
@@ -2016,6 +2277,15 @@ impl CheckServerTime {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for CheckServerTime {
     type Response = super::rest_models::CheckServerTimeResponse;
@@ -2068,6 +2338,15 @@ impl CompositeIndexSymbolInformation {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for CompositeIndexSymbolInformation {
@@ -2153,6 +2432,15 @@ impl CompressedAggregateTradesList {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for CompressedAggregateTradesList {
@@ -2252,6 +2540,15 @@ impl ContinuousContractKlineCandlestickData {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for ContinuousContractKlineCandlestickData {
     type Response = super::rest_models::ContinuousContractKlineCandlestickDataResponse;
@@ -2317,6 +2614,15 @@ impl ExchangeInformation {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for ExchangeInformation {
@@ -2395,6 +2701,15 @@ impl GetFundingRateHistory {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for GetFundingRateHistory {
     type Response = super::rest_models::GetFundingRateHistoryResponse;
@@ -2443,6 +2758,15 @@ impl GetFundingRateInfo {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for GetFundingRateInfo {
@@ -2528,6 +2852,15 @@ impl IndexPriceKlineCandlestickData {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for IndexPriceKlineCandlestickData {
@@ -2625,6 +2958,15 @@ impl KlineCandlestickData {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for KlineCandlestickData {
     type Response = super::rest_models::KlineCandlestickDataResponse;
@@ -2721,6 +3063,15 @@ impl LongShortRatio {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for LongShortRatio {
     type Response = super::rest_models::LongShortRatioResponse;
@@ -2781,6 +3132,15 @@ impl MarkPrice {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for MarkPrice {
@@ -2867,6 +3227,15 @@ impl MarkPriceKlineCandlestickData {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for MarkPriceKlineCandlestickData {
     type Response = super::rest_models::MarkPriceKlineCandlestickDataResponse;
@@ -2930,6 +3299,15 @@ impl AssetIndex {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for AssetIndex {
@@ -3000,6 +3378,15 @@ impl OldTradesLookup {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for OldTradesLookup {
     type Response = super::rest_models::OldTradesLookupResponse;
@@ -3057,6 +3444,15 @@ impl OpenInterest {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for OpenInterest {
@@ -3143,6 +3539,15 @@ impl OpenInterestStatistics {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for OpenInterestStatistics {
     type Response = super::rest_models::OpenInterestStatisticsResponse;
@@ -3211,6 +3616,15 @@ impl OrderBook {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for OrderBook {
@@ -3302,6 +3716,15 @@ impl PremiumIndexKlineData {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for PremiumIndexKlineData {
     type Response = super::rest_models::PremiumIndexKlineDataResponse;
@@ -3366,6 +3789,15 @@ impl QuarterlyContractSettlementPrice {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for QuarterlyContractSettlementPrice {
     type Response = super::rest_models::QuarterlyContractSettlementPriceResponse;
@@ -3419,6 +3851,15 @@ impl QueryIndexPriceConstituents {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for QueryIndexPriceConstituents {
     type Response = super::rest_models::QueryIndexPriceConstituentsResponse;
@@ -3471,6 +3912,15 @@ impl QueryInsuranceFundBalanceSnapshot {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for QueryInsuranceFundBalanceSnapshot {
@@ -3532,6 +3982,15 @@ impl RecentTradesList {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for RecentTradesList {
@@ -3599,6 +4058,15 @@ impl RpiOrderBook {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for RpiOrderBook {
     type Response = super::rest_models::RpiOrderBookResponse;
@@ -3651,6 +4119,15 @@ impl SymbolOrderBookTicker {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for SymbolOrderBookTicker {
@@ -3705,6 +4182,15 @@ impl SymbolPriceTicker {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for SymbolPriceTicker {
     type Response = super::rest_models::SymbolPriceTickerResponse;
@@ -3757,6 +4243,15 @@ impl SymbolPriceTickerV2 {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for SymbolPriceTickerV2 {
@@ -3843,6 +4338,15 @@ impl TakerBuySellVolume {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for TakerBuySellVolume {
     type Response = super::rest_models::TakerBuySellVolumeResponse;
@@ -3894,6 +4398,15 @@ impl TestConnectivity {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for TestConnectivity {
@@ -3947,6 +4460,15 @@ impl Ticker24hrPriceChangeStatistics {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for Ticker24hrPriceChangeStatistics {
@@ -4032,6 +4554,15 @@ impl TopTraderLongShortRatioAccounts {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for TopTraderLongShortRatioAccounts {
@@ -4126,6 +4657,15 @@ impl TopTraderLongShortRatioPositions {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for TopTraderLongShortRatioPositions {
     type Response = super::rest_models::TopTraderLongShortRatioPositionsResponse;
@@ -4177,6 +4717,15 @@ impl TradingSchedule {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for TradingSchedule {
@@ -4238,6 +4787,15 @@ impl ClassicPortfolioMarginAccountInformation {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for ClassicPortfolioMarginAccountInformation {
@@ -4345,6 +4903,15 @@ impl AccountTradeList {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for AccountTradeList {
     type Response = super::rest_models::AccountTradeListResponse;
@@ -4446,6 +5013,15 @@ impl AllOrders {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for AllOrders {
     type Response = super::rest_models::AllOrdersResponse;
@@ -4523,6 +5099,15 @@ impl AutoCancelAllOpenOrders {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for AutoCancelAllOpenOrders {
     type Response = super::rest_models::AutoCancelAllOpenOrdersResponse;
@@ -4596,6 +5181,15 @@ impl CancelAlgoOrder {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for CancelAlgoOrder {
@@ -4818,6 +5412,15 @@ impl NewAlgoOrder {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for NewAlgoOrder {
     type Response = super::rest_models::NewAlgoOrderResponse;
@@ -4930,6 +5533,15 @@ impl QueryAlgoOrder {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for QueryAlgoOrder {
     type Response = super::rest_models::QueryAlgoOrderResponse;
@@ -4990,6 +5602,15 @@ impl CancelAllAlgoOpenOrders {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for CancelAllAlgoOpenOrders {
@@ -5056,6 +5677,15 @@ impl CancelAllOpenOrders {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for CancelAllOpenOrders {
@@ -5142,6 +5772,15 @@ impl CancelMultipleOrders {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for CancelMultipleOrders {
     type Response = super::rest_models::CancelMultipleOrdersResponse;
@@ -5208,6 +5847,15 @@ impl ModifyMultipleOrders {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for ModifyMultipleOrders {
     type Response = super::rest_models::ModifyMultipleOrdersResponse;
@@ -5273,6 +5921,15 @@ impl PlaceMultipleOrders {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for PlaceMultipleOrders {
@@ -5355,6 +6012,15 @@ impl CancelOrder {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for CancelOrder {
@@ -5485,6 +6151,15 @@ impl ModifyOrder {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for ModifyOrder {
@@ -5667,6 +6342,15 @@ impl NewOrder {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for NewOrder {
     type Response = super::rest_models::NewOrderResponse;
@@ -5783,6 +6467,15 @@ impl QueryOrder {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for QueryOrder {
     type Response = super::rest_models::QueryOrderResponse;
@@ -5851,6 +6544,15 @@ impl ChangeInitialLeverage {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for ChangeInitialLeverage {
@@ -5928,6 +6630,15 @@ impl ChangeMarginType {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for ChangeMarginType {
@@ -6011,6 +6722,15 @@ impl CurrentAllAlgoOpenOrders {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for CurrentAllAlgoOpenOrders {
     type Response = super::rest_models::CurrentAllAlgoOpenOrdersResponse;
@@ -6077,6 +6797,15 @@ impl CurrentAllOpenOrders {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for CurrentAllOpenOrders {
     type Response = super::rest_models::CurrentAllOpenOrdersResponse;
@@ -6134,6 +6863,15 @@ impl FuturesTradfiPerpsContract {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for FuturesTradfiPerpsContract {
@@ -6241,6 +6979,15 @@ impl GetOrderModifyHistory {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for GetOrderModifyHistory {
     type Response = super::rest_models::GetOrderModifyHistoryResponse;
@@ -6342,6 +7089,15 @@ impl GetPositionMarginChangeHistory {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for GetPositionMarginChangeHistory {
     type Response = super::rest_models::GetPositionMarginChangeHistoryResponse;
@@ -6432,6 +7188,15 @@ impl ModifyIsolatedPositionMargin {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for ModifyIsolatedPositionMargin {
     type Response = super::rest_models::ModifyIsolatedPositionMarginResponse;
@@ -6497,6 +7262,15 @@ impl PositionAdlQuantileEstimation {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for PositionAdlQuantileEstimation {
@@ -6564,6 +7338,15 @@ impl PositionInformationV2 {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for PositionInformationV2 {
     type Response = super::rest_models::PositionInformationV2Response;
@@ -6629,6 +7412,15 @@ impl PositionInformationV3 {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for PositionInformationV3 {
@@ -6728,6 +7520,15 @@ impl QueryAllAlgoOrders {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for QueryAllAlgoOrders {
     type Response = super::rest_models::QueryAllAlgoOrdersResponse;
@@ -6809,6 +7610,15 @@ impl QueryCurrentOpenOrder {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for QueryCurrentOpenOrder {
@@ -7018,6 +7828,15 @@ impl TestOrder {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for TestOrder {
     type Response = super::rest_models::TestOrderResponse;
@@ -7154,6 +7973,15 @@ impl UsersForceOrders {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for UsersForceOrders {
     type Response = super::rest_models::UsersForceOrdersResponse;
@@ -7203,6 +8031,15 @@ impl CloseUserDataStream {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for CloseUserDataStream {
     type Response = super::rest_models::CloseUserDataStreamResponse;
@@ -7247,6 +8084,15 @@ impl KeepaliveUserDataStream {
         self.validate()?;
         Ok(self)
     }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
+    }
 }
 impl Request for KeepaliveUserDataStream {
     type Response = super::rest_models::KeepaliveUserDataStreamResponse;
@@ -7290,6 +8136,15 @@ impl StartUserDataStream {
     pub fn build(self) -> Result<Self, Error> {
         self.validate()?;
         Ok(self)
+    }
+    /// The weight admission charges this request against its pool's minute weight
+    /// window, as the venue documents it for these parameters; read before sending.
+    ///
+    /// # Errors
+    /// Refuses a request dispatch would refuse before admission.
+    pub fn weight(&self) -> Result<u64, Error> {
+        self.validate()?;
+        Ok(self.cost()?.request_weight())
     }
 }
 impl Request for StartUserDataStream {
@@ -7751,7 +8606,9 @@ impl super::RestClient {
         request: &ExchangeInformation,
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::rest_models::ExchangeInformationResponse>, Error> {
-        self.inner.execute(request, deadline).await
+        let response = self.inner.execute(request, deadline).await?;
+        super::rate::adopt_stated_limits(&self.inner, &response.data)?;
+        Ok(response)
     }
 
     /// [getFundingRateHistory](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/market-data#get-funding-rate-history).

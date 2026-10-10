@@ -188,7 +188,7 @@ impl MarketStreams {
                 // PING/PONG/JSON frames count against a rate limit of
                 // "5 requests per second" (Spot SBE Market Data Streams,
                 // WebSocket Limits; verified 2026-10-03).
-                ping_limit: 5,
+                incoming_limit: 5,
                 time_unit: TimeUnit::Microseconds,
                 binary_decoder: Some(super::market::decode_value),
                 api_key_header: true,
@@ -203,6 +203,11 @@ impl MarketStreams {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
+            // This connection never sends stream control messages.
+            SocketEvent::ControlLate { generation, .. } => StreamEvent::Gap {
+                generation,
+                error: Error::Gap("unexpected stream control answer"),
+            },
             SocketEvent::Late { generation, .. } => StreamEvent::Gap {
                 generation,
                 error: Error::Gap("unexpected SBE market reply"),

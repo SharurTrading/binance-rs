@@ -580,9 +580,18 @@ impl PoolKey {
 /// One IP weight pool per venue pool and environment: Spot, Options, USDⓈ-M with
 /// COIN-M together, and SAPI endpoint scopes. `Config::new` draws on the process's registry; a registry built
 /// here is independent of it and of every other.
+///
+/// The registry also keeps one account owner per venue pool, environment and
+/// [`AccountKey`] for configurations drawn with a key; an unkeyed configuration gets
+/// an account owner of its own.
 #[derive(Default)]
 pub struct WeightPools {
-    pools: Mutex<BTreeMap<PoolKey, Budgets>>,
+    pools: Mutex<Registry>,
+}
+#[derive(Default)]
+struct Registry {
+    ip: BTreeMap<PoolKey, Budgets>,
+    accounts: BTreeMap<(PoolKey, AccountKey), Budgets>,
 }
 impl std::fmt::Debug for WeightPools {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -599,31 +608,41 @@ impl WeightPools {
         static PROCESS: OnceLock<WeightPools> = OnceLock::new();
         PROCESS.get_or_init(Self::new)
     }
-    /// A budget counting IP traffic against `pool` in `environment`, with its own
-    /// account owner. The pool starts at the venue's documented baseline.
+    /// A budget counting IP traffic against `pool` in `environment`. Its account
+    /// owner is the one this registry keeps for `account` in that pool, or its own
+    /// when no key is given. The pool starts at the venue's documented baseline.
     pub(crate) fn draw(
         &self,
         pool: VenuePool,
         environment: PoolEnvironment,
+        account: Option<&AccountKey>,
     ) -> Result<Budgets, Error> {
-        let mut pools = self
+        let mut registry = self
             .pools
             .lock()
             .map_err(|_| Error::Configuration("weight pools poisoned"))?;
         let key = PoolKey::new(pool, environment);
-        if let Some(owner) = pools.get(&key) {
-            return Ok(owner.for_account());
-        }
-        let mut owner = match pool {
-            VenuePool::Spot => Budgets::new(BudgetLimits::spot())?,
-            VenuePool::Futures => Budgets::new(BudgetLimits::coinm())?,
-            VenuePool::Sapi => Budgets::sapi()?,
-            VenuePool::Options => Budgets::new(BudgetLimits::options())?,
+        let root = if let Some(root) = registry.ip.get(&key) {
+            root.clone()
+        } else {
+            let mut root = match pool {
+                VenuePool::Spot => Budgets::new(BudgetLimits::spot())?,
+                VenuePool::Futures => Budgets::new(BudgetLimits::coinm())?,
+                VenuePool::Sapi => Budgets::sapi()?,
+                VenuePool::Options => Budgets::new(BudgetLimits::options())?,
+            };
+            root.key = Some(key);
+            registry.ip.insert(key, root.clone());
+            root
         };
-        owner.key = Some(key);
-        let drawn = owner.for_account();
-        pools.insert(key, owner);
-        Ok(drawn)
+        let Some(account) = account else {
+            return Ok(root.for_account());
+        };
+        Ok(registry
+            .accounts
+            .entry((key, account.clone()))
+            .or_insert_with(|| root.for_account())
+            .clone())
     }
 }
 
@@ -712,7 +731,9 @@ fn monthly_download(
     Ok(Some((key, bucket)))
 }
 
+mod account;
 mod usage;
+pub use account::AccountKey;
 pub use usage::{LimitSource, PoolUsage, WindowUsage};
 
 #[cfg(test)]

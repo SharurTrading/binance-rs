@@ -340,8 +340,8 @@ pub struct Config {
 }
 impl Config {
     /// Configure the documented production SAPI host without network I/O.
-    /// Uses the process SAPI IP pool with a distinct account owner; override
-    /// `budgets` to share the same account across clients.
+    /// Uses the process SAPI IP pool with a distinct account owner; use
+    /// [`Config::new_for_account`] to share the same account across clients.
     ///
     /// # Errors
     /// Returns invalid endpoint or budget configuration errors.
@@ -353,11 +353,42 @@ impl Config {
     /// # Errors
     /// Returns endpoint or budget configuration failures.
     pub fn with_pools(pools: &super::WeightPools) -> Result<Self, Error> {
+        Self::drawn(pools, None)
+    }
+    /// Configure the production SAPI host like [`Config::new`], with the account
+    /// owner the process's registry keeps for `account` in the SAPI pool: every
+    /// Wallet, Convert and Margin configuration given an equal key shares its UID
+    /// weight and Margin order windows, while the IP scopes stay the pool's.
+    ///
+    /// # Errors
+    /// Returns invalid endpoint or budget configuration errors.
+    pub fn new_for_account(account: &super::AccountKey) -> Result<Self, Error> {
+        Self::with_pools_for_account(super::WeightPools::process(), account)
+    }
+    /// Configure like [`Config::new_for_account`], drawing both the IP scopes and the
+    /// keyed account owner from `pools` instead of the process's registry.
+    ///
+    /// # Errors
+    /// Returns endpoint or budget configuration failures.
+    pub fn with_pools_for_account(
+        pools: &super::WeightPools,
+        account: &super::AccountKey,
+    ) -> Result<Self, Error> {
+        Self::drawn(pools, Some(account))
+    }
+    fn drawn(
+        pools: &super::WeightPools,
+        account: Option<&super::AccountKey>,
+    ) -> Result<Self, Error> {
         Ok(Self {
             rest: super::validate_url("https://api.binance.com", false)?,
             credentials: None,
             clock: std::sync::Arc::new(super::SystemClock),
-            budgets: pools.draw(super::VenuePool::Sapi, super::PoolEnvironment::Production)?,
+            budgets: pools.draw(
+                super::VenuePool::Sapi,
+                super::PoolEnvironment::Production,
+                account,
+            )?,
             timeout: Duration::from_secs(10),
             proxy: None,
         })

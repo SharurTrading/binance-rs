@@ -27,11 +27,15 @@ pub struct BudgetLimits {
     pub raw_requests_per_five_minutes: Option<u64>,
     /// Optional WebSocket connection-attempt limit per five minutes.
     pub connections_per_five_minutes: Option<u64>,
-    /// Whether REST and WebSocket request weight share one IP counter.
+    /// Whether REST and WebSocket API request weight share one IP counter. When
+    /// they do not, WebSocket API weight has a counter of its own; a client whose
+    /// product counts it on the REST counter (COIN-M) charges REST weight instead.
     pub shared_request_weight: bool,
 }
 impl BudgetLimits {
-    /// Binance's documented production USDⓈ-M limits (conservative schema baseline).
+    /// Binance's documented production USDⓈ-M limits (conservative schema baseline),
+    /// with the WebSocket API weight counter apart from REST weight. The futures pool
+    /// every USDⓈ-M and COIN-M `Config::new` draws on starts here.
     #[must_use]
     pub fn usdm() -> Self {
         Self {
@@ -45,8 +49,8 @@ impl BudgetLimits {
             shared_request_weight: false,
         }
     }
-    /// COIN-M's current shared UM/CM limits after the June 2026 integration; the
-    /// futures pool every USDⓈ-M and COIN-M `Config::new` draws on starts here.
+    /// COIN-M's current shared UM/CM limits after the June 2026 integration, with
+    /// WebSocket API weight counted on the REST counter.
     #[must_use]
     pub fn coinm() -> Self {
         Self {
@@ -186,6 +190,8 @@ pub struct Budgets {
     pub(super) account: Arc<Mutex<State>>,
     limits: Arc<BudgetLimits>,
     key: Option<PoolKey>,
+    // This client's WebSocket API weight and evidence belong to the REST counter.
+    ws_on_rest: bool,
 }
 impl std::fmt::Debug for Budgets {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -213,6 +219,7 @@ impl Budgets {
             ip: Arc::default(),
             ws_ip: Arc::default(),
             account: Arc::default(),
+            ws_on_rest: limits.shared_request_weight,
             limits: Arc::new(limits),
             key: None,
         })
@@ -227,14 +234,23 @@ impl Budgets {
             account: Arc::default(),
             limits: self.limits.clone(),
             key: self.key,
+            ws_on_rest: self.ws_on_rest,
         }
+    }
+    /// This owner for a client whose WebSocket API weight the venue counts on the
+    /// REST weight counter: that weight, its refunds and its `rateLimits` evidence
+    /// go to REST weight. Where the pool also keeps a WebSocket API counter, that
+    /// counter is still charged.
+    pub(crate) fn websocket_weight_on_rest(mut self) -> Self {
+        self.ws_on_rest = true;
+        self
     }
     /// The venue pool this owner was drawn from; `None` for an explicit owner.
     pub(crate) fn pool_key(&self) -> Option<PoolKey> {
         self.key
     }
     fn ip_cost(&self, ip: &State, c: Cost) -> Vec<(&'static str, u64, u64, u64)> {
-        let weight = if self.limits.shared_request_weight {
+        let weight = if self.ws_on_rest {
             c.request_weight()
         } else {
             c.weight
@@ -388,7 +404,7 @@ impl Budgets {
         now: u64,
         websocket: bool,
     ) -> Result<(), Error> {
-        let owner = if websocket && !self.limits.shared_request_weight {
+        let owner = if websocket && !self.ws_on_rest {
             &self.ws_ip
         } else {
             &self.ip
@@ -444,7 +460,7 @@ impl Budgets {
         for (name, count) in &e.counters {
             let (state, key, window) = match name.as_str() {
                 "x-mbx-used-weight-1m" => (
-                    if websocket && !self.limits.shared_request_weight {
+                    if websocket && !self.ws_on_rest {
                         &mut ws_ip
                     } else {
                         &mut ip
@@ -632,7 +648,7 @@ impl WeightPools {
         } else {
             let mut root = match pool {
                 VenuePool::Spot => Budgets::new(BudgetLimits::spot())?,
-                VenuePool::Futures => Budgets::new(BudgetLimits::coinm())?,
+                VenuePool::Futures => Budgets::new(BudgetLimits::usdm())?,
                 VenuePool::Sapi => Budgets::sapi()?,
                 VenuePool::Options => Budgets::new(BudgetLimits::options())?,
             };

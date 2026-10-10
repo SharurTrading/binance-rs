@@ -106,9 +106,9 @@ Neither computes portfolio equity or normalizes unlike settlement assets.
 Spot budgets share REST/WebSocket weight, account ten-second/daily order counts,
 REST raw requests, and connection attempts. Successful ordinary submits/cancels
 release only their own admission-interval weight reservation, never observed
-venue usage. Failed/ambiguous responses retain the reservation. UM/CM clients must
-receive the same `Budgets::new(BudgetLimits::coinm())` owner to share current
-IP/account limits. COIN-M download jobs enforce their own eight-per-calendar-month
+venue usage. Failed/ambiguous responses retain the reservation. UM/CM clients from
+`Config::new` share one futures IP pool per environment; an account shared across
+them still needs one explicit owner. COIN-M download jobs enforce their own eight-per-calendar-month
 endpoint quotas and do not borrow USDⓈ-M download quotas. Clones share budgets; `for_account()` retains a common IP owner.
 Quota evidence/cooldowns survive failed response bodies. Admission does not wait
 or retry, and expired queued commands cannot send late.

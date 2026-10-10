@@ -99,3 +99,22 @@ pub(crate) fn cost(op: Operation, p: &BTreeMap<String, Value>) -> Result<Cost, E
         ..Default::default()
     })
 }
+
+/// Hands an exchange information reply's `rateLimits` to the client's IP pool.
+pub(crate) fn adopt_stated_limits(
+    client: &crate::core::HttpClient,
+    reply: &super::rest_models::ExchangeInfoResponse,
+) -> Result<(), Error> {
+    client.adopt_stated_limits(reply.rate_limits.iter().flatten().map(stated))
+}
+
+fn stated(
+    item: &super::rest_models::ExchangeInfoResponseRateLimitsItem,
+) -> crate::core::StatedLimit<'_> {
+    crate::core::StatedLimit {
+        kind: item.rate_limit_type.as_deref(),
+        interval: item.interval.as_deref(),
+        interval_num: item.interval_num,
+        limit: item.limit,
+    }
+}

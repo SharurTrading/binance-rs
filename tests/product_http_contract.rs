@@ -14,6 +14,7 @@
     reason = "fixture helpers are shared across integration suites"
 )]
 mod support;
+use binance_client::WeightPools;
 use binance_client::{
     BudgetLimits, Budgets, Credentials, Decimal, Error, Outcome, Symbol, coinm, spot, usdm,
 };
@@ -21,7 +22,7 @@ use std::sync::Arc;
 use support::{FixedClock, HttpFixture, deadline};
 
 fn spot_config() -> spot::Config {
-    spot::Config::new(spot::Environment::Demo)
+    spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
         .unwrap()
         .clock(Arc::new(FixedClock(1_700_000_001_000)))
         .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap())
@@ -135,7 +136,7 @@ async fn futures_products_share_one_explicit_ip_owner() {
     )
     .unwrap();
     let cm = coinm::RestClient::new(
-        coinm::Config::new(coinm::Environment::Demo)
+        coinm::Config::with_pools(coinm::Environment::Demo, &WeightPools::new())
             .unwrap()
             .rest_url(&f.url)
             .unwrap()
@@ -163,7 +164,7 @@ async fn futures_products_share_one_explicit_ip_owner() {
 async fn spot_public_metadata_requires_no_credentials_and_is_expired_before_send() {
     let mut f = HttpFixture::new(200, "", r#"{"serverTime":1}"#, None, false).await;
     let c = spot::RestClient::new(
-        spot::Config::new(spot::Environment::Demo)
+        spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
             .unwrap()
             .rest_url(&f.url)
             .unwrap(),
@@ -233,7 +234,7 @@ async fn coinm_successful_price_match_mode_decodes_without_replaying_mutation() 
         false,
     )
     .await;
-    let config = coinm::Config::new(coinm::Environment::Demo)
+    let config = coinm::Config::with_pools(coinm::Environment::Demo, &WeightPools::new())
         .unwrap()
         .rest_url(&f.url)
         .unwrap()

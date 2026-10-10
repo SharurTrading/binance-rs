@@ -8,8 +8,9 @@
 //! [issue #11](https://github.com/SharurTrading/binance-rs/issues/11).
 //!
 //! All operations use caller deadlines. The library never retries a mutation.
-//! Construct `Config` with an explicit demo/production environment, and share
-//! its budgets across clients. WebSocket drivers run on caller-owned tasks.
+//! Construct `Config` with an explicit demo/production environment; it draws on
+//! the process's IP weight pool for that environment. WebSocket drivers run on
+//! caller-owned tasks.
 
 mod config;
 pub mod event_payloads;

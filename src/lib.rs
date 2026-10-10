@@ -39,5 +39,5 @@ pub use core::{
     RateEvidence, RequestId, Response, ResponseMeta, SensitiveString, Signer, Symbol, SystemClock,
     TimeUnit, VenueFailure,
 };
-pub use core::{BudgetLimits, Budgets};
+pub use core::{BudgetLimits, Budgets, WeightPools};
 pub use rust_decimal::Decimal;

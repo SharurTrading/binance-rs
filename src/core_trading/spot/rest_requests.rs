@@ -6447,7 +6447,9 @@ impl super::RestClient {
         request: &ExchangeInfo,
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::rest_models::ExchangeInfoResponse>, Error> {
-        self.inner.execute(request, deadline).await
+        let response = self.inner.execute(request, deadline).await?;
+        super::rate::adopt_stated_limits(&self.inner, &response.data)?;
+        Ok(response)
     }
 
     /// [executionRules](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/general).

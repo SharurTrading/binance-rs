@@ -72,6 +72,13 @@ impl HttpClient {
             binary: None,
         })
     }
+    /// Adopt the limits a venue reply states for this client's IP pool.
+    pub(crate) fn adopt_stated_limits<'a>(
+        &self,
+        stated: impl IntoIterator<Item = super::StatedLimit<'a>>,
+    ) -> Result<(), Error> {
+        self.budgets.adopt_stated(stated)
+    }
     pub(crate) fn time_unit(mut self, unit: super::TimeUnit) -> Self {
         self.time_unit = unit;
         self

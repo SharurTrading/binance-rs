@@ -76,12 +76,14 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
   counters, and both legs of cancel/replace results. Unknown future codes do not
   imply definitive rejection. Never erase evidence behind a generic string error.
 - **BN-RATE-01:** Documented venue budgets govern every outbound attempt, including
-  retries, subscriptions, and control traffic. Client clones share budgets; make
-  sharing across clients explicit for common IP/account scopes. Apply provider
-  cooldown evidence. Admission may refuse with a typed result before acceptance.
-  Recheck time-sensitive authority immediately before sending. Queued expiration
-  returns an outcome and prevents a late send. Preserve causal order while promptly
-  servicing cancellation and shutdown. No arbitrary account or subscription ceilings.
+  retries, subscriptions, and control traffic. Client clones share budgets. Every
+  client of a venue pool and environment shares one IP pool in the process unless
+  given its own; sharing an account scope across clients stays explicit. Apply
+  provider cooldown evidence. Admission may refuse with a typed result before
+  acceptance. Recheck time-sensitive authority immediately before sending. Queued
+  expiration returns an outcome and prevents a late send. Preserve causal order while
+  promptly servicing cancellation and shutdown. No arbitrary account or subscription
+  ceilings.
 - **BN-INGRESS-01:** Retain every accepted inbound event in source order without
   fixed queue capacities. Expose queue depth, oldest-item age, and progress as lag
   diagnostics. Backlog or an old timestamp alone is not lost continuity and must not

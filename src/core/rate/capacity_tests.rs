@@ -363,3 +363,64 @@ fn weight_refunds_never_remove_venue_evidence_or_a_new_interval_reservation() {
     b.refund_weight(1, 0, true).unwrap();
     assert_refused(&b, c, 60_000, 60_000);
 }
+
+fn stated(
+    kind: &'static str,
+    interval: &'static str,
+    interval_num: i64,
+    limit: Option<i64>,
+) -> StatedLimit<'static> {
+    StatedLimit {
+        kind: Some(kind),
+        interval: Some(interval),
+        interval_num: Some(interval_num),
+        limit,
+    }
+}
+
+#[test]
+fn a_stated_window_without_a_positive_limit_is_a_gap_and_keeps_the_previous_limit() {
+    let budgets = Budgets::new(BudgetLimits::coinm()).unwrap();
+    budgets
+        .adopt_stated([stated("REQUEST_WEIGHT", "MINUTE", 1, Some(2))])
+        .unwrap();
+    for limit in [None, Some(0), Some(-1)] {
+        assert!(matches!(
+            budgets.adopt_stated([
+                stated("REQUEST_WEIGHT", "MINUTE", 1, Some(5)),
+                stated("REQUEST_WEIGHT", "MINUTE", 1, limit),
+            ]),
+            Err(Error::Gap(_))
+        ));
+    }
+    let weight = Cost {
+        weight: 1,
+        ..Cost::default()
+    };
+    budgets.admit(weight, 0).unwrap();
+    budgets.admit(weight, 0).unwrap();
+    assert_refused(&budgets, weight, 0, 60_000);
+}
+
+#[test]
+fn only_the_counted_ip_windows_are_adopted_and_the_stricter_of_two_binds() {
+    let budgets = Budgets::new(BudgetLimits::coinm()).unwrap();
+    budgets
+        .adopt_stated([
+            stated("ORDERS", "MINUTE", 1, Some(1)),
+            stated("REQUEST_WEIGHT", "SECOND", 10, Some(1)),
+            stated("REQUEST_WEIGHT", "MINUTE", 1, Some(4)),
+            stated("REQUEST_WEIGHT", "MINUTE", 1, Some(3)),
+        ])
+        .unwrap();
+    let order = Cost {
+        weight: 1,
+        orders10: 1,
+        orders60: 1,
+        ..Cost::default()
+    };
+    for _ in 0..3 {
+        budgets.admit(order, 0).unwrap();
+    }
+    assert_refused(&budgets, order, 0, 60_000);
+}

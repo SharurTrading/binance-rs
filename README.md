@@ -160,32 +160,46 @@ WebSocket lifecycles.
 
 ## Budgets
 
-Clone a product `Config` to share budgets between its REST and WebSocket clients.
-Across accounts on the same IP, use one `Budgets` owner and `for_account()`; reuse
-that account owner for every credential/client of the account. Spot shares REST/WS
-weight, daily/ten-second order counts, and connection-attempt limits. Successful
-ordinary Spot submits/cancels release the documented weight reservation; failures
-remain charged and observed venue counters are never reduced.
+Every `Config::new` draws its IP budget from the process's pool for its venue pool
+and environment, so every client of that pool counts against one weight limit:
 
-UM and CM share IP/account limits after the current integration. Configure an
-explicit common owner for both products:
+| Pool | Products | Baseline minute weight | Source |
+| --- | --- | ---: | --- |
+| Spot | Spot | 6,000 | [Spot rate limiters](https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#rate-limiters-ratelimittype) |
+| Futures | USDⓈ-M and COIN-M together | 2,400 | [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice), A.3 |
+
+Demo and production never share a pool. Each pool starts at its documented baseline;
+every REST exchange information reply hands its `rateLimits` to the pool, and the
+latest stated `REQUEST_WEIGHT` per minute (and Spot's `RAW_REQUESTS` per five
+minutes) replaces it for every client of the pool. A counted window stated without a
+positive limit is refused as `Error::Gap` and leaves the pool unchanged. `ORDERS`
+entries are account limits and are not adopted. Every `X-MBX-USED-WEIGHT-1M` raises
+the pool's count, and a `Retry-After` or `418` holds every client of the pool. A
+request the pool cannot take is refused unsent as `Error::Admission` with its retry
+delay. The futures pool counts REST and WebSocket API weight together.
+
+Each `Config::new` keeps its own account owner; clone a product `Config` to share
+budgets between its REST and WebSocket clients. Across products or credentials of
+one account, pass one account owner explicitly. Spot shares REST/WS weight,
+daily/ten-second order counts, and connection-attempt limits. Successful ordinary
+Spot submits/cancels release the documented weight reservation; failures remain
+charged and observed venue counters are never reduced.
+
+`Config::budgets` replaces the drawn pool with an explicit owner, isolating the
+client from every pool. `Config::with_pools` draws from a registry the caller builds
+instead of the process's, so tests can share a pool without touching it:
 
 ```rust
 use binance_client::core_trading::{coinm, usdm};
-use binance_client::{BudgetLimits, Budgets, Error};
+use binance_client::{Error, WeightPools};
 
-let budgets = Budgets::new(BudgetLimits::coinm())?;
-let um = usdm::Config::new(usdm::Environment::Production)?.budgets(budgets.clone());
-let cm = coinm::Config::new(coinm::Environment::Production)?.budgets(budgets);
+let pools = WeightPools::new();
+let um = usdm::Config::with_pools(usdm::Environment::Production, &pools)?;
+let cm = coinm::Config::with_pools(coinm::Environment::Production, &pools)?;
 # Ok::<(), Error>(())
 ```
 
-Independent `Config::new` values do not coordinate IP usage automatically. The
-existing USDⓈ-M default preserves its separate REST/WS reservation baseline;
-use the shared owner above when combining Futures products.
-
-Baseline limits are conservative documented values, with demo REST limits from
-exchange metadata. Configure `BudgetLimits` from current venue evidence. USDⓈ-M
+Explicit `BudgetLimits` owners start from conservative documented values. USDⓈ-M
 also tracks its documented funding/history, conversion, and monthly download-job limits. External
 clients and frontend usage can consume the same budgets; local admission cannot
 guarantee venue acceptance. It never waits, retries, or sends a command after expiry. The catalog omits

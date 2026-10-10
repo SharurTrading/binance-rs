@@ -9,12 +9,13 @@
 )]
 #[allow(dead_code, reason = "shared synthetic fixture helpers")]
 mod support;
+use binance_client::WeightPools;
 use binance_client::{Credentials, Decimal, Error, Outcome, Symbol, spot};
 use std::sync::Arc;
 use support::{FixedClock, HttpFixture, deadline};
 
 fn config() -> spot::Config {
-    spot::Config::new(spot::Environment::Demo)
+    spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
         .unwrap()
         .clock(Arc::new(FixedClock(1_700_000_001_000)))
         .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap())

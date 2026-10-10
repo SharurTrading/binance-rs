@@ -1254,7 +1254,7 @@
                     "x-rust-type": "crate::Symbol"
                   },
                   "ct": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/ContractType"
                   },
                   "k": {
                     "type": "object",
@@ -1360,7 +1360,7 @@
                         "x-rust-type": "crate::Symbol"
                       },
                       "ct": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContractType"
                       },
                       "k": {
                         "type": "object",
@@ -1526,7 +1526,7 @@
                     "x-rust-type": "crate::Symbol"
                   },
                   "ct": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/ContractType"
                   },
                   "dt": {
                     "type": "integer",
@@ -1537,7 +1537,7 @@
                     "format": "int64"
                   },
                   "cs": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/ContractStatus"
                   },
                   "bks": {
                     "type": "array",
@@ -1623,7 +1623,7 @@
                         "x-rust-type": "crate::Symbol"
                       },
                       "ct": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContractType"
                       },
                       "dt": {
                         "type": "integer",
@@ -1634,7 +1634,7 @@
                         "format": "int64"
                       },
                       "cs": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContractStatus"
                       },
                       "bks": {
                         "type": "array",
@@ -5260,6 +5260,37 @@
           {
             "$ref": "#/components/schemas/strategyUpdate"
           }
+        ]
+      },
+      "ContractStatus": {
+        "type": "string",
+        "description": "Contract status (`contractStatus` in exchange information, `cs` on the contract info stream).",
+        "enum": [
+          "PENDING_TRADING",
+          "TRADING",
+          "PRE_DELIVERING",
+          "DELIVERING",
+          "DELIVERED",
+          "TRADING_HALT",
+          "TRADING_CANCEL_ONLY"
+        ],
+        "x-sources": [
+          "https://developers.binance.info/docs/derivatives/coin-margined-futures/common-definition"
+        ]
+      },
+      "ContractType": {
+        "type": "string",
+        "description": "Contract type (`contractType`, and `ct` on the contract info and continuous kline streams).",
+        "enum": [
+          "PERPETUAL",
+          "CURRENT_QUARTER",
+          "NEXT_QUARTER",
+          "CURRENT_QUARTER_DELIVERING",
+          "NEXT_QUARTER_DELIVERING",
+          "PERPETUAL_DELIVERING"
+        ],
+        "x-sources": [
+          "https://developers.binance.info/docs/derivatives/coin-margined-futures/common-definition"
         ]
       }
     }

@@ -1872,7 +1872,7 @@ pub struct BasisResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub contract_type: Option<String>,
+    pub contract_type: Option<super::enums::ContractType>,
     /// Exact `basisRate` wire field.
     #[serde(
         rename = "basisRate",
@@ -2163,7 +2163,7 @@ pub struct ExchangeInformationResponseSymbolsItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub contract_type: Option<String>,
+    pub contract_type: Option<super::enums::ContractType>,
     /// Exact `deliveryDate` wire field.
     #[serde(
         rename = "deliveryDate",
@@ -2180,7 +2180,7 @@ pub struct ExchangeInformationResponseSymbolsItem {
     pub onboard_date: Option<i64>,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<String>,
+    pub status: Option<super::enums::ContractStatus>,
     /// Exact `maintMarginPercent` wire field.
     #[serde(
         rename = "maintMarginPercent",
@@ -2439,7 +2439,7 @@ pub struct GetFundingRateHistoryResponseItem {
     pub mark_price: Option<Decimal>,
     /// Exact `rateType` wire field.
     #[serde(rename = "rateType", default, skip_serializing_if = "Option::is_none")]
-    pub rate_type: Option<String>,
+    pub rate_type: Option<super::enums::FundingRateType>,
     /// Unknown future wire fields, retained without inventing defaults.
     #[serde(flatten)]
     pub extra: BTreeMap<String, serde_json::Value>,

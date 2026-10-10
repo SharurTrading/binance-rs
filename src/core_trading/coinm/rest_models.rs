@@ -774,7 +774,7 @@ pub struct BasisResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub contract_type: Option<String>,
+    pub contract_type: Option<super::enums::ContractType>,
     /// Exact `basisRate` wire field.
     #[serde(
         rename = "basisRate",
@@ -997,7 +997,7 @@ pub struct ExchangeInformationResponseSymbolsItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub contract_type: Option<String>,
+    pub contract_type: Option<super::enums::ContractType>,
     /// Exact `deliveryDate` wire field.
     #[serde(
         rename = "deliveryDate",
@@ -1018,7 +1018,7 @@ pub struct ExchangeInformationResponseSymbolsItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub contract_status: Option<String>,
+    pub contract_status: Option<super::enums::ContractStatus>,
     /// Exact `contractSize` wire field.
     #[serde(
         rename = "contractSize",
@@ -1503,7 +1503,7 @@ pub struct OpenInterestResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub contract_type: Option<String>,
+    pub contract_type: Option<super::enums::ContractType>,
     /// Exact `time` wire field.
     #[serde(rename = "time", default, skip_serializing_if = "Option::is_none")]
     pub time: Option<i64>,
@@ -1525,7 +1525,7 @@ pub struct OpenInterestStatisticsResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub contract_type: Option<String>,
+    pub contract_type: Option<super::enums::ContractType>,
     /// Exact `sumOpenInterest` wire field.
     #[serde(
         rename = "sumOpenInterest",
@@ -1794,7 +1794,7 @@ pub struct TakerBuySellVolumeResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub contract_type: Option<String>,
+    pub contract_type: Option<super::enums::ContractType>,
     /// Exact `takerBuyVol` wire field.
     #[serde(
         rename = "takerBuyVol",

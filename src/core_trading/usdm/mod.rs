@@ -9,6 +9,7 @@
 //! caller-owned tasks.
 
 mod config;
+pub mod enums;
 pub mod event_payloads;
 mod rate;
 pub mod rest_models;

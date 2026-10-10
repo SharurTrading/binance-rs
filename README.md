@@ -219,10 +219,53 @@ pool. Options uses its own pool and native exchange-information limits.
 
 Each `Config::new` keeps its own account owner; clone a product `Config` to share
 budgets between its REST and WebSocket clients. Across products or credentials of
-one account, pass one account owner explicitly. Spot shares REST/WS weight,
+one account, name the account with an `AccountKey` (see
+[Sharing an account](#sharing-an-account)). Spot shares REST/WS weight,
 daily/ten-second order counts, and connection-attempt limits. Successful ordinary
 Spot submits/cancels release the documented weight reservation; failures remain
 charged and observed venue counters are never reduced.
+
+### Sharing an account
+
+Binance counts orders per account, not per client: Spot's unfilled order count is
+[shared across all IP addresses, API keys and APIs](https://github.com/binance/binance-spot-api-docs/blob/master/faqs/order_count_decrement.md),
+and USDⓈ-M and COIN-M share one order budget
+([UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice)).
+An `AccountKey` names one account. It is opaque bytes or text the caller chooses;
+the client only compares it, redacts it from `Debug`, and zeroizes it when its last
+copy drops. A registry keeps a copy for as long as the registry lives.
+
+`new_for_account` draws from the process's registry and `with_pools_for_account`
+from an explicit one. Every configuration of one registry given an equal key, in one
+venue pool and environment, shares that pool's account owner; it still shares the
+pool's IP weight with every other client of the pool, keyed or not. Without a key,
+each configuration gets an account owner of its own, so sharing stays explicit.
+
+| Shared per key and pool | Pool |
+| --- | --- |
+| Order counts per ten seconds, minute and day, including `X-MBX-ORDER-COUNT-*` a reply reports | Spot, Futures, Options |
+| USDⓈ-M conversion quote and USDⓈ-M and COIN-M monthly download quotas | Futures |
+| UID endpoint weight and Margin's native order windows, including those `order_limits` installs | SAPI |
+
+| Configuration | Keyed constructors |
+| --- | --- |
+| `spot::Config`, `usdm::Config`, `coinm::Config`, `options::Config` | `new_for_account(environment, &key)`, `with_pools_for_account(environment, &pools, &key)` |
+| `wallet::Config`, `convert::Config`, `margin::Config` | `new_for_account(&key)`, `with_pools_for_account(&pools, &key)` |
+| `margin::WsConfig` | `new_for_account(&key)`, `with_pools_for_account(&pools, &key)` |
+
+Each pool keeps its own owner per key: a key shared by a Spot and a USDⓈ-M client
+names one account in each pool, not one owner across pools. `budgets` still
+replaces both scopes with an explicit owner.
+
+```rust
+use binance_client::core_trading::{coinm, usdm};
+use binance_client::{AccountKey, Error};
+
+let account = AccountKey::new("main-account");
+let um = usdm::Config::new_for_account(usdm::Environment::Production, &account)?;
+let cm = coinm::Config::new_for_account(coinm::Environment::Production, &account)?;
+# Ok::<(), Error>(())
+```
 
 `Config::budgets` replaces the drawn pool with an explicit owner, isolating the
 client from every pool. `Config::with_pools` draws from a registry the caller builds

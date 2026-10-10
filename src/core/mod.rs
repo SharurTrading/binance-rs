@@ -21,7 +21,7 @@ pub use error::{
 pub(crate) use http::HttpClient;
 pub use identity::{Asset, ClientOrderId, RequestId, SensitiveString, Symbol};
 pub use rate::{
-    BudgetLimits, Budgets, LimitSource, PoolEnvironment, PoolKey, PoolUsage, VenuePool,
+    AccountKey, BudgetLimits, Budgets, LimitSource, PoolEnvironment, PoolKey, PoolUsage, VenuePool,
     WeightPools, WindowUsage,
 };
 pub(crate) use rate::{Cost, StatedLimit};

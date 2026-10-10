@@ -48,11 +48,11 @@ accounting belong to consumers. There is no dependency on a consuming platform.
 src/
 ├── core/: shared identities, credentials, time, transport and rate budgets
 └── core_trading/
-    ├── usdm/: linear Futures models, requests, streams, depth bootstrap
+    ├── usdm/: linear Futures models, requests, streams
     ├── wallet/: native balances, networks, withdrawals, SAPI endpoint scopes
     ├── convert/: native quote/limit amounts, expiry authority, SAPI endpoint scopes
-    ├── spot/: balances, base quantity/quote spend, depth bootstrap, FIX and SBE
-    └── coinm/: inverse Futures models, requests, streams, depth bootstrap
+    ├── spot/: balances, base quantity/quote spend, FIX and SBE
+    └── coinm/: inverse Futures models, requests, streams
 ```
 
 `core_trading` groups the existing products within this single crate. Future API
@@ -133,9 +133,9 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
   Spot execution events arrive through WebSocket API subscriptions; Futures use
   listen keys. Renewal and reconnect are explicit caller operations; no automatic
   replay, recovery, credential loading, or hidden continuity claim.
-- Each product has a `DepthBook`: Spot bridges snapshot + 1; Futures retain `pu`
-  continuity. Bootstrap events are retained and real gaps are explicit. Every
-  finite snapshot remains partial.
+- Depth events and snapshots keep their update IDs (`U`, `u`, Futures `pu`,
+  `lastUpdateId`) and exact levels. Synchronising a local book from them is the
+  consumer's; the client builds no book. Every finite snapshot remains partial.
 
 HMAC, RSA PKCS#8, Ed25519 PKCS#8, and external signers are supported. WebSocket
 session logon requires Ed25519. TLS is required except exact loopback fixtures;

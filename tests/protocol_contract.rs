@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-//! Financial precision, request refusal, and depth continuity contracts.
+//! Financial precision, request refusal, and depth update-ID contracts.
 
 #[cfg(test)]
 mod tests {
     use binance_client::usdm::{
-        book::{BookState, DepthBook},
         rest_models::{OrderBookResponse, PlaceMultipleOrdersBatchOrdersInputItem},
         rest_requests::{NewOrder, PlaceMultipleOrders},
         stream_models::{DiffBookDepthStreamsEvent, OrderTradeUpdateEvent},
@@ -94,64 +93,18 @@ mod tests {
     }
 
     #[test]
-    fn snapshot_requires_a_bridge_and_deletion_is_absolute() {
-        let mut book = DepthBook::new(Symbol::new("BTCUSDT").unwrap(), 7);
-        book.snapshot(&snapshot()).unwrap();
-        assert_eq!(book.state(), BookState::AwaitingSnapshot);
-        assert!(book.bids().is_err());
-        book.update(7, update(99, 101, 98, "3")).unwrap();
+    fn diff_depth_and_snapshot_keep_their_update_ids_and_exact_levels() {
+        let event = update(99, 101, 98, "0");
+        assert_eq!((event.upper_u, event.u, event.pu), (99, 101, 98));
+        assert_eq!(event.b[0].price, dec("100.00000000000000000001"));
+        assert_eq!(event.b[0].quantity, Decimal::ZERO);
+        let snapshot = snapshot();
+        assert_eq!(snapshot.last_update_id, Some(100));
         assert_eq!(
-            book.bids().unwrap()[&dec("100.00000000000000000001")],
-            dec("3")
+            snapshot.bids.unwrap()[0].price,
+            dec("100.00000000000000000001")
         );
-        book.update(7, update(102, 102, 101, "0")).unwrap();
-        assert!(book.bids().unwrap().is_empty());
-        assert!(book.is_partial());
-        assert!(book.update(7, update(104, 104, 103, "4")).is_err());
-        assert_eq!(book.state(), BookState::Gap);
-        assert!(book.bids().is_err());
-    }
-
-    #[test]
-    fn bootstrap_retains_a_large_source_ordered_prefix() {
-        let mut book = DepthBook::new(Symbol::new("BTCUSDT").unwrap(), 7);
-        for id in 100..5100 {
-            book.update(7, update(id, id, id - 1, &id.to_string()))
-                .unwrap();
-        }
-        book.snapshot(&snapshot()).unwrap();
-        assert_eq!(book.last_update_id(), Some(5099));
-        assert_eq!(
-            book.bids().unwrap()[&dec("100.00000000000000000001")],
-            Decimal::from(5099)
-        );
-        assert!(book.update(8, update(5100, 5100, 5099, "1")).is_err());
-    }
-
-    #[test]
-    fn bootstrap_gap_reports_the_count_of_discarded_pending_updates() {
-        let mut book = DepthBook::new(Symbol::new("BTCUSDT").unwrap(), 7);
-        assert_eq!(book.discarded_pending_updates(), 0);
-        // The first buffered update bridges, the second breaks the `pu` chain
-        // mid-drain, and the third is never applied: two updates are discarded.
-        book.update(7, update(99, 101, 98, "1")).unwrap();
-        book.update(7, update(103, 103, 102, "2")).unwrap();
-        book.update(7, update(104, 104, 103, "3")).unwrap();
-        assert!(book.snapshot(&snapshot()).is_err());
-        assert_eq!(book.state(), BookState::Gap);
-        assert_eq!(book.discarded_pending_updates(), 2);
-        assert!(book.bids().is_err());
-        assert!(book.asks().is_err());
-        // A later snapshot that bridges the surviving evidence restores views
-        // and clears the discarded count.
-        let recovery: OrderBookResponse = serde_json::from_value(
-            json!({"lastUpdateId":104,"bids":[["100.00000000000000000001","1"]],"asks":[]}),
-        )
-        .unwrap();
-        book.snapshot(&recovery).unwrap();
-        assert_eq!(book.state(), BookState::Ready);
-        assert_eq!(book.discarded_pending_updates(), 0);
-        assert_eq!(book.last_update_id(), Some(104));
+        assert_eq!(snapshot.asks.unwrap()[0].quantity, dec("2"));
     }
 
     #[test]

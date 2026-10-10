@@ -97,9 +97,9 @@ combined `/stream` and private `/ws/<listenKey>` routes rather than adopting the
 USDⓈ-M Public/Market/Private prefixes. Socket queue lag does not cause dropping,
 resnapshot, or retirement. Malformed known events and real transport loss are gaps.
 
-Spot depth discards updates at/below the snapshot/update ID and bridges the next
-ID (`U <= last + 1 <= u`). COIN-M uses its documented snapshot bridge and subsequent
-`pu` chain. Both retain all bootstrap updates and expose finite, partial depth.
+Spot diff-depth events keep `U` and `u`; COIN-M events also keep `pu`. Depth replies
+keep `lastUpdateId`. Bridging a snapshot to the update stream is the consumer's;
+neither product builds a local book, and every finite snapshot remains partial.
 Price-only COIN-M candles retain ignored columns without inventing contract volume.
 Neither computes portfolio equity or normalizes unlike settlement assets.
 

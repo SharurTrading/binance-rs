@@ -94,10 +94,10 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
   no silent continuity claim. Pending requests retain late-answer attribution for
   their semantic lifetime. Cancellation cannot authorize replay on a new socket.
   Ordinary silence never proves failure. Honor documented ping/pong requirements.
-- **BN-BOOK-01:** Any depth bootstrap follows Binance's documented snapshot/update-ID
-  sequence. Preserve updates during bootstrap without a capacity cutoff. Explicitly
-  report a real gap and the limits of a finite venue snapshot. Do not claim a complete
-  book from a truncated response or invent depth beyond the venue's evidence.
+- **BN-BOOK-01:** Depth events and snapshots keep their update IDs; synchronisation
+  is the consumer's. Preserve `U`, `u`, and Futures `pu` on diff-depth events and
+  `lastUpdateId` on depth replies, with exact decimal levels. Do not build, bridge,
+  or claim a local order book.
 - **BN-VALIDATE-01:** Normal CI is deterministic, synthetic, and credential-free.
   Test network failures locally, including truncated responses, partial outcomes,
   delayed replies, rate admission, cancellation, and reconnect overlap. Use controlled

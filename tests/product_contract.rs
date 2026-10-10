@@ -88,75 +88,31 @@ fn spot_fractional_receive_window_has_no_rounding() {
 }
 
 #[test]
-fn spot_depth_bridges_snapshot_plus_one_without_futures_pu() {
-    use spot::{
-        book::{BookState, DepthBook},
-        rest_models::DepthResponse,
-        stream_models::DiffBookDepthEvent,
-    };
+fn spot_depth_events_and_snapshots_keep_their_update_ids() {
+    use spot::{rest_models::DepthResponse, stream_models::DiffBookDepthEvent};
     let snapshot: DepthResponse =
-        serde_json::from_value(json!({"lastUpdateId":100,"bids":[["1","2"]],"asks":[]})).unwrap();
-    let event = |first, last, q: &str| -> DiffBookDepthEvent {
-        serde_json::from_value(
-            json!({"e":"depthUpdate","E":1,"s":"BTCUSDT","U":first,"u":last,"b":[["1",q]],"a":[]}),
-        )
-        .unwrap()
-    };
-    let mut b = DepthBook::new(Symbol::new("BTCUSDT").unwrap(), 3);
-    b.update(3, event(99, 100, "9")).unwrap();
-    b.update(3, event(101, 102, "3")).unwrap();
-    b.snapshot(&snapshot).unwrap();
-    assert_eq!(b.state(), BookState::Ready);
-    assert_eq!(b.last_update_id(), Some(102));
-    assert_eq!(b.bids().unwrap()[&Decimal::ONE], Decimal::new(3, 0));
-    b.update(3, event(102, 103, "0")).unwrap();
-    assert!(b.bids().unwrap().is_empty());
-    assert!(b.update(3, event(105, 106, "1")).is_err());
-    assert_eq!(b.state(), BookState::Gap);
-    assert!(b.bids().is_err());
-    assert!(b.is_partial());
+        serde_json::from_value(json!({"lastUpdateId":100,"bids":[["1.10","2"]],"asks":[]}))
+            .unwrap();
+    assert_eq!(snapshot.last_update_id, Some(100));
+    assert_eq!(snapshot.bids.unwrap()[0].price, Decimal::new(110, 2));
+    let event: DiffBookDepthEvent = serde_json::from_value(
+        json!({"e":"depthUpdate","E":1,"s":"BTCUSDT","U":101,"u":102,"b":[["1.10","0"]],"a":[]}),
+    )
+    .unwrap();
+    assert_eq!((event.upper_u, event.u), (101, 102));
+    assert_eq!(event.b[0].quantity, Decimal::ZERO);
 }
 
 #[test]
-fn coinm_depth_keeps_its_previous_update_chain() {
-    use coinm::{
-        book::DepthBook, rest_models::OrderBookResponse, stream_models::DiffBookDepthStreamsEvent,
-    };
+fn coinm_depth_events_and_snapshots_keep_their_update_ids() {
+    use coinm::{rest_models::OrderBookResponse, stream_models::DiffBookDepthStreamsEvent};
     let snapshot: OrderBookResponse =
-        serde_json::from_value(json!({"lastUpdateId":100,"bids":[],"asks":[]})).unwrap();
-    let event = |first, last, previous| -> DiffBookDepthStreamsEvent {
-        serde_json::from_value(json!({"e":"depthUpdate","E":1,"T":1,"s":"BTCUSD_PERP","U":first,"u":last,"pu":previous,"b":[],"a":[]})).unwrap()
-    };
-    let mut b = DepthBook::new(Symbol::new("BTCUSD_PERP").unwrap(), 7);
-    b.update(7, event(99, 101, 98)).unwrap();
-    b.snapshot(&snapshot).unwrap();
-    assert_eq!(b.last_update_id(), Some(101));
-    assert!(b.update(7, event(102, 103, 100)).is_err());
-}
-
-#[test]
-fn coinm_bootstrap_gap_reports_the_count_of_discarded_pending_updates() {
-    use coinm::{
-        book::{BookState, DepthBook},
-        rest_models::OrderBookResponse,
-        stream_models::DiffBookDepthStreamsEvent,
-    };
-    let snapshot: OrderBookResponse =
-        serde_json::from_value(json!({"lastUpdateId":100,"bids":[],"asks":[]})).unwrap();
-    let event = |first, last, previous| -> DiffBookDepthStreamsEvent {
-        serde_json::from_value(json!({"e":"depthUpdate","E":1,"T":1,"s":"BTCUSD_PERP","U":first,"u":last,"pu":previous,"b":[],"a":[]})).unwrap()
-    };
-    let mut b = DepthBook::new(Symbol::new("BTCUSD_PERP").unwrap(), 7);
-    assert_eq!(b.discarded_pending_updates(), 0);
-    // One buffered update bridges, one breaks the `pu` chain mid-drain, and
-    // one is never applied: two accepted updates are discarded at the break.
-    b.update(7, event(99, 101, 98)).unwrap();
-    b.update(7, event(103, 103, 102)).unwrap();
-    b.update(7, event(104, 104, 103)).unwrap();
-    assert!(b.snapshot(&snapshot).is_err());
-    assert_eq!(b.state(), BookState::Gap);
-    assert_eq!(b.discarded_pending_updates(), 2);
-    assert!(b.bids().is_err());
+        serde_json::from_value(json!({"lastUpdateId":100,"bids":[],"asks":[["2.5","7"]]})).unwrap();
+    assert_eq!(snapshot.last_update_id, Some(100));
+    assert_eq!(snapshot.asks.unwrap()[0].quantity, Decimal::new(7, 0));
+    let event: DiffBookDepthStreamsEvent = serde_json::from_value(json!({"e":"depthUpdate","E":1,"T":1,"s":"BTCUSD_PERP","U":99,"u":101,"pu":98,"b":[],"a":[["2.5","3"]]})).unwrap();
+    assert_eq!((event.upper_u, event.u, event.pu), (99, 101, 98));
+    assert_eq!(event.a[0].price, Decimal::new(25, 1));
 }
 
 #[test]

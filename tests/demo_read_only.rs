@@ -7,7 +7,7 @@
 mod tests {
     use binance_client::Symbol;
     use binance_client::usdm::{
-        Config, Environment, RestClient, Stream, StreamEvent, Streams, WsClient,
+        Config, Environment, RestClient, Route, Stream, StreamEvent, Streams, WsClient,
         rest_requests::{CheckServerTime, ExchangeInformation, TestConnectivity},
         ws_requests::OrderBook,
     };
@@ -71,10 +71,13 @@ mod tests {
     async fn demo_routed_market_depth() {
         let stream =
             Stream::diff_book_depth_streams(&Symbol::new("BTCUSDT").unwrap(), "100ms").unwrap();
-        let (mut streams, driver) =
-            Streams::connect(Config::new(Environment::Demo).unwrap(), &[stream])
-                .await
-                .unwrap();
+        let (mut streams, driver) = Streams::connect(
+            Config::new(Environment::Demo).unwrap(),
+            Route::Public,
+            &[stream],
+        )
+        .await
+        .unwrap();
         let task = tokio::spawn(driver.run());
         streams.recv().await.unwrap();
         let result = tokio::time::timeout(Duration::from_secs(15), streams.recv()).await;
@@ -82,5 +85,25 @@ mod tests {
         while streams.recv().await.is_some() {}
         task.await.unwrap().unwrap();
         assert!(matches!(result.unwrap(), Some(StreamEvent::Data { .. })));
+    }
+
+    #[tokio::test]
+    #[ignore = "explicit read-only network probe; never runs in normal CI"]
+    async fn demo_empty_market_socket_subscribes_and_lists() {
+        let stream = Stream::aggregate_trade_streams(&Symbol::new("BTCUSDT").unwrap()).unwrap();
+        let name = stream.name().to_owned();
+        let (mut streams, driver) =
+            Streams::connect(Config::new(Environment::Demo).unwrap(), Route::Market, &[])
+                .await
+                .unwrap();
+        let task = tokio::spawn(driver.run());
+        streams.recv().await.unwrap();
+        let subscribed = streams.subscribe(&[stream], deadline()).await;
+        let listed = streams.list_subscriptions(deadline()).await;
+        let _ = streams.close().await;
+        while streams.recv().await.is_some() {}
+        task.await.unwrap().unwrap();
+        subscribed.unwrap();
+        assert_eq!(listed.unwrap(), vec![name]);
     }
 }

@@ -10,7 +10,7 @@
 #[cfg(test)]
 mod support;
 use binance_client::usdm::{
-    ApiEvent, Stream, StreamEvent, Streams, WsClient, event_payloads::ApiPayload,
+    ApiEvent, Route, Stream, StreamEvent, Streams, WsClient, event_payloads::ApiPayload,
     streams::StreamPayload, ws_requests::NewOrder,
 };
 use binance_client::{ClientOrderId, Decimal, Error, Outcome, RequestId, SensitiveString, Symbol};
@@ -695,7 +695,7 @@ mod tests {
         let depth = Stream::diff_book_depth_streams(&symbol, "100ms").unwrap();
         let trade = Stream::aggregate_trade_streams(&symbol).unwrap();
         assert!(matches!(
-            Streams::connect(config(), &[depth.clone(), trade]).await,
+            Streams::connect(config(), Route::Public, &[depth.clone(), trade]).await,
             Err(Error::Validation(_))
         ));
         let (listener, url) = listener().await;
@@ -713,9 +713,10 @@ mod tests {
             ws.send(Message::text("not-json".to_owned())).await.unwrap();
             finish_server(ws).await;
         });
-        let (mut streams, driver) = Streams::connect(config().streams_url(&url).unwrap(), &[depth])
-            .await
-            .unwrap();
+        let (mut streams, driver) =
+            Streams::connect(config().streams_url(&url).unwrap(), Route::Public, &[depth])
+                .await
+                .unwrap();
         let driver = tokio::spawn(driver.run());
         streams.recv().await.unwrap();
         assert!(matches!(

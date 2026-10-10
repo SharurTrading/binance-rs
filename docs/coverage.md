@@ -36,6 +36,7 @@ of the protocol implementation; regenerating DTOs alone cannot establish correct
 - [General REST behavior and 503 outcomes](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/general-info)
 - [WebSocket API signing, session authentication, and budget scope](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/websocket-api-general-info)
 - [Current stream routes and control limits](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/websocket-market-streams/Connect)
+- [Live subscribing, unsubscribing and listing streams](https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-market-streams/Live-Subscribing-Unsubscribing-to-streams)
 - [Futures snapshot/update depth procedure](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/websocket-market-streams/How-to-manage-a-local-order-book-correctly)
 - [User-data lifecycle and event semantics](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams)
 - [Portfolio Margin Pro's separate account/API boundary](https://developers.binance.com/en/docs/products/derivatives-trading-portfolio-margin-pro/quick-start)
@@ -61,7 +62,8 @@ local admission invariants, not live venue throughput.
 
 The separately invoked credential-free Futures demo probes passed on 2026-09-27:
 REST ping/server time/exchange metadata, WebSocket API depth, and routed Public depth
-stream. Separately authorized account probes on the same date passed signed USD-M
+stream. On 2026-10-10 the demo Market route accepted a socket with no streams, then
+answered `SUBSCRIBE` with `result: null` and `LIST_SUBSCRIPTIONS` with the added name. Separately authorized account probes on the same date passed signed USD-M
 REST balance/account reads, signed WebSocket balance reads, and one post-only
 placement/cancellation over each transport. Queries confirmed both owned orders
 canceled with zero fills and preserved caller IDs. These probes establish basic demo
@@ -229,6 +231,25 @@ zero; other malformed financial strings fail. See
 | Session | `session.logout` |
 
 ## Market streams
+
+A routed `Streams` socket connects to `/public/stream` or `/market/stream`, with
+any number of its route's streams including none. `subscribe`, `unsubscribe` and
+`list_subscriptions` send the documented `SUBSCRIBE`, `UNSUBSCRIBE` and
+`LIST_SUBSCRIPTIONS` control messages on the open socket, verified 2026-10-10:
+
+| Message | Request | Success | Refusal |
+| --- | --- | --- | --- |
+| `SUBSCRIBE` | `{"method":"SUBSCRIBE","params":[names],"id":n}` | `{"result":null,"id":n}` | `{"code":c,"msg":m}` → `Error::ControlRefused` |
+| `UNSUBSCRIBE` | `{"method":"UNSUBSCRIBE","params":[names],"id":n}` | `{"result":null,"id":n}` | as above |
+| `LIST_SUBSCRIPTIONS` | `{"method":"LIST_SUBSCRIPTIONS","id":n}` | `{"result":[names],"id":n}` | as above |
+
+The venue requires an unsigned integer `id`; the client numbers each generation's
+control messages from 1. A stream of the other route is refused unsent, as at
+connect. Control messages and pongs share the connection's documented ceiling of
+10 incoming messages a second; a control message past it is refused unsent with
+`Error::Admission`. The documented 1,024 streams per socket bound connect and
+subscribe together. A lost answer is `Outcome::Unknown` and its late arrival is a
+`StreamEvent::LateControl`. Nothing is resubscribed after a reconnect.
 
 | Stream | Route | Name template |
 | --- | --- | --- |

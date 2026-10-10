@@ -133,6 +133,12 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
   Spot execution events arrive through WebSocket API subscriptions; Futures use
   listen keys. Renewal and reconnect are explicit caller operations; no automatic
   replay, recovery, credential loading, or hidden continuity claim.
+- A market socket may connect with no streams. `subscribe`, `unsubscribe` and
+  `list_subscriptions` send the venue's `SUBSCRIBE`, `UNSUBSCRIBE` and
+  `LIST_SUBSCRIPTIONS` control messages on the open socket, within the same
+  generation, in Spot, USDⓈ-M (per route) and COIN-M. They share the documented
+  incoming-message ceiling with pongs and are refused unsent past it. A reconnect
+  resubscribes nothing: membership is the caller's.
 - Depth events and snapshots keep their update IDs (`U`, `u`, Futures `pu`,
   `lastUpdateId`) and exact levels. Synchronising a local book from them is the
   consumer's; the client builds no book. Every finite snapshot remains partial.
@@ -234,7 +240,7 @@ Read-only demo probes are ignored by default and require explicit invocation:
 cargo test --test demo_read_only -- --ignored
 ```
 
-These probes verify public metadata/depth only. They do not prove authenticated
+These probes verify public metadata, depth and USDⓈ-M stream membership only. They do not prove authenticated
 execution, account modes, or all long-tail endpoints work on demo or production.
 Human review and separately authorized demo trading are required before claiming
 execution readiness. There are no credentials or captured user data in the fixtures.

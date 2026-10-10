@@ -36,8 +36,8 @@ mod core;
 
 pub use core::{
     Asset, ClientOrderId, Clock, Credentials, Error, OperationLeg, Outcome, PartialOperation,
-    RateEvidence, RequestId, Response, ResponseMeta, SensitiveString, Signer, Symbol, SystemClock,
-    TimeUnit, VenueFailure,
+    RateEvidence, RequestId, Response, ResponseMeta, SensitiveString, Signer, StreamControl,
+    Symbol, SystemClock, TimeUnit, VenueFailure,
 };
 pub use core::{BudgetLimits, Budgets, WeightPools};
 pub use rust_decimal::Decimal;

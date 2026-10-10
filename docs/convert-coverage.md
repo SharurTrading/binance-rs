@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT-0
 
 # Convert REST coverage and protocol evidence
 
-Checked **2026-09-27** against the official catalog: all nine SAPI REST operations.
+Checked **2026-10-10** against the official catalog: all nine SAPI REST operations.
 This product is separate from USDⓈ-M Futures Convert. No credentialed or live
 mutation probe was run; catalog bindings never establish execution readiness.
 
@@ -24,8 +24,11 @@ immediately before sending. Expiration returns an unsent outcome. Receive window
 remain separate millisecond parameters and never extend a quote's authority.
 
 Acceptance preserves the original quotation and native string order ID.
-Integer order IDs used by query/limit operations remain their own validated type;
-the client never silently converts between these native representations. Errors
+`order_status` takes the native string `AcceptanceOrderId`, so acceptance
+identities can be used directly for reconciliation. Native integer response/limit
+IDs remain their own validated `OrderId`; converting one to the string query
+identity is explicit. The client never silently parses a string identity into an
+integer or removes leading zeroes. Errors
 retain quote/native cancellation order IDs for reconciliation, status, code, and
 quota evidence. A timeout,
 truncated body or malformed receipt remains ambiguous, and mutations are never
@@ -39,15 +42,17 @@ completion or fills. The limit placement and cancellation `status` fields have
 no documented enum — the catalog publishes example values (`PROCESS`,
 `CANCELED`) only — so their outcomes stay `Unknown` and the caller reads the
 exact native string. Known request refusals use Convert's own error-code
-documentation, machine-checked against the same snapshot; unknown codes,
-undocumented codes (including the retired `-1002`), and every 5xx remain
-ambiguous.
+documentation, machine-checked against the same snapshot; unknown codes and
+every 5xx remain ambiguous. The current error page
+explicitly documents `-1002 UNAUTHORIZED`, classified as a definitive refusal
+below 500.
 
 SAPI admission shares the endpoint IP/UID owners described in
 [Wallet coverage](wallet-coverage.md). Each endpoint independently charges its
 published scope and weight. Header evidence and `Retry-After` update the originating
-scope before reading the body. A `418` IP ban applies across endpoint and UID
-owners sharing that IP. Missing/malformed ban retry timing refuses subsequent sends
+scope before reading the body. The general-info says SAPI rate violations return `429` without IP-ban
+escalation. An unexpected `418` still conservatively applies its ban evidence
+across endpoint and UID owners sharing that IP. Missing/malformed ban retry timing refuses subsequent sends
 with `CooldownTimingUnknown`; no retry delay or restored authority is fabricated.
 No Spot/Futures aggregate budget is borrowed.
 Clients start no tasks or hidden runtime. Production SAPI uses HTTPS, explicit
@@ -65,14 +70,17 @@ original schema SHA-256 and check date. Financial/identity/required evidence
 annotations correct catalog gaps. Examples and provider prose were excluded.
 The standard-library generator produces native DTOs, eight builders, all nine
 methods, and canonical acceptance operation facts. Quote authority remains a
-handwritten validated request. Generated freshness checks all five products
+handwritten validated request. Generated freshness checks these product bindings
 offline. No dependencies were added.
+
+[Convert trade history](https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#get-convert-trade-history) permits an explicit interval of at most 30 days, including exactly 2,592,000,000 milliseconds.
 
 `tests/convert_contract.rs` covers amount direction, asset provenance, exact values,
 venue expiry during admission, unsent expired authority, retained quote IDs and
 headers after truncated acceptance, no mutation retries, future statuses, native
 cancellation vocabulary, documented rejection versus unknown/5xx outcomes,
-malformed financial data, required query IDs, the 30-day history range, and IP
+malformed financial data, exact string order IDs for status queries, the 30-day
+history range, and IP
 bans spanning endpoints and distinct account owners.
 Human execution review is required before merge.
 [Issue #17](https://github.com/SharurTrading/binance-rs/issues/17) tracks this client.

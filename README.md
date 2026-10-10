@@ -15,7 +15,7 @@ SharurTrading. This project is not affiliated with or endorsed by Binance.
 > public probes do not establish live trading readiness. `publish = false` remains
 > in force.
 
-Five separate JSON product clients are available under `binance_client::core_trading`:
+Seven separate JSON product clients are available under `binance_client::core_trading`:
 
 | Product | REST | WebSocket API | Market streams | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
@@ -24,12 +24,20 @@ Five separate JSON product clients are available under `binance_client::core_tra
 | Wallet | 50 | — | — | — |
 | Convert | 9 | — | — | — |
 | COIN-M (initial coverage) | 63 | 10 + 3 session methods | 19 | 7 |
+| Margin | 66 bindings | Listen-token subscription | Risk/execution streams | Native Margin events |
+| Options | 44 | — | 10 | 6 |
 
 [USDⓈ-M coverage](docs/coverage.md) and
 [Spot/COIN-M coverage](docs/spot-coinm-coverage.md), and
 [Wallet coverage](docs/wallet-coverage.md), and
-[Convert coverage](docs/convert-coverage.md) record official sources and
-verification limits. Advanced Spot JSON bindings include order lists, SOR, amend,
+[Convert coverage](docs/convert-coverage.md),
+[Margin coverage](docs/margin-coverage.md), and
+[Options coverage](docs/options-coverage.md) record official sources and
+verification limits. Margin has 65 currently dispatchable REST operations; the
+October 14 query is date-gated. Token issuance uses the documented API-key-only
+`USER_STREAM` contract. Announced UTA stream scope is tracked in
+[issue #76](https://github.com/SharurTrading/binance-rs/issues/76).
+Advanced Spot JSON bindings include order lists, SOR, amend,
 cancel/replace partial evidence, and explicit microsecond units. COIN-M migrated
 algo evidence remains tracked in
 [issue #11](https://github.com/SharurTrading/binance-rs/issues/11).
@@ -51,8 +59,11 @@ src/
     ├── usdm/: linear Futures models, requests, streams
     ├── wallet/: native balances, networks, withdrawals, SAPI endpoint scopes
     ├── convert/: native quote/limit amounts, expiry authority, SAPI endpoint scopes
-    ├── spot/: balances, base quantity/quote spend, FIX and SBE
-    └── coinm/: inverse Futures models, requests, streams
+    ├── margin/: cross/isolated balances, borrowing, orders, execution/risk events
+    ├── options/: native option contracts, Greeks, orders, routed streams
+    ├── spot/: balances, base quantity/quote spend, depth updates, FIX and SBE
+    └── coinm/: inverse Futures models, requests, streams, depth updates
+
 ```
 
 `core_trading` groups the existing products within this single crate. Future API
@@ -174,13 +185,14 @@ WebSocket lifecycles.
 
 ## Budgets
 
-Every `Config::new` draws its IP budget from the process's pool for its venue pool
-and environment, so every client of that pool counts against one weight limit:
+Spot, Futures and Options `Config::new` draw their IP budgets from the process's pool for
+that venue pool and environment, so every client counts against one weight limit:
 
 | Pool | Products | Baseline minute weight | Source |
 | --- | --- | ---: | --- |
 | Spot | Spot | 6,000 | [Spot rate limiters](https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#rate-limiters-ratelimittype) |
 | Futures | USDⓈ-M and COIN-M together | 2,400 | [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice), A.3 |
+| Options | Options | 2,400 | [Options rate limiters](https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition) |
 
 Demo and production never share a pool. Each pool starts at its documented baseline;
 every REST exchange information reply hands its `rateLimits` to the pool, and the
@@ -191,6 +203,11 @@ entries are account limits and are not adopted. Every `X-MBX-USED-WEIGHT-1M` rai
 the pool's count, and a `Retry-After` or `418` holds every client of the pool. A
 request the pool cannot take is refused unsent as `Error::Admission` with its retry
 delay. The futures pool counts REST and WebSocket API weight together.
+
+Wallet, Convert and Margin REST draw from a separate process SAPI IP pool; their
+endpoint weight counters remain independent. Margin WebSocket API uses the Spot
+pool. Options uses its own pool and native exchange-information limits.
+`with_pools` selects an explicit registry for these products.
 
 Each `Config::new` keeps its own account owner; clone a product `Config` to share
 budgets between its REST and WebSocket clients. Across products or credentials of

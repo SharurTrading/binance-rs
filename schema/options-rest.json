@@ -1,0 +1,5107 @@
+{
+  "checked": "2026-10-10",
+  "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/1.0.0/schema.yaml",
+  "sha256": "dc134d75a8c2a66198beb3d51bda06bee50e41f8445a2d3eedce3f96fb80a5e6",
+  "operations": [
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "accountFundingFlow",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "currency",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "recordId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "x-rust-type": "crate::core_trading::options::RecordId"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 100,
+            "maximum": 1000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "x-parameters-notes": "- Only support querying data in the past 3 months",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::RecordId"
+                    },
+                    "asset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "amount": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "createDate": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  },
+                  "required": [
+                    "amount",
+                    "asset"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/bill",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/account#account-funding-flow",
+      "x-time-validator": "super::validation::validate_three_month_history"
+    },
+    {
+      "tags": [
+        "account"
+      ],
+      "operationId": "optionMarginAccountInformation",
+      "x-ip-weight": 3,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "asset": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "asset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "marginBalance": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "equity": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "available": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "initialMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "maintMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "unrealizedPNL": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "adjustedEquity": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "adjustedEquity",
+                        "asset",
+                        "available",
+                        "equity",
+                        "initialMargin",
+                        "maintMargin",
+                        "marginBalance",
+                        "unrealizedPNL"
+                      ]
+                    }
+                  },
+                  "greek": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "underlying": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "delta": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "gamma": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "theta": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "vega": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "delta",
+                        "gamma",
+                        "theta",
+                        "underlying",
+                        "vega"
+                      ]
+                    }
+                  },
+                  "time": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "canTrade": {
+                    "type": "boolean"
+                  },
+                  "canDeposit": {
+                    "type": "boolean"
+                  },
+                  "canWithdraw": {
+                    "type": "boolean"
+                  },
+                  "reduceOnly": {
+                    "type": "boolean"
+                  },
+                  "tradeGroupId": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "asset",
+                  "greek",
+                  "time"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/marginAccount",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/account#option-margin-account-information"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "checkServerTime",
+      "x-ip-weight": 1,
+      "parameters": [],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "serverTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "serverTime"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/time",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#check-server-time"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "exchangeInformation",
+      "x-ip-weight": 1,
+      "parameters": [],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "timezone": {
+                    "type": "string"
+                  },
+                  "serverTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "optionContracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "baseAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "quoteAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "underlying": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "settleAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        }
+                      },
+                      "required": [
+                        "baseAsset",
+                        "quoteAsset",
+                        "settleAsset",
+                        "underlying"
+                      ]
+                    }
+                  },
+                  "optionAssets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ]
+                    }
+                  },
+                  "optionSymbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "expiryDate": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "filters": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "filterType": {
+                                    "type": "string",
+                                    "enum": [
+                                      "PRICE_FILTER"
+                                    ]
+                                  },
+                                  "minPrice": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "maxPrice": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "tickSize": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "minQty": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "maxQty": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "stepSize": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  }
+                                },
+                                "required": [
+                                  "maxPrice",
+                                  "maxQty",
+                                  "minPrice",
+                                  "minQty",
+                                  "stepSize",
+                                  "tickSize"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "symbol": {
+                          "type": "string",
+                          "x-rust-type": "crate::core_trading::options::Symbol"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "strikePrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "underlying": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "unit": {
+                          "type": "integer",
+                          "format": "int64",
+                          "x-decimal": true
+                        },
+                        "liquidationFeeRate": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "minQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "maxQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "initialMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "maintenanceMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "minInitialMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "minMaintenanceMargin": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "priceScale": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "quantityScale": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "quoteAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "contractType": {
+                          "type": "string"
+                        },
+                        "underlyingType": {
+                          "type": "string"
+                        },
+                        "nakedSell": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "expiryDate",
+                        "filters",
+                        "symbol",
+                        "side",
+                        "strikePrice",
+                        "underlying",
+                        "unit",
+                        "liquidationFeeRate",
+                        "minQty",
+                        "maxQty",
+                        "initialMargin",
+                        "maintenanceMargin",
+                        "minInitialMargin",
+                        "minMaintenanceMargin",
+                        "priceScale",
+                        "quantityScale",
+                        "quoteAsset",
+                        "contractType",
+                        "underlyingType",
+                        "nakedSell",
+                        "status"
+                      ]
+                    }
+                  },
+                  "rateLimits": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "rateLimitType": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalNum": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "required": []
+                    }
+                  }
+                },
+                "required": [
+                  "optionAssets",
+                  "optionContracts",
+                  "optionSymbols",
+                  "rateLimits",
+                  "serverTime"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/exchangeInfo",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#exchange-information"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "historicalExerciseRecords",
+      "x-ip-weight": 3,
+      "parameters": [
+        {
+          "name": "underlying",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Symbol"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 100,
+            "maximum": 100,
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "strikePrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "realStrikePrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "expiryDate": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "strikeResult": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "realStrikePrice",
+                    "strikePrice",
+                    "symbol"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/exerciseHistory",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#historical-exercise-records"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "indexPrice",
+      "x-ip-weight": 1,
+      "parameters": [
+        {
+          "name": "underlying",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Symbol"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "time": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "indexPrice": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                },
+                "required": [
+                  "indexPrice",
+                  "time"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/index",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#index-price"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "klineCandlestickData",
+      "x-ip-weight": 1,
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "6h",
+              "8h",
+              "12h",
+              "1d",
+              "3d",
+              "1w",
+              "1M"
+            ]
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 500,
+            "maximum": 1500,
+            "format": "int64"
+          }
+        }
+      ],
+      "x-parameters-notes": "- If startTime and endTime are not sent, the most recent klines are returned.",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "minItems": 12,
+                  "maxItems": 12,
+                  "x-prefixItems": [
+                    {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  ],
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/klines",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#kline-candlestick-data"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "openInterest",
+      "x-ip-weight": 0,
+      "parameters": [
+        {
+          "name": "underlyingAsset",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "expiration",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "sumOpenInterest": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "sumOpenInterestUsd": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "timestamp": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "sumOpenInterest",
+                    "sumOpenInterestUsd",
+                    "symbol"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/openInterest",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#open-interest"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "optionMarkPrice",
+      "x-ip-weight": 5,
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "markPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "bidIV": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "askIV": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "markIV": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "delta": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "theta": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "gamma": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "vega": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "highPriceLimit": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "lowPriceLimit": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "riskFreeInterest": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "required": [
+                    "askIV",
+                    "bidIV",
+                    "delta",
+                    "gamma",
+                    "highPriceLimit",
+                    "lowPriceLimit",
+                    "markIV",
+                    "markPrice",
+                    "riskFreeInterest",
+                    "symbol",
+                    "theta",
+                    "vega"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/mark",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#option-mark-price"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "orderBook",
+      "x-weight": "limit         | weight\n------------  | ------------\n5, 10, 20, 50 | 1\n100           | 5\n500           | 10\n1000          | 20",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 100,
+            "maximum": 1000,
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bids": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ],
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "asks": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ],
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "T": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "lastUpdateId": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "T",
+                  "asks",
+                  "bids",
+                  "lastUpdateId"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/depth",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#order-book"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "recentBlockTradesList",
+      "x-ip-weight": 5,
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 100,
+            "maximum": 500,
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::RecordId"
+                    },
+                    "tradeId": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::TradeId"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "price": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "qty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "quoteQty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "side": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "time": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  },
+                  "required": [
+                    "price",
+                    "qty",
+                    "quoteQty",
+                    "symbol",
+                    "time"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/blockTrades",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#recent-block-trades-list"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "recentTradesList",
+      "x-ip-weight": 5,
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 100,
+            "maximum": 500,
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::RecordId"
+                    },
+                    "tradeId": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::TradeId"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "price": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "qty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "quoteQty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "side": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "time": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  },
+                  "required": [
+                    "price",
+                    "qty",
+                    "quoteQty",
+                    "symbol",
+                    "time"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/trades",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#recent-trades-list"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "testConnectivity",
+      "x-ip-weight": 1,
+      "parameters": [],
+      "responses": {
+        "200": {}
+      },
+      "path": "/eapi/v1/ping",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#test-connectivity"
+    },
+    {
+      "tags": [
+        "market-data"
+      ],
+      "operationId": "ticker24hrPriceChangeStatistics",
+      "x-weight": "1 for a single symbol; 40 when the symbol parameter is omitted",
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "priceChange": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "priceChangePercent": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "lastPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "lastQty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "open": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "high": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "low": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "volume": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "amount": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "bidPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "askPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "openTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "closeTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "firstTradeId": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "tradeCount": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "strikePrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "exercisePrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "required": [
+                    "amount",
+                    "askPrice",
+                    "bidPrice",
+                    "exercisePrice",
+                    "high",
+                    "lastPrice",
+                    "lastQty",
+                    "low",
+                    "open",
+                    "priceChange",
+                    "priceChangePercent",
+                    "strikePrice",
+                    "symbol",
+                    "volume"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/ticker",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-data#ticker24hr-price-change-statistics"
+    },
+    {
+      "tags": [
+        "market-maker-block-trade"
+      ],
+      "operationId": "acceptBlockTradeOrder",
+      "x-ip-weight": 5,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "blockOrderMatchingKey",
+                "timestamp"
+              ],
+              "properties": {
+                "blockOrderMatchingKey": {
+                  "type": "string",
+                  "x-rust-type": "crate::core_trading::options::BlockOrderMatchingKey"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "maximum": 60000,
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "blockTradeSettlementKey": {
+                    "type": "string",
+                    "x-rust-type": "crate::core_trading::options::BlockTradeSettlementKey"
+                  },
+                  "expireTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "liquidity": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "createTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "legs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "symbol": {
+                          "type": "string",
+                          "x-rust-type": "crate::core_trading::options::Symbol"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "price": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "price",
+                        "quantity",
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "legs"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/block/order/execute",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#accept-block-trade-order"
+    },
+    {
+      "tags": [
+        "market-maker-block-trade"
+      ],
+      "operationId": "queryBlockTradeDetails",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "blockOrderMatchingKey",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::BlockOrderMatchingKey"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "blockTradeSettlementKey": {
+                    "type": "string",
+                    "x-rust-type": "crate::core_trading::options::BlockTradeSettlementKey"
+                  },
+                  "expireTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "liquidity": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "createTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "legs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "symbol": {
+                          "type": "string",
+                          "x-rust-type": "crate::core_trading::options::Symbol"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "price": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "price",
+                        "quantity",
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "legs"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/block/order/execute",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#query-block-trade-details"
+    },
+    {
+      "tags": [
+        "market-maker-block-trade"
+      ],
+      "operationId": "accountBlockTradeList",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "underlying",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Symbol"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "parentOrderId": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::OrderId"
+                    },
+                    "crossType": {
+                      "type": "string"
+                    },
+                    "legs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "createTime": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "updateTime": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "symbol": {
+                            "type": "string",
+                            "x-rust-type": "crate::core_trading::options::Symbol"
+                          },
+                          "orderId": {
+                            "type": "string",
+                            "x-rust-type": "crate::core_trading::options::OrderId"
+                          },
+                          "orderPrice": {
+                            "type": "number",
+                            "format": "float",
+                            "x-decimal": true
+                          },
+                          "orderQuantity": {
+                            "type": "number",
+                            "format": "float",
+                            "x-decimal": true
+                          },
+                          "orderStatus": {
+                            "type": "string"
+                          },
+                          "executedQty": {
+                            "type": "number",
+                            "format": "float",
+                            "x-decimal": true
+                          },
+                          "executedAmount": {
+                            "type": "number",
+                            "format": "float",
+                            "x-decimal": true
+                          },
+                          "fee": {
+                            "type": "number",
+                            "format": "float",
+                            "x-decimal": true
+                          },
+                          "orderType": {
+                            "type": "string"
+                          },
+                          "orderSide": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string",
+                            "x-decimal": true,
+                            "x-rust-type": "crate::core_trading::options::RecordId"
+                          },
+                          "tradeId": {
+                            "type": "integer",
+                            "format": "int64",
+                            "x-rust-type": "crate::core_trading::options::TradeId"
+                          },
+                          "tradePrice": {
+                            "type": "number",
+                            "format": "float",
+                            "x-decimal": true
+                          },
+                          "tradeQty": {
+                            "type": "number",
+                            "format": "float",
+                            "x-decimal": true
+                          },
+                          "tradeTime": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "liquidity": {
+                            "type": "string"
+                          },
+                          "commission": {
+                            "type": "number",
+                            "format": "float",
+                            "x-decimal": true
+                          }
+                        },
+                        "required": [
+                          "orderId",
+                          "symbol"
+                        ]
+                      }
+                    },
+                    "blockTradeSettlementKey": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::BlockTradeSettlementKey"
+                    }
+                  },
+                  "required": [
+                    "legs"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/block/user-trades",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#account-block-trade-list"
+    },
+    {
+      "tags": [
+        "market-maker-block-trade"
+      ],
+      "operationId": "cancelBlockTradeOrder",
+      "x-ip-weight": 5,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "blockOrderMatchingKey",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::BlockOrderMatchingKey"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {}
+      },
+      "path": "/eapi/v1/block/order/create",
+      "method": "DELETE",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#cancel-block-trade-order"
+    },
+    {
+      "tags": [
+        "market-maker-block-trade"
+      ],
+      "operationId": "extendBlockTradeOrder",
+      "x-ip-weight": 5,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "blockOrderMatchingKey",
+                "timestamp"
+              ],
+              "properties": {
+                "blockOrderMatchingKey": {
+                  "type": "string",
+                  "x-rust-type": "crate::core_trading::options::BlockOrderMatchingKey"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "maximum": 60000,
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "blockTradeSettlementKey": {
+                    "type": "string",
+                    "x-rust-type": "crate::core_trading::options::BlockTradeSettlementKey"
+                  },
+                  "expireTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "liquidity": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "createTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "legs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "symbol": {
+                          "type": "string",
+                          "x-rust-type": "crate::core_trading::options::Symbol"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "price": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "price",
+                        "quantity",
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "legs"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/block/order/create",
+      "method": "PUT",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#extend-block-trade-order"
+    },
+    {
+      "tags": [
+        "market-maker-block-trade"
+      ],
+      "operationId": "newBlockTradeOrder",
+      "x-ip-weight": 5,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "liquidity",
+                "legs",
+                "timestamp"
+              ],
+              "properties": {
+                "liquidity": {
+                  "type": "string",
+                  "enum": [
+                    "MAKER",
+                    "TAKER"
+                  ]
+                },
+                "legs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "price",
+                      "quantity",
+                      "side",
+                      "symbol",
+                      "type"
+                    ],
+                    "properties": {
+                      "symbol": {
+                        "type": "string",
+                        "x-rust-type": "crate::core_trading::options::Symbol"
+                      },
+                      "side": {
+                        "type": "string",
+                        "enum": [
+                          "BUY",
+                          "SELL"
+                        ]
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "LIMIT"
+                        ]
+                      },
+                      "quantity": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "price": {
+                        "type": "string",
+                        "x-decimal": true
+                      }
+                    }
+                  }
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "maximum": 60000,
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "blockTradeSettlementKey": {
+                    "type": "string",
+                    "x-rust-type": "crate::core_trading::options::BlockTradeSettlementKey"
+                  },
+                  "expireTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "liquidity": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "legs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "symbol": {
+                          "type": "string",
+                          "x-rust-type": "crate::core_trading::options::Symbol"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "price": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "price",
+                        "quantity",
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "legs"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/block/order/create",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#new-block-trade-order"
+    },
+    {
+      "tags": [
+        "market-maker-block-trade"
+      ],
+      "operationId": "queryBlockTradeOrder",
+      "x-ip-weight": 5,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "blockOrderMatchingKey",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::BlockOrderMatchingKey"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "underlying",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Symbol"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "blockTradeSettlementKey": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::BlockTradeSettlementKey"
+                    },
+                    "expireTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "liquidity": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "createTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "legs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "symbol": {
+                            "type": "string",
+                            "x-rust-type": "crate::core_trading::options::Symbol"
+                          },
+                          "side": {
+                            "type": "string"
+                          },
+                          "quantity": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "price": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        },
+                        "required": [
+                          "price",
+                          "quantity",
+                          "symbol"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "legs"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/block/order/orders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-block-trade#query-block-trade-order"
+    },
+    {
+      "tags": [
+        "market-maker-endpoints"
+      ],
+      "operationId": "autoCancelAllOpenOrders",
+      "x-ip-weight": 10,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "x-parameters-notes": "- The response will only include underlying symbols where the heartbeat has been successfully updated.",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "underlyings",
+                "timestamp"
+              ],
+              "properties": {
+                "underlyings": {
+                  "type": "string"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "underlyings": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "underlyings"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/countdownCancelAllHeartBeat",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#auto-cancel-all-open-orders"
+    },
+    {
+      "tags": [
+        "market-maker-endpoints"
+      ],
+      "operationId": "getAutoCancelAllOpenOrders",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "underlying",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Symbol"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "x-parameters-notes": "- countdownTime = 0 means the function is disabled.",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "underlying": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "countdownTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "underlying"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/countdownCancelAll",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#get-auto-cancel-all-open-orders"
+    },
+    {
+      "tags": [
+        "market-maker-endpoints"
+      ],
+      "operationId": "setAutoCancelAllOpenOrders",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "x-parameters-notes": "- This rest endpoint sets up the parameters to cancel your open orders in case of an outage or disconnection.\n- Example usage: > Call this endpoint with a countdownTime value of 10000 (10 seconds) to turn on the auto-cancel feature. If the corresponding countdownCancelAllHeartBeat endpoint is not called within 10 seconds with the specified underlying symbol, all open orders of the specified symbol will be automatically canceled. If this endpoint is called with an countdownTime of 0, the countdown timer will be stopped.\n- The system will check all countdowns approximately every 100 milliseconds, **please note that sufficient redundancy should be considered when using this function**. We do not recommend setting the countdown time to be too precise or too small.",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "underlying",
+                "countdownTime",
+                "timestamp"
+              ],
+              "properties": {
+                "underlying": {
+                  "type": "string",
+                  "x-rust-type": "crate::Symbol"
+                },
+                "countdownTime": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "underlying": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "countdownTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "underlying"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/countdownCancelAll",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#set-auto-cancel-all-open-orders"
+    },
+    {
+      "tags": [
+        "market-maker-endpoints"
+      ],
+      "operationId": "getMarketMakerProtectionConfig",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "underlying",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Symbol"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "underlyingId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "underlying": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "windowTimeInMilliseconds": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "frozenTimeInMilliseconds": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "qtyLimit": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "deltaLimit": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "lastTriggerTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "deltaLimit",
+                  "qtyLimit",
+                  "underlying"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/mmp",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#get-market-maker-protection-config"
+    },
+    {
+      "tags": [
+        "market-maker-endpoints"
+      ],
+      "operationId": "resetMarketMakerProtectionConfig",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "underlying",
+                "timestamp"
+              ],
+              "properties": {
+                "underlying": {
+                  "type": "string",
+                  "x-rust-type": "crate::Symbol"
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "underlyingId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "underlying": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "windowTimeInMilliseconds": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "frozenTimeInMilliseconds": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "qtyLimit": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "deltaLimit": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "lastTriggerTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "deltaLimit",
+                  "qtyLimit",
+                  "underlying"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/mmpReset",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#reset-market-maker-protection-config"
+    },
+    {
+      "tags": [
+        "market-maker-endpoints"
+      ],
+      "operationId": "setMarketMakerProtectionConfig",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "underlying",
+                "windowTimeInMilliseconds",
+                "frozenTimeInMilliseconds",
+                "qtyLimit",
+                "deltaLimit",
+                "timestamp"
+              ],
+              "properties": {
+                "underlying": {
+                  "type": "string",
+                  "x-rust-type": "crate::Symbol"
+                },
+                "windowTimeInMilliseconds": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 5000,
+                  "format": "int64"
+                },
+                "frozenTimeInMilliseconds": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "qtyLimit": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "deltaLimit": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "underlyingId": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "underlying": {
+                    "type": "string",
+                    "x-rust-type": "crate::Symbol"
+                  },
+                  "windowTimeInMilliseconds": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "frozenTimeInMilliseconds": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "qtyLimit": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "deltaLimit": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "lastTriggerTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": [
+                  "deltaLimit",
+                  "qtyLimit",
+                  "underlying"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/mmpSet",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/market-maker-endpoints#set-market-maker-protection-config"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "accountTradeList",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "fromId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "x-rust-type": "crate::core_trading::options::TradeId"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 100,
+            "maximum": 1000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::RecordId"
+                    },
+                    "tradeId": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::TradeId"
+                    },
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::OrderId"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "price": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "fee": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "realizedProfit": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "side": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "liquidity": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "priceScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "quantityScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "optionSide": {
+                      "type": "string"
+                    },
+                    "quoteAsset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    }
+                  },
+                  "required": [
+                    "orderId",
+                    "symbol"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/userTrades",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#account-trade-list",
+      "x-time-validator": "super::validation::validate_three_month_history"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "cancelAllOptionOrdersByUnderlying",
+      "x-ip-weight": 5,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "underlying",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Symbol"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/allOpenOrdersByUnderlying",
+      "method": "DELETE",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#cancel-all-option-orders-by-underlying"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "cancelAllOptionOrdersOnSpecificSymbol",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/allOpenOrders",
+      "method": "DELETE",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#cancel-all-option-orders-on-specific-symbol"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "cancelMultipleOptionOrders",
+      "x-ip-weight": 5,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "orderIds",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "x-rust-type": "Vec<crate::core_trading::options::OrderId>"
+          }
+        },
+        {
+          "name": "clientOrderIds",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "x-rust-type": "crate::core_trading::options::ClientOrderId"
+            }
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "x-parameters-notes": "- At least one instance of `orderId` and `clientOrderId` must be sent.",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::OrderId"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "price": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "executedQty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "fee": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "side": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "timeInForce": {
+                      "type": "string"
+                    },
+                    "reduceOnly": {
+                      "type": "boolean"
+                    },
+                    "createTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "updateTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "avgPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "clientOrderId": {
+                      "type": "string",
+                      "x-rust-type": "String"
+                    },
+                    "priceScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "quantityScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "optionSide": {
+                      "type": "string"
+                    },
+                    "quoteAsset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "mmp": {
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "selfTradePreventionMode": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "clientOrderId",
+                    "orderId",
+                    "symbol"
+                  ],
+                  "x-batch-member": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/batchOrders",
+      "method": "DELETE",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#cancel-multiple-option-orders",
+      "x-parameters-notes-cn": "- `orderIds` 与 `clientOrderIds` 必须至少发送一个，不可同时发送"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "placeMultipleOrders",
+      "x-ip-weight": 5,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "x-parameters-notes": "Some parameters are mandatory depending on the order type as follows:\n\nType | Mandatory parameters\n------------ | ------------ \nLIMIT | timeInForce, quantity, price\n\n- Parameter rules are same with New Order\n- Batch orders are processed concurrently, and the order of matching is not guaranteed.",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "orders",
+                "timestamp"
+              ],
+              "properties": {
+                "orders": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "symbol",
+                      "side",
+                      "type",
+                      "quantity",
+                      "clientOrderId",
+                      "price"
+                    ],
+                    "properties": {
+                      "symbol": {
+                        "type": "string",
+                        "x-rust-type": "crate::core_trading::options::Symbol"
+                      },
+                      "side": {
+                        "type": "string",
+                        "enum": [
+                          "BUY",
+                          "SELL"
+                        ]
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "LIMIT"
+                        ]
+                      },
+                      "quantity": {
+                        "type": "number",
+                        "format": "float",
+                        "x-decimal": true
+                      },
+                      "price": {
+                        "type": "number",
+                        "format": "float",
+                        "x-decimal": true
+                      },
+                      "timeInForce": {
+                        "type": "string",
+                        "default": "GTC",
+                        "enum": [
+                          "GTC",
+                          "IOC",
+                          "FOK",
+                          "GTX"
+                        ]
+                      },
+                      "reduceOnly": {
+                        "type": "boolean",
+                        "default": false
+                      },
+                      "postOnly": {
+                        "type": "boolean",
+                        "default": false
+                      },
+                      "newOrderRespType": {
+                        "type": "string",
+                        "default": "ACK",
+                        "enum": [
+                          "ACK",
+                          "RESULT"
+                        ]
+                      },
+                      "clientOrderId": {
+                        "type": "string",
+                        "x-rust-type": "crate::core_trading::options::ClientOrderId"
+                      },
+                      "isMmp": {
+                        "type": "boolean"
+                      },
+                      "selfTradePreventionMode": {
+                        "type": "string",
+                        "default": "EXPIRE_MAKER",
+                        "enum": [
+                          "EXPIRE_TAKER",
+                          "EXPIRE_MAKER",
+                          "EXPIRE_BOTH"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::OrderId"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "price": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "executedQty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "fee": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-decimal": true
+                    },
+                    "side": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "timeInForce": {
+                      "type": "string"
+                    },
+                    "reduceOnly": {
+                      "type": "boolean"
+                    },
+                    "postOnly": {
+                      "type": "boolean"
+                    },
+                    "createTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "updateTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "avgPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "clientOrderId": {
+                      "type": "string",
+                      "x-rust-type": "String"
+                    },
+                    "priceScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "quantityScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "optionSide": {
+                      "type": "string"
+                    },
+                    "quoteAsset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "mmp": {
+                      "type": "boolean"
+                    },
+                    "selfTradePreventionMode": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "clientOrderId",
+                    "orderId",
+                    "symbol"
+                  ],
+                  "x-batch-member": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/batchOrders",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#place-multiple-orders"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "cancelOptionOrder",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "orderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "x-rust-type": "crate::core_trading::options::OrderId"
+          }
+        },
+        {
+          "name": "clientOrderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::ClientOrderId"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "x-parameters-notes": "- At least one instance of `orderId` and `clientOrderId` must be sent.",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": {
+                    "type": "integer",
+                    "format": "int64",
+                    "x-rust-type": "crate::core_trading::options::OrderId"
+                  },
+                  "symbol": {
+                    "type": "string",
+                    "x-rust-type": "crate::core_trading::options::Symbol"
+                  },
+                  "price": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "quantity": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "executedQty": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "side": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "timeInForce": {
+                    "type": "string"
+                  },
+                  "reduceOnly": {
+                    "type": "boolean"
+                  },
+                  "createDate": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "updateTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "avgPrice": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "source": {
+                    "type": "string"
+                  },
+                  "clientOrderId": {
+                    "type": "string",
+                    "x-rust-type": "String"
+                  },
+                  "priceScale": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "quantityScale": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "optionSide": {
+                    "type": "string"
+                  },
+                  "quoteAsset": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "mmp": {
+                    "type": "boolean"
+                  },
+                  "selfTradePreventionMode": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "clientOrderId",
+                  "orderId",
+                  "symbol"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/order",
+      "method": "DELETE",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#cancel-option-order"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "newOrder",
+      "x-ip-weight": 0,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "x-parameters-notes": "Some parameters are mandatory depending on the order type as follows:\n\nType | Mandatory parameters\n------------ | ------------ \nLIMIT | timeInForce, quantity, price",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "symbol",
+                "side",
+                "type",
+                "quantity",
+                "timestamp",
+                "clientOrderId",
+                "price"
+              ],
+              "properties": {
+                "symbol": {
+                  "type": "string",
+                  "x-rust-type": "crate::core_trading::options::Symbol"
+                },
+                "side": {
+                  "type": "string",
+                  "enum": [
+                    "BUY",
+                    "SELL"
+                  ]
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "LIMIT"
+                  ]
+                },
+                "quantity": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "price": {
+                  "type": "number",
+                  "format": "float",
+                  "x-decimal": true
+                },
+                "timeInForce": {
+                  "type": "string",
+                  "default": "GTC",
+                  "enum": [
+                    "GTC",
+                    "IOC",
+                    "FOK",
+                    "GTX"
+                  ]
+                },
+                "reduceOnly": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "postOnly": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "newOrderRespType": {
+                  "type": "string",
+                  "default": "ACK",
+                  "enum": [
+                    "ACK",
+                    "RESULT"
+                  ]
+                },
+                "clientOrderId": {
+                  "type": "string",
+                  "x-rust-type": "crate::core_trading::options::ClientOrderId"
+                },
+                "isMmp": {
+                  "type": "boolean"
+                },
+                "selfTradePreventionMode": {
+                  "type": "string",
+                  "enum": [
+                    "NONE",
+                    "EXPIRE_TAKER",
+                    "EXPIRE_MAKER",
+                    "EXPIRE_BOTH"
+                  ]
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": {
+                    "type": "integer",
+                    "format": "int64",
+                    "x-rust-type": "crate::core_trading::options::OrderId"
+                  },
+                  "symbol": {
+                    "type": "string",
+                    "x-rust-type": "crate::core_trading::options::Symbol"
+                  },
+                  "price": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "quantity": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "executedQty": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "fee": {
+                    "type": "integer",
+                    "format": "int64",
+                    "x-decimal": true
+                  },
+                  "side": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "timeInForce": {
+                    "type": "string"
+                  },
+                  "reduceOnly": {
+                    "type": "boolean"
+                  },
+                  "postOnly": {
+                    "type": "boolean"
+                  },
+                  "createTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "updateTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "avgPrice": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "source": {
+                    "type": "string"
+                  },
+                  "clientOrderId": {
+                    "type": "string",
+                    "x-rust-type": "String"
+                  },
+                  "priceScale": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "quantityScale": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "optionSide": {
+                    "type": "string"
+                  },
+                  "quoteAsset": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "mmp": {
+                    "type": "boolean"
+                  },
+                  "selfTradePreventionMode": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "clientOrderId",
+                  "orderId",
+                  "symbol"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/order",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#new-order"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "querySingleOrder",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "orderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "x-rust-type": "crate::core_trading::options::OrderId"
+          }
+        },
+        {
+          "name": "clientOrderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::ClientOrderId"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "x-parameters-notes": "- Either `orderId` or `clientOrderId ` must be sent.",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": {
+                    "type": "integer",
+                    "format": "int64",
+                    "x-rust-type": "crate::core_trading::options::OrderId"
+                  },
+                  "symbol": {
+                    "type": "string",
+                    "x-rust-type": "crate::core_trading::options::Symbol"
+                  },
+                  "price": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "quantity": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "executedQty": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "side": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "timeInForce": {
+                    "type": "string"
+                  },
+                  "reduceOnly": {
+                    "type": "boolean"
+                  },
+                  "postOnly": {
+                    "type": "boolean"
+                  },
+                  "createTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "updateTime": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "avgPrice": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "clientOrderId": {
+                    "type": "string",
+                    "x-rust-type": "String"
+                  },
+                  "priceScale": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "quantityScale": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "optionSide": {
+                    "type": "string"
+                  },
+                  "quoteAsset": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "mmp": {
+                    "type": "boolean"
+                  },
+                  "selfTradePreventionMode": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "clientOrderId",
+                  "orderId",
+                  "symbol"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/order",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#query-single-order"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "optionPositionInformation",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entryPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "side": {
+                      "type": "string"
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "markValue": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "unrealizedPNL": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "markPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "strikePrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "expiryDate": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "priceScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "quantityScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "optionSide": {
+                      "type": "string"
+                    },
+                    "quoteAsset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "time": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "bidQuantity": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "askQuantity": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "required": [
+                    "askQuantity",
+                    "bidQuantity",
+                    "entryPrice",
+                    "markPrice",
+                    "markValue",
+                    "quantity",
+                    "quoteAsset",
+                    "strikePrice",
+                    "symbol",
+                    "time",
+                    "unrealizedPNL"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/position",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#option-position-information"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "queryCurrentOpenOptionOrders",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-weight": "1 for a single symbol; 40 when the symbol parameter is omitted",
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "orderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "x-rust-type": "crate::core_trading::options::OrderId"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::OrderId"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "price": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "executedQty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "side": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "timeInForce": {
+                      "type": "string"
+                    },
+                    "reduceOnly": {
+                      "type": "boolean"
+                    },
+                    "createTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "updateTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "avgPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "clientOrderId": {
+                      "type": "string",
+                      "x-rust-type": "String"
+                    },
+                    "priceScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "quantityScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "optionSide": {
+                      "type": "string"
+                    },
+                    "quoteAsset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "mmp": {
+                      "type": "boolean"
+                    },
+                    "selfTradePreventionMode": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "clientOrderId",
+                    "orderId",
+                    "symbol"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/openOrders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#query-current-open-option-orders"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "queryOptionOrderHistory",
+      "x-ip-weight": 3,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "orderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "x-rust-type": "crate::core_trading::options::OrderId"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 100,
+            "maximum": 1000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "orderId": {
+                      "type": "integer",
+                      "format": "int64",
+                      "x-rust-type": "crate::core_trading::options::OrderId"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "price": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "executedQty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "side": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "timeInForce": {
+                      "type": "string"
+                    },
+                    "reduceOnly": {
+                      "type": "boolean"
+                    },
+                    "createTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "updateTime": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "avgPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "clientOrderId": {
+                      "type": "string",
+                      "x-rust-type": "String"
+                    },
+                    "priceScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "quantityScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "optionSide": {
+                      "type": "string"
+                    },
+                    "quoteAsset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "mmp": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "clientOrderId",
+                    "orderId",
+                    "symbol"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/historyOrders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#query-option-order-history",
+      "x-time-validator": "super::validation::validate_five_day_history"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "tradfiOptionsContract",
+      "x-ip-weight": 50,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "recvWindow": {
+                  "type": "integer",
+                  "maximum": 60000,
+                  "format": "int64"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/stock/contract",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#tradfi-options-contract"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "userCommission",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "commissions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "underlying": {
+                          "type": "string",
+                          "x-rust-type": "crate::Symbol"
+                        },
+                        "makerFee": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "takerFee": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "makerFee",
+                        "takerFee",
+                        "underlying"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "commissions"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/commission",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#user-commission"
+    },
+    {
+      "tags": [
+        "trade"
+      ],
+      "operationId": "userExerciseRecord",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::core_trading::options::Symbol"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 1000,
+            "maximum": 1000,
+            "format": "int64"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "x-decimal": true,
+                      "x-rust-type": "crate::core_trading::options::RecordId"
+                    },
+                    "currency": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "x-rust-type": "crate::core_trading::options::Symbol"
+                    },
+                    "exercisePrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "amount": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "fee": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "createDate": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "priceScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "quantityScale": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "optionSide": {
+                      "type": "string"
+                    },
+                    "positionSide": {
+                      "type": "string"
+                    },
+                    "quoteAsset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    }
+                  },
+                  "required": [
+                    "amount",
+                    "currency",
+                    "exercisePrice",
+                    "fee",
+                    "id",
+                    "quantity",
+                    "quoteAsset",
+                    "symbol"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/exerciseRecord",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#user-exercise-record"
+    },
+    {
+      "tags": [
+        "user-data-streams"
+      ],
+      "operationId": "closeUserDataStream",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_STREAM",
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {}
+      },
+      "path": "/eapi/v1/listenKey",
+      "method": "DELETE",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/user-data-streams#close-user-data-stream"
+    },
+    {
+      "tags": [
+        "user-data-streams"
+      ],
+      "operationId": "keepaliveUserDataStream",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_STREAM",
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {}
+      },
+      "path": "/eapi/v1/listenKey",
+      "method": "PUT",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/user-data-streams#keepalive-user-data-stream"
+    },
+    {
+      "tags": [
+        "user-data-streams"
+      ],
+      "operationId": "startUserDataStream",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_STREAM",
+      "parameters": [
+        {
+          "name": "X-MBX-APIKEY",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "listenKey": {
+                    "type": "string"
+                  },
+                  "expiration": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        }
+      },
+      "path": "/eapi/v1/listenKey",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/user-data-streams#start-user-data-stream"
+    }
+  ],
+  "components": {
+    "schemas": {}
+  }
+}

@@ -13,6 +13,7 @@ pub(crate) fn cost(op: Operation, _p: &BTreeMap<String, Value>) -> Result<Cost, 
     }
     Ok(Cost {
         sapi: Some(SapiCost {
+            requests_per_minute: None,
             endpoint: op.path,
             uid: !matches!(
                 op.name,

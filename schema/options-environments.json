@@ -1,0 +1,75 @@
+{
+  "sources": {
+    "general_information": {
+      "url": "https://developers.binance.info/en/docs/products/derivatives-trading-options/general-info",
+      "canonical_url": "https://developers.binance.com/en/docs/products/derivatives-trading-options/general-info",
+      "sha256": "f8d90cd714b995565673df13ec611193aafd52efd3fcf073ae6c0460a0853642",
+      "encoding": "UTF-8 HTML",
+      "checked": "2026-10-11"
+    },
+    "stream_connection": {
+      "url": "https://developers.binance.info/en/docs/products/derivatives-trading-options/websocket-market-streams/Connect",
+      "canonical_url": "https://developers.binance.com/en/docs/products/derivatives-trading-options/websocket-market-streams/Connect",
+      "sha256": "9e887997f0906121b1815f9610bca23a85042872d1ba5413510cee7f2fa97b57",
+      "encoding": "UTF-8 HTML",
+      "checked": "2026-10-11"
+    },
+    "rate_definitions": {
+      "url": "https://developers.binance.info/en/docs/products/derivatives-trading-options/common-definition",
+      "canonical_url": "https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition",
+      "sha256": "8b76373e24d2260874b5044c6becfd638e2c145465ce0d5b9af8bf8c652ac8a3",
+      "encoding": "UTF-8 HTML",
+      "checked": "2026-10-11"
+    },
+    "private_streams": {
+      "url": "https://developers.binance.info/en/docs/products/derivatives-trading-options/user-data-streams",
+      "canonical_url": "https://developers.binance.com/en/docs/products/derivatives-trading-options/user-data-streams",
+      "sha256": "f211addc1d596a8359e225e68a312cb29886fb5a5a3d0471e43447fc5626d626",
+      "encoding": "UTF-8 HTML",
+      "checked": "2026-10-11"
+    }
+  },
+  "environments": {
+    "Demo": {
+      "rest": "https://demo-fapi.binance.com",
+      "streams": "wss://demo-fstream.binance.com",
+      "documented_stream_paths": [
+        "/public/",
+        "/market/",
+        "/private/"
+      ],
+      "source": "general_information"
+    },
+    "Production": {
+      "rest": "https://eapi.binance.com",
+      "streams": "wss://fstream.binance.com",
+      "documented_stream_paths": [
+        "/public/",
+        "/market/",
+        "/private/"
+      ],
+      "sources": [
+        "general_information",
+        "stream_connection",
+        "private_streams"
+      ]
+    }
+  },
+  "documented_baseline": {
+    "REQUEST_WEIGHT": {
+      "interval": "MINUTE",
+      "intervalNum": 1,
+      "limit": 2400
+    },
+    "ORDERS": {
+      "interval": "MINUTE",
+      "intervalNum": 1,
+      "limit": 1200
+    },
+    "source": "rate_definitions",
+    "ip_scope": "IP, not API key",
+    "order_scope": "account",
+    "scope_source": "general_information",
+    "undocumented_windows_have_no_local_ceiling": true
+  }
+}

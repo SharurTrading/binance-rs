@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT-0
 
 # Wallet REST coverage and protocol evidence
 
-Checked **2026-09-27** against the official catalog: 50 REST operations.
+Checked **2026-10-10** against the official catalog: 50 REST operations.
 Bindings and synthetic transport tests establish the described JSON contracts;
 no credentialed or live mutation probe was run.
 
@@ -31,15 +31,15 @@ venue history reads. Every mutation is attempted once, including after truncated
 bodies, timeout, 5xx, and decode failure. Read-only POST queries report `ReadFailed`.
 Definitive request refusals are pinned in `schema/wallet-error-codes.json`
 against the product's documented error-code page and machine-checked in CI;
-unknown codes, undocumented codes (including the retired `-1002`), and every 5xx
-remain ambiguous for mutations. Sensitive addresses,
+the documented `-1002 UNAUTHORIZED` is a definitive refusal below 500;
+unknown codes and every 5xx remain ambiguous for mutations. Sensitive addresses,
 tags, questionnaires, personal data, and unknown fields have redacted Debug.
 Callers explicitly access provider data; the client never logs raw bodies.
 
 SAPI limits are independent per endpoint: IP **12,000/minute** or UID
 **180,000/minute**, according to the operation's documented scope. Withdrawal
 history also retains its documented **10 requests/second** limit, pinned in the
-schema snapshot (`x-requests-per-second`, verified 2026-10-03 against the
+schema snapshot (`x-requests-per-second`, verified 2026-10-10 against the
 endpoint's "Account Weight 18000 (10 requests per second)" annotation and the
 2023-09-04 Wallet change log) and derived into admission, so codegen freshness
 checks detect drift. The provider's own figures are in tension — general info's
@@ -51,7 +51,9 @@ owner while creating a distinct UID owner. Wallet and Convert can receive the sa
 owners. SAPI admissions do not charge Spot/Futures aggregate counters. Response
 `X-SAPI-USED-IP-WEIGHT-1M`, `X-SAPI-USED-UID-WEIGHT-1M`, and `Retry-After` evidence
 updates the originating endpoint scope before attempting to read its body.
-A documented `418` IP ban additionally blocks every shared endpoint/account owner.
+The current general-info says SAPI limit violations return `429` without IP-ban
+escalation. If a `418` arrives nevertheless, its ban evidence conservatively
+blocks every shared endpoint/account owner.
 Missing/malformed ban retry timing produces `CooldownTimingUnknown` on subsequent
 admission; no expiry is invented. The caller verifies restored venue authority
 before supplying a fresh explicit owner.
@@ -76,13 +78,30 @@ rechecked immediately before sending.
 SHA-256 and check date. Provider prose/examples were excluded. The generator
 corrects sample asset keys, exact financial types, native identities and required
 receipt evidence. `schema/wallet-coverage.json` and bindings regenerate offline.
+
+[Daily snapshots](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#daily-account-snapshot) require explicit intervals strictly shorter than 30 days.
+[Capital histories](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital) and [Travel Rule histories](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule) require explicit intervals strictly shorter than 90 days; capital and V2 Travel Rule withdrawals queried by caller ID require strictly less than 7 days.
+Dividend history allows up to and including 180 days, as specified by the [official schema notes](https://developers.binance.info/en/docs/catalog/core-trading-wallet/api/rest-api/1.0.0/schema.yaml).
+
 `tests/wallet_contract.rs` covers precision, malformed/missing asset evidence,
 withdrawal caller IDs and redaction, truncated mutations without retry, quota
 headers, independent endpoints, read-only POST failure, isolated transfer symbols,
 comma-separated dust assets, requested quote/target asset provenance, and native
-capital/dividend history range and withdrawal ID-list bounds.
+capital/dividend history range, daily snapshot intervals shorter than 30 days,
+Travel Rule deposit/withdrawal intervals shorter than 90 days
+(and 7 days for V2 withdrawals queried by caller ID), and withdrawal ID-list
+bounds. V2 Travel Rule withdrawal identity lists preserve the documented
+maximum of 45 records.
 Human execution review is required before merge. [Issue #16](https://github.com/SharurTrading/binance-rs/issues/16)
-tracks this implementation; Margin and Options trading remain separate products.
+tracks this implementation. Margin and Options trading have their own clients.
+
+The [Wallet change log](https://developers.binance.com/en/docs/products/wallet/change-log)
+adds Brazil questionnaire support on 2026-09-30 and clarifies purpose/relationship
+codes on 2026-10-01. Questionnaire answers remain explicit caller-supplied sensitive
+JSON, so jurisdictional selection and requirements are never fabricated by this
+client. The refreshed schema contains the same 50 operations. Catalog sample
+asset keys and the misplaced transfer-type enums on `fromSymbol`/`toSymbol` are
+normalized into native asset maps and symbol identities, as before.
 
 ## REST operations
 

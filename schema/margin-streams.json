@@ -1,0 +1,644 @@
+{
+  "source": "https://developers.binance.info/en/docs/catalog/core-trading-margin-trading/api/ws-streams/1.0.0/schema.yaml",
+  "sha256": "e35a3d501d455acbb47b65f9a4fb8af625f363202275e42ccdfebf561d0506ba",
+  "checked": "2026-10-10",
+  "components": {
+    "schemas": {
+      "marginLevelStatusChange": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "description": "Event Type",
+            "enum": [
+              "MARGIN_LEVEL_STATUS_CHANGE"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "description": "Event Time",
+            "format": "int64"
+          },
+          "l": {
+            "type": "string",
+            "description": "Margin level",
+            "x-decimal": true
+          },
+          "s": {
+            "type": "string",
+            "description": "Margin call status"
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "l",
+          "s"
+        ]
+      },
+      "userLiabilityChange": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "description": "Event Type",
+            "enum": [
+              "USER_LIABILITY_CHANGE"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "description": "Event Time",
+            "format": "int64"
+          },
+          "a": {
+            "type": "string",
+            "description": "Asset",
+            "x-rust-type": "crate::Asset"
+          },
+          "t": {
+            "type": "string",
+            "description": "Liability Update Type"
+          },
+          "p": {
+            "type": "string",
+            "description": "Principle Quantity",
+            "x-decimal": true
+          },
+          "i": {
+            "type": "string",
+            "description": "Interest Quantity",
+            "x-decimal": true
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "a",
+          "t",
+          "p",
+          "i"
+        ]
+      },
+      "Risk Data Stream Events": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/marginLevelStatusChange"
+          },
+          {
+            "$ref": "#/components/schemas/userLiabilityChange"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "e",
+          "mapping": {
+            "MARGIN_LEVEL_STATUS_CHANGE": "#/components/schemas/marginLevelStatusChange",
+            "USER_LIABILITY_CHANGE": "#/components/schemas/userLiabilityChange"
+          }
+        }
+      },
+      "balanceUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "description": "Event Type",
+            "enum": [
+              "balanceUpdate"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "description": "Event Time",
+            "format": "int64"
+          },
+          "a": {
+            "type": "string",
+            "description": "Asset",
+            "x-rust-type": "crate::Asset"
+          },
+          "d": {
+            "type": "string",
+            "description": "Balance Delta",
+            "x-decimal": true
+          },
+          "T": {
+            "type": "integer",
+            "description": "Clear Time",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "a",
+          "d",
+          "T"
+        ]
+      },
+      "executionReport": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "description": "Event type",
+            "enum": [
+              "executionReport"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "description": "Event time",
+            "format": "int64"
+          },
+          "s": {
+            "type": "string",
+            "description": "Symbol",
+            "x-rust-type": "crate::Symbol"
+          },
+          "c": {
+            "type": "string",
+            "description": "Client order ID",
+            "x-rust-type": "crate::margin::ClientOrderId"
+          },
+          "S": {
+            "type": "string",
+            "description": "Side"
+          },
+          "o": {
+            "type": "string",
+            "description": "Order type"
+          },
+          "f": {
+            "type": "string",
+            "description": "Time in force"
+          },
+          "q": {
+            "type": "string",
+            "description": "Order quantity",
+            "x-decimal": true
+          },
+          "p": {
+            "type": "string",
+            "description": "Order price",
+            "x-decimal": true
+          },
+          "P": {
+            "type": "string",
+            "description": "Stop price",
+            "x-decimal": true
+          },
+          "F": {
+            "type": "string",
+            "description": "Iceberg quantity",
+            "x-decimal": true
+          },
+          "g": {
+            "type": "integer",
+            "description": "OrderListId",
+            "format": "int64",
+            "x-rust-type": "crate::margin::OrderListId"
+          },
+          "C": {
+            "type": "string",
+            "description": "Original client order ID; This is the ID of the order being canceled"
+          },
+          "x": {
+            "type": "string",
+            "description": "Current execution type"
+          },
+          "X": {
+            "type": "string",
+            "description": "Current order status"
+          },
+          "r": {
+            "type": "string",
+            "description": "Order reject reason; will be an error code."
+          },
+          "i": {
+            "type": "integer",
+            "description": "Order ID",
+            "format": "int64",
+            "x-rust-type": "crate::margin::OrderId"
+          },
+          "l": {
+            "type": "string",
+            "description": "Last executed quantity",
+            "x-decimal": true
+          },
+          "z": {
+            "type": "string",
+            "description": "Cumulative filled quantity",
+            "x-decimal": true
+          },
+          "L": {
+            "type": "string",
+            "description": "Last executed price",
+            "x-decimal": true
+          },
+          "n": {
+            "type": "string",
+            "description": "Commission amount",
+            "x-decimal": true
+          },
+          "N": {
+            "type": "string",
+            "description": "Commission asset",
+            "x-rust-type": "crate::Asset",
+            "nullable": true
+          },
+          "T": {
+            "type": "integer",
+            "description": "Transaction time",
+            "format": "int64"
+          },
+          "t": {
+            "type": "integer",
+            "description": "Trade ID",
+            "format": "int64",
+            "x-rust-type": "crate::margin::TradeId"
+          },
+          "I": {
+            "type": "integer",
+            "description": "Ignore",
+            "format": "int64",
+            "x-rust-type": "crate::margin::RecordId"
+          },
+          "w": {
+            "type": "boolean",
+            "description": "Is the order on the book?"
+          },
+          "m": {
+            "type": "boolean",
+            "description": "Is this trade the maker side?"
+          },
+          "M": {
+            "type": "boolean",
+            "description": "Ignore"
+          },
+          "O": {
+            "type": "integer",
+            "description": "Order creation time",
+            "format": "int64"
+          },
+          "Z": {
+            "type": "string",
+            "description": "Cumulative quote asset transacted quantity",
+            "x-decimal": true
+          },
+          "Y": {
+            "type": "string",
+            "description": "Last quote asset transacted quantity (i.e. lastPrice * lastQty)",
+            "x-decimal": true
+          },
+          "Q": {
+            "type": "string",
+            "description": "Quote Order Quantity",
+            "x-decimal": true
+          },
+          "W": {
+            "type": "integer",
+            "description": "Working Time; This is only visible if the order has been placed on the book.",
+            "format": "int64"
+          },
+          "V": {
+            "type": "string",
+            "description": "selfTradePreventionMode"
+          },
+          "d": {
+            "type": "integer",
+            "description": "Trailing Delta; This is only visible if the order was a trailing stop order.",
+            "format": "int64"
+          },
+          "D": {
+            "type": "integer",
+            "description": "Trailing Time",
+            "format": "int64"
+          },
+          "j": {
+            "type": "integer",
+            "description": "Strategy Id",
+            "format": "int64"
+          },
+          "J": {
+            "type": "integer",
+            "description": "Strategy Type",
+            "format": "int64"
+          },
+          "v": {
+            "type": "integer",
+            "description": "Prevented Match Id",
+            "format": "int64"
+          },
+          "A": {
+            "type": "string",
+            "description": "Prevented Quantity",
+            "x-decimal": true
+          },
+          "B": {
+            "type": "string",
+            "description": "Last Prevented Quantity",
+            "x-decimal": true
+          },
+          "u": {
+            "type": "integer",
+            "description": "Trade Group Id",
+            "format": "int64"
+          },
+          "U": {
+            "type": "integer",
+            "description": "Counter Order Id",
+            "format": "int64"
+          },
+          "Cs": {
+            "type": "string",
+            "description": "Counter Symbol",
+            "x-rust-type": "crate::Symbol"
+          },
+          "pl": {
+            "type": "string",
+            "description": "Prevented Execution Quantity",
+            "x-decimal": true
+          },
+          "pL": {
+            "type": "string",
+            "description": "Prevented Execution Price",
+            "x-decimal": true
+          },
+          "pY": {
+            "type": "string",
+            "description": "Prevented Execution Quote Qty",
+            "x-decimal": true
+          },
+          "b": {
+            "type": "string",
+            "description": "Match Type"
+          },
+          "a": {
+            "type": "integer",
+            "description": "Allocation ID",
+            "format": "int64"
+          },
+          "k": {
+            "type": "string",
+            "description": "Working Floor"
+          },
+          "uS": {
+            "type": "boolean",
+            "description": "UsedSor"
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "s",
+          "c",
+          "S",
+          "o",
+          "f",
+          "q",
+          "p",
+          "P",
+          "F",
+          "g",
+          "C",
+          "x",
+          "X",
+          "r",
+          "i",
+          "l",
+          "z",
+          "L",
+          "n",
+          "T",
+          "t",
+          "I",
+          "w",
+          "m",
+          "M",
+          "O",
+          "Z",
+          "Y",
+          "Q",
+          "V"
+        ]
+      },
+      "listStatus": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "description": "Event Type",
+            "enum": [
+              "listStatus"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "description": "Event Time",
+            "format": "int64"
+          },
+          "s": {
+            "type": "string",
+            "description": "Symbol",
+            "x-rust-type": "crate::Symbol"
+          },
+          "g": {
+            "type": "integer",
+            "description": "OrderListId",
+            "format": "int64",
+            "x-rust-type": "crate::margin::OrderListId"
+          },
+          "c": {
+            "type": "string",
+            "description": "Contingency Type"
+          },
+          "l": {
+            "type": "string",
+            "description": "List Status Type",
+            "x-decimal": true
+          },
+          "L": {
+            "type": "string",
+            "description": "List Order Status",
+            "x-decimal": true
+          },
+          "r": {
+            "type": "string",
+            "description": "List Reject Reason"
+          },
+          "C": {
+            "type": "string",
+            "description": "List Client Order ID",
+            "x-rust-type": "crate::margin::ClientOrderId"
+          },
+          "T": {
+            "type": "integer",
+            "description": "Transaction Time",
+            "format": "int64"
+          },
+          "O": {
+            "type": "array",
+            "description": "An array of objects",
+            "items": {
+              "type": "object",
+              "properties": {
+                "s": {
+                  "type": "string",
+                  "description": "Symbol"
+                },
+                "i": {
+                  "type": "integer",
+                  "description": "orderId",
+                  "format": "int64",
+                  "x-rust-type": "crate::margin::OrderId"
+                },
+                "c": {
+                  "type": "string",
+                  "description": "ClientOrderId"
+                }
+              },
+              "required": [
+                "s",
+                "i",
+                "c"
+              ]
+            }
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "s",
+          "g",
+          "c",
+          "l",
+          "L",
+          "r",
+          "C",
+          "T",
+          "O"
+        ]
+      },
+      "listenKeyExpired": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "description": "Event type",
+            "enum": [
+              "listenKeyExpired"
+            ]
+          },
+          "E": {
+            "type": "string",
+            "description": "Event time"
+          },
+          "listenKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "listenKey"
+        ]
+      },
+      "outboundAccountPosition": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "description": "Event type",
+            "enum": [
+              "outboundAccountPosition"
+            ]
+          },
+          "E": {
+            "type": "integer",
+            "description": "Event Time",
+            "format": "int64"
+          },
+          "u": {
+            "type": "integer",
+            "description": "Time of last account update",
+            "format": "int64"
+          },
+          "B": {
+            "type": "array",
+            "description": "Balances Array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string",
+                  "description": "Asset",
+                  "x-rust-type": "crate::Asset"
+                },
+                "f": {
+                  "type": "string",
+                  "description": "Free",
+                  "x-decimal": true
+                },
+                "l": {
+                  "type": "string",
+                  "description": "Locked",
+                  "x-decimal": true
+                }
+              },
+              "required": [
+                "a",
+                "f",
+                "l"
+              ]
+            }
+          }
+        },
+        "required": [
+          "e",
+          "E",
+          "u",
+          "B"
+        ]
+      },
+      "Trade Data Stream Events": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/marginLevelStatusChange"
+          },
+          {
+            "$ref": "#/components/schemas/userLiabilityChange"
+          },
+          {
+            "$ref": "#/components/schemas/balanceUpdate"
+          },
+          {
+            "$ref": "#/components/schemas/executionReport"
+          },
+          {
+            "$ref": "#/components/schemas/listStatus"
+          },
+          {
+            "$ref": "#/components/schemas/listenKeyExpired"
+          },
+          {
+            "$ref": "#/components/schemas/outboundAccountPosition"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "e",
+          "mapping": {
+            "MARGIN_LEVEL_STATUS_CHANGE": "#/components/schemas/marginLevelStatusChange",
+            "USER_LIABILITY_CHANGE": "#/components/schemas/userLiabilityChange",
+            "balanceUpdate": "#/components/schemas/balanceUpdate",
+            "executionReport": "#/components/schemas/executionReport",
+            "listStatus": "#/components/schemas/listStatus",
+            "listenKeyExpired": "#/components/schemas/listenKeyExpired",
+            "outboundAccountPosition": "#/components/schemas/outboundAccountPosition"
+          }
+        }
+      }
+    }
+  },
+  "operations": []
+}

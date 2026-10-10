@@ -1,9 +1,10 @@
 {
   "source": "https://developers.binance.com/en/docs/products/convert/error-code",
-  "verified": "2026-10-03",
+  "verified": "2026-10-10",
   "scope": "Convert (SAPI) definitive request refusals for money-moving mutations. Codes are universal; the page documents names and messages only, with no code-to-HTTP-status mapping, so definitive classification applies below 500 only. Identical to the Wallet page except the intentional divergence below: the page's 'Order Rejection Issues' section states that -1010 ERROR_MSG_RECEIVED, -2010 NEW_ORDER_REJECTED and -2011 CANCEL_REJECTED 'are indicated when the error is coming specifically from the matching engine', which is definitive execution evidence for Convert order placement and cancellation.",
   "divergence_from_wallet": [-2010, -2011],
   "definitive": [
+    { "code": -1002, "name": "UNAUTHORIZED" },
     { "code": -1020, "name": "UNSUPPORTED_OPERATION" },
     { "code": -1021, "name": "INVALID_TIMESTAMP" },
     { "code": -1022, "name": "INVALID_SIGNATURE" },
@@ -36,8 +37,7 @@
   ],
   "never_definitive": [
     { "code": -1000, "name": "UNKNOWN", "reason": "unknown error while processing the request" },
-    { "code": -1001, "name": "DISCONNECTED", "reason": "internal error/disconnect family; the page folds the legacy unauthorized message into this ambiguous code" },
-    { "code": -1002, "reason": "no longer on the documented page; its legacy unauthorized message now appears under -1001, so an undocumented -1002 body is an unknown code" },
+    { "code": -1001, "name": "DISCONNECTED", "reason": "internal error/disconnect; no execution refusal established" },
     { "code": -1003, "name": "TOO_MANY_REQUESTS", "reason": "rate limit; HTTP 429 with its own retry timing" },
     { "code": -1004, "name": "SERVER_BUSY", "reason": "retryable server state" },
     { "code": -1006, "name": "UNEXPECTED_RESP", "reason": "unexpected response; execution status unknown" },

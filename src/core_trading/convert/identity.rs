@@ -40,9 +40,9 @@ text_id!(
 );
 text_id!(
     AcceptanceOrderId,
-    "String order identity returned by quote acceptance; native integer query IDs remain distinct."
+    "Native string order identity returned by quote acceptance and accepted by status queries."
 );
-/// Native integer order identity used by Convert queries and limit operations.
+/// Native integer order identity returned by Convert queries and used by limit operations.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(transparent)]
 pub struct OrderId(i64);
@@ -66,5 +66,13 @@ impl OrderId {
 impl<'de> Deserialize<'de> for OrderId {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         Self::new(i64::deserialize(d)?).map_err(serde::de::Error::custom)
+    }
+}
+
+impl From<OrderId> for AcceptanceOrderId {
+    /// Explicitly render an integer order identity for the native string status query.
+    fn from(value: OrderId) -> Self {
+        // Validated positive i64 IDs render as nonempty ASCII digits, satisfying the text identity invariant.
+        Self(value.value().to_string())
     }
 }

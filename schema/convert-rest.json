@@ -1,7 +1,7 @@
 {
   "source": "https://developers.binance.info/en/docs/catalog/core-trading-convert/api/rest-api/1.0.0/schema.yaml",
   "sha256": "b73d1742126778707e132a51ace65df3e7fae277f72b5da1c63f699bb4229296",
-  "checked": "2026-09-27",
+  "checked": "2026-10-10",
   "components": {
     "schemas": {}
   },
@@ -477,7 +477,7 @@
           "required": false,
           "schema": {
             "type": "string",
-            "x-rust-type": "super::OrderId"
+            "x-rust-type": "super::AcceptanceOrderId"
           }
         },
         {

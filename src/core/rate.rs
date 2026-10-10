@@ -54,6 +54,22 @@ impl BudgetLimits {
             ..Self::usdm()
         }
     }
+    /// Options' native minute limits, documented in its public endpoint definitions:
+    /// <https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition>.
+    /// No ten-second order, daily order, raw-request or connection ceiling is stated.
+    #[must_use]
+    pub fn options() -> Self {
+        Self {
+            weight_per_minute: 2400,
+            ws_weight_per_minute: 2400,
+            orders_per_ten_seconds: u64::MAX,
+            orders_per_minute: 1200,
+            orders_per_day: None,
+            raw_requests_per_five_minutes: None,
+            connections_per_five_minutes: None,
+            shared_request_weight: true,
+        }
+    }
     /// Spot's documented baseline; replace account limits with exchange evidence.
     /// Sources: Spot WebSocket rate limits and the March 2026 `RAW_REQUESTS` update.
     #[must_use]
@@ -92,6 +108,8 @@ impl BudgetLimits {
 
 #[derive(Clone, Copy, Default)]
 pub(crate) struct Cost {
+    /// Caller-retained venue authority, never serialized into the wire request.
+    pub authority_expiry: Option<u64>,
     pub sapi: Option<super::sapi::SapiCost>,
     pub weight: u64,
     pub orders10: u64,
@@ -106,10 +124,14 @@ pub(crate) struct Cost {
     pub download: u8,
 }
 impl Cost {
+    pub(crate) fn validate_authority(self, operation: &'static str, now: u64) -> Result<(), Error> {
+        if self.authority_expiry.is_some_and(|expiry| now >= expiry) {
+            return Err(Error::Expired(operation));
+        }
+        Ok(())
+    }
     /// The weight this cost charges a pool's minute weight window.
-    ///
-    /// REST requests carry their weight in `weight`; WebSocket API requests in
-    /// `ws_weight`, which a pool counting both together charges the same window.
+    /// REST uses `weight`; WebSocket API uses `ws_weight`.
     pub(crate) fn request_weight(&self) -> u64 {
         self.weight.max(self.ws_weight)
     }
@@ -123,7 +145,10 @@ pub(super) struct State {
     pub(super) cooldown_timing_unknown: bool,
     observed_weight: (u64, u64),
     order_windows: BTreeMap<u64, (u64, u64, u64)>,
+    /// Margin venue order quotas are distinct from Spot/Futures/FIX evidence.
+    pub(super) sapi_order_windows: BTreeMap<u64, (u64, u64, u64)>,
     pub(super) endpoints: BTreeMap<(&'static str, u64), (u64, u64)>,
+    pub(super) endpoint_ip_requests: BTreeMap<&'static str, (u64, u64)>,
     pub(super) endpoint_cooldown: BTreeMap<&'static str, u64>,
     // The latest limits the venue stated for this pool; the baseline stands until then.
     stated_weight_per_minute: Option<u64>,
@@ -224,7 +249,7 @@ impl Budgets {
     }
     pub(crate) fn admit(&self, c: Cost, now: u64) -> Result<(), Error> {
         if let Some(cost) = c.sapi {
-            return self.admit_sapi(cost, now);
+            return self.admit_sapi(cost, c, now);
         }
         let mut ip = self
             .ip
@@ -496,8 +521,12 @@ impl Budgets {
 pub(crate) enum VenuePool {
     /// Spot's own IP limits.
     Spot,
+    /// SAPI independent endpoint IP scopes shared by Wallet, Convert and Margin.
+    Sapi,
     /// USDⓈ-M and COIN-M, which share one IP limit since the UM/CM integration.
     Futures,
+    /// Options' EAPI IP limit, independent of Spot, SAPI and Futures.
+    Options,
 }
 
 /// The environment a pool counts; demo and production never share a pool.
@@ -509,8 +538,8 @@ pub(crate) enum PoolEnvironment {
     Production,
 }
 
-/// One IP weight pool per venue pool and environment: Spot's own, and USDⓈ-M with
-/// COIN-M together. `Config::new` draws on the process's registry; a registry built
+/// One IP weight pool per venue pool and environment: Spot, Options, USDⓈ-M with
+/// COIN-M together, and SAPI endpoint scopes. `Config::new` draws on the process's registry; a registry built
 /// here is independent of it and of every other.
 #[derive(Default)]
 pub struct WeightPools {
@@ -545,10 +574,12 @@ impl WeightPools {
         if let Some(owner) = pools.get(&(pool, environment)) {
             return Ok(owner.for_account());
         }
-        let owner = Budgets::new(match pool {
-            VenuePool::Spot => BudgetLimits::spot(),
-            VenuePool::Futures => BudgetLimits::coinm(),
-        })?;
+        let owner = match pool {
+            VenuePool::Spot => Budgets::new(BudgetLimits::spot())?,
+            VenuePool::Futures => Budgets::new(BudgetLimits::coinm())?,
+            VenuePool::Sapi => Budgets::sapi()?,
+            VenuePool::Options => Budgets::new(BudgetLimits::options())?,
+        };
         let drawn = owner.for_account();
         pools.insert((pool, environment), owner);
         Ok(drawn)

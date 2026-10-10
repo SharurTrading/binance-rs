@@ -16,7 +16,7 @@ use std::sync::{
 };
 use support::{FixedClock, HttpFixture, deadline};
 fn config() -> convert::Config {
-    convert::Config::new()
+    convert::Config::with_pools(&binance_client::WeightPools::new())
         .unwrap()
         .clock(Arc::new(FixedClock(1000)))
         .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())
@@ -154,10 +154,21 @@ async fn unknown_acceptance_status_is_preserved_without_claiming_execution() {
 }
 #[test]
 fn history_and_order_queries_validate_required_evidence() {
-    let request = convert::rest_requests::GetConvertTradeHistory::new()
-        .start_time(0)
-        .end_time(2_592_000_001);
-    assert!(request.build().is_err());
+    let thirty_days = 2_592_000_000;
+    for (span, accepted) in [
+        (thirty_days - 1, true),
+        (thirty_days, true),
+        (thirty_days + 1, false),
+    ] {
+        assert_eq!(
+            convert::rest_requests::GetConvertTradeHistory::new()
+                .start_time(0)
+                .end_time(span)
+                .build()
+                .is_ok(),
+            accepted
+        );
+    }
     assert!(convert::rest_requests::OrderStatus::new().build().is_err());
     assert!(
         serde_json::from_str::<convert::rest_models::OrderStatusResponse>(
@@ -242,7 +253,7 @@ async fn definitive_codes_match_the_pinned_error_code_snapshot() {
     // Machine-checks schema/convert-error-codes.json, including Convert's only
     // intentional divergence from Wallet: the matching-engine rejection codes
     // -2010/-2011. Every never-definitive code (retryable, unknown-execution,
-    // rate, and the retired -1002) stays ambiguous, and every 5xx too.
+    // rate, and future codes) stays ambiguous, and every 5xx too.
     let snapshot = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/schema/convert-error-codes.json"
@@ -383,6 +394,44 @@ async fn ban_without_retry_timing_does_not_fabricate_permission_to_send() {
         .await
         .unwrap_err();
     assert_eq!(error.outcome(), Some(Outcome::NotSent));
+    assert_eq!(fixture.connections_accepted(), 1);
+    fixture.finish().await;
+}
+
+#[tokio::test]
+async fn status_query_retains_acceptance_string_order_identity() {
+    let id = convert::AcceptanceOrderId::new("venue-order-000123").unwrap();
+    let request = convert::rest_requests::OrderStatus::new()
+        .order_id(id)
+        .build()
+        .unwrap();
+    assert_eq!(
+        serde_json::to_value(&request).unwrap()["orderId"],
+        "venue-order-000123"
+    );
+    let mut fixture = HttpFixture::new(
+        200,
+        "",
+        r#"{"orderId":123,"orderStatus":"SUCCESS","fromAsset":"BTC","fromAmount":"0.001","toAsset":"ETH","toAmount":"0.015125","ratio":"15.125","inverseRatio":"0.0661157","createTime":1000}"#,
+        None,
+        false,
+    )
+    .await;
+    let client = convert::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+    let result = client
+        .order_status(&request, deadline())
+        .await
+        .unwrap()
+        .data;
+    assert_eq!(result.order_id.value(), 123);
+    assert!(
+        fixture
+            .requests
+            .recv()
+            .await
+            .unwrap()
+            .contains("orderId=venue-order-000123")
+    );
     assert_eq!(fixture.connections_accepted(), 1);
     fixture.finish().await;
 }

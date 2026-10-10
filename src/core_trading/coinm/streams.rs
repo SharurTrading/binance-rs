@@ -69,8 +69,9 @@ pub struct Streams {
 impl Streams {
     /// Connect one market socket without spawning a task.
     ///
-    /// `streams` may be empty: the socket then carries no stream until
-    /// [`Streams::subscribe`] adds one.
+    /// With an empty `streams` slice, the client omits the initial stream query
+    /// and initializes empty membership. [`Streams::subscribe`] can subsequently
+    /// send Binance's documented live subscription control messages.
     ///
     /// # Errors
     /// Refuses duplicate names or more than Binance's documented 1024 subscriptions

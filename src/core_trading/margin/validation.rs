@@ -182,19 +182,7 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
     validate_magnitudes(p)?;
     validate_range(op, p)?;
     validate_scope_and_lists(p)?;
-    if op == "createUserListenToken" {
-        return Err(Error::Configuration(
-            "Margin token issuance security evidence unresolved",
-        ));
-    }
     match op {
-        "createUserListenToken"
-            if p.contains_key("symbol") && p.get("isIsolated") != Some(&Value::Bool(true)) =>
-        {
-            return Err(Error::Validation(
-                "Margin cross token cannot select isolated symbol",
-            ));
-        }
         "marginAccountNewOrder" => order(p, "", true)?,
         "marginAccountNewOco" => {
             if p.contains_key("stopLimitPrice") != p.contains_key("stopLimitTimeInForce") {

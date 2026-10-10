@@ -379,24 +379,139 @@ fn issued_token() -> margin::ListenToken {
     result
 }
 #[tokio::test]
-async fn token_security_gap_refuses_issuance_before_network_send() {
+async fn token_issuance_uses_api_key_only_and_retains_native_scope() {
+    for (isolated, has_symbol) in [(false, false), (true, true), (false, true)] {
+        let mut fixture = HttpFixture::new(
+            200,
+            "X-SAPI-USED-UID-WEIGHT-1M: 1\r\n",
+            r#"{"token":"synthetic-issued-token","expirationTime":2000}"#,
+            None,
+            false,
+        )
+        .await;
+        let client = margin::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        let mut request = margin::rest_requests::CreateUserListenToken::new().validity(1000);
+        if has_symbol {
+            request = request
+                .is_isolated(isolated)
+                .symbol(Symbol::new("BTCUSDT").unwrap());
+        }
+        let response = client
+            .create_user_listen_token(&request, deadline())
+            .await
+            .unwrap();
+        let scope = if isolated {
+            margin::AccountScope::Isolated(Symbol::new("BTCUSDT").unwrap())
+        } else {
+            margin::AccountScope::Cross
+        };
+        assert_eq!(response.data.scope, scope);
+        assert_eq!(response.data.receipt.expiration_time, 2000);
+        assert_eq!(
+            response.data.receipt.token.as_str(),
+            "synthetic-issued-token"
+        );
+        assert!(!format!("{:?}", response.data).contains("synthetic-issued-token"));
+        assert_eq!(response.meta.rates.counters["x-sapi-used-uid-weight-1m"], 1);
+        let wire = fixture.requests.recv().await.unwrap();
+        assert!(wire.starts_with("POST /sapi/v1/userListenToken HTTP/1.1"));
+        assert!(
+            wire.to_ascii_lowercase()
+                .contains("x-mbx-apikey: synthetic-key")
+        );
+        assert!(wire.contains("validity=1000"));
+        assert_eq!(wire.contains("isIsolated=true"), isolated);
+        assert_eq!(wire.contains("symbol=BTCUSDT"), has_symbol);
+        assert_eq!(wire.contains("isIsolated=false"), has_symbol && !isolated);
+        assert!(!wire.contains("signature="));
+        assert!(!wire.contains("timestamp="));
+        assert_eq!(fixture.connections_accepted(), 1);
+        fixture.finish().await;
+    }
+}
+#[test]
+fn token_scope_and_validity_are_checked_without_fabricating_defaults() {
+    let request = margin::rest_requests::CreateUserListenToken::new();
+    assert!(request.clone().build().is_ok());
+    assert!(request.clone().is_isolated(true).build().is_err());
+    assert!(
+        request
+            .clone()
+            .symbol(Symbol::new("BTCUSDT").unwrap())
+            .build()
+            .is_ok()
+    );
+    assert!(
+        request
+            .clone()
+            .is_isolated(false)
+            .symbol(Symbol::new("BTCUSDT").unwrap())
+            .build()
+            .is_ok()
+    );
+    assert!(request.clone().validity(0).build().is_err());
+    assert!(request.clone().validity(86_400_001).build().is_err());
+    assert!(request.validity(86_400_000).build().is_ok());
+}
+#[tokio::test]
+async fn token_issuance_without_credentials_refuses_before_network_send() {
     let fixture = HttpFixture::new(
         200,
         "",
-        r#"{"token":"should-not-issue","expirationTime":2000}"#,
+        r#"{"token":"synthetic-issued-token","expirationTime":2000}"#,
         None,
         false,
     )
     .await;
-    let client = margin::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
-    let request = margin::rest_requests::CreateUserListenToken::new();
+    let client = margin::RestClient::new(
+        margin::Config::with_pools(&binance_client::WeightPools::new())
+            .unwrap()
+            .rest_url(&fixture.url)
+            .unwrap(),
+    )
+    .unwrap();
     let error = client
-        .create_user_listen_token(&request, deadline())
+        .create_user_listen_token(
+            &margin::rest_requests::CreateUserListenToken::new(),
+            deadline(),
+        )
         .await
         .unwrap_err();
+    assert!(matches!(error, Error::CredentialsRequired));
     assert_eq!(error.outcome(), Some(Outcome::NotSent));
     assert_eq!(fixture.connections_accepted(), 0);
     fixture.finish().await;
+}
+#[tokio::test]
+async fn malformed_issued_token_preserves_ambiguous_response_evidence_without_retry() {
+    for body in [
+        r#"{"token":"","expirationTime":2000}"#,
+        r#"{"token":"synthetic-issued-token","expirationTime":-1}"#,
+        r#"{"token":"synthetic-issued-token"}"#,
+    ] {
+        let fixture =
+            HttpFixture::new(200, "X-SAPI-USED-UID-WEIGHT-1M: 1\r\n", body, None, false).await;
+        let client = margin::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        let error = client
+            .create_user_listen_token(
+                &margin::rest_requests::CreateUserListenToken::new(),
+                deadline(),
+            )
+            .await
+            .unwrap_err();
+        assert_eq!(error.outcome(), Some(Outcome::Unknown));
+        assert!(!format!("{error:?}").contains("synthetic-issued-token"));
+        let Error::Transport {
+            meta: Some(meta), ..
+        } = error
+        else {
+            panic!("token response decode evidence")
+        };
+        assert_eq!(meta.status, 200);
+        assert_eq!(meta.rates.counters["x-sapi-used-uid-weight-1m"], 1);
+        assert_eq!(fixture.connections_accepted(), 1);
+        fixture.finish().await;
+    }
 }
 #[tokio::test]
 async fn capacity_keeps_asset_and_isolated_request_provenance() {
@@ -521,7 +636,7 @@ mod sockets {
             assert_eq!(frame["params"]["listenToken"], "synthetic-margin-token");
             sent.send(()).unwrap();
             permit.await.unwrap();
-            ws.send(Message::text(json!({"id":frame["id"],"status":200,"result":{"subscriptionId":7,"expirationTime":2000}}).to_string())).await.unwrap();
+            ws.send(Message::text(json!({"id":frame["id"],"status":200,"result":{"subscriptionId":7,"expirationTime":2000},"rateLimits":[{"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"count":2}]}).to_string())).await.unwrap();
             ws.send(Message::text(json!({"subscriptionId":7,"event":{"e":"USER_LIABILITY_CHANGE","E":123,"a":"BTC","t":"REPAY","p":"1","i":"0.01"}}).to_string())).await.unwrap();
             ws.send(Message::text(
                 json!({"subscriptionId":7,"event":{"e":"eventStreamTerminated","E":124}})
@@ -542,7 +657,6 @@ mod sockets {
         assert!(
             matches!(events.recv().await,Some(margin::ApiEvent::Established(g))if g==generation)
         );
-        tokio::time::pause();
         let sender = client.clone();
         let call = tokio::spawn(async move {
             sender
@@ -554,14 +668,15 @@ mod sockets {
                 .await
         });
         received.await.unwrap();
+        // Pause only after real I/O confirms acceptance, then resume before any
+        // awaited I/O or task completion can advance the 24-hour generation timer.
+        tokio::time::pause();
         tokio::time::advance(Duration::from_secs(1)).await;
+        tokio::time::resume();
         assert_eq!(
             call.await.unwrap().unwrap_err().outcome(),
             Some(Outcome::Unknown)
         );
-        // The controlled deadline has elapsed. Real socket I/O must not let paused
-        // time automatically advance to the documented 24-hour generation expiry.
-        tokio::time::resume();
         answer.send(()).unwrap();
         let event = events.recv().await.unwrap();
         let margin::ApiEvent::Late {
@@ -570,11 +685,18 @@ mod sockets {
             result,
         } = event
         else {
-            panic!("late answer")
+            panic!("late answer: {event:?}")
         };
         assert_eq!(g, generation);
         assert_eq!(id.as_str(), "late-margin");
-        assert_eq!(result.unwrap().data.subscription_id, 7);
+        let response = result.unwrap();
+        assert_eq!(response.data.subscription_id, 7);
+        assert_eq!(response.meta.status, 200);
+        assert_eq!(
+            response.meta.operation,
+            "userDataStreamSubscribeListenToken"
+        );
+        assert_eq!(response.meta.rates.counters["x-mbx-used-weight-1m"], 2);
         assert!(
             matches!(events.recv().await,Some(margin::ApiEvent::UserData{generation:g,subscription_id:7,payload:margin::event_payloads::UserPayload::UserLiabilityChange(_),})if g==generation)
         );

@@ -33,9 +33,10 @@ Seven separate JSON product clients are available under `binance_client::core_tr
 [Convert coverage](docs/convert-coverage.md),
 [Margin coverage](docs/margin-coverage.md), and
 [Options coverage](docs/options-coverage.md) record official sources and
-verification limits. Margin has 64 currently dispatchable REST operations; the
-October 14 query is date-gated and token issuance awaits authoritative authentication
-details tracked in [issue #76](https://github.com/SharurTrading/binance-rs/issues/76).
+verification limits. Margin has 65 currently dispatchable REST operations; the
+October 14 query is date-gated. Token issuance uses the documented API-key-only
+`USER_STREAM` contract. Announced UTA stream scope is tracked in
+[issue #76](https://github.com/SharurTrading/binance-rs/issues/76).
 Advanced Spot JSON bindings include order lists, SOR, amend,
 cancel/replace partial evidence, and explicit microsecond units. COIN-M migrated
 algo evidence remains tracked in

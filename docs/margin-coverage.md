@@ -5,12 +5,12 @@ SPDX-License-Identifier: MIT-0
 
 # Margin coverage and protocol evidence
 
-Checked **2026-10-10** against Binance's official Margin REST catalog: **66
+Checked **2026-10-11** against Binance's official Margin REST catalog: **66
 catalog operations**, minus one retired Cross Margin Pro operation, plus the recommended `POST /sapi/v1/userListenToken`
 operation documented on the product's new listen-token page: **66 bindings**.
 The bindings use **54 distinct REST paths**.
-As of October 10, **64 dispatchable operations** exclude the future open-list
-query and token issuance pending authoritative REST security evidence. Bindings cover
+As of October 11, **65 dispatchable operations** exclude the future open-list
+query. Bindings cover
 account data/configuration, cross/isolated margin, borrow/repay and liability
 history, market metadata, risk stream key lifecycle, low-latency special keys,
 orders and OCO/OTO/OTOCO lists, liquidation loans, and transfer history/capacity.
@@ -94,12 +94,16 @@ renewal. The recommended trade stream uses `WsClient` on
 `wss://ws-api.binance.com:443/ws-api/v3` and the unauthenticated
 `userDataStream.subscribe.listenToken` method, charging its documented weight
 of 2. `ListenToken::new` accepts externally issued native receipts with explicit
-source scope. REST token issuance currently refuses before admission/network IO:
-the official token page omits authentication/signing declarations, so the client
-does not fabricate a security contract. The unresolved authentication contract
-is tracked in [issue #76](https://github.com/SharurTrading/binance-rs/issues/76).
-Tokens retain source account scope and
-millisecond expiry. Reissuing a
+source scope. REST token issuance uses the official retained endpoint heading
+`USER_STREAM` and the general security table: a valid `X-MBX-APIKEY` header,
+without a signature or timestamp. The modern token page supplies the same native
+parameters, quota and response. The security source URL, checked date and HTML
+SHA-256 are pinned in the snapshot. Missing credentials refuse before admission
+or network IO. Empty tokens, missing expiry and negative expiry in a 200 issuance
+response fail decoding with an unknown mutation outcome, original status and quota
+evidence, and no retry.
+Tokens retain the scope selected by `isIsolated` (cross when false or absent),
+without deriving it from symbol presence, and millisecond expiry. Reissuing a
 token and subscribing again is explicit; no reconnect or replay is automatic.
 The subscription acknowledgment's expiry is retained exactly: the official
 example's magnitude differs from the REST millisecond example, so it never
@@ -140,6 +144,8 @@ claimed as implemented coverage.
 - [Margin changelog and effective dates](https://developers.binance.com/en/docs/products/margin-trading/change-log)
 - [Margin error codes](https://developers.binance.com/en/docs/products/margin-trading/error-code)
 - [Risk stream lifecycle and events](https://developers.binance.com/en/docs/products/margin-trading/risk-data-stream)
+- [Retained token issuance security contract](https://developers.binance.com/legacy-docs/margin_trading/trade-data-stream/Listen-Token-Websocket-API)
+- [Retained authentication table](https://developers.binance.com/legacy-docs/margin_trading/general-info)
 - [Recommended listen-token subscriptions and expiry](https://developers.binance.com/en/docs/products/margin-trading/listen-token-data-stream)
 - [Native Margin stream event schemas](https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/ws-streams/~schemas)
 

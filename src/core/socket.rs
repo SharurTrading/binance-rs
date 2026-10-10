@@ -445,11 +445,6 @@ impl SocketDriver {
                 }
                 let client_order_ids = super::request::order_ids(&params);
                 let prepare = (|| {
-                    if op.security == Security::Unresolved {
-                        return Err(Error::Configuration(
-                            "endpoint authentication contract unresolved",
-                        ));
-                    }
                     let now = self.clock.now_millis()?;
                     cost.validate_authority(op.name, now)?;
                     (op.validate_time)(&params, now)?;

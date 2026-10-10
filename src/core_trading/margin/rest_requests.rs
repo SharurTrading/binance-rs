@@ -5721,7 +5721,7 @@ impl Request for CreateUserListenToken {
         name: "createUserListenToken",
         path: "/sapi/v1/userListenToken",
         method: "POST",
-        security: Security::Unresolved,
+        security: Security::Key,
         mutation: true,
         weight: 1,
         requests_per_second: None,

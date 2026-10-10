@@ -11,8 +11,6 @@ pub(crate) enum Security {
     Public,
     Key,
     Signed,
-    /// No authoritative authentication contract: dispatch must refuse unsent.
-    Unresolved,
 }
 
 #[derive(Clone, Copy)]

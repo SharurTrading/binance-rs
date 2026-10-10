@@ -8975,7 +8975,7 @@
       ],
       "path": "/sapi/v1/userListenToken",
       "method": "POST",
-      "x-security-type": "UNRESOLVED",
+      "x-security-type": "USER_STREAM",
       "x-uid-weight": 1,
       "source": "https://developers.binance.com/en/docs/products/margin-trading/listen-token-data-stream",
       "parameters": [
@@ -9017,10 +9017,12 @@
                 "properties": {
                   "token": {
                     "type": "string",
-                    "x-rust-type": "crate::SensitiveString"
+                    "x-rust-type": "crate::SensitiveString",
+                    "x-deserialize-with": "super::wire::listen_token"
                   },
                   "expirationTime": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-deserialize-with": "super::wire::expiration_time"
                   }
                 }
               }
@@ -9028,7 +9030,14 @@
           }
         }
       },
-      "x-dispatch-blocker": "Current official token page does not declare REST authentication/signing. Do not dispatch until authoritative evidence resolves it."
+      "x-security-evidence": {
+        "source": "https://developers.binance.com/legacy-docs/margin_trading/trade-data-stream/Listen-Token-Websocket-API",
+        "sha256": "df7a3296a5d74104afb8914bd3ba0dd5afbc1052e9fb7346ea137d3ab6ae72dc",
+        "checked": "2026-10-11",
+        "security_type": "USER_STREAM",
+        "authentication": "API key only",
+        "general_source": "https://developers.binance.com/legacy-docs/margin_trading/general-info"
+      }
     }
   ],
   "excluded_operations": [

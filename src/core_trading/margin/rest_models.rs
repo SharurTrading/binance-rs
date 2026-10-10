@@ -2940,10 +2940,13 @@ pub struct QueryMaxTransferOutAmountResponse {
 #[non_exhaustive]
 pub struct CreateUserListenTokenResponse {
     /// Exact `token` wire field.
-    #[serde(rename = "token")]
+    #[serde(rename = "token", deserialize_with = "super::wire::listen_token")]
     pub token: crate::SensitiveString,
     /// Exact `expirationTime` wire field.
-    #[serde(rename = "expirationTime")]
+    #[serde(
+        rename = "expirationTime",
+        deserialize_with = "super::wire::expiration_time"
+    )]
     pub expiration_time: i64,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]

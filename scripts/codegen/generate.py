@@ -183,7 +183,10 @@ class Models:
             for key,s in props.items():
                 t = self.type(s, name+pascal(key), response)
                 optional = key not in required
-                if not optional and t == 'Decimal':
+                if s.get('x-deserialize-with'):
+                    optional_attrs = ', default, skip_serializing_if = \"Option::is_none\"' if optional else ''
+                    serde_attr = f'#[serde(rename = {lit(key)}{optional_attrs}, deserialize_with = {lit(s["x-deserialize-with"])})]'
+                elif not optional and t == 'Decimal':
                     serde_attr = f'#[serde(rename = {lit(key)}, deserialize_with = "super::wire::decimal")]'
                 elif not optional and t == 'Vec<Vec<Decimal>>':
                     serde_attr = f'#[serde(rename = {lit(key)}, deserialize_with = "super::wire::decimal_rows")]'
@@ -291,7 +294,7 @@ def generate(kind):
                 enums.append('('+lit(key)+', &['+', '.join(lit(str(v)) for v in s['enum'])+'])')
             if typ=='i64' and ('minimum' in s or 'maximum' in s):
                 bounds.append('('+lit(key)+', '+format(s.get('minimum',-9223372036854775808),'_')+', '+format(s.get('maximum',9223372036854775807),'_')+')')
-        security = 'Unresolved' if op.get('x-security-type') == 'UNRESOLVED' else 'Signed' if op.get('x-signed') else 'Key' if op.get('x-security-type') in ['MARKET_DATA','USER_STREAM'] else 'Public'
+        security = 'Signed' if op.get('x-signed') else 'Key' if op.get('x-security-type') in ['MARKET_DATA','USER_STREAM'] else 'Public'
         mutation = op['method']!='GET' if kind=='rest' else op['path'] in ['/order.place','/order.modify','/order.cancel','/algoOrder.place','/algoOrder.cancel','/userDataStream.start','/userDataStream.stop','/userDataStream.ping']
         if PRODUCT == 'spot' and kind == 'ws':
             mutation = op['tags'][0] == 'trade' or op['operationId'] in ['userDataStreamSubscribe','userDataStreamSubscribeSignature','userDataStreamUnsubscribe']

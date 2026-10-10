@@ -116,11 +116,6 @@ impl HttpClient {
         request: &R,
         deadline: Instant,
     ) -> Result<reqwest::Request, Error> {
-        if op.security == Security::Unresolved {
-            return Err(Error::Configuration(
-                "endpoint authentication contract unresolved",
-            ));
-        }
         let mut params = request::parameters(request)?;
         let timestamp = self.clock.now_millis()?;
         (op.validate_time)(&params, timestamp)?;

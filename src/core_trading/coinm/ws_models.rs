@@ -217,7 +217,7 @@ pub struct AccountInformationResponsePositionsItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub position_side: Option<String>,
+    pub position_side: Option<super::enums::PositionSide>,
     /// Exact `entryPrice` wire field.
     #[serde(
         rename = "entryPrice",
@@ -351,7 +351,7 @@ pub struct CancelOrderResponse {
     pub pair: Option<crate::Symbol>,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<String>,
+    pub status: Option<super::enums::OrderStatus>,
     /// Exact `clientOrderId` wire field.
     #[serde(rename = "clientOrderId")]
     pub client_order_id: ClientOrderId,
@@ -393,10 +393,10 @@ pub struct CancelOrderResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub time_in_force: Option<String>,
+    pub time_in_force: Option<super::enums::TimeInForce>,
     /// Exact `type` wire field.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_value: Option<String>,
+    pub type_value: Option<super::enums::OrderType>,
     /// Exact `reduceOnly` wire field.
     #[serde(
         rename = "reduceOnly",
@@ -413,14 +413,14 @@ pub struct CancelOrderResponse {
     pub close_position: Option<bool>,
     /// Exact `side` wire field.
     #[serde(rename = "side", default, skip_serializing_if = "Option::is_none")]
-    pub side: Option<String>,
+    pub side: Option<super::enums::OrderSide>,
     /// Exact `positionSide` wire field.
     #[serde(
         rename = "positionSide",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub position_side: Option<String>,
+    pub position_side: Option<super::enums::PositionSide>,
     /// Exact `stopPrice` wire field.
     #[serde(
         rename = "stopPrice",
@@ -435,7 +435,7 @@ pub struct CancelOrderResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub working_type: Option<String>,
+    pub working_type: Option<super::enums::WorkingType>,
     /// Exact `priceProtect` wire field.
     #[serde(
         rename = "priceProtect",
@@ -445,7 +445,7 @@ pub struct CancelOrderResponse {
     pub price_protect: Option<bool>,
     /// Exact `origType` wire field.
     #[serde(rename = "origType", default, skip_serializing_if = "Option::is_none")]
-    pub orig_type: Option<String>,
+    pub orig_type: Option<super::enums::OrderType>,
     /// Exact `updateTime` wire field.
     #[serde(
         rename = "updateTime",
@@ -473,7 +473,7 @@ pub struct ModifyOrderResponse {
     pub pair: Option<crate::Symbol>,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<String>,
+    pub status: Option<super::enums::OrderStatus>,
     /// Exact `clientOrderId` wire field.
     #[serde(rename = "clientOrderId")]
     pub client_order_id: ClientOrderId,
@@ -518,10 +518,10 @@ pub struct ModifyOrderResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub time_in_force: Option<String>,
+    pub time_in_force: Option<super::enums::TimeInForce>,
     /// Exact `type` wire field.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_value: Option<String>,
+    pub type_value: Option<super::enums::OrderType>,
     /// Exact `reduceOnly` wire field.
     #[serde(
         rename = "reduceOnly",
@@ -538,14 +538,14 @@ pub struct ModifyOrderResponse {
     pub close_position: Option<bool>,
     /// Exact `side` wire field.
     #[serde(rename = "side", default, skip_serializing_if = "Option::is_none")]
-    pub side: Option<String>,
+    pub side: Option<super::enums::OrderSide>,
     /// Exact `positionSide` wire field.
     #[serde(
         rename = "positionSide",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub position_side: Option<String>,
+    pub position_side: Option<super::enums::PositionSide>,
     /// Exact `stopPrice` wire field.
     #[serde(
         rename = "stopPrice",
@@ -560,7 +560,7 @@ pub struct ModifyOrderResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub working_type: Option<String>,
+    pub working_type: Option<super::enums::WorkingType>,
     /// Exact `priceProtect` wire field.
     #[serde(
         rename = "priceProtect",
@@ -570,7 +570,7 @@ pub struct ModifyOrderResponse {
     pub price_protect: Option<bool>,
     /// Exact `origType` wire field.
     #[serde(rename = "origType", default, skip_serializing_if = "Option::is_none")]
-    pub orig_type: Option<String>,
+    pub orig_type: Option<super::enums::OrderType>,
     /// Exact `updateTime` wire field.
     #[serde(
         rename = "updateTime",
@@ -598,7 +598,7 @@ pub struct NewOrderResponse {
     pub pair: Option<crate::Symbol>,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<String>,
+    pub status: Option<super::enums::OrderStatus>,
     /// Exact `clientOrderId` wire field.
     #[serde(rename = "clientOrderId")]
     pub client_order_id: ClientOrderId,
@@ -640,10 +640,10 @@ pub struct NewOrderResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub time_in_force: Option<String>,
+    pub time_in_force: Option<super::enums::TimeInForce>,
     /// Exact `type` wire field.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_value: Option<String>,
+    pub type_value: Option<super::enums::OrderType>,
     /// Exact `reduceOnly` wire field.
     #[serde(
         rename = "reduceOnly",
@@ -660,14 +660,14 @@ pub struct NewOrderResponse {
     pub close_position: Option<bool>,
     /// Exact `side` wire field.
     #[serde(rename = "side", default, skip_serializing_if = "Option::is_none")]
-    pub side: Option<String>,
+    pub side: Option<super::enums::OrderSide>,
     /// Exact `positionSide` wire field.
     #[serde(
         rename = "positionSide",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub position_side: Option<String>,
+    pub position_side: Option<super::enums::PositionSide>,
     /// Exact `stopPrice` wire field.
     #[serde(
         rename = "stopPrice",
@@ -682,7 +682,7 @@ pub struct NewOrderResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub working_type: Option<String>,
+    pub working_type: Option<super::enums::WorkingType>,
     /// Exact `priceProtect` wire field.
     #[serde(
         rename = "priceProtect",
@@ -692,7 +692,7 @@ pub struct NewOrderResponse {
     pub price_protect: Option<bool>,
     /// Exact `origType` wire field.
     #[serde(rename = "origType", default, skip_serializing_if = "Option::is_none")]
-    pub orig_type: Option<String>,
+    pub orig_type: Option<super::enums::OrderType>,
     /// Exact `updateTime` wire field.
     #[serde(
         rename = "updateTime",
@@ -791,7 +791,7 @@ pub struct PositionInformationResponseItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub position_side: Option<String>,
+    pub position_side: Option<super::enums::PositionSide>,
     /// Exact `notionalValue` wire field.
     #[serde(
         rename = "notionalValue",
@@ -845,7 +845,7 @@ pub struct QueryOrderResponse {
     pub pair: Option<crate::Symbol>,
     /// Exact `status` wire field.
     #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<String>,
+    pub status: Option<super::enums::OrderStatus>,
     /// Exact `clientOrderId` wire field.
     #[serde(rename = "clientOrderId")]
     pub client_order_id: ClientOrderId,
@@ -903,10 +903,10 @@ pub struct QueryOrderResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub time_in_force: Option<String>,
+    pub time_in_force: Option<super::enums::TimeInForce>,
     /// Exact `type` wire field.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_value: Option<String>,
+    pub type_value: Option<super::enums::OrderType>,
     /// Exact `reduceOnly` wire field.
     #[serde(
         rename = "reduceOnly",
@@ -923,14 +923,14 @@ pub struct QueryOrderResponse {
     pub close_position: Option<bool>,
     /// Exact `side` wire field.
     #[serde(rename = "side", default, skip_serializing_if = "Option::is_none")]
-    pub side: Option<String>,
+    pub side: Option<super::enums::OrderSide>,
     /// Exact `positionSide` wire field.
     #[serde(
         rename = "positionSide",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub position_side: Option<String>,
+    pub position_side: Option<super::enums::PositionSide>,
     /// Exact `stopPrice` wire field.
     #[serde(
         rename = "stopPrice",
@@ -945,7 +945,7 @@ pub struct QueryOrderResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub working_type: Option<String>,
+    pub working_type: Option<super::enums::WorkingType>,
     /// Exact `priceProtect` wire field.
     #[serde(
         rename = "priceProtect",
@@ -955,14 +955,14 @@ pub struct QueryOrderResponse {
     pub price_protect: Option<bool>,
     /// Exact `origType` wire field.
     #[serde(rename = "origType", default, skip_serializing_if = "Option::is_none")]
-    pub orig_type: Option<String>,
+    pub orig_type: Option<super::enums::OrderType>,
     /// Exact `selfTradePreventionMode` wire field.
     #[serde(
         rename = "selfTradePreventionMode",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub self_trade_prevention_mode: Option<String>,
+    pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
     /// Exact `time` wire field.
     #[serde(rename = "time", default, skip_serializing_if = "Option::is_none")]
     pub time: Option<i64>,
@@ -979,7 +979,7 @@ pub struct QueryOrderResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub price_match: Option<String>,
+    pub price_match: Option<super::enums::PriceMatch>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,

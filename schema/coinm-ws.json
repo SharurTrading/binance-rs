@@ -190,7 +190,7 @@
                               "type": "boolean"
                             },
                             "positionSide": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/PositionSide"
                             },
                             "entryPrice": {
                               "type": "string",
@@ -230,10 +230,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -380,10 +380,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -510,7 +510,7 @@
                         "x-rust-type": "crate::Symbol"
                       },
                       "status": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "clientOrderId": {
                         "type": "string",
@@ -533,10 +533,10 @@
                         "x-decimal": true
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "reduceOnly": {
                         "type": "boolean"
@@ -545,23 +545,23 @@
                         "type": "boolean"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "positionSide": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PositionSide"
                       },
                       "stopPrice": {
                         "type": "string",
                         "x-decimal": true
                       },
                       "workingType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingType"
                       },
                       "priceProtect": {
                         "type": "boolean"
                       },
                       "origType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "updateTime": {
                         "type": "integer",
@@ -579,10 +579,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -743,7 +743,7 @@
                         "x-rust-type": "crate::Symbol"
                       },
                       "status": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "clientOrderId": {
                         "type": "string",
@@ -770,10 +770,10 @@
                         "x-decimal": true
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "reduceOnly": {
                         "type": "boolean"
@@ -782,23 +782,23 @@
                         "type": "boolean"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "positionSide": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PositionSide"
                       },
                       "stopPrice": {
                         "type": "string",
                         "x-decimal": true
                       },
                       "workingType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingType"
                       },
                       "priceProtect": {
                         "type": "boolean"
                       },
                       "origType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "updateTime": {
                         "type": "integer",
@@ -816,10 +816,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1059,7 +1059,7 @@
                         "x-rust-type": "crate::Symbol"
                       },
                       "status": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "clientOrderId": {
                         "type": "string",
@@ -1082,10 +1082,10 @@
                         "x-decimal": true
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "reduceOnly": {
                         "type": "boolean"
@@ -1094,23 +1094,23 @@
                         "type": "boolean"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "positionSide": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PositionSide"
                       },
                       "stopPrice": {
                         "type": "string",
                         "x-decimal": true
                       },
                       "workingType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingType"
                       },
                       "priceProtect": {
                         "type": "boolean"
                       },
                       "origType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "updateTime": {
                         "type": "integer",
@@ -1128,10 +1128,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1284,7 +1284,7 @@
                           "type": "string"
                         },
                         "positionSide": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/PositionSide"
                         },
                         "notionalValue": {
                           "type": "string",
@@ -1310,10 +1310,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1440,7 +1440,7 @@
                         "x-rust-type": "crate::Symbol"
                       },
                       "status": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "clientOrderId": {
                         "type": "string",
@@ -1471,10 +1471,10 @@
                         "x-decimal": true
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "reduceOnly": {
                         "type": "boolean"
@@ -1483,26 +1483,26 @@
                         "type": "boolean"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "positionSide": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PositionSide"
                       },
                       "stopPrice": {
                         "type": "string",
                         "x-decimal": true
                       },
                       "workingType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingType"
                       },
                       "priceProtect": {
                         "type": "boolean"
                       },
                       "origType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "selfTradePreventionMode": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/SelfTradePreventionMode"
                       },
                       "time": {
                         "type": "integer",
@@ -1513,7 +1513,7 @@
                         "format": "int64"
                       },
                       "priceMatch": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/PriceMatch"
                       }
                     },
                     "required": [
@@ -1527,10 +1527,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1627,10 +1627,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1731,10 +1731,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1835,10 +1835,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1867,6 +1867,141 @@
     }
   ],
   "components": {
-    "schemas": {}
+    "schemas": {
+      "PriceMatch": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "OPPONENT",
+          "OPPONENT_5",
+          "OPPONENT_10",
+          "OPPONENT_20",
+          "QUEUE",
+          "QUEUE_5",
+          "QUEUE_10",
+          "QUEUE_20"
+        ],
+        "description": "Native `PriceMatch` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "WorkingType": {
+        "type": "string",
+        "enum": [
+          "MARK_PRICE",
+          "CONTRACT_PRICE"
+        ],
+        "description": "Native `WorkingType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "OrderType": {
+        "type": "string",
+        "enum": [
+          "LIMIT",
+          "MARKET",
+          "STOP",
+          "STOP_MARKET",
+          "TAKE_PROFIT",
+          "TAKE_PROFIT_MARKET",
+          "TRAILING_STOP_MARKET",
+          "LIQUIDATION"
+        ],
+        "description": "Native `OrderType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition",
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/user-data-streams"
+        ]
+      },
+      "PositionSide": {
+        "type": "string",
+        "enum": [
+          "BOTH",
+          "LONG",
+          "SHORT"
+        ],
+        "description": "Native `PositionSide` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "PARTIALLY_FILLED",
+          "FILLED",
+          "CANCELED",
+          "EXPIRED",
+          "EXPIRED_IN_MATCH"
+        ],
+        "description": "Native `OrderStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition",
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/user-data-streams"
+        ]
+      },
+      "OrderSide": {
+        "type": "string",
+        "enum": [
+          "BUY",
+          "SELL"
+        ],
+        "description": "Native `OrderSide` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "SelfTradePreventionMode": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "EXPIRE_TAKER",
+          "EXPIRE_BOTH",
+          "EXPIRE_MAKER"
+        ],
+        "description": "Native `SelfTradePreventionMode` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition",
+          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#new-order"
+        ]
+      },
+      "TimeInForce": {
+        "type": "string",
+        "enum": [
+          "GTC",
+          "IOC",
+          "FOK",
+          "GTX"
+        ],
+        "description": "Native `TimeInForce` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "RateLimitInterval": {
+        "type": "string",
+        "enum": [
+          "MINUTE"
+        ],
+        "description": "Native `RateLimitInterval` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      },
+      "RateLimitType": {
+        "type": "string",
+        "enum": [
+          "REQUEST_WEIGHT",
+          "ORDERS"
+        ],
+        "description": "Native `RateLimitType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/common-definition"
+        ]
+      }
+    }
   }
 }

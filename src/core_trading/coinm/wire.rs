@@ -47,6 +47,17 @@ pub(crate) fn decimal_option<'de, D: Deserializer<'de>>(d: D) -> Result<Option<D
         .transpose()
 }
 
+// Required COIN-M mark-stream funding evidence uses only the documented empty
+// string for delivery contracts. Missing fields and JSON null are malformed.
+pub(crate) fn decimal_empty<'de, D: Deserializer<'de>>(d: D) -> Result<Option<Decimal>, D::Error> {
+    match Value::deserialize(d)? {
+        Value::String(value) if value.is_empty() => Ok(None),
+        value => parse_decimal(&value)
+            .map(Some)
+            .map_err(serde::de::Error::custom),
+    }
+}
+
 // Only fields with an explicitly documented unavailable sentinel use this parser.
 pub(crate) fn decimal_option_empty<'de, D: Deserializer<'de>>(
     d: D,

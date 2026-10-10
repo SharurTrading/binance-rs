@@ -6,6 +6,8 @@
 //! acceptance checks it again immediately before sending. Caller cancellation never
 //! proves venue cancellation; reconcile unknown outcomes with `order_status`.
 //! No hidden runtime, background tasks, wallet selection or accounting is provided.
+/// Provider-native response enumerations with exact unknown-value retention.
+pub mod enums;
 pub mod event_payloads;
 mod identity;
 mod quote;

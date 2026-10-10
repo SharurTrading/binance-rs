@@ -126,6 +126,22 @@ pub(crate) fn encode(params: &BTreeMap<String, Value>) -> Result<String, Error> 
     Ok(form.finish())
 }
 
+fn exact_decimal(value: &Value) -> Result<rust_decimal::Decimal, Error> {
+    let value = text(value)?;
+    if let Ok(decimal) = rust_decimal::Decimal::from_str_exact(&value) {
+        return Ok(decimal);
+    }
+    let (mantissa, _) = value
+        .split_once(['e', 'E'])
+        .ok_or(Error::Validation("decimal parameter"))?;
+    // Scientific parsing internally uses FromStr for the mantissa, which can
+    // round. Validate it exactly before applying the exponent.
+    rust_decimal::Decimal::from_str_exact(mantissa)
+        .map_err(|_| Error::Validation("decimal parameter"))?;
+    rust_decimal::Decimal::from_scientific(&value)
+        .map_err(|_| Error::Validation("decimal parameter"))
+}
+
 pub(crate) fn validate_parameters(
     p: &BTreeMap<String, Value>,
     required: &[&str],
@@ -156,9 +172,7 @@ pub(crate) fn validate_parameters(
         }
     }
     if let Some(value) = p.get("recvWindow") {
-        let n = text(value)?
-            .parse::<rust_decimal::Decimal>()
-            .map_err(|_| Error::Validation("recvWindow"))?;
+        let n = exact_decimal(value).map_err(|_| Error::Validation("recvWindow"))?;
         if n <= rust_decimal::Decimal::ZERO
             || n > rust_decimal::Decimal::new(60_000, 0)
             || n.scale() > 3
@@ -179,10 +193,14 @@ pub(crate) fn validate_parameters(
         "amount",
     ] {
         if let Some(value) = p.get(name) {
-            let value = text(value)?
-                .parse::<rust_decimal::Decimal>()
-                .map_err(|_| Error::Validation("decimal parameter"))?;
-            if value <= rust_decimal::Decimal::ZERO {
+            let value = exact_decimal(value)?;
+            // Price filters belong to the venue; no fixed sign floor is inferred.
+            // https://github.com/binance/binance-spot-api-docs/blob/master/filters.md#price_filter
+            if !matches!(
+                name,
+                "price" | "triggerPrice" | "stopPrice" | "activationPrice" | "activatePrice"
+            ) && value <= rust_decimal::Decimal::ZERO
+            {
                 return Err(Error::Validation("positive financial magnitude"));
             }
         }
@@ -193,6 +211,81 @@ pub(crate) fn validate_parameters(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn precision_overflow_financial_strings_are_refused_without_rounding() {
+        for name in [
+            "price",
+            "triggerPrice",
+            "stopPrice",
+            "activationPrice",
+            "activatePrice",
+            "quantity",
+            "amount",
+            "fromAmount",
+            "toAmount",
+            "callbackRate",
+        ] {
+            for value in [
+                "0.00000000000000000000000000001",
+                "1.00000000000000000000000000001",
+                "-1.00000000000000000000000000001",
+                "1e-29",
+                "1.00000000000000000000000000001e0",
+            ] {
+                let parameters = BTreeMap::from([(name.into(), serde_json::json!(value))]);
+                assert!(
+                    validate_parameters(&parameters, &[], &[], &[]).is_err(),
+                    "{name}={value}"
+                );
+                assert_eq!(parameters[name], serde_json::json!(value));
+            }
+        }
+    }
+
+    #[test]
+    fn representable_scientific_prices_preserve_original_parameter_evidence() {
+        for value in ["0e0", "-1.25e0", "1e-28", "1.25e3"] {
+            let parameters = BTreeMap::from([("price".into(), serde_json::json!(value))]);
+            assert!(validate_parameters(&parameters, &[], &[], &[]).is_ok());
+            assert_eq!(parameters["price"], serde_json::json!(value));
+        }
+    }
+
+    #[test]
+    fn decimal_prices_have_no_invented_floor_but_magnitudes_stay_positive() {
+        for name in [
+            "price",
+            "triggerPrice",
+            "stopPrice",
+            "activationPrice",
+            "activatePrice",
+        ] {
+            for value in ["0", "-1.25"] {
+                let p = BTreeMap::from([(name.into(), serde_json::json!(value))]);
+                assert!(
+                    validate_parameters(&p, &[], &[], &[]).is_ok(),
+                    "{name}={value}"
+                );
+            }
+            for value in ["NaN", "", "private-invalid"] {
+                let p = BTreeMap::from([(name.into(), serde_json::json!(value))]);
+                assert!(validate_parameters(&p, &[], &[], &[]).is_err());
+            }
+        }
+        for name in [
+            "quantity",
+            "amount",
+            "fromAmount",
+            "toAmount",
+            "callbackRate",
+        ] {
+            for value in ["0", "-1.25"] {
+                let p = BTreeMap::from([(name.into(), serde_json::json!(value))]);
+                assert!(validate_parameters(&p, &[], &[], &[]).is_err());
+            }
+        }
+    }
+
     #[test]
     fn reconciliation_ids_include_nested_orders_and_cancellation_lists() {
         let p = BTreeMap::from([

@@ -171,10 +171,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -278,10 +278,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -304,10 +304,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -501,7 +501,7 @@
                       "permissions": {
                         "type": "array",
                         "items": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/Permission"
                         }
                       },
                       "uid": {
@@ -519,10 +519,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -679,16 +679,16 @@
                           "x-decimal": true
                         },
                         "status": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderStatus"
                         },
                         "timeInForce": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/TimeInForce"
                         },
                         "type": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderType"
                         },
                         "side": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderSide"
                         },
                         "time": {
                           "type": "integer",
@@ -710,7 +710,7 @@
                           "x-decimal": true
                         },
                         "selfTradePreventionMode": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/SelfTradePreventionMode"
                         },
                         "preventedMatchId": {
                           "type": "integer",
@@ -748,7 +748,7 @@
                           "type": "boolean"
                         },
                         "workingFloor": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/WorkingFloor"
                         },
                         "pegPriceType": {
                           "type": "string"
@@ -776,10 +776,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -963,10 +963,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1110,16 +1110,16 @@
                           "x-decimal": true
                         },
                         "status": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderStatus"
                         },
                         "timeInForce": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/TimeInForce"
                         },
                         "type": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderType"
                         },
                         "side": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderSide"
                         },
                         "time": {
                           "type": "integer",
@@ -1137,7 +1137,7 @@
                           "format": "int64"
                         },
                         "selfTradePreventionMode": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/SelfTradePreventionMode"
                         },
                         "icebergQty": {
                           "type": "string",
@@ -1175,7 +1175,7 @@
                           "type": "boolean"
                         },
                         "workingFloor": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/WorkingFloor"
                         },
                         "pegPriceType": {
                           "type": "string"
@@ -1203,10 +1203,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1358,16 +1358,16 @@
                         "x-decimal": true
                       },
                       "status": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "stopPrice": {
                         "type": "string",
@@ -1409,7 +1409,7 @@
                         "format": "int64"
                       },
                       "selfTradePreventionMode": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/SelfTradePreventionMode"
                       },
                       "preventedMatchId": {
                         "type": "integer",
@@ -1423,7 +1423,7 @@
                         "type": "boolean"
                       },
                       "workingFloor": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingFloor"
                       },
                       "pegPriceType": {
                         "type": "string"
@@ -1454,10 +1454,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1759,10 +1759,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1856,10 +1856,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -1970,10 +1970,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -2147,10 +2147,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -2388,10 +2388,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -2662,10 +2662,10 @@
                           "type": "object",
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -2768,10 +2768,10 @@
                           "type": "object",
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -2975,10 +2975,10 @@
                           "type": "object",
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -3105,10 +3105,10 @@
                           "type": "object",
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -3241,10 +3241,10 @@
                           "type": "object",
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -3307,10 +3307,10 @@
                           "type": "object",
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -3431,10 +3431,10 @@
                           "type": "object",
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -3485,10 +3485,10 @@
                           "type": "object",
                           "properties": {
                             "rateLimitType": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitType"
                             },
                             "interval": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/RateLimitInterval"
                             },
                             "intervalNum": {
                               "type": "integer",
@@ -3672,10 +3672,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -3824,10 +3824,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -3963,10 +3963,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -4100,10 +4100,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer"
@@ -4232,10 +4232,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -4472,10 +4472,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -4593,10 +4593,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -4722,10 +4722,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -4838,13 +4838,13 @@
                           "format": "int64"
                         },
                         "contingencyType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ContingencyType"
                         },
                         "listStatusType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ListStatusType"
                         },
                         "listOrderStatus": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ListOrderStatus"
                         },
                         "listClientOrderId": {
                           "type": "string",
@@ -4928,19 +4928,19 @@
                                 "x-decimal": true
                               },
                               "status": {
-                                "type": "string"
+                                "$ref": "#/components/schemas/OrderStatus"
                               },
                               "timeInForce": {
-                                "type": "string"
+                                "$ref": "#/components/schemas/TimeInForce"
                               },
                               "type": {
-                                "type": "string"
+                                "$ref": "#/components/schemas/OrderType"
                               },
                               "side": {
-                                "type": "string"
+                                "$ref": "#/components/schemas/OrderSide"
                               },
                               "selfTradePreventionMode": {
-                                "type": "string"
+                                "$ref": "#/components/schemas/SelfTradePreventionMode"
                               },
                               "icebergQty": {
                                 "type": "string",
@@ -4978,7 +4978,7 @@
                                 "type": "boolean"
                               },
                               "workingFloor": {
-                                "type": "string"
+                                "$ref": "#/components/schemas/WorkingFloor"
                               },
                               "pegPriceType": {
                                 "type": "string"
@@ -5037,16 +5037,16 @@
                           "x-decimal": true
                         },
                         "status": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderStatus"
                         },
                         "timeInForce": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/TimeInForce"
                         },
                         "type": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderType"
                         },
                         "side": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderSide"
                         },
                         "stopPrice": {
                           "type": "string",
@@ -5073,7 +5073,7 @@
                           "format": "int64"
                         },
                         "selfTradePreventionMode": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/SelfTradePreventionMode"
                         },
                         "preventedMatchId": {
                           "type": "integer",
@@ -5087,7 +5087,7 @@
                           "type": "boolean"
                         },
                         "workingFloor": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/WorkingFloor"
                         },
                         "pegPriceType": {
                           "type": "string"
@@ -5116,10 +5116,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -5291,16 +5291,16 @@
                             "x-decimal": true
                           },
                           "status": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderStatus"
                           },
                           "timeInForce": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/TimeInForce"
                           },
                           "type": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderType"
                           },
                           "side": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderSide"
                           },
                           "stopPrice": {
                             "type": "string",
@@ -5323,7 +5323,7 @@
                             "format": "int64"
                           },
                           "selfTradePreventionMode": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/SelfTradePreventionMode"
                           },
                           "preventedMatchId": {
                             "type": "integer",
@@ -5341,7 +5341,7 @@
                             "type": "boolean"
                           },
                           "workingFloor": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/WorkingFloor"
                           },
                           "pegPriceType": {
                             "type": "string"
@@ -5378,13 +5378,13 @@
                             "format": "int64"
                           },
                           "contingencyType": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/ContingencyType"
                           },
                           "listStatusType": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/ListStatusType"
                           },
                           "listOrderStatus": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/ListOrderStatus"
                           },
                           "listClientOrderId": {
                             "type": "string",
@@ -5464,19 +5464,19 @@
                                   "x-decimal": true
                                 },
                                 "status": {
-                                  "type": "string"
+                                  "$ref": "#/components/schemas/OrderStatus"
                                 },
                                 "timeInForce": {
-                                  "type": "string"
+                                  "$ref": "#/components/schemas/TimeInForce"
                                 },
                                 "type": {
-                                  "type": "string"
+                                  "$ref": "#/components/schemas/OrderType"
                                 },
                                 "side": {
-                                  "type": "string"
+                                  "$ref": "#/components/schemas/OrderSide"
                                 },
                                 "selfTradePreventionMode": {
-                                  "type": "string"
+                                  "$ref": "#/components/schemas/SelfTradePreventionMode"
                                 },
                                 "icebergQty": {
                                   "type": "string",
@@ -5514,7 +5514,7 @@
                                   "type": "boolean"
                                 },
                                 "workingFloor": {
-                                  "type": "string"
+                                  "$ref": "#/components/schemas/WorkingFloor"
                                 },
                                 "pegPriceType": {
                                   "type": "string"
@@ -5552,10 +5552,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -5802,23 +5802,23 @@
                         "x-decimal": true
                       },
                       "status": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "timeInForce": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "side": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "workingTime": {
                         "type": "integer",
                         "format": "int64"
                       },
                       "selfTradePreventionMode": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/SelfTradePreventionMode"
                       },
                       "stopPrice": {
                         "type": "string",
@@ -5856,7 +5856,7 @@
                         "type": "boolean"
                       },
                       "workingFloor": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/WorkingFloor"
                       },
                       "pegPriceType": {
                         "type": "string"
@@ -5915,10 +5915,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -6192,10 +6192,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -6628,13 +6628,13 @@
                           "format": "int64"
                         },
                         "contingencyType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ContingencyType"
                         },
                         "listStatusType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ListStatusType"
                         },
                         "listOrderStatus": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ListOrderStatus"
                         },
                         "listClientOrderId": {
                           "type": "string",
@@ -6675,10 +6675,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -6812,7 +6812,7 @@
                           "format": "int64"
                         },
                         "allocationType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/AllocationType"
                         },
                         "orderId": {
                           "type": "integer",
@@ -6863,10 +6863,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -7099,7 +7099,7 @@
                           "format": "int64"
                         },
                         "selfTradePreventionMode": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/SelfTradePreventionMode"
                         },
                         "price": {
                           "type": "string",
@@ -7122,10 +7122,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -7233,13 +7233,13 @@
                           "format": "int64"
                         },
                         "contingencyType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ContingencyType"
                         },
                         "listStatusType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ListStatusType"
                         },
                         "listOrderStatus": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/ListOrderStatus"
                         },
                         "listClientOrderId": {
                           "type": "string",
@@ -7280,10 +7280,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -7444,10 +7444,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -7559,13 +7559,13 @@
                         "format": "int64"
                       },
                       "contingencyType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContingencyType"
                       },
                       "listStatusType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListStatusType"
                       },
                       "listOrderStatus": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListOrderStatus"
                       },
                       "listClientOrderId": {
                         "type": "string",
@@ -7605,10 +7605,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -7784,23 +7784,23 @@
                             "x-decimal": true
                           },
                           "status": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderStatus"
                           },
                           "timeInForce": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/TimeInForce"
                           },
                           "type": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderType"
                           },
                           "side": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderSide"
                           },
                           "workingTime": {
                             "type": "integer",
                             "format": "int64"
                           },
                           "selfTradePreventionMode": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/SelfTradePreventionMode"
                           },
                           "icebergQty": {
                             "type": "string",
@@ -7838,7 +7838,7 @@
                             "type": "boolean"
                           },
                           "workingFloor": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/WorkingFloor"
                           },
                           "pegPriceType": {
                             "type": "string"
@@ -7867,10 +7867,10 @@
                             "format": "int64"
                           },
                           "contingencyType": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/ContingencyType"
                           },
                           "listOrderStatus": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/ListOrderStatus"
                           },
                           "listClientOrderId": {
                             "type": "string",
@@ -7908,10 +7908,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -8201,19 +8201,19 @@
                             "x-decimal": true
                           },
                           "status": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderStatus"
                           },
                           "timeInForce": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/TimeInForce"
                           },
                           "type": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderType"
                           },
                           "side": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderSide"
                           },
                           "selfTradePreventionMode": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/SelfTradePreventionMode"
                           },
                           "icebergQty": {
                             "type": "string",
@@ -8251,7 +8251,7 @@
                             "type": "boolean"
                           },
                           "workingFloor": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/WorkingFloor"
                           },
                           "pegPriceType": {
                             "type": "string"
@@ -8315,19 +8315,19 @@
                             "x-decimal": true
                           },
                           "status": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderStatus"
                           },
                           "timeInForce": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/TimeInForce"
                           },
                           "type": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderType"
                           },
                           "side": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderSide"
                           },
                           "selfTradePreventionMode": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/SelfTradePreventionMode"
                           },
                           "icebergQty": {
                             "type": "string",
@@ -8365,7 +8365,7 @@
                             "type": "boolean"
                           },
                           "workingFloor": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/WorkingFloor"
                           },
                           "pegPriceType": {
                             "type": "string"
@@ -8400,10 +8400,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -8523,13 +8523,13 @@
                         "format": "int64"
                       },
                       "contingencyType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContingencyType"
                       },
                       "listStatusType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListStatusType"
                       },
                       "listOrderStatus": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListOrderStatus"
                       },
                       "listClientOrderId": {
                         "type": "string",
@@ -8606,19 +8606,19 @@
                               "x-decimal": true
                             },
                             "status": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderStatus"
                             },
                             "timeInForce": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/TimeInForce"
                             },
                             "type": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderType"
                             },
                             "side": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderSide"
                             },
                             "selfTradePreventionMode": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/SelfTradePreventionMode"
                             },
                             "icebergQty": {
                               "type": "string",
@@ -8656,7 +8656,7 @@
                               "type": "boolean"
                             },
                             "workingFloor": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/WorkingFloor"
                             },
                             "pegPriceType": {
                               "type": "string"
@@ -8686,10 +8686,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -8887,13 +8887,13 @@
                         "format": "int64"
                       },
                       "contingencyType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContingencyType"
                       },
                       "listStatusType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListStatusType"
                       },
                       "listOrderStatus": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListOrderStatus"
                       },
                       "listClientOrderId": {
                         "type": "string",
@@ -8970,23 +8970,23 @@
                               "x-decimal": true
                             },
                             "status": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderStatus"
                             },
                             "timeInForce": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/TimeInForce"
                             },
                             "type": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderType"
                             },
                             "side": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderSide"
                             },
                             "workingTime": {
                               "type": "integer",
                               "format": "int64"
                             },
                             "selfTradePreventionMode": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/SelfTradePreventionMode"
                             },
                             "icebergQty": {
                               "type": "string",
@@ -9024,7 +9024,7 @@
                               "type": "boolean"
                             },
                             "workingFloor": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/WorkingFloor"
                             },
                             "pegPriceType": {
                               "type": "string"
@@ -9054,10 +9054,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -9326,13 +9326,13 @@
                         "format": "int64"
                       },
                       "contingencyType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContingencyType"
                       },
                       "listStatusType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListStatusType"
                       },
                       "listOrderStatus": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListOrderStatus"
                       },
                       "listClientOrderId": {
                         "type": "string",
@@ -9409,23 +9409,23 @@
                               "x-decimal": true
                             },
                             "status": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderStatus"
                             },
                             "timeInForce": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/TimeInForce"
                             },
                             "type": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderType"
                             },
                             "side": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderSide"
                             },
                             "workingTime": {
                               "type": "integer",
                               "format": "int64"
                             },
                             "selfTradePreventionMode": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/SelfTradePreventionMode"
                             },
                             "icebergQty": {
                               "type": "string",
@@ -9463,7 +9463,7 @@
                               "type": "boolean"
                             },
                             "workingFloor": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/WorkingFloor"
                             },
                             "pegPriceType": {
                               "type": "string"
@@ -9493,10 +9493,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -9766,13 +9766,13 @@
                         "format": "int64"
                       },
                       "contingencyType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContingencyType"
                       },
                       "listStatusType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListStatusType"
                       },
                       "listOrderStatus": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListOrderStatus"
                       },
                       "listClientOrderId": {
                         "type": "string",
@@ -9845,23 +9845,23 @@
                               "x-decimal": true
                             },
                             "status": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderStatus"
                             },
                             "timeInForce": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/TimeInForce"
                             },
                             "type": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderType"
                             },
                             "side": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderSide"
                             },
                             "workingTime": {
                               "type": "integer",
                               "format": "int64"
                             },
                             "selfTradePreventionMode": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/SelfTradePreventionMode"
                             },
                             "origQty": {
                               "type": "string",
@@ -9903,7 +9903,7 @@
                               "type": "boolean"
                             },
                             "workingFloor": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/WorkingFloor"
                             },
                             "pegPriceType": {
                               "type": "string"
@@ -10238,13 +10238,13 @@
                         "format": "int64"
                       },
                       "contingencyType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContingencyType"
                       },
                       "listStatusType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListStatusType"
                       },
                       "listOrderStatus": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListOrderStatus"
                       },
                       "listClientOrderId": {
                         "type": "string",
@@ -10317,23 +10317,23 @@
                               "x-decimal": true
                             },
                             "status": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderStatus"
                             },
                             "timeInForce": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/TimeInForce"
                             },
                             "type": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderType"
                             },
                             "side": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderSide"
                             },
                             "workingTime": {
                               "type": "integer",
                               "format": "int64"
                             },
                             "selfTradePreventionMode": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/SelfTradePreventionMode"
                             },
                             "stopPrice": {
                               "type": "string",
@@ -10375,7 +10375,7 @@
                               "type": "boolean"
                             },
                             "workingFloor": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/WorkingFloor"
                             },
                             "pegPriceType": {
                               "type": "string"
@@ -10657,13 +10657,13 @@
                         "format": "int64"
                       },
                       "contingencyType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContingencyType"
                       },
                       "listStatusType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListStatusType"
                       },
                       "listOrderStatus": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListOrderStatus"
                       },
                       "listClientOrderId": {
                         "type": "string",
@@ -10740,23 +10740,23 @@
                               "x-decimal": true
                             },
                             "status": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderStatus"
                             },
                             "timeInForce": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/TimeInForce"
                             },
                             "type": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderType"
                             },
                             "side": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderSide"
                             },
                             "workingTime": {
                               "type": "integer",
                               "format": "int64"
                             },
                             "selfTradePreventionMode": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/SelfTradePreventionMode"
                             },
                             "icebergQty": {
                               "type": "string",
@@ -10794,7 +10794,7 @@
                               "type": "boolean"
                             },
                             "workingFloor": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/WorkingFloor"
                             },
                             "pegPriceType": {
                               "type": "string"
@@ -10824,10 +10824,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -11160,13 +11160,13 @@
                         "format": "int64"
                       },
                       "contingencyType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ContingencyType"
                       },
                       "listStatusType": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListStatusType"
                       },
                       "listOrderStatus": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/ListOrderStatus"
                       },
                       "listClientOrderId": {
                         "type": "string",
@@ -11243,23 +11243,23 @@
                               "x-decimal": true
                             },
                             "status": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderStatus"
                             },
                             "timeInForce": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/TimeInForce"
                             },
                             "type": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderType"
                             },
                             "side": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/OrderSide"
                             },
                             "workingTime": {
                               "type": "integer",
                               "format": "int64"
                             },
                             "selfTradePreventionMode": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/SelfTradePreventionMode"
                             },
                             "icebergQty": {
                               "type": "string",
@@ -11297,7 +11297,7 @@
                               "type": "boolean"
                             },
                             "workingFloor": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/WorkingFloor"
                             },
                             "pegPriceType": {
                               "type": "string"
@@ -11327,10 +11327,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -11544,16 +11544,16 @@
                           "x-decimal": true
                         },
                         "status": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderStatus"
                         },
                         "timeInForce": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/TimeInForce"
                         },
                         "type": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderType"
                         },
                         "side": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/OrderSide"
                         },
                         "workingTime": {
                           "type": "integer",
@@ -11594,10 +11594,10 @@
                           }
                         },
                         "workingFloor": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/WorkingFloor"
                         },
                         "selfTradePreventionMode": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/SelfTradePreventionMode"
                         },
                         "usedSor": {
                           "type": "boolean"
@@ -11660,10 +11660,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -11883,10 +11883,10 @@
                       "type": "object",
                       "properties": {
                         "rateLimitType": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitType"
                         },
                         "interval": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/RateLimitInterval"
                         },
                         "intervalNum": {
                           "type": "integer",
@@ -12447,10 +12447,10 @@
         "type": "object",
         "properties": {
           "rateLimitType": {
-            "type": "string"
+            "$ref": "#/components/schemas/RateLimitType"
           },
           "interval": {
-            "type": "string"
+            "$ref": "#/components/schemas/RateLimitInterval"
           },
           "intervalNum": {
             "type": "integer",
@@ -12531,7 +12531,7 @@
                 "orderTypes": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/OrderType"
                   }
                 },
                 "icebergAllowed": {
@@ -12576,7 +12576,7 @@
                 "permissions": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/Permission"
                   }
                 },
                 "permissionSets": {
@@ -12584,17 +12584,17 @@
                   "items": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/Permission"
                     }
                   }
                 },
                 "defaultSelfTradePreventionMode": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/SelfTradePreventionMode"
                 },
                 "allowedSelfTradePreventionModes": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/SelfTradePreventionMode"
                   }
                 }
               }
@@ -12684,13 +12684,13 @@
             "x-rust-type": "ClientOrderId"
           },
           "S": {
-            "type": "string"
+            "$ref": "#/components/schemas/OrderSide"
           },
           "o": {
-            "type": "string"
+            "$ref": "#/components/schemas/OrderType"
           },
           "f": {
-            "type": "string"
+            "$ref": "#/components/schemas/TimeInForce"
           },
           "q": {
             "type": "string",
@@ -12716,10 +12716,10 @@
             "type": "string"
           },
           "x": {
-            "type": "string"
+            "$ref": "#/components/schemas/ExecutionType"
           },
           "X": {
-            "type": "string"
+            "$ref": "#/components/schemas/OrderStatus"
           },
           "r": {
             "type": "string"
@@ -12794,7 +12794,7 @@
             "format": "int64"
           },
           "V": {
-            "type": "string"
+            "$ref": "#/components/schemas/SelfTradePreventionMode"
           },
           "d": {
             "type": "integer",
@@ -12844,14 +12844,14 @@
             "x-decimal": true
           },
           "b": {
-            "type": "string"
+            "$ref": "#/components/schemas/AllocationType"
           },
           "a": {
             "type": "integer",
             "format": "int64"
           },
           "k": {
-            "type": "string"
+            "$ref": "#/components/schemas/WorkingFloor"
           },
           "uS": {
             "type": "boolean"
@@ -12924,13 +12924,13 @@
             "format": "int64"
           },
           "c": {
-            "type": "string"
+            "$ref": "#/components/schemas/ContingencyType"
           },
           "l": {
-            "type": "string"
+            "$ref": "#/components/schemas/ListStatusType"
           },
           "L": {
-            "type": "string"
+            "$ref": "#/components/schemas/ListOrderStatus"
           },
           "r": {
             "type": "string"
@@ -12956,7 +12956,7 @@
                   "format": "int64"
                 },
                 "c": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/ContingencyType"
                 }
               }
             }
@@ -13036,6 +13036,215 @@
         ],
         "x-sources": [
           "https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#symbol-status-status"
+        ]
+      },
+      "ContingencyType": {
+        "type": "string",
+        "enum": [
+          "OCO",
+          "OTO"
+        ],
+        "description": "Native `ContingencyType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "OrderType": {
+        "type": "string",
+        "enum": [
+          "LIMIT",
+          "MARKET",
+          "STOP_LOSS",
+          "STOP_LOSS_LIMIT",
+          "TAKE_PROFIT",
+          "TAKE_PROFIT_LIMIT",
+          "LIMIT_MAKER"
+        ],
+        "description": "Native `OrderType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "PENDING_NEW",
+          "PARTIALLY_FILLED",
+          "FILLED",
+          "CANCELED",
+          "PENDING_CANCEL",
+          "REJECTED",
+          "EXPIRED",
+          "EXPIRED_IN_MATCH"
+        ],
+        "description": "Native `OrderStatus` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "OrderSide": {
+        "type": "string",
+        "enum": [
+          "BUY",
+          "SELL"
+        ],
+        "description": "Native `OrderSide` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "AllocationType": {
+        "type": "string",
+        "enum": [
+          "SOR"
+        ],
+        "description": "Native `AllocationType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "ExecutionType": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "CANCELED",
+          "REPLACED",
+          "REJECTED",
+          "TRADE",
+          "EXPIRED",
+          "TRADE_PREVENTION"
+        ],
+        "description": "Native `ExecutionType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "ListStatusType": {
+        "type": "string",
+        "enum": [
+          "RESPONSE",
+          "EXEC_STARTED",
+          "UPDATED",
+          "ALL_DONE"
+        ],
+        "description": "Native `ListStatusType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "WorkingFloor": {
+        "type": "string",
+        "enum": [
+          "EXCHANGE",
+          "SOR"
+        ],
+        "description": "Native `WorkingFloor` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "ListOrderStatus": {
+        "type": "string",
+        "enum": [
+          "EXECUTING",
+          "ALL_DONE",
+          "REJECT"
+        ],
+        "description": "Native `ListOrderStatus` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "Permission": {
+        "type": "string",
+        "enum": [
+          "SPOT",
+          "MARGIN",
+          "LEVERAGED",
+          "TRD_GRP_002",
+          "TRD_GRP_003",
+          "TRD_GRP_004",
+          "TRD_GRP_005",
+          "TRD_GRP_006",
+          "TRD_GRP_007",
+          "TRD_GRP_008",
+          "TRD_GRP_009",
+          "TRD_GRP_010",
+          "TRD_GRP_011",
+          "TRD_GRP_012",
+          "TRD_GRP_013",
+          "TRD_GRP_014",
+          "TRD_GRP_015",
+          "TRD_GRP_016",
+          "TRD_GRP_017",
+          "TRD_GRP_018",
+          "TRD_GRP_019",
+          "TRD_GRP_020",
+          "TRD_GRP_021",
+          "TRD_GRP_022",
+          "TRD_GRP_023",
+          "TRD_GRP_024",
+          "TRD_GRP_025"
+        ],
+        "description": "Native `Permission` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "SelfTradePreventionMode": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "EXPIRE_MAKER",
+          "EXPIRE_TAKER",
+          "EXPIRE_BOTH",
+          "DECREMENT",
+          "TRANSFER"
+        ],
+        "description": "Native `SelfTradePreventionMode` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "TimeInForce": {
+        "type": "string",
+        "enum": [
+          "GTC",
+          "IOC",
+          "FOK"
+        ],
+        "description": "Native `TimeInForce` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "RateLimitInterval": {
+        "type": "string",
+        "enum": [
+          "SECOND",
+          "MINUTE",
+          "HOUR",
+          "DAY"
+        ],
+        "description": "Native `RateLimitInterval` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md",
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/sbe/schemas/spot_3_4.xml"
+        ]
+      },
+      "RateLimitType": {
+        "type": "string",
+        "enum": [
+          "REQUEST_WEIGHT",
+          "ORDERS",
+          "RAW_REQUESTS",
+          "CONNECTIONS"
+        ],
+        "description": "Native `RateLimitType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md",
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/sbe/schemas/spot_3_4.xml"
         ]
       }
     }

@@ -199,10 +199,10 @@ mod tests {
         fixture.finish().await;
     }
     #[tokio::test]
-    async fn stale_idle_connection_redials_once_and_delivers_the_request_exactly_once() {
-        // Complementary drift pin: a pooled connection closed while idle is
-        // redialed transparently and the caller sees an ordinary success, but
-        // the venue must observe exactly one delivery — never a duplicate.
+    async fn stale_idle_connection_never_resends_a_potentially_sent_mutation() {
+        // The server's FIN can reach the pool before or after dispatch. Both
+        // schedules are valid: replace a known-dead idle connection, or expose
+        // uncertainty after attempting a write. Neither permits a mutation retry.
         let mut fixture = HttpFixture::keep_alive(
             200,
             "",
@@ -212,19 +212,41 @@ mod tests {
         .await;
         let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
         client.new_order(&order(), deadline()).await.unwrap();
-        client.cancel_order(&cancel(), deadline()).await.unwrap();
+        let result = client.cancel_order(&cancel(), deadline()).await;
         let first = fixture.requests.recv().await.unwrap();
-        let second = fixture.requests.recv().await.unwrap();
         assert!(first.starts_with("POST /fapi/v1/order"));
-        assert!(second.starts_with("DELETE /fapi/v1/order"));
-        assert_eq!(
-            fixture.connections_accepted(),
-            2,
-            "the stale idle connection must be replaced by exactly one redial"
-        );
+        match result {
+            Ok(response) => {
+                assert_eq!(response.data.order_id, 7);
+                let second = fixture.requests.recv().await.unwrap();
+                assert!(second.starts_with("DELETE /fapi/v1/order"));
+                assert_eq!(fixture.connections_accepted(), 2);
+            }
+            Err(error) => {
+                assert_eq!(error.outcome(), Some(Outcome::Unknown));
+                let Error::Transport {
+                    operation,
+                    client_order_ids,
+                    ..
+                } = error
+                else {
+                    panic!("stale write failure lost transport evidence");
+                };
+                assert_eq!(operation, "cancelOrder");
+                assert_eq!(
+                    client_order_ids["origClientOrderId"].as_str(),
+                    "fixture/order:1"
+                );
+                assert_eq!(
+                    fixture.connections_accepted(),
+                    1,
+                    "an ambiguous write must not redial"
+                );
+            }
+        }
         assert!(
             fixture.requests.try_recv().is_err(),
-            "no duplicate delivery may follow a redial"
+            "no duplicate delivery may follow idle socket loss"
         );
         fixture.finish().await;
     }

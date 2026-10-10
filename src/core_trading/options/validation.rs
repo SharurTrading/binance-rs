@@ -292,11 +292,12 @@ fn validate_common(p: &BTreeMap<String, Value>) -> Result<(), Error> {
         if matches!(
             key.as_str(),
             "quantity" | "price" | "qtyLimit" | "deltaLimit"
-        ) && super::wire::parse_decimal(value)
-            .map_err(|_| Error::Validation("Options financial parameter"))?
-            <= Decimal::ZERO
-        {
-            return Err(Error::Validation("positive Options amount"));
+        ) {
+            let amount = super::wire::parse_decimal(value)
+                .map_err(|_| Error::Validation("Options financial parameter"))?;
+            if key != "price" && amount <= Decimal::ZERO {
+                return Err(Error::Validation("positive Options amount"));
+            }
         }
         if matches!(
             key.as_str(),

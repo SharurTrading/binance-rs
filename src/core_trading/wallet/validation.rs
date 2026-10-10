@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-use crate::{Decimal, Error};
+use crate::Error;
 use serde_json::Value;
 use std::collections::BTreeMap;
 fn required(p: &BTreeMap<String, Value>, keys: &[&str]) -> Result<(), Error> {
@@ -25,11 +25,8 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
                 crate::Asset::new(value.as_str().ok_or(Error::Validation("asset identity"))?)?;
             }
         }
-        if key.ends_with("Price")
-            && super::wire::parse_decimal(value).map_err(|_| Error::Validation("Wallet price"))?
-                <= Decimal::ZERO
-        {
-            return Err(Error::Validation("positive Wallet price"));
+        if key.ends_with("Price") {
+            super::wire::parse_decimal(value).map_err(|_| Error::Validation("Wallet price"))?;
         }
     }
     if let (Some(start), Some(end)) = (
@@ -151,4 +148,18 @@ fn validate_history(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> 
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod price_tests {
+    use super::*;
+    #[test]
+    fn price_parser_does_not_select_a_business_floor() {
+        for value in ["0", "-1.25"] {
+            let parameters = BTreeMap::from([("futurePrice".into(), serde_json::json!(value))]);
+            assert!(validate("futureOperation", &parameters).is_ok());
+        }
+        let malformed = BTreeMap::from([("futurePrice".into(), serde_json::json!("NaN"))]);
+        assert!(validate("futureOperation", &malformed).is_err());
+    }
 }

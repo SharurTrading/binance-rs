@@ -136,6 +136,15 @@ overrides REST token authority.
 Margin-native event DTOs are generated from the separately pinned stream
 catalog. Execution reports, balance deltas, partial free/locked updates,
 order-list status, listen-key expiry and token termination remain visible.
+The [September 25 announcement](https://developers.binance.com/en/docs/products/margin-trading/change-log#2026-09-25)
+also supplies payload decoders for `marginLevelChange` and `liabilityChange`,
+effective October 14. These retain exact margin level, status, native change kind
+(`BORROW`, `REPAY`, `INTEREST`, `DEBT_CHANGE`, or unchanged future spelling), and
+ordered per-asset exact `p`/`i` amounts. The lowercase event kinds remain distinct
+from legacy uppercase risk events. Required fields, asset identities and financial
+values fail explicitly when malformed; partial liability arrays never replace an
+account. Decoder coverage does not establish the announced v2 stream's transport,
+lifecycle or cross/isolated account scope.
 Unknown events retain original evidence; malformed known events produce an
 explicit gap. Every event and late reply retains its socket generation;
 late subscription replies retain caller correlation and quota metadata. Unexpected
@@ -153,12 +162,13 @@ Margin; consumers can use the existing Spot market-data capability explicitly.
 
 The September 25 changelog announces UTA Margin listen-key lifecycle paths and
 an `fstream.binance.com/private/ws` route effective October 14. It does not
-provide lifecycle parameters, authorization, quotas or complete native UTA event
-schemas, and the current official REST catalog has no UTA operations. These
+provide lifecycle parameters, authorization, quotas or account-scope semantics,
+and the current official REST catalog has no UTA operations. The two announced
+payload shapes have decoders as described above; the v2 transport and lifecycle
 bindings are blocked on complete protocol evidence in
 [issue #76](https://github.com/SharurTrading/binance-rs/issues/76). Cross/isolated
-Margin models are not borrowed for UTA accounts, and announced scope is not
-claimed as implemented coverage.
+Margin models are not borrowed for UTA accounts, and the announced transport is
+not claimed as implemented coverage.
 
 ## Sources and verification
 

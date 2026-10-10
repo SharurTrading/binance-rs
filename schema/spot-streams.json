@@ -1369,7 +1369,7 @@
                         "x-rust-type": "crate::Symbol"
                       },
                       "i": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/KlineInterval"
                       },
                       "f": {
                         "type": "integer",
@@ -1473,7 +1473,7 @@
                             "x-rust-type": "crate::Symbol"
                           },
                           "i": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/KlineInterval"
                           },
                           "f": {
                             "type": "integer",
@@ -1666,7 +1666,7 @@
                         "x-rust-type": "crate::Symbol"
                       },
                       "i": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/KlineInterval"
                       },
                       "f": {
                         "type": "integer",
@@ -1770,7 +1770,7 @@
                             "x-rust-type": "crate::Symbol"
                           },
                           "i": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/KlineInterval"
                           },
                           "f": {
                             "type": "integer",
@@ -2358,7 +2358,10 @@
                   },
                   "r": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "nullable": true,
+                    "x-rust-type": "Option<Decimal>",
+                    "x-deserialize-with": "super::wire::decimal_option"
                   },
                   "t": {
                     "type": "integer",
@@ -2368,6 +2371,7 @@
                 "required": [
                   "e",
                   "s",
+                  "r",
                   "t"
                 ]
               }
@@ -2395,7 +2399,10 @@
                       },
                       "r": {
                         "type": "string",
-                        "x-decimal": true
+                        "x-decimal": true,
+                        "nullable": true,
+                        "x-rust-type": "Option<Decimal>",
+                        "x-deserialize-with": "super::wire::decimal_option"
                       },
                       "t": {
                         "type": "integer",
@@ -2405,6 +2412,7 @@
                     "required": [
                       "e",
                       "s",
+                      "r",
                       "t"
                     ]
                   }
@@ -3474,13 +3482,13 @@
             "x-rust-type": "ClientOrderId"
           },
           "S": {
-            "type": "string"
+            "$ref": "#/components/schemas/OrderSide"
           },
           "o": {
-            "type": "string"
+            "$ref": "#/components/schemas/OrderType"
           },
           "f": {
-            "type": "string"
+            "$ref": "#/components/schemas/TimeInForce"
           },
           "q": {
             "type": "string",
@@ -3506,10 +3514,10 @@
             "type": "string"
           },
           "x": {
-            "type": "string"
+            "$ref": "#/components/schemas/ExecutionType"
           },
           "X": {
-            "type": "string"
+            "$ref": "#/components/schemas/OrderStatus"
           },
           "r": {
             "type": "string"
@@ -3584,7 +3592,7 @@
             "format": "int64"
           },
           "V": {
-            "type": "string"
+            "$ref": "#/components/schemas/SelfTradePreventionMode"
           },
           "d": {
             "type": "integer",
@@ -3634,14 +3642,14 @@
             "x-decimal": true
           },
           "b": {
-            "type": "string"
+            "$ref": "#/components/schemas/AllocationType"
           },
           "a": {
             "type": "integer",
             "format": "int64"
           },
           "k": {
-            "type": "string"
+            "$ref": "#/components/schemas/WorkingFloor"
           },
           "uS": {
             "type": "boolean"
@@ -3738,13 +3746,13 @@
             "format": "int64"
           },
           "c": {
-            "type": "string"
+            "$ref": "#/components/schemas/ContingencyType"
           },
           "l": {
-            "type": "string"
+            "$ref": "#/components/schemas/ListStatusType"
           },
           "L": {
-            "type": "string"
+            "$ref": "#/components/schemas/ListOrderStatus"
           },
           "r": {
             "type": "string"
@@ -3770,7 +3778,7 @@
                   "format": "int64"
                 },
                 "c": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/ContingencyType"
                 }
               }
             }
@@ -3852,6 +3860,194 @@
           {
             "$ref": "#/components/schemas/outboundAccountPosition"
           }
+        ]
+      },
+      "ContingencyType": {
+        "type": "string",
+        "enum": [
+          "OCO",
+          "OTO"
+        ],
+        "description": "Native `ContingencyType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "OrderType": {
+        "type": "string",
+        "enum": [
+          "LIMIT",
+          "MARKET",
+          "STOP_LOSS",
+          "STOP_LOSS_LIMIT",
+          "TAKE_PROFIT",
+          "TAKE_PROFIT_LIMIT",
+          "LIMIT_MAKER"
+        ],
+        "description": "Native `OrderType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "PENDING_NEW",
+          "PARTIALLY_FILLED",
+          "FILLED",
+          "CANCELED",
+          "PENDING_CANCEL",
+          "REJECTED",
+          "EXPIRED",
+          "EXPIRED_IN_MATCH"
+        ],
+        "description": "Native `OrderStatus` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "OrderSide": {
+        "type": "string",
+        "enum": [
+          "BUY",
+          "SELL"
+        ],
+        "description": "Native `OrderSide` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "KlineInterval": {
+        "type": "string",
+        "enum": [
+          "1s",
+          "1m",
+          "3m",
+          "5m",
+          "15m",
+          "30m",
+          "1h",
+          "2h",
+          "4h",
+          "6h",
+          "8h",
+          "12h",
+          "1d",
+          "3d",
+          "1w",
+          "1M"
+        ],
+        "description": "Native `KlineInterval` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/web-socket-streams.md#klinecandlestick-streams"
+        ],
+        "x-rust-variants": {
+          "1s": "Second1",
+          "1m": "Minute1",
+          "3m": "Minute3",
+          "5m": "Minute5",
+          "15m": "Minute15",
+          "30m": "Minute30",
+          "1h": "Hour1",
+          "2h": "Hour2",
+          "4h": "Hour4",
+          "6h": "Hour6",
+          "8h": "Hour8",
+          "12h": "Hour12",
+          "1d": "Day1",
+          "3d": "Day3",
+          "1w": "Week1",
+          "1M": "Month1"
+        }
+      },
+      "AllocationType": {
+        "type": "string",
+        "enum": [
+          "SOR"
+        ],
+        "description": "Native `AllocationType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "ExecutionType": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "CANCELED",
+          "REPLACED",
+          "REJECTED",
+          "TRADE",
+          "EXPIRED",
+          "TRADE_PREVENTION"
+        ],
+        "description": "Native `ExecutionType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "ListStatusType": {
+        "type": "string",
+        "enum": [
+          "RESPONSE",
+          "EXEC_STARTED",
+          "UPDATED",
+          "ALL_DONE"
+        ],
+        "description": "Native `ListStatusType` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "WorkingFloor": {
+        "type": "string",
+        "enum": [
+          "EXCHANGE",
+          "SOR"
+        ],
+        "description": "Native `WorkingFloor` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "ListOrderStatus": {
+        "type": "string",
+        "enum": [
+          "EXECUTING",
+          "ALL_DONE",
+          "REJECT"
+        ],
+        "description": "Native `ListOrderStatus` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "SelfTradePreventionMode": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "EXPIRE_MAKER",
+          "EXPIRE_TAKER",
+          "EXPIRE_BOTH",
+          "DECREMENT",
+          "TRANSFER"
+        ],
+        "description": "Native `SelfTradePreventionMode` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
+        ]
+      },
+      "TimeInForce": {
+        "type": "string",
+        "enum": [
+          "GTC",
+          "IOC",
+          "FOK"
+        ],
+        "description": "Native `TimeInForce` values documented for this product.",
+        "x-sources": [
+          "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/enums.md"
         ]
       }
     }

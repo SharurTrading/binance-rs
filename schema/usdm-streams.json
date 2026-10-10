@@ -260,13 +260,13 @@
                         "type": "string"
                       },
                       "S": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "o": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "f": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "q": {
                         "type": "string",
@@ -281,7 +281,7 @@
                         "x-decimal": true
                       },
                       "X": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "l": {
                         "type": "string",
@@ -337,13 +337,13 @@
                             "type": "string"
                           },
                           "S": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderSide"
                           },
                           "o": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderType"
                           },
                           "f": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/TimeInForce"
                           },
                           "q": {
                             "type": "string",
@@ -358,7 +358,7 @@
                             "x-decimal": true
                           },
                           "X": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderStatus"
                           },
                           "l": {
                             "type": "string",
@@ -1146,7 +1146,7 @@
                         "format": "int64"
                       },
                       "i": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/KlineInterval"
                       },
                       "f": {
                         "type": "integer",
@@ -1245,7 +1245,7 @@
                             "format": "int64"
                           },
                           "i": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/KlineInterval"
                           },
                           "f": {
                             "type": "integer",
@@ -2092,7 +2092,7 @@
                         "type": "string"
                       },
                       "i": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/KlineInterval"
                       },
                       "f": {
                         "type": "integer",
@@ -2192,7 +2192,7 @@
                             "type": "string"
                           },
                           "i": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/KlineInterval"
                           },
                           "f": {
                             "type": "integer",
@@ -2341,13 +2341,13 @@
                         "type": "string"
                       },
                       "S": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderSide"
                       },
                       "o": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderType"
                       },
                       "f": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/TimeInForce"
                       },
                       "q": {
                         "type": "string",
@@ -2362,7 +2362,7 @@
                         "x-decimal": true
                       },
                       "X": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/OrderStatus"
                       },
                       "l": {
                         "type": "string",
@@ -2412,13 +2412,13 @@
                             "type": "string"
                           },
                           "S": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderSide"
                           },
                           "o": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderType"
                           },
                           "f": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/TimeInForce"
                           },
                           "q": {
                             "type": "string",
@@ -2433,7 +2433,7 @@
                             "x-decimal": true
                           },
                           "X": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/OrderStatus"
                           },
                           "l": {
                             "type": "string",
@@ -4414,26 +4414,7 @@
           "a": {
             "properties": {
               "m": {
-                "type": "string",
-                "enum": [
-                  "DEPOSIT",
-                  "WITHDRAW",
-                  "ORDER",
-                  "FUNDING_FEE",
-                  "WITHDRAW_REJECT",
-                  "ADJUSTMENT",
-                  "INSURANCE_CLEAR",
-                  "ADMIN_DEPOSIT",
-                  "ADMIN_WITHDRAW",
-                  "MARGIN_TRANSFER",
-                  "MARGIN_TYPE_CHANGE",
-                  "ASSET_TRANSFER",
-                  "OPTIONS_PREMIUM_FEE",
-                  "OPTIONS_SETTLE_PROFIT",
-                  "AUTO_EXCHANGE",
-                  "COIN_SWAP_DEPOSIT",
-                  "COIN_SWAP_WITHDRAW"
-                ]
+                "$ref": "#/components/schemas/AccountUpdateReason"
               },
               "B": {
                 "type": "array",
@@ -4496,10 +4477,17 @@
                     },
                     "iw": {
                       "type": "string",
-                      "x-decimal": true
+                      "x-decimal": true,
+                      "description": "Isolated wallet when supplied by the venue; absence is retained, never interpreted as zero.",
+                      "x-evidence": {
+                        "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-streams/1.0.0/schema.yaml",
+                        "checked": "2026-10-11",
+                        "issue": "https://github.com/SharurTrading/binance-rs/issues/69",
+                        "reason": "Official schema leaves this conditional isolated-position field optional; no client-only required constraint."
+                      }
                     },
                     "ps": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/PositionSide"
                     }
                   },
                   "type": "object",
@@ -4510,7 +4498,6 @@
                     "cr",
                     "up",
                     "mt",
-                    "iw",
                     "ps"
                   ]
                 }
@@ -4559,29 +4546,29 @@
                 "format": "int64"
               },
               "at": {
-                "type": "string"
+                "$ref": "#/components/schemas/AlgoType"
               },
               "o": {
-                "type": "string"
+                "$ref": "#/components/schemas/OrderType"
               },
               "s": {
                 "type": "string"
               },
               "S": {
-                "type": "string"
+                "$ref": "#/components/schemas/OrderSide"
               },
               "ps": {
-                "type": "string"
+                "$ref": "#/components/schemas/PositionSide"
               },
               "f": {
-                "type": "string"
+                "$ref": "#/components/schemas/TimeInForce"
               },
               "q": {
                 "type": "string",
                 "x-decimal": true
               },
               "X": {
-                "type": "string"
+                "$ref": "#/components/schemas/AlgoStatus"
               },
               "ai": {
                 "type": "string"
@@ -4595,7 +4582,7 @@
                 "x-decimal": true
               },
               "act": {
-                "type": "string"
+                "$ref": "#/components/schemas/OrderType"
               },
               "tp": {
                 "type": "string",
@@ -4606,13 +4593,13 @@
                 "x-decimal": true
               },
               "V": {
-                "type": "string"
+                "$ref": "#/components/schemas/SelfTradePreventionMode"
               },
               "wt": {
-                "type": "string"
+                "$ref": "#/components/schemas/WorkingType"
               },
               "pm": {
-                "type": "string"
+                "$ref": "#/components/schemas/PriceMatch"
               },
               "cp": {
                 "type": "boolean"
@@ -4822,7 +4809,7 @@
                   "type": "string"
                 },
                 "ps": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/PositionSide"
                 },
                 "pa": {
                   "type": "string",
@@ -4832,7 +4819,15 @@
                   "type": "string"
                 },
                 "iw": {
-                  "type": "string"
+                  "type": "string",
+                  "x-decimal": true,
+                  "description": "Isolated wallet when supplied by the venue; absence is retained, never interpreted as zero.",
+                  "x-evidence": {
+                    "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-streams/1.0.0/schema.yaml",
+                    "checked": "2026-10-11",
+                    "issue": "https://github.com/SharurTrading/binance-rs/issues/69",
+                    "reason": "Official schema leaves this conditional isolated-position field optional; no client-only required constraint."
+                  }
                 },
                 "mp": {
                   "type": "string",
@@ -4853,7 +4848,6 @@
                 "ps",
                 "pa",
                 "mt",
-                "iw",
                 "mp",
                 "up",
                 "mm"
@@ -4893,13 +4887,13 @@
                 "type": "string"
               },
               "S": {
-                "type": "string"
+                "$ref": "#/components/schemas/OrderSide"
               },
               "o": {
-                "type": "string"
+                "$ref": "#/components/schemas/OrderType"
               },
               "f": {
-                "type": "string"
+                "$ref": "#/components/schemas/TimeInForce"
               },
               "q": {
                 "type": "string",
@@ -4918,10 +4912,10 @@
                 "x-decimal": true
               },
               "x": {
-                "type": "string"
+                "$ref": "#/components/schemas/ExecutionType"
               },
               "X": {
-                "type": "string"
+                "$ref": "#/components/schemas/OrderStatus"
               },
               "i": {
                 "type": "integer",
@@ -4972,13 +4966,13 @@
                 "type": "boolean"
               },
               "wt": {
-                "type": "string"
+                "$ref": "#/components/schemas/WorkingType"
               },
               "ot": {
-                "type": "string"
+                "$ref": "#/components/schemas/OrderType"
               },
               "ps": {
-                "type": "string"
+                "$ref": "#/components/schemas/PositionSide"
               },
               "cp": {
                 "type": "boolean"
@@ -5007,10 +5001,10 @@
                 "x-decimal": true
               },
               "V": {
-                "type": "string"
+                "$ref": "#/components/schemas/SelfTradePreventionMode"
               },
               "pm": {
-                "type": "string"
+                "$ref": "#/components/schemas/PriceMatch"
               },
               "gtd": {
                 "type": "integer",
@@ -5138,7 +5132,7 @@
             "type": "string"
           },
           "S": {
-            "type": "string"
+            "$ref": "#/components/schemas/OrderSide"
           },
           "L": {
             "type": "string",
@@ -5257,6 +5251,232 @@
         "x-sources": [
           "https://developers.binance.info/docs/derivatives/usds-margined-futures/common-definition",
           "https://developers.binance.info/docs/derivatives/usds-margined-futures/market-data/rest-api/Continuous-Contract-Kline-Candlestick-Data"
+        ]
+      },
+      "PriceMatch": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "OPPONENT",
+          "OPPONENT_5",
+          "OPPONENT_10",
+          "OPPONENT_20",
+          "QUEUE",
+          "QUEUE_5",
+          "QUEUE_10",
+          "QUEUE_20"
+        ],
+        "description": "Native `PriceMatch` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      },
+      "WorkingType": {
+        "type": "string",
+        "enum": [
+          "MARK_PRICE",
+          "CONTRACT_PRICE"
+        ],
+        "description": "Native `WorkingType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      },
+      "OrderType": {
+        "type": "string",
+        "enum": [
+          "LIMIT",
+          "MARKET",
+          "STOP",
+          "STOP_MARKET",
+          "TAKE_PROFIT",
+          "TAKE_PROFIT_MARKET",
+          "TRAILING_STOP_MARKET",
+          "LIQUIDATION"
+        ],
+        "description": "Native `OrderType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition",
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams"
+        ]
+      },
+      "PositionSide": {
+        "type": "string",
+        "enum": [
+          "BOTH",
+          "LONG",
+          "SHORT"
+        ],
+        "description": "Native `PositionSide` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "PARTIALLY_FILLED",
+          "FILLED",
+          "CANCELED",
+          "REJECTED",
+          "EXPIRED",
+          "EXPIRED_IN_MATCH"
+        ],
+        "description": "Native `OrderStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition",
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams"
+        ]
+      },
+      "OrderSide": {
+        "type": "string",
+        "enum": [
+          "BUY",
+          "SELL"
+        ],
+        "description": "Native `OrderSide` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      },
+      "KlineInterval": {
+        "type": "string",
+        "enum": [
+          "1s",
+          "1m",
+          "3m",
+          "5m",
+          "15m",
+          "30m",
+          "1h",
+          "2h",
+          "4h",
+          "6h",
+          "8h",
+          "12h",
+          "1d",
+          "3d",
+          "1w",
+          "1M"
+        ],
+        "description": "Native `KlineInterval` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ],
+        "x-rust-variants": {
+          "1s": "Second1",
+          "1m": "Minute1",
+          "3m": "Minute3",
+          "5m": "Minute5",
+          "15m": "Minute15",
+          "30m": "Minute30",
+          "1h": "Hour1",
+          "2h": "Hour2",
+          "4h": "Hour4",
+          "6h": "Hour6",
+          "8h": "Hour8",
+          "12h": "Hour12",
+          "1d": "Day1",
+          "3d": "Day3",
+          "1w": "Week1",
+          "1M": "Month1"
+        }
+      },
+      "ExecutionType": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "CANCELED",
+          "CALCULATED",
+          "EXPIRED",
+          "TRADE",
+          "AMENDMENT"
+        ],
+        "description": "Native `ExecutionType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams"
+        ]
+      },
+      "SelfTradePreventionMode": {
+        "type": "string",
+        "enum": [
+          "NONE",
+          "EXPIRE_TAKER",
+          "EXPIRE_BOTH",
+          "EXPIRE_MAKER"
+        ],
+        "description": "Native `SelfTradePreventionMode` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition",
+          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade#new-order"
+        ]
+      },
+      "TimeInForce": {
+        "type": "string",
+        "enum": [
+          "GTC",
+          "IOC",
+          "FOK",
+          "GTX",
+          "GTD",
+          "RPI"
+        ],
+        "description": "Native `TimeInForce` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/common-definition"
+        ]
+      },
+      "AlgoType": {
+        "type": "string",
+        "enum": [
+          "CONDITIONAL"
+        ],
+        "description": "Native `AlgoType` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade#new-algo-order"
+        ]
+      },
+      "AlgoStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "CANCELED",
+          "TRIGGERING",
+          "TRIGGERED",
+          "FINISHED",
+          "REJECTED",
+          "EXPIRED"
+        ],
+        "description": "Native `AlgoStatus` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams"
+        ]
+      },
+      "AccountUpdateReason": {
+        "type": "string",
+        "enum": [
+          "DEPOSIT",
+          "WITHDRAW",
+          "ORDER",
+          "FUNDING_FEE",
+          "WITHDRAW_REJECT",
+          "ADJUSTMENT",
+          "INSURANCE_CLEAR",
+          "ADMIN_DEPOSIT",
+          "ADMIN_WITHDRAW",
+          "MARGIN_TRANSFER",
+          "MARGIN_TYPE_CHANGE",
+          "ASSET_TRANSFER",
+          "OPTIONS_PREMIUM_FEE",
+          "OPTIONS_SETTLE_PROFIT",
+          "AUTO_EXCHANGE",
+          "COIN_SWAP_DEPOSIT",
+          "COIN_SWAP_WITHDRAW"
+        ],
+        "description": "Native `AccountUpdateReason` values documented for this product.",
+        "x-sources": [
+          "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams"
         ]
       }
     }

@@ -5,6 +5,8 @@
 //! Every mutation is attempted once. Dropping a future never proves cancellation;
 //! reconcile uncertain withdrawals/transfers through the matching venue history.
 //! No runtime or background tasks are started. All calls take caller deadlines.
+/// Provider-native response enumerations with exact unknown-value retention.
+pub mod enums;
 pub mod event_payloads;
 mod rate;
 pub mod rest_models;

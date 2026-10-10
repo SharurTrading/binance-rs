@@ -134,8 +134,18 @@ fn coinm_conditional_algo_and_funding_evidence_decode_from_observed_wire() {
     }))
     .unwrap();
     assert_eq!(ack.algo_id, 1_000_000_226_909_486);
-    assert_eq!(ack.algo_status.as_deref(), Some("NEW"));
-    assert_eq!(ack.working_type.as_deref(), Some("CONTRACT_PRICE"));
+    assert_eq!(
+        ack.algo_status
+            .as_ref()
+            .map(coinm::enums::AlgoStatus::as_str),
+        Some("NEW")
+    );
+    assert_eq!(
+        ack.working_type
+            .as_ref()
+            .map(binance_client::coinm::enums::WorkingType::as_str),
+        Some("CONTRACT_PRICE")
+    );
     assert_eq!(ack.trigger_price, Some(D::from(10_000)));
     assert_eq!(ack.iceberg_quantity, None);
 

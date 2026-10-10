@@ -87,7 +87,7 @@ pub struct AcceptQuoteResponse {
     pub create_time: i64,
     /// Exact `orderStatus` wire field.
     #[serde(rename = "orderStatus")]
-    pub order_status: String,
+    pub order_status: super::enums::OrderStatus,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -148,7 +148,7 @@ pub struct GetConvertTradeHistoryResponseListItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub order_status: Option<String>,
+    pub order_status: Option<super::enums::OrderStatus>,
     /// Exact `fromAsset` wire field.
     #[serde(rename = "fromAsset")]
     pub from_asset: crate::Asset,
@@ -198,7 +198,7 @@ pub struct OrderStatusResponse {
     pub order_id: super::OrderId,
     /// Exact `orderStatus` wire field.
     #[serde(rename = "orderStatus")]
-    pub order_status: String,
+    pub order_status: super::enums::OrderStatus,
     /// Exact `fromAsset` wire field.
     #[serde(rename = "fromAsset")]
     pub from_asset: crate::Asset,
@@ -268,7 +268,7 @@ pub struct QueryLimitOpenOrdersResponseListItem {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub order_status: Option<String>,
+    pub order_status: Option<super::enums::OrderStatus>,
     /// Exact `fromAsset` wire field.
     #[serde(rename = "fromAsset")]
     pub from_asset: crate::Asset,

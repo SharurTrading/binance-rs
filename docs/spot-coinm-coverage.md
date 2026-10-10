@@ -48,13 +48,28 @@ amounts remain absent. USD-M WebSocket position V2 applies the same exact parsin
 to its own native `positionAmt` field.
 
 Stream fields the venue documents as conditional decode as absent rather than
-refusing the frame. A COIN-M `!contractInfo` push carries `bks` only on a bracket
+refusing the frame. COIN-M account-update position `iw` follows the
+[official optional isolated-wallet field](https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/1.0.0/schema.yaml):
+absence stays `None`, reported zero stays `Some(0)`, and malformed money fails
+explicitly. Synthetic loopback fixtures check delivery and joined retirement;
+no live cross-margin capture is claimed ([#69](https://github.com/SharurTrading/binance-rs/issues/69)). A COIN-M `!contractInfo` push carries `bks` only on a bracket
 update, so a listing or settlement push decodes with `bks: None`, while an empty
 bracket list stays `Some([])`; `ct`, `dt`, `ot` and `cs` remain required in both
-Futures markets. Spot `@referencePrice` sends `r` as `null` when there is no
-reference price, which decodes as `None`. Sources:
+Futures markets. Spot `@referencePrice` requires the `r` field: JSON `null` means no
+reference price and decodes as `None`, while an omitted field is malformed. A price
+string stays an exact `Decimal`. Sources:
 [COIN-M contract info stream](https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-market-streams/Contract-Info-Stream)
-and [Spot reference price streams](https://developers.binance.com/en/docs/products/spot/web-socket-streams#reference-price-streams).
+and [Spot reference price streams](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#reference-price-streams).
+
+COIN-M single-symbol and pair mark-price streams retain required exact index
+prices (`i`). Their required funding-rate field (`r`) decodes the documented empty
+string for delivery contracts as `None`; a numeric zero remains `Some(0)`, and
+missing, null, malformed or unrepresentable values fail decoding. See the
+[official COIN-M stream schema](https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/1.0.0/schema.yaml).
+The optional exact moving-average price (`ap`) follows the dated public wire
+observation in [#71](https://github.com/SharurTrading/binance-rs/issues/71);
+the current official COIN-M schema does not yet document its presence, so the field
+is not required. Unknown future fields remain available as redacted evidence.
 
 Venue enumerations are string components in the schema facts: an `enum` list, a
 one-line summary and the `x-sources` pages that document the values. The upstream

@@ -16,13 +16,7 @@ fn text<'a>(p: &'a BTreeMap<String, Value>, key: &str) -> Option<&'a str> {
 }
 pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> {
     crate::core::validate_parameters(p, &[], &[], &[])?;
-    for key in [
-        "quantity",
-        "quoteOrderQty",
-        "price",
-        "stopPrice",
-        "icebergQty",
-    ] {
+    for key in ["quantity", "quoteOrderQty", "icebergQty"] {
         if let Some(v) = p.get(key) {
             let d =
                 super::wire::parse_decimal(v).map_err(|_| Error::Validation("Spot magnitude"))?;
@@ -299,7 +293,7 @@ fn validate_advanced(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error>
         {
             let amount = super::wire::parse_decimal(value)
                 .map_err(|_| Error::Validation("Spot magnitude"))?;
-            if amount <= Decimal::ZERO {
+            if !name.ends_with("Price") && amount <= Decimal::ZERO {
                 return Err(Error::Validation("positive Spot magnitude"));
             }
         }

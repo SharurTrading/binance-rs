@@ -158,7 +158,13 @@ fn inverse_position_retains_its_margin_mode_verbatim() {
     let position = &parsed[0];
     assert_eq!(position.margin_type.as_deref(), Some("isolated"));
     assert_eq!(position.is_auto_add_margin.as_deref(), Some("false"));
-    assert_eq!(position.position_side.as_deref(), Some("SHORT"));
+    assert_eq!(
+        position
+            .position_side
+            .as_ref()
+            .map(binance_client::coinm::enums::PositionSide::as_str),
+        Some("SHORT")
+    );
     assert_eq!(
         position.position_amt,
         Some("-1".parse::<Decimal>().unwrap()),

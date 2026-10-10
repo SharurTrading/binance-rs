@@ -100,10 +100,12 @@ fn validate_magnitudes(p: &BTreeMap<String, Value>) -> Result<(), Error> {
                 | "pendingTrailingDelta"
                 | "pendingAboveTrailingDelta"
                 | "pendingBelowTrailingDelta"
-        ) && super::wire::parse_decimal(v).map_err(|_| Error::Validation("Margin magnitude"))?
-            <= Decimal::ZERO
-        {
-            return Err(Error::Validation("positive Margin magnitude"));
+        ) {
+            let amount = super::wire::parse_decimal(v)
+                .map_err(|_| Error::Validation("Margin financial parameter"))?;
+            if k != "price" && !k.ends_with("Price") && amount <= Decimal::ZERO {
+                return Err(Error::Validation("positive Margin magnitude"));
+            }
         }
         if matches!(
             k.as_str(),

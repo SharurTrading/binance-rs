@@ -297,6 +297,13 @@ def generate(kind):
         op_expr = f'Operation {{ name: {lit(op["operationId"])}, path: {lit(op["path"])}, method: {lit(op["method"])}, security: Security::{security}, mutation: {str(mutation).lower()}, weight: {op.get("x-ip-weight",op.get("x-uid-weight",0))}, requests_per_second: {requests_per_second}, validate_time: super::validation::validate_time, definitive: super::validation::definitive, success_weight: {success_weight}, partial: {partial} }}'
         required_rust='&['+', '.join(lit(v) for v in sorted(required))+']'
         validation=f'let p = parameters(self)?; validate_parameters(&p, {required_rust}, &[{", ".join(enums)}], &[{", ".join(bounds)}])?; super::validation::validate({lit(op["operationId"])}, &p)'
+        # The weight admission charges, reported before sending; the venue's pools only.
+        weight_fn = ['    /// The weight admission charges this request against its pool\'s minute weight',
+            '    /// window, as the venue documents it for these parameters; read before sending.',
+            '    ///', '    /// # Errors',
+            '    /// Refuses a request dispatch would refuse before admission.',
+            '    pub fn weight(&self) -> Result<u64, Error> { self.validate()?; Ok(self.cost()?.request_weight()) }',
+            ] if kind == 'rest' and PRODUCT in ['spot', 'usdm', 'coinm'] else []
         if PRODUCT == 'convert' and op['operationId']=='acceptQuote':
             requests.append(f'/// Canonical quote acceptance operation facts.\npub(crate) const ACCEPT_QUOTE_OPERATION:Operation={op_expr};\npub use super::quote::AcceptQuote;')
         else:
@@ -306,7 +313,7 @@ def generate(kind):
                 '    #[must_use]', '    pub fn new() -> Self { Self::default() }',*setters,
                 '    /// Validate this request before dispatch.', '    ///', '    /// # Errors',
                 '    /// Refuses missing, invalid, or contradictory provider parameters.',
-                '    pub fn build(self) -> Result<Self, Error> { self.validate()?; Ok(self) }','}',
+                '    pub fn build(self) -> Result<Self, Error> { self.validate()?; Ok(self) }',*weight_fn,'}',
                 f'impl Request for {name} {{', f'    type Response = super::{kind}_models::{response_type};',
                 f'    const OP: Operation = {op_expr};',f'    fn validate(&self) -> Result<(), Error> {{ {validation} }}',
                 '    fn cost(&self) -> Result<crate::core::Cost, Error> { super::rate::cost(Self::OP, &parameters(self)?) }','}']))

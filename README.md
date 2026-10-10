@@ -205,13 +205,51 @@ let cm = coinm::Config::with_pools(coinm::Environment::Production, &pools)?;
 # Ok::<(), Error>(())
 ```
 
+### Reading a pool and a request's weight
+
+The client reports what it measures and decides nothing with it. `pool_usage()` on
+a product `Config` or `RestClient` reads the pool that client draws on, at its
+injected clock:
+
+| Field | Meaning |
+| --- | --- |
+| `request_weight` | `REQUEST_WEIGHT` per minute; on every drawn pool it counts REST and WebSocket API weight together |
+| `raw_requests` | `RAW_REQUESTS` per five minutes, where the pool counts them (Spot) |
+| `limit`, `source` | The latest stated limit (`LimitSource::Stated`), or the documented baseline until a client of the pool reads exchange information (`LimitSource::Documented`) |
+| `used` | Spent in the current window: the pool's own count, raised to `X-MBX-USED-WEIGHT-1M` whenever a reply reports more |
+| `interval`, `resets_in` | The window's length and the time until it starts again, aligned to the epoch as the venue's windows are |
+
+Every Spot, USDⓈ-M and COIN-M REST request builder has `weight()`: the weight
+admission will charge that request against the minute window, read before it is
+sent. It follows the parameters exactly as admission does (`limit` for klines and
+depth, `symbol` or `symbols` for tickers and open orders), and refuses what dispatch
+would refuse before admission. Fixed weights come from each catalog's `x-ip-weight`
+in `schema/`; parameter-dependent weights are each product's `rate.rs` tables, from
+the same pages. A Spot submit or cancel the venue documents as free on success is
+charged its reservation and released once it succeeds.
+
+```rust
+use binance_client::core_trading::usdm::{self, rest_requests::KlineCandlestickData};
+use binance_client::{Error, Symbol};
+
+let config = usdm::Config::new(usdm::Environment::Production)?;
+let pool = config.pool_usage()?;
+let bars = KlineCandlestickData::new()
+    .symbol(Symbol::new("BTCUSDT")?)
+    .interval("1m")
+    .limit(1000);
+let fits = pool.request_weight.used + bars.weight()? <= pool.request_weight.limit;
+# Ok::<(), Error>(())
+```
+
 Explicit `BudgetLimits` owners start from conservative documented values. USDⓈ-M
 also tracks its documented funding/history, conversion, and monthly download-job limits. External
 clients and frontend usage can consume the same budgets; local admission cannot
 guarantee venue acceptance. It never waits, retries, or sends a command after expiry. The catalog omits
-USDⓈ-M `testOrder` quota weights; the client conservatively reserves one IP unit and one
-order slot pending [verification #4](https://github.com/SharurTrading/binance-rs/issues/4).
-That validation endpoint does not submit to the matching engine.
+USDⓈ-M `testOrder` quota weights; an authorized demo probe
+([verification #4](https://github.com/SharurTrading/binance-rs/issues/4)) found it charges
+no IP weight and one slot on each order limit, which the client charges. That validation
+endpoint does not submit to the matching engine.
 
 ## Development and verification
 

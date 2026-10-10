@@ -79,6 +79,10 @@ impl HttpClient {
     ) -> Result<(), Error> {
         self.budgets.adopt_stated(stated)
     }
+    /// The IP windows of this client's pool, read at the client's clock.
+    pub(crate) fn pool_usage(&self) -> Result<super::PoolUsage, Error> {
+        self.budgets.usage(self.clock.now_millis()?)
+    }
     pub(crate) fn time_unit(mut self, unit: super::TimeUnit) -> Self {
         self.time_unit = unit;
         self

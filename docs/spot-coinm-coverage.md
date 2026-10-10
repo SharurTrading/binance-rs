@@ -127,7 +127,9 @@ venue usage. Failed/ambiguous responses retain the reservation. UM/CM clients fr
 them still needs one explicit owner. COIN-M download jobs enforce their own eight-per-calendar-month
 endpoint quotas and do not borrow USDⓈ-M download quotas. Clones share budgets; `for_account()` retains a common IP owner.
 Quota evidence/cooldowns survive failed response bodies. Admission does not wait
-or retry, and expired queued commands cannot send late.
+or retry, and expired queued commands cannot send late. Both products report their
+pool through `pool_usage()` and each REST request's admission weight through
+`weight()`, as USDⓈ-M does; the report decides nothing.
 
 ## Verification and remaining work
 

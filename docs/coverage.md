@@ -93,9 +93,11 @@ schema-permitted omission and malformed money through a real loopback socket.
 A dated authorized demo capture additionally replays the recorded cross-margin pushes
 themselves: on 2026-10-11, one-way cross-margin round trips on both the USD-M and
 COIN-M demo environments supplied `iw` as a reported zero on every position update
-rather than omitting the field, with every money value staying exact
+rather than omitting the field, with every money value staying exact — including
+each market's `bep` break-even price, balances and margin asset
 ([#69](https://github.com/SharurTrading/binance-rs/issues/69),
-`tests/fixtures/*-cross-margin-account-update-2026-10-11.json`). Request
+`tests/fixtures/*-cross-margin-account-update-2026-10-11.json`; the recorded COIN-M
+frames carry the venue's account-alias field redacted). Request
 builders check protocol constraints; current symbol-dependent filters and market
 state remain caller/venue checks. No complete order-book or atomic account snapshot
 is promised. GTD expiry is rechecked against the injected venue clock before the wire.

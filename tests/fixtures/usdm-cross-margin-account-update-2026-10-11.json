@@ -8,19 +8,20 @@
   "events": [
     {
       "phase": "open",
-      "raw": "{\"e\":\"ACCOUNT_UPDATE\",\"T\":1791666891806,\"E\":1791666891806,\"a\":{\"B\":[{\"a\":\"USDT\",\"wb\":\"4999.96680604\",\"cw\":\"4999.96680604\",\"bc\":\"0\"}],\"P\":[{\"s\":\"BTCUSDT\",\"pa\":\"0.001\",\"ep\":\"82984.9\",\"cr\":\"0\",\"up\":\"0.01981291\",\"mt\":\"cross\",\"iw\":\"0\",\"ps\":\"BOTH\",\"ma\":\"USDT\",\"bep\":\"83018.09396000001\"}],\"m\":\"ORDER\"}}"
+      "raw": "{\"E\":1791668285897,\"T\":1791668285896,\"a\":{\"B\":[{\"a\":\"USDT\",\"bc\":\"0\",\"cw\":\"4999.89920577\",\"wb\":\"4999.89920577\"}],\"P\":[{\"bep\":\"83050.2068\",\"cr\":\"-0.0012\",\"ep\":\"83017\",\"iw\":\"0\",\"ma\":\"USDT\",\"mt\":\"cross\",\"pa\":\"0.001\",\"ps\":\"BOTH\",\"s\":\"BTCUSDT\",\"up\":\"0\"}],\"m\":\"ORDER\"},\"e\":\"ACCOUNT_UPDATE\"}"
     },
     {
       "phase": "close",
-      "raw": "{\"e\":\"ACCOUNT_UPDATE\",\"T\":1791666892879,\"E\":1791666892879,\"a\":{\"B\":[{\"a\":\"USDT\",\"wb\":\"4999.93241257\",\"cw\":\"4999.93241257\",\"bc\":\"0\"}],\"P\":[{\"s\":\"BTCUSDT\",\"pa\":\"0\",\"ep\":\"0\",\"cr\":\"-0.0012\",\"up\":\"0\",\"mt\":\"cross\",\"iw\":\"0\",\"ps\":\"BOTH\",\"ma\":\"USDT\",\"bep\":\"0\"}],\"m\":\"ORDER\"}}"
+      "raw": "{\"E\":1791668286946,\"T\":1791668286946,\"a\":{\"B\":[{\"a\":\"USDT\",\"bc\":\"0\",\"cw\":\"4999.84900577\",\"wb\":\"4999.84900577\"}],\"P\":[{\"bep\":\"0\",\"cr\":\"-0.0182\",\"ep\":\"0\",\"iw\":\"0\",\"ma\":\"USDT\",\"mt\":\"cross\",\"pa\":\"0\",\"ps\":\"BOTH\",\"s\":\"BTCUSDT\",\"up\":\"0\"}],\"m\":\"ORDER\"},\"e\":\"ACCOUNT_UPDATE\"}"
     }
   ],
   "market": "usdm",
-  "observedAtUnixSeconds": 1791666894,
+  "observedAtUnixSeconds": 1791668289,
+  "phaseAttribution": "phase labels capture-session attribution; a delayed venue push is attributed to the leg that observed it.",
   "positionMode": "one-way",
   "restMarginType": "cross",
   "run": "issue-69-usdm-cross-margin-account-update",
-  "scrub": "No API key, secret, signed URL or listen key is recorded; ACCOUNT_UPDATE carries no account identifier.",
+  "scrub": "No API key, secret, signed URL or listen key is recorded; the recorded USD-M ACCOUNT_UPDATE frames carry no account-identifier field.",
   "symbol": "BTCUSDT",
   "tradedQuantity": "0.001"
 }

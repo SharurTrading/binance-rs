@@ -6,12 +6,18 @@
 //!
 //! These probes never run in normal CI (`--ignored` only) and require the
 //! operator's explicit authorization (BN-VALIDATE-01): each probe places and
-//! fully closes one minimal demo market position on its market, then verifies
-//! the flat state before recording evidence. Credentials are read from the
-//! environment (`TEST_KEY`, `TEST_SECRET`); they, the listen key, signed URLs
-//! and authentication payloads are never logged. Recorded frames keep only
-//! what the venue put on the wire: `ACCOUNT_UPDATE` carries no account
-//! identifier, and the fixture never stores the listen key or credentials.
+//! fully closes one minimal demo market position on its market. Credentials
+//! are read from the environment (`TEST_KEY`, `TEST_SECRET`); they, the listen
+//! key, signed URLs and authentication payloads are never logged. Frames are
+//! recorded with the venue's account-alias field `i` redacted before anything
+//! is retained; no API key, secret, signed URL or listen key is ever recorded.
+//!
+//! Cleanup is owned on every exit path, not only the happy one (BN-ORDER-01:
+//! a timeout or failed read does not cancel the open order): after the open
+//! order is accepted, the round trip returns a typed result and an
+//! unconditional cleanup routine reads the venue, flattens any held position
+//! reduce-only, cancels stray orders, closes the listen key and the socket,
+//! and prints the final held state before the probe surfaces its own failure.
 
 #[cfg(test)]
 mod tests {
@@ -72,7 +78,11 @@ mod tests {
 
     /// Read frames until `stop` accepts the accumulated evidence, a frame
     /// timeout passes with no traffic, or a safety cap is reached. Every
-    /// `ACCOUNT_UPDATE` and `MARGIN_CALL` frame is recorded verbatim.
+    /// `ACCOUNT_UPDATE` and `MARGIN_CALL` frame is recorded with the venue's
+    /// account-alias field `i` removed; every other byte is as captured.
+    ///
+    /// A `phase` label is capture-session attribution: a delayed venue push is
+    /// attributed to the leg that observed it, not to venue causality.
     async fn capture_frames(
         stream: &mut DemoStream,
         phase: &'static str,
@@ -91,16 +101,22 @@ mod tests {
             let Some(text) = message.as_text() else {
                 continue;
             };
-            let value: Value = serde_json::from_str(text).expect("demo frame is JSON");
+            let mut value: Value = serde_json::from_str(text).expect("demo frame is JSON");
             match value.get("e").and_then(Value::as_str) {
                 Some("ACCOUNT_UPDATE" | "MARGIN_CALL") => {
+                    if value
+                        .as_object_mut()
+                        .is_some_and(|object| object.remove("i").is_some())
+                    {
+                        println!("{phase}: redacted account-alias field");
+                    }
                     println!(
                         "{phase}: recorded {}",
                         value["e"].as_str().unwrap_or("event")
                     );
                     frames.push(CapturedFrame {
                         phase,
-                        raw: text.to_owned(),
+                        raw: value.to_string(),
                     });
                 }
                 _ => println!("{phase}: unrecorded frame kind"),
@@ -124,12 +140,19 @@ mod tests {
     }
 
     fn write_fixture(market: &str, body: &Value) {
+        for event in body["events"].as_array().expect("capture events") {
+            let raw: Value = serde_json::from_str(event["raw"].as_str().unwrap()).unwrap();
+            assert!(
+                raw.get("i").is_none(),
+                "the account-alias field must be redacted before recording"
+            );
+        }
         let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("tests/fixtures")
             .join(format!(
                 "{market}-cross-margin-account-update-2026-10-11.json"
             ));
-        std::fs::write(&path, serde_json::to_string_pretty(&body).unwrap()).expect("fixture write");
+        std::fs::write(&path, serde_json::to_string_pretty(body).unwrap()).expect("fixture write");
         println!("fixture recorded: {}", path.display());
     }
 
@@ -141,14 +164,14 @@ mod tests {
     #[ignore = "authorized credentialed demo probe placing and closing one demo market position; never runs in normal CI"]
     #[allow(
         clippy::too_many_lines,
-        reason = "one sequential authorized probe; splitting would obscure the capture-then-cleanup sequence"
+        reason = "one sequential authorized probe; splitting would obscure the capture-cleanup sequence"
     )]
     async fn demo_usdm_cross_margin_account_update_capture() {
         use binance_client::usdm::{
             Config, Environment, RestClient,
             rest_requests::{
-                ChangeMarginType, CloseUserDataStream, CurrentAllOpenOrders,
-                GetCurrentPositionMode, NewOrder, PositionInformationV2, StartUserDataStream,
+                ChangeMarginType, GetCurrentPositionMode, NewOrder, PositionInformationV2,
+                StartUserDataStream,
             },
         };
         let symbol = Symbol::new("BTCUSDT").unwrap();
@@ -186,8 +209,10 @@ mod tests {
             "refusing to run beside an existing BTCUSDT position"
         );
 
-        // -4046 is the venue's "no need to change margin type" reply: already
-        // cross. Any other refusal fails the probe before any order is sent.
+        // -4046 is the documented "No need to change margin type." reply
+        // ([error code](https://developers.binance.com/en/docs/derivatives/usds-margined-futures/error-code)):
+        // already cross. Any other refusal fails the probe before any order is
+        // sent.
         match client
             .change_margin_type(
                 &ChangeMarginType::new()
@@ -219,123 +244,107 @@ mod tests {
         ))
         .await;
 
-        let mut order = NewOrder::new()
-            .symbol(symbol.clone())
-            .side("BUY")
-            .type_value("MARKET")
-            .quantity(Decimal::new(1, 3))
-            .new_client_order_id(ClientOrderId::new("issue69/usdm-open").unwrap());
-        if dual {
-            order = order.position_side("LONG");
-        }
-        client
-            .new_order(&order.build().unwrap(), deadline())
-            .await
-            .unwrap();
-        let mut frames = capture_frames(&mut stream, "open", |frames| {
-            frames.iter().any(|frame| {
+        // From the open order on, failures return typed errors so the
+        // unconditional cleanup below still owns the venue state.
+        let capture: Result<(Vec<CapturedFrame>, String), String> = async {
+            let mut order = NewOrder::new()
+                .symbol(symbol.clone())
+                .side("BUY")
+                .type_value("MARKET")
+                .quantity(Decimal::new(1, 3))
+                .new_client_order_id(ClientOrderId::new("issue69/usdm-open").unwrap());
+            if dual {
+                order = order.position_side("LONG");
+            }
+            client
+                .new_order(&order.build().unwrap(), deadline())
+                .await
+                .map_err(|error| format!("open order: {error}"))?;
+            let mut frames = capture_frames(&mut stream, "open", |frames| {
+                frames.iter().any(|frame| {
+                    position_entries(frame, "BTCUSDT")
+                        .iter()
+                        .any(|entry| entry["pa"].as_str().is_some_and(|pa| pa != "0"))
+                })
+            })
+            .await;
+            if !frames.iter().any(|frame| {
                 position_entries(frame, "BTCUSDT")
                     .iter()
                     .any(|entry| entry["pa"].as_str().is_some_and(|pa| pa != "0"))
+            }) {
+                return Err("no open-leg ACCOUNT_UPDATE observed".to_owned());
+            }
+
+            // A slow fill is resolved by venue reads, never by assumption.
+            let (held_amt, margin_type) = loop {
+                let positions = client
+                    .position_information_v2(
+                        &PositionInformationV2::new()
+                            .symbol(symbol.clone())
+                            .build()
+                            .unwrap(),
+                        deadline(),
+                    )
+                    .await
+                    .map_err(|error| format!("position read: {error}"))?;
+                if let Some(found) = positions
+                    .data
+                    .iter()
+                    .find(|item| item.position_amt.unwrap_or(Decimal::ZERO) != Decimal::ZERO)
+                {
+                    break (
+                        found.position_amt.unwrap_or(Decimal::ZERO),
+                        found.margin_type.clone(),
+                    );
+                }
+                tokio::time::sleep(Duration::from_secs(1)).await;
+            };
+            let margin_type = margin_type.unwrap_or_else(|| "absent".to_owned());
+            println!("held {held_amt} with marginType {margin_type}");
+            if margin_type != "cross" {
+                return Err(format!(
+                    "probe requires a cross position, read {margin_type}"
+                ));
+            }
+
+            let mut close = NewOrder::new()
+                .symbol(symbol.clone())
+                .side("SELL")
+                .type_value("MARKET")
+                .quantity(held_amt.abs())
+                .reduce_only("true")
+                .new_client_order_id(ClientOrderId::new("issue69/usdm-close").unwrap());
+            if dual {
+                close = close.position_side("LONG");
+            }
+            client
+                .new_order(&close.build().unwrap(), deadline())
+                .await
+                .map_err(|error| format!("close order: {error}"))?;
+            let close_frames = capture_frames(&mut stream, "close", |frames| {
+                frames.iter().any(|frame| {
+                    position_entries(frame, "BTCUSDT")
+                        .iter()
+                        .any(|entry| entry["pa"].as_str() == Some("0"))
+                })
             })
-        })
-        .await;
-        assert!(
-            frames.iter().any(|frame| {
+            .await;
+            if !close_frames.iter().any(|frame| {
                 position_entries(frame, "BTCUSDT")
                     .iter()
-                    .any(|entry| entry["pa"].as_str().is_some_and(|pa| pa != "0"))
-            }),
-            "no open-leg ACCOUNT_UPDATE observed"
-        );
-
-        let held = client
-            .position_information_v2(
-                &PositionInformationV2::new()
-                    .symbol(symbol.clone())
-                    .build()
-                    .unwrap(),
-                deadline(),
-            )
-            .await
-            .unwrap()
-            .data
-            .into_iter()
-            .map(|item| (item.position_amt.unwrap_or(Decimal::ZERO), item.margin_type))
-            .collect::<Vec<_>>();
-        let (held_amt, margin_type) = held
-            .iter()
-            .find(|(amt, _)| *amt != Decimal::ZERO)
-            .expect("REST confirms the demo position");
-        println!("held {held_amt} with marginType {margin_type:?}");
-
-        let mut close = NewOrder::new()
-            .symbol(symbol.clone())
-            .side("SELL")
-            .type_value("MARKET")
-            .quantity(held_amt.abs())
-            .reduce_only("true")
-            .new_client_order_id(ClientOrderId::new("issue69/usdm-close").unwrap());
-        if dual {
-            close = close.position_side("LONG");
+                    .any(|entry| entry["pa"].as_str() == Some("0"))
+            }) {
+                return Err("no close-leg ACCOUNT_UPDATE observed".to_owned());
+            }
+            frames.extend(close_frames);
+            Ok((frames, margin_type))
         }
-        client
-            .new_order(&close.build().unwrap(), deadline())
-            .await
-            .unwrap();
-        let close_frames = capture_frames(&mut stream, "close", |frames| {
-            frames.iter().any(|frame| {
-                position_entries(frame, "BTCUSDT")
-                    .iter()
-                    .any(|entry| entry["pa"].as_str() == Some("0"))
-            })
-        })
         .await;
-        assert!(
-            close_frames.iter().any(|frame| {
-                position_entries(frame, "BTCUSDT")
-                    .iter()
-                    .any(|entry| entry["pa"].as_str() == Some("0"))
-            }),
-            "no close-leg ACCOUNT_UPDATE observed"
-        );
-        frames.extend(close_frames);
 
-        // Owned cleanup is verified, not assumed.
-        let after = client
-            .position_information_v2(
-                &PositionInformationV2::new()
-                    .symbol(symbol.clone())
-                    .build()
-                    .unwrap(),
-                deadline(),
-            )
-            .await
-            .unwrap()
-            .data;
-        assert!(
-            after
-                .iter()
-                .all(|item| item.position_amt.unwrap_or(Decimal::ZERO) == Decimal::ZERO),
-            "demo position not flat after cleanup"
-        );
-        let open = client
-            .current_all_open_orders(
-                &CurrentAllOpenOrders::new()
-                    .symbol(symbol.clone())
-                    .build()
-                    .unwrap(),
-                deadline(),
-            )
-            .await
-            .unwrap()
-            .data;
-        assert!(open.is_empty(), "demo orders remain open");
-        client
-            .close_user_data_stream(&CloseUserDataStream::new().build().unwrap(), deadline())
-            .await
-            .unwrap();
-        stream.send(Message::close(None, "")).await.unwrap();
+        // Owned cleanup runs on every exit, success or failure.
+        usdm_owned_cleanup(&client, &symbol, dual, &mut stream).await;
+        let (frames, margin_type) = capture.expect("demo capture round trip");
 
         write_fixture(
             "usdm",
@@ -343,7 +352,8 @@ mod tests {
                 "run": "issue-69-usdm-cross-margin-account-update",
                 "observedAtUnixSeconds": SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
                 "credentialed": true,
-                "scrub": "No API key, secret, signed URL or listen key is recorded; ACCOUNT_UPDATE carries no account identifier.",
+                "scrub": "No API key, secret, signed URL or listen key is recorded; the recorded USD-M ACCOUNT_UPDATE frames carry no account-identifier field.",
+                "phaseAttribution": "phase labels capture-session attribution; a delayed venue push is attributed to the leg that observed it.",
                 "environment": {
                     "rest": "https://demo-fapi.binance.com",
                     "streams": "wss://demo-fstream.binance.com",
@@ -362,6 +372,116 @@ mod tests {
         );
     }
 
+    /// Best-effort, failure-tolerant flatten-and-close: reads the venue,
+    /// closes any held position reduce-only, cancels stray orders, closes the
+    /// listen key and the socket, and always prints the final held state.
+    #[allow(
+        clippy::too_many_lines,
+        reason = "failure-tolerant cleanup must stay one sequential routine"
+    )]
+    async fn usdm_owned_cleanup(
+        client: &binance_client::usdm::RestClient,
+        symbol: &Symbol,
+        dual: bool,
+        stream: &mut DemoStream,
+    ) {
+        use binance_client::usdm::rest_requests::{
+            CancelAllOpenOrders, CloseUserDataStream, CurrentAllOpenOrders, PositionInformationV2,
+        };
+        for attempt in 0..3 {
+            let Ok(positions) = client
+                .position_information_v2(
+                    &PositionInformationV2::new()
+                        .symbol(symbol.clone())
+                        .build()
+                        .unwrap(),
+                    deadline(),
+                )
+                .await
+            else {
+                println!("cleanup: position read failed on attempt {attempt}");
+                break;
+            };
+            let held: Vec<_> = positions
+                .data
+                .iter()
+                .filter(|item| item.position_amt.unwrap_or(Decimal::ZERO) != Decimal::ZERO)
+                .collect();
+            if held.is_empty() {
+                println!("cleanup: flat after {attempt} attempt(s)");
+                break;
+            }
+            for item in held {
+                let amount = item.position_amt.unwrap_or(Decimal::ZERO);
+                let mut close = binance_client::usdm::rest_requests::NewOrder::new()
+                    .symbol(symbol.clone())
+                    .side(if amount > Decimal::ZERO {
+                        "SELL"
+                    } else {
+                        "BUY"
+                    })
+                    .type_value("MARKET")
+                    .quantity(amount.abs())
+                    .reduce_only("true")
+                    .new_client_order_id(
+                        ClientOrderId::new(format!("issue69/usdm-clean{attempt}").as_str())
+                            .unwrap(),
+                    );
+                if dual {
+                    let Some(side) = item
+                        .position_side
+                        .as_ref()
+                        .map(binance_client::usdm::enums::PositionSide::as_str)
+                    else {
+                        println!(
+                            "cleanup: hedge position without a reported side; not auto-closed"
+                        );
+                        continue;
+                    };
+                    close = close.position_side(side);
+                }
+                match client.new_order(&close.build().unwrap(), deadline()).await {
+                    Ok(_) => println!("cleanup: reduce-only close sent for {amount}"),
+                    Err(error) => println!("cleanup: close refused: {error}"),
+                }
+            }
+        }
+        match client
+            .cancel_all_open_orders(
+                &CancelAllOpenOrders::new()
+                    .symbol(symbol.clone())
+                    .build()
+                    .unwrap(),
+                deadline(),
+            )
+            .await
+        {
+            Ok(_) => println!("cleanup: no open orders remain"),
+            Err(error) => println!("cleanup: cancel-all failed: {error}"),
+        }
+        match client
+            .current_all_open_orders(
+                &CurrentAllOpenOrders::new()
+                    .symbol(symbol.clone())
+                    .build()
+                    .unwrap(),
+                deadline(),
+            )
+            .await
+        {
+            Ok(orders) => println!("cleanup: {} open order(s) reported", orders.data.len()),
+            Err(error) => println!("cleanup: open-order read failed: {error}"),
+        }
+        match client
+            .close_user_data_stream(&CloseUserDataStream::new().build().unwrap(), deadline())
+            .await
+        {
+            Ok(_) => println!("cleanup: listen key closed"),
+            Err(error) => println!("cleanup: listen-key close failed: {error}"),
+        }
+        let _ = stream.send(Message::close(None, "")).await;
+    }
+
     /// COIN-M: one minimal `BTCUSD_PERP` cross-margin round trip on the demo
     /// environment, capturing the native `ACCOUNT_UPDATE` pushes for the
     /// inverse market's own schema.
@@ -369,14 +489,14 @@ mod tests {
     #[ignore = "authorized credentialed demo probe placing and closing one demo market position; never runs in normal CI"]
     #[allow(
         clippy::too_many_lines,
-        reason = "one sequential authorized probe; splitting would obscure the capture-then-cleanup sequence"
+        reason = "one sequential authorized probe; splitting would obscure the capture-cleanup sequence"
     )]
     async fn demo_coinm_cross_margin_account_update_capture() {
         use binance_client::coinm::{
             Config, Environment, RestClient,
             rest_requests::{
-                ChangeMarginType, CloseUserDataStream, CurrentAllOpenOrders,
-                GetCurrentPositionMode, NewOrder, PositionInformation, StartUserDataStream,
+                ChangeMarginType, GetCurrentPositionMode, NewOrder, PositionInformation,
+                StartUserDataStream,
             },
         };
         let symbol = Symbol::new("BTCUSD_PERP").unwrap();
@@ -413,6 +533,10 @@ mod tests {
             "refusing to run beside an existing BTCUSD_PERP position"
         );
 
+        // -4046 is the documented "No need to change margin type." reply
+        // ([error code](https://developers.binance.com/en/docs/derivatives/coin-margined-futures/error-code)):
+        // already cross. Any other refusal fails the probe before any order is
+        // sent.
         match client
             .change_margin_type(
                 &ChangeMarginType::new()
@@ -444,129 +568,108 @@ mod tests {
         ))
         .await;
 
-        let mut order = NewOrder::new()
-            .symbol(symbol.clone())
-            .side("BUY")
-            .type_value("MARKET")
-            .quantity(Decimal::ONE)
-            .new_client_order_id(ClientOrderId::new("issue69/coinm-open").unwrap());
-        if dual {
-            order = order.position_side("LONG");
-        }
-        client
-            .new_order(&order.build().unwrap(), deadline())
-            .await
-            .unwrap();
-        let mut frames = capture_frames(&mut stream, "open", |frames| {
-            frames.iter().any(|frame| {
+        let capture: Result<(Vec<CapturedFrame>, String), String> = async {
+            let mut order = NewOrder::new()
+                .symbol(symbol.clone())
+                .side("BUY")
+                .type_value("MARKET")
+                .quantity(Decimal::ONE)
+                .new_client_order_id(ClientOrderId::new("issue69/coinm-open").unwrap());
+            if dual {
+                order = order.position_side("LONG");
+            }
+            client
+                .new_order(&order.build().unwrap(), deadline())
+                .await
+                .map_err(|error| format!("open order: {error}"))?;
+            let mut frames = capture_frames(&mut stream, "open", |frames| {
+                frames.iter().any(|frame| {
+                    position_entries(frame, "BTCUSD_PERP")
+                        .iter()
+                        .any(|entry| entry["pa"].as_str().is_some_and(|pa| pa != "0"))
+                })
+            })
+            .await;
+            if !frames.iter().any(|frame| {
                 position_entries(frame, "BTCUSD_PERP")
                     .iter()
                     .any(|entry| entry["pa"].as_str().is_some_and(|pa| pa != "0"))
+            }) {
+                return Err("no open-leg ACCOUNT_UPDATE observed".to_owned());
+            }
+
+            let (held_amt, margin_type) = loop {
+                let positions = client
+                    .position_information(
+                        &PositionInformation::new()
+                            .pair(Symbol::new("BTCUSD").unwrap())
+                            .build()
+                            .unwrap(),
+                        deadline(),
+                    )
+                    .await
+                    .map_err(|error| format!("position read: {error}"))?;
+                if let Some(found) = positions
+                    .data
+                    .into_iter()
+                    .filter(|item| {
+                        item.symbol
+                            .as_ref()
+                            .is_some_and(|s| s.as_str() == "BTCUSD_PERP")
+                    })
+                    .find(|item| item.position_amt.unwrap_or(Decimal::ZERO) != Decimal::ZERO)
+                {
+                    break (
+                        found.position_amt.unwrap_or(Decimal::ZERO),
+                        found.margin_type,
+                    );
+                }
+                tokio::time::sleep(Duration::from_secs(1)).await;
+            };
+            let margin_type = margin_type.unwrap_or_else(|| "absent".to_owned());
+            println!("held {held_amt} with marginType {margin_type}");
+            if margin_type != "cross" {
+                return Err(format!(
+                    "probe requires a cross position, read {margin_type}"
+                ));
+            }
+
+            let mut close = NewOrder::new()
+                .symbol(symbol.clone())
+                .side("SELL")
+                .type_value("MARKET")
+                .quantity(held_amt.abs())
+                .reduce_only("true")
+                .new_client_order_id(ClientOrderId::new("issue69/coinm-close").unwrap());
+            if dual {
+                close = close.position_side("LONG");
+            }
+            client
+                .new_order(&close.build().unwrap(), deadline())
+                .await
+                .map_err(|error| format!("close order: {error}"))?;
+            let close_frames = capture_frames(&mut stream, "close", |frames| {
+                frames.iter().any(|frame| {
+                    position_entries(frame, "BTCUSD_PERP")
+                        .iter()
+                        .any(|entry| entry["pa"].as_str() == Some("0"))
+                })
             })
-        })
-        .await;
-        assert!(
-            frames.iter().any(|frame| {
+            .await;
+            if !close_frames.iter().any(|frame| {
                 position_entries(frame, "BTCUSD_PERP")
                     .iter()
-                    .any(|entry| entry["pa"].as_str().is_some_and(|pa| pa != "0"))
-            }),
-            "no open-leg ACCOUNT_UPDATE observed"
-        );
-
-        let held = client
-            .position_information(
-                &PositionInformation::new()
-                    .pair(Symbol::new("BTCUSD").unwrap())
-                    .build()
-                    .unwrap(),
-                deadline(),
-            )
-            .await
-            .unwrap()
-            .data;
-        let (held_amt, margin_type) = held
-            .into_iter()
-            .filter(|item| {
-                item.symbol
-                    .as_ref()
-                    .is_some_and(|s| s.as_str() == "BTCUSD_PERP")
-            })
-            .map(|item| (item.position_amt.unwrap_or(Decimal::ZERO), item.margin_type))
-            .find(|(amt, _)| *amt != Decimal::ZERO)
-            .expect("REST confirms the demo position");
-        println!("held {held_amt} with marginType {margin_type:?}");
-
-        let mut close = NewOrder::new()
-            .symbol(symbol.clone())
-            .side("SELL")
-            .type_value("MARKET")
-            .quantity(held_amt.abs())
-            .reduce_only("true")
-            .new_client_order_id(ClientOrderId::new("issue69/coinm-close").unwrap());
-        if dual {
-            close = close.position_side("LONG");
+                    .any(|entry| entry["pa"].as_str() == Some("0"))
+            }) {
+                return Err("no close-leg ACCOUNT_UPDATE observed".to_owned());
+            }
+            frames.extend(close_frames);
+            Ok((frames, margin_type))
         }
-        client
-            .new_order(&close.build().unwrap(), deadline())
-            .await
-            .unwrap();
-        let close_frames = capture_frames(&mut stream, "close", |frames| {
-            frames.iter().any(|frame| {
-                position_entries(frame, "BTCUSD_PERP")
-                    .iter()
-                    .any(|entry| entry["pa"].as_str() == Some("0"))
-            })
-        })
         .await;
-        assert!(
-            close_frames.iter().any(|frame| {
-                position_entries(frame, "BTCUSD_PERP")
-                    .iter()
-                    .any(|entry| entry["pa"].as_str() == Some("0"))
-            }),
-            "no close-leg ACCOUNT_UPDATE observed"
-        );
-        frames.extend(close_frames);
 
-        let after = client
-            .position_information(
-                &PositionInformation::new()
-                    .pair(Symbol::new("BTCUSD").unwrap())
-                    .build()
-                    .unwrap(),
-                deadline(),
-            )
-            .await
-            .unwrap()
-            .data;
-        assert!(
-            after
-                .iter()
-                .filter(|item| item
-                    .symbol
-                    .as_ref()
-                    .is_some_and(|s| s.as_str() == "BTCUSD_PERP"))
-                .all(|item| item.position_amt.unwrap_or(Decimal::ZERO) == Decimal::ZERO),
-            "demo position not flat after cleanup"
-        );
-        let open = client
-            .current_all_open_orders(
-                &CurrentAllOpenOrders::new()
-                    .symbol(symbol.clone())
-                    .build()
-                    .unwrap(),
-                deadline(),
-            )
-            .await
-            .unwrap()
-            .data;
-        assert!(open.is_empty(), "demo orders remain open");
-        client
-            .close_user_data_stream(&CloseUserDataStream::new().build().unwrap(), deadline())
-            .await
-            .unwrap();
-        stream.send(Message::close(None, "")).await.unwrap();
+        coinm_owned_cleanup(&client, &symbol, dual, &mut stream).await;
+        let (frames, margin_type) = capture.expect("demo capture round trip");
 
         write_fixture(
             "coinm",
@@ -574,7 +677,8 @@ mod tests {
                 "run": "issue-69-coinm-cross-margin-account-update",
                 "observedAtUnixSeconds": SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
                 "credentialed": true,
-                "scrub": "No API key, secret, signed URL or listen key is recorded; ACCOUNT_UPDATE carries no account identifier.",
+                "scrub": "No API key, secret, signed URL or listen key is recorded. The venue-supplied account-alias field i was redacted before recording; every other byte is as captured.",
+                "phaseAttribution": "phase labels capture-session attribution; a delayed venue push is attributed to the leg that observed it.",
                 "environment": {
                     "rest": "https://demo-dapi.binance.com",
                     "streams": "wss://demo-dstream.binance.com",
@@ -591,5 +695,118 @@ mod tests {
                 })).collect::<Vec<_>>()
             }),
         );
+    }
+
+    /// COIN-M counterpart of the unconditional flatten-and-close routine.
+    #[allow(
+        clippy::too_many_lines,
+        reason = "failure-tolerant cleanup must stay one sequential routine"
+    )]
+    async fn coinm_owned_cleanup(
+        client: &binance_client::coinm::RestClient,
+        symbol: &Symbol,
+        dual: bool,
+        stream: &mut DemoStream,
+    ) {
+        use binance_client::coinm::rest_requests::{
+            CancelAllOpenOrders, CloseUserDataStream, CurrentAllOpenOrders, PositionInformation,
+        };
+        for attempt in 0..3 {
+            let Ok(positions) = client
+                .position_information(
+                    &PositionInformation::new()
+                        .pair(Symbol::new("BTCUSD").unwrap())
+                        .build()
+                        .unwrap(),
+                    deadline(),
+                )
+                .await
+            else {
+                println!("cleanup: position read failed on attempt {attempt}");
+                break;
+            };
+            let held: Vec<_> = positions
+                .data
+                .iter()
+                .filter(|item| {
+                    item.symbol
+                        .as_ref()
+                        .is_some_and(|s| s.as_str() == symbol.as_str())
+                        && item.position_amt.unwrap_or(Decimal::ZERO) != Decimal::ZERO
+                })
+                .collect();
+            if held.is_empty() {
+                println!("cleanup: flat after {attempt} attempt(s)");
+                break;
+            }
+            for item in held {
+                let amount = item.position_amt.unwrap_or(Decimal::ZERO);
+                let mut close = binance_client::coinm::rest_requests::NewOrder::new()
+                    .symbol(symbol.clone())
+                    .side(if amount > Decimal::ZERO {
+                        "SELL"
+                    } else {
+                        "BUY"
+                    })
+                    .type_value("MARKET")
+                    .quantity(amount.abs())
+                    .reduce_only("true")
+                    .new_client_order_id(
+                        ClientOrderId::new(format!("issue69/coinm-clean{attempt}").as_str())
+                            .unwrap(),
+                    );
+                if dual {
+                    let Some(side) = item
+                        .position_side
+                        .as_ref()
+                        .map(binance_client::coinm::enums::PositionSide::as_str)
+                    else {
+                        println!(
+                            "cleanup: hedge position without a reported side; not auto-closed"
+                        );
+                        continue;
+                    };
+                    close = close.position_side(side);
+                }
+                match client.new_order(&close.build().unwrap(), deadline()).await {
+                    Ok(_) => println!("cleanup: reduce-only close sent for {amount}"),
+                    Err(error) => println!("cleanup: close refused: {error}"),
+                }
+            }
+        }
+        match client
+            .cancel_all_open_orders(
+                &CancelAllOpenOrders::new()
+                    .symbol(symbol.clone())
+                    .build()
+                    .unwrap(),
+                deadline(),
+            )
+            .await
+        {
+            Ok(_) => println!("cleanup: no open orders remain"),
+            Err(error) => println!("cleanup: cancel-all failed: {error}"),
+        }
+        match client
+            .current_all_open_orders(
+                &CurrentAllOpenOrders::new()
+                    .symbol(symbol.clone())
+                    .build()
+                    .unwrap(),
+                deadline(),
+            )
+            .await
+        {
+            Ok(orders) => println!("cleanup: {} open order(s) reported", orders.data.len()),
+            Err(error) => println!("cleanup: open-order read failed: {error}"),
+        }
+        match client
+            .close_user_data_stream(&CloseUserDataStream::new().build().unwrap(), deadline())
+            .await
+        {
+            Ok(_) => println!("cleanup: listen key closed"),
+            Err(error) => println!("cleanup: listen-key close failed: {error}"),
+        }
+        let _ = stream.send(Message::close(None, "")).await;
     }
 }

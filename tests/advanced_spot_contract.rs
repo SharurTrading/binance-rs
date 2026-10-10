@@ -14,7 +14,7 @@ use std::sync::Arc;
 use support::{FixedClock, HttpFixture, deadline};
 
 fn config() -> spot::Config {
-    spot::Config::new(spot::Environment::Demo)
+    spot::Config::with_pools(spot::Environment::Demo, &binance_client::WeightPools::new())
         .unwrap()
         .clock(Arc::new(FixedClock(1_700_000_001_000)))
         .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap())

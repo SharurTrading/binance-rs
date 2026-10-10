@@ -4,7 +4,7 @@
 use super::{Error, RateEvidence};
 use std::{
     collections::BTreeMap,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, OnceLock},
     time::Duration,
 };
 
@@ -115,6 +115,9 @@ pub(super) struct State {
     order_windows: BTreeMap<u64, (u64, u64, u64)>,
     pub(super) endpoints: BTreeMap<(&'static str, u64), (u64, u64)>,
     pub(super) endpoint_cooldown: BTreeMap<&'static str, u64>,
+    // The latest limits the venue stated for this pool; the baseline stands until then.
+    stated_weight_per_minute: Option<u64>,
+    stated_raw_requests_per_five_minutes: Option<u64>,
 }
 impl State {
     pub(super) fn check_cooldown(&self, now: u64) -> Result<(), Error> {
@@ -180,14 +183,20 @@ impl Budgets {
             limits: self.limits.clone(),
         }
     }
-    fn ip_cost(&self, c: Cost) -> Vec<(&'static str, u64, u64, u64)> {
+    fn ip_cost(&self, ip: &State, c: Cost) -> Vec<(&'static str, u64, u64, u64)> {
         let weight = if self.limits.shared_request_weight {
             c.weight.max(c.ws_weight)
         } else {
             c.weight
         };
-        let mut ip_cost = vec![("weight", 60_000, self.limits.weight_per_minute, weight)];
-        if let Some(limit) = self.limits.raw_requests_per_five_minutes {
+        let weight_limit = ip
+            .stated_weight_per_minute
+            .unwrap_or(self.limits.weight_per_minute);
+        let mut ip_cost = vec![("weight", 60_000, weight_limit, weight)];
+        if let Some(limit) = ip
+            .stated_raw_requests_per_five_minutes
+            .or(self.limits.raw_requests_per_five_minutes)
+        {
             ip_cost.push(("raw", 300_000, limit, c.raw_requests));
         }
         if let Some(limit) = self.limits.connections_per_five_minutes {
@@ -218,7 +227,7 @@ impl Budgets {
             .lock()
             .map_err(|_| Error::Configuration("account budget poisoned"))?;
         ip.check_cooldown(now)?;
-        let ip_cost = self.ip_cost(c);
+        let ip_cost = self.ip_cost(&ip, c);
         let ws_cost = vec![(
             "weight",
             60_000,
@@ -418,6 +427,119 @@ impl Budgets {
             current.1 = current.1.max(*count);
         }
         Ok(())
+    }
+}
+
+/// One `rateLimits` entry of a venue's exchange information, as stated.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct StatedLimit<'a> {
+    pub kind: Option<&'a str>,
+    pub interval: Option<&'a str>,
+    pub interval_num: Option<i64>,
+    pub limit: Option<i64>,
+}
+
+impl Budgets {
+    /// Adopt the minute request weight and five-minute raw-request limits a venue
+    /// reply states, for every client of this IP owner. `ORDERS` entries are account
+    /// limits and other windows are not counted here; neither is adopted.
+    ///
+    /// # Errors
+    /// A counted window stated without a positive limit is refused as a gap and
+    /// leaves the owner's limits unchanged.
+    pub(crate) fn adopt_stated<'a>(
+        &self,
+        stated: impl IntoIterator<Item = StatedLimit<'a>>,
+    ) -> Result<(), Error> {
+        let mut weight = None;
+        let mut raw = None;
+        for entry in stated {
+            let slot = match (entry.kind, entry.interval, entry.interval_num) {
+                (Some("REQUEST_WEIGHT"), Some("MINUTE"), Some(1)) => &mut weight,
+                (Some("RAW_REQUESTS"), Some("MINUTE"), Some(5)) => &mut raw,
+                _ => continue,
+            };
+            let limit = entry
+                .limit
+                .and_then(|limit| u64::try_from(limit).ok())
+                .filter(|limit| *limit > 0)
+                .ok_or(Error::Gap("stated rate limit without a positive limit"))?;
+            // Two statements of one window: the stricter binds.
+            *slot = Some(slot.map_or(limit, |current: u64| current.min(limit)));
+        }
+        let mut ip = self
+            .ip
+            .lock()
+            .map_err(|_| Error::Configuration("IP budget poisoned"))?;
+        if weight.is_some() {
+            ip.stated_weight_per_minute = weight;
+        }
+        if raw.is_some() {
+            ip.stated_raw_requests_per_five_minutes = raw;
+        }
+        Ok(())
+    }
+}
+
+/// The venue IP limit a product's requests count against.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) enum VenuePool {
+    /// Spot's own IP limits.
+    Spot,
+    /// USDⓈ-M and COIN-M, which share one IP limit since the UM/CM integration.
+    Futures,
+}
+
+/// The environment a pool counts; demo and production never share a pool.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) enum PoolEnvironment {
+    /// The venue's demo environment.
+    Demo,
+    /// The venue's production environment.
+    Production,
+}
+
+/// One IP weight pool per venue pool and environment.
+#[derive(Default)]
+pub struct WeightPools {
+    pools: Mutex<BTreeMap<(VenuePool, PoolEnvironment), Budgets>>,
+}
+impl std::fmt::Debug for WeightPools {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("WeightPools")
+    }
+}
+impl WeightPools {
+    /// An empty registry, independent of the process's.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    pub(crate) fn process() -> &'static Self {
+        static PROCESS: OnceLock<WeightPools> = OnceLock::new();
+        PROCESS.get_or_init(Self::new)
+    }
+    /// A budget counting IP traffic against `pool` in `environment`, with its own
+    /// account owner. The pool starts at the venue's documented baseline.
+    pub(crate) fn draw(
+        &self,
+        pool: VenuePool,
+        environment: PoolEnvironment,
+    ) -> Result<Budgets, Error> {
+        let mut pools = self
+            .pools
+            .lock()
+            .map_err(|_| Error::Configuration("weight pools poisoned"))?;
+        if let Some(owner) = pools.get(&(pool, environment)) {
+            return Ok(owner.for_account());
+        }
+        let owner = Budgets::new(match pool {
+            VenuePool::Spot => BudgetLimits::spot(),
+            VenuePool::Futures => BudgetLimits::coinm(),
+        })?;
+        let drawn = owner.for_account();
+        pools.insert((pool, environment), owner);
+        Ok(drawn)
     }
 }
 

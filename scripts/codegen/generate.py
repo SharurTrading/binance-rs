@@ -318,6 +318,9 @@ def generate(kind):
             args=f'&self, request: &{name}, id: crate::RequestId, deadline: tokio::time::Instant'
             call='self.execute(request, id, deadline).await'
         return_type = f'super::{kind}_models::{response_type}'
+        # Exchange information states the venue's own IP limits; its pool adopts them.
+        if kind == 'rest' and (PRODUCT, op['operationId']) in [('spot', 'exchangeInfo'), ('usdm', 'exchangeInformation'), ('coinm', 'exchangeInformation')]:
+            call='let response=self.inner.execute(request,deadline).await?;super::rate::adopt_stated_limits(&self.inner,&response.data)?;Ok(response)'
         if PRODUCT == 'wallet' and op['operationId'] in ['queryUserWalletBalance','dustConvert','dustConvertibleAssets']:
             context,field,wrapper = {'queryUserWalletBalance':('quote_asset','wallets','QuotedWalletBalance'), 'dustConvert':('target_asset','receipt','DustConversion'), 'dustConvertibleAssets':('target_asset','assets','ConvertibleDust')}[op['operationId']]
             return_type='super::'+wrapper

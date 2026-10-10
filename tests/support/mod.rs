@@ -25,7 +25,7 @@ impl Clock for FixedClock {
     }
 }
 pub fn config() -> Config {
-    Config::new(Environment::Demo)
+    Config::with_pools(Environment::Demo, &binance_client::WeightPools::new())
         .unwrap()
         .clock(Arc::new(FixedClock(1_700_000_001_000)))
         .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap())

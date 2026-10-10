@@ -51,6 +51,11 @@ impl RestClient {
     pub fn pool_usage(&self) -> Result<crate::PoolUsage, crate::Error> {
         self.inner.pool_usage()
     }
+    /// The venue pool this client draws on; see [`Config::pool_key`].
+    #[must_use]
+    pub fn pool_key(&self) -> Option<crate::PoolKey> {
+        self.inner.pool_key()
+    }
     /// Receive production SBE schema 3:4 into the same native response models.
     /// SBE timestamps/signing use microseconds; receive windows remain milliseconds.
     /// JSON negotiation errors retain status/rates; successful JSON fallback is refused.

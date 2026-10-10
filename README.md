@@ -230,6 +230,39 @@ let cm = coinm::Config::with_pools(coinm::Environment::Production, &pools)?;
 # Ok::<(), Error>(())
 ```
 
+### Naming a pool
+
+`pool_key()` names the venue limit a client draws on as a `PoolKey`: its
+`VenuePool` and `PoolEnvironment`. Clients reporting equal keys count against one
+venue limit, so a caller pacing several clients can group them by key; `PoolKey`
+orders, hashes and compares for use as a map key.
+
+| Configuration | `VenuePool` | `PoolEnvironment` |
+| --- | --- | --- |
+| `spot::Config` | `Spot` | Its `Environment` |
+| `spot::sbe::MarketConfig` | `Spot` | `Production` |
+| `usdm::Config`, `coinm::Config` | `Futures` | Its `Environment` |
+| `options::Config` | `Options` | Its `Environment` |
+| `wallet::Config`, `convert::Config`, `margin::Config` | `Sapi` | `Production` |
+| `margin::WsConfig` | `Spot` | `Production` |
+
+The Spot, USDⓈ-M, COIN-M and Options `RestClient` report the same key, and
+`pool_usage()` carries it as `key`. A configuration given an explicit owner through
+`budgets` reports `None`: that owner belongs to no registry, and the caller that
+built it already knows which clients share it.
+
+```rust
+use binance_client::core_trading::{coinm, usdm};
+use binance_client::{Error, PoolEnvironment, PoolKey, VenuePool};
+
+let um = usdm::Config::new(usdm::Environment::Production)?;
+let cm = coinm::Config::new(coinm::Environment::Production)?;
+let futures = Some(PoolKey::new(VenuePool::Futures, PoolEnvironment::Production));
+assert_eq!(um.pool_key(), futures);
+assert_eq!(cm.pool_key(), futures);
+# Ok::<(), Error>(())
+```
+
 ### Reading a pool and a request's weight
 
 The client reports what it measures and decides nothing with it. `pool_usage()` on
@@ -240,6 +273,7 @@ injected clock:
 | --- | --- |
 | `request_weight` | `REQUEST_WEIGHT` per minute; on every drawn pool it counts REST and WebSocket API weight together |
 | `raw_requests` | `RAW_REQUESTS` per five minutes, where the pool counts them (Spot) |
+| `key` | The pool read, as `pool_key()` names it; `None` for an explicit owner |
 | `limit`, `source` | The latest stated limit (`LimitSource::Stated`), or the documented baseline until a client of the pool reads exchange information (`LimitSource::Documented`) |
 | `used` | Spent in the current window: the pool's own count, raised to `X-MBX-USED-WEIGHT-1M` whenever a reply reports more |
 | `interval`, `resets_in` | The window's length and the time until it starts again, aligned to the epoch as the venue's windows are |

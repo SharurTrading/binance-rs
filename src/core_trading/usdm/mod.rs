@@ -43,6 +43,11 @@ impl RestClient {
     pub fn pool_usage(&self) -> Result<crate::PoolUsage, crate::Error> {
         self.inner.pool_usage()
     }
+    /// The venue pool this client draws on; see [`Config::pool_key`].
+    #[must_use]
+    pub fn pool_key(&self) -> Option<crate::PoolKey> {
+        self.inner.pool_key()
+    }
     /// Create a transport without starting a runtime or performing network I/O.
     ///
     /// # Errors

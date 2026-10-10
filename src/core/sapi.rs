@@ -374,6 +374,12 @@ impl Config {
         self.clock = value;
         self
     }
+    /// The venue pool this configuration's clients draw on, the production SAPI
+    /// pool; `None` once [`Config::budgets`] replaces it with an explicit owner.
+    #[must_use]
+    pub fn pool_key(&self) -> Option<super::PoolKey> {
+        self.budgets.pool_key()
+    }
     /// Share IP/UID scopes across every Wallet/Convert/Margin client for this account.
     #[must_use]
     pub fn budgets(mut self, value: Budgets) -> Self {

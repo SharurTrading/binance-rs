@@ -185,6 +185,7 @@ pub struct Budgets {
     ws_ip: Arc<Mutex<State>>,
     pub(super) account: Arc<Mutex<State>>,
     limits: Arc<BudgetLimits>,
+    key: Option<PoolKey>,
 }
 impl std::fmt::Debug for Budgets {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -192,7 +193,8 @@ impl std::fmt::Debug for Budgets {
     }
 }
 impl Budgets {
-    /// Construct an explicit venue budget scope.
+    /// Construct an explicit venue budget scope. It belongs to no registry, so a
+    /// configuration given it reports no [`PoolKey`].
     ///
     /// # Errors
     /// Refuses zero budgets.
@@ -212,6 +214,7 @@ impl Budgets {
             ws_ip: Arc::default(),
             account: Arc::default(),
             limits: Arc::new(limits),
+            key: None,
         })
     }
     /// A distinct account sharing this IP budget. Reuse this returned owner for
@@ -223,7 +226,12 @@ impl Budgets {
             ws_ip: self.ws_ip.clone(),
             account: Arc::default(),
             limits: self.limits.clone(),
+            key: self.key,
         }
+    }
+    /// The venue pool this owner was drawn from; `None` for an explicit owner.
+    pub(crate) fn pool_key(&self) -> Option<PoolKey> {
+        self.key
     }
     fn ip_cost(&self, ip: &State, c: Cost) -> Vec<(&'static str, u64, u64, u64)> {
         let weight = if self.limits.shared_request_weight {
@@ -516,26 +524,57 @@ impl Budgets {
     }
 }
 
-/// The venue IP limit a product's requests count against.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum VenuePool {
-    /// Spot's own IP limits.
+/// The venue IP limit a client's requests count against.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[non_exhaustive]
+pub enum VenuePool {
+    /// Spot's own IP limits, which Margin's WebSocket API also counts against
+    /// (<https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#ip-limits>).
     Spot,
-    /// SAPI independent endpoint IP scopes shared by Wallet, Convert and Margin.
+    /// SAPI's independent endpoint IP scopes, shared by Wallet, Convert and Margin
+    /// REST (<https://developers.binance.com/en/docs/products/wallet/general-info>).
     Sapi,
-    /// USDⓈ-M and COIN-M, which share one IP limit since the UM/CM integration.
+    /// USDⓈ-M and COIN-M, which share one IP weight limit and one
+    /// `X-MBX-USED-WEIGHT-1M` counter
+    /// (<https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice>, A.3).
     Futures,
-    /// Options' EAPI IP limit, independent of Spot, SAPI and Futures.
+    /// Options' EAPI IP limit, independent of Spot, SAPI and Futures
+    /// (<https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition>).
     Options,
 }
 
-/// The environment a pool counts; demo and production never share a pool.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum PoolEnvironment {
+/// The environment whose venue hosts count a pool's traffic.
+///
+/// Demo and production are served by distinct hosts with their own counters, so
+/// they never share a pool.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[non_exhaustive]
+pub enum PoolEnvironment {
     /// The venue's demo environment.
     Demo,
     /// The venue's production environment.
     Production,
+}
+
+/// Which venue IP limit a client draws on: one pool of one environment.
+///
+/// Clients reporting equal keys count against the same venue limit, so a caller
+/// pacing several clients can group them by key. A configuration given an explicit
+/// [`Budgets`] owner reports no key: that owner is not a venue pool's.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[non_exhaustive]
+pub struct PoolKey {
+    /// The venue limit counted.
+    pub pool: VenuePool,
+    /// The environment counted.
+    pub environment: PoolEnvironment,
+}
+impl PoolKey {
+    /// Name the pool `pool` in `environment`.
+    #[must_use]
+    pub const fn new(pool: VenuePool, environment: PoolEnvironment) -> Self {
+        Self { pool, environment }
+    }
 }
 
 /// One IP weight pool per venue pool and environment: Spot, Options, USDⓈ-M with
@@ -543,7 +582,7 @@ pub(crate) enum PoolEnvironment {
 /// here is independent of it and of every other.
 #[derive(Default)]
 pub struct WeightPools {
-    pools: Mutex<BTreeMap<(VenuePool, PoolEnvironment), Budgets>>,
+    pools: Mutex<BTreeMap<PoolKey, Budgets>>,
 }
 impl std::fmt::Debug for WeightPools {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -571,17 +610,19 @@ impl WeightPools {
             .pools
             .lock()
             .map_err(|_| Error::Configuration("weight pools poisoned"))?;
-        if let Some(owner) = pools.get(&(pool, environment)) {
+        let key = PoolKey::new(pool, environment);
+        if let Some(owner) = pools.get(&key) {
             return Ok(owner.for_account());
         }
-        let owner = match pool {
+        let mut owner = match pool {
             VenuePool::Spot => Budgets::new(BudgetLimits::spot())?,
             VenuePool::Futures => Budgets::new(BudgetLimits::coinm())?,
             VenuePool::Sapi => Budgets::sapi()?,
             VenuePool::Options => Budgets::new(BudgetLimits::options())?,
         };
+        owner.key = Some(key);
         let drawn = owner.for_account();
-        pools.insert((pool, environment), owner);
+        pools.insert(key, owner);
         Ok(drawn)
     }
 }

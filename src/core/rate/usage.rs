@@ -5,7 +5,7 @@
 //!
 //! The report reads the same state admission reads; it neither paces nor admits.
 
-use super::{Budgets, State};
+use super::{Budgets, PoolKey, State};
 use crate::core::Error;
 use std::time::Duration;
 
@@ -47,6 +47,8 @@ pub struct PoolUsage {
     pub request_weight: WindowUsage,
     /// `RAW_REQUESTS` per five minutes, where the pool counts them (Spot).
     pub raw_requests: Option<WindowUsage>,
+    /// The venue pool read; `None` for an explicit [`Budgets`] owner.
+    pub key: Option<PoolKey>,
 }
 
 impl Budgets {
@@ -92,6 +94,7 @@ impl Budgets {
             raw_requests: self
                 .raw_request_limit(&ip)
                 .map(|limit| window("raw", 300_000, limit)),
+            key: self.key,
         })
     }
 }

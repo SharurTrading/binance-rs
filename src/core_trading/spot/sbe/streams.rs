@@ -37,6 +37,12 @@ impl MarketConfig {
         self.0 = self.0.streams_url(endpoint)?;
         Ok(self)
     }
+    /// The venue pool this configuration draws on, the production Spot pool;
+    /// `None` once [`MarketConfig::budgets`] replaces it with an explicit owner.
+    #[must_use]
+    pub fn pool_key(&self) -> Option<crate::PoolKey> {
+        self.0.pool_key()
+    }
     /// Share the IP owner used by other Spot clients on this same source IP.
     #[must_use]
     pub fn budgets(mut self, budgets: Budgets) -> Self {

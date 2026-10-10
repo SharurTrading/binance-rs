@@ -409,6 +409,27 @@ impl Budgets {
         }
         Ok(())
     }
+    /// Clear an IP cooldown whose timing the venue never gave, for every owner of this
+    /// IP pool.
+    ///
+    /// A `418` ban without a usable `Retry-After`, or retry timing this client cannot
+    /// read, leaves the pool refusing every send with [`Error::CooldownTimingUnknown`]:
+    /// Binance documents such a ban as lasting from two minutes to three days and offers
+    /// no signal that one has ended, so no reply can clear it. The caller decides when
+    /// the ban has ended and calls this; sends are admitted again, and the venue answers
+    /// afresh. A cooldown with a known `Retry-After` is the venue's own timing and holds
+    /// until it expires. Releasing a pool with nothing to clear changes nothing, and
+    /// releasing one too early makes the venue answer with a ban again.
+    ///
+    /// # Errors
+    /// Returns a configuration error if the pool's lock is poisoned.
+    pub fn release_unknown_ban(&self) -> Result<(), Error> {
+        self.ip
+            .lock()
+            .map_err(|_| Error::Configuration("IP budget poisoned"))?
+            .cooldown_timing_unknown = false;
+        Ok(())
+    }
     pub(crate) fn observe_ban(&self, status: u16, evidence: &RateEvidence) -> Result<(), Error> {
         // A ban, or any venue retry timing this client cannot use, leaves the owner
         // without an expiry. Refuse every send rather than invent one.
@@ -783,6 +804,29 @@ mod tests {
             Err(Error::Admission { .. })
         ));
         budgets.admit(Cost::default(), 1001).unwrap();
+    }
+
+    #[test]
+    fn release_clears_the_unknown_timing_ban_and_keeps_a_known_cooldown() {
+        let budgets = Budgets::new(BudgetLimits::spot()).unwrap();
+        let known = RateEvidence {
+            retry_after: Some(Duration::from_mins(1)),
+            ..RateEvidence::default()
+        };
+        budgets.observe(&known, 1000, false).unwrap();
+        budgets.observe_ban(418, &RateEvidence::default()).unwrap();
+        assert!(matches!(
+            budgets.admit(Cost::default(), 2000),
+            Err(Error::CooldownTimingUnknown)
+        ));
+
+        budgets.for_account().release_unknown_ban().unwrap();
+
+        assert!(matches!(
+            budgets.admit(Cost::default(), 2000),
+            Err(Error::Admission { retry_after }) if retry_after == Duration::from_secs(59)
+        ));
+        budgets.admit(Cost::default(), 61_000).unwrap();
     }
 
     #[test]

@@ -135,6 +135,15 @@ impl Config {
     pub fn pool_usage(&self) -> Result<crate::PoolUsage, Error> {
         self.budgets.usage(self.clock.now_millis()?)
     }
+    /// Clear an IP ban the venue gave no timing for, on the pool this configuration's
+    /// clients draw on. Every client of the pool is admitted again; a known
+    /// `Retry-After` cooldown still holds. See [`Budgets::release_unknown_ban`].
+    ///
+    /// # Errors
+    /// Returns a configuration error if the pool's lock is poisoned.
+    pub fn release_unknown_ban(&self) -> Result<(), Error> {
+        self.budgets.release_unknown_ban()
+    }
     /// The venue pool this configuration's clients draw on, to group clients that
     /// count against one venue limit; `None` once [`Config::budgets`] replaces it
     /// with an explicit owner.

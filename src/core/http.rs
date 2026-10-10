@@ -83,6 +83,10 @@ impl HttpClient {
     pub(crate) fn pool_usage(&self) -> Result<super::PoolUsage, Error> {
         self.budgets.usage(self.clock.now_millis()?)
     }
+    /// Clear the pool's unknown-timing ban; see [`super::Budgets::release_unknown_ban`].
+    pub(crate) fn release_unknown_ban(&self) -> Result<(), Error> {
+        self.budgets.release_unknown_ban()
+    }
     /// The venue pool this client draws on; `None` for an explicit owner.
     pub(crate) fn pool_key(&self) -> Option<super::PoolKey> {
         self.budgets.pool_key()

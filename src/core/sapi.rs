@@ -415,6 +415,16 @@ impl Config {
     pub fn pool_key(&self) -> Option<super::PoolKey> {
         self.budgets.pool_key()
     }
+    /// Clear an IP ban the venue gave no timing for, on the SAPI pool this
+    /// configuration's clients draw on. Every Wallet, Convert and Margin client of the
+    /// pool is admitted again; a known `Retry-After` cooldown still holds. See
+    /// [`Budgets::release_unknown_ban`].
+    ///
+    /// # Errors
+    /// Returns a configuration error if the pool's lock is poisoned.
+    pub fn release_unknown_ban(&self) -> Result<(), Error> {
+        self.budgets.release_unknown_ban()
+    }
     /// Share IP/UID scopes across every Wallet/Convert/Margin client for this account.
     #[must_use]
     pub fn budgets(mut self, value: Budgets) -> Self {

@@ -9,6 +9,182 @@ fn position() -> serde_json::Value {
     json!({"s":"BTCUSDT","pa":"1","ep":"100","cr":"0","up":"-1","mt":"cross","ps":"BOTH"})
 }
 
+// Loads a recorded capture inside the calling test: the recorded evidence is
+// compile-time checked in, like the synthetic fixtures beside it.
+macro_rules! captured_cross_margin_fixture {
+    ($market:literal) => {
+        serde_json::from_str::<serde_json::Value>(include_str!(concat!(
+            "fixtures/",
+            $market,
+            "-cross-margin-account-update-2026-10-11.json"
+        )))
+        .unwrap()
+    };
+}
+
+/// The authorized 2026-10-11 demo capture for issue #69: both markets'
+/// one-way cross-margin `ACCOUNT_UPDATE` pushes carried `iw` as a reported
+/// zero rather than omitting it, and every money field stays exact.
+#[test]
+fn captured_usdm_cross_margin_update_decodes_exactly() {
+    let fixture = captured_cross_margin_fixture!("usdm");
+    assert_eq!(fixture["market"], "usdm");
+    assert_eq!(fixture["credentialed"], json!(true));
+    let events = fixture["events"].as_array().unwrap();
+    let expected = [("open", "0.001"), ("close", "0")];
+    assert_eq!(events.len(), expected.len());
+    for (event, (phase, pa)) in events.iter().zip(expected) {
+        assert_eq!(event["phase"], phase);
+        let raw: serde_json::Value = serde_json::from_str(event["raw"].as_str().unwrap()).unwrap();
+        assert_eq!(raw["e"], "ACCOUNT_UPDATE");
+        let decoded: usdm::stream_models::AccountUpdateEvent =
+            serde_json::from_value(raw.clone()).unwrap();
+        assert_eq!(decoded.a.m, usdm::enums::AccountUpdateReason::Order);
+        let balances = decoded.a.upper_b.as_ref().unwrap();
+        assert_eq!(balances[0].a, "USDT");
+        let raw_position = &raw["a"]["P"][0];
+        let position = &decoded.a.upper_p.as_ref().unwrap()[0];
+        assert_eq!(position.s, "BTCUSDT");
+        assert_eq!(position.mt, "cross");
+        assert_eq!(position.ps, usdm::enums::PositionSide::Both);
+        assert_eq!(position.iw, Some(binance_client::Decimal::ZERO));
+        assert_eq!(
+            position.pa,
+            binance_client::Decimal::from_str_exact(pa).unwrap()
+        );
+        for field in ["ep", "cr", "up"] {
+            let exact =
+                binance_client::Decimal::from_str_exact(raw_position[field].as_str().unwrap())
+                    .unwrap();
+            assert_eq!(
+                match field {
+                    "ep" => position.ep,
+                    "cr" => position.cr,
+                    _ => position.up,
+                },
+                exact
+            );
+        }
+    }
+}
+
+#[test]
+fn captured_coinm_cross_margin_update_decodes_exactly() {
+    let fixture = captured_cross_margin_fixture!("coinm");
+    assert_eq!(fixture["market"], "coinm");
+    assert_eq!(fixture["credentialed"], json!(true));
+    let events = fixture["events"].as_array().unwrap();
+    let expected = [("open", "1"), ("close", "0")];
+    assert_eq!(events.len(), expected.len());
+    for (event, (phase, pa)) in events.iter().zip(expected) {
+        assert_eq!(event["phase"], phase);
+        let raw: serde_json::Value = serde_json::from_str(event["raw"].as_str().unwrap()).unwrap();
+        assert_eq!(raw["e"], "ACCOUNT_UPDATE");
+        let decoded: coinm::stream_models::AccountUpdateEvent =
+            serde_json::from_value(raw.clone()).unwrap();
+        assert_eq!(decoded.a.m, Some(coinm::enums::AccountUpdateReason::Order));
+        let balances = decoded.a.upper_b.as_ref().unwrap();
+        assert_eq!(balances[0].a.as_str(), "BTC");
+        let raw_position = &raw["a"]["P"][0];
+        let position = &decoded.a.upper_p.as_ref().unwrap()[0];
+        assert_eq!(position.s.as_str(), "BTCUSD_PERP");
+        assert_eq!(position.mt, "cross");
+        assert_eq!(position.ps, coinm::enums::PositionSide::Both);
+        assert_eq!(position.iw, Some(binance_client::Decimal::ZERO));
+        assert_eq!(
+            position.pa,
+            binance_client::Decimal::from_str_exact(pa).unwrap()
+        );
+        // The inverse market's exact break-even price survives the capture.
+        assert_eq!(
+            position.bep,
+            Some(
+                binance_client::Decimal::from_str_exact(raw_position["bep"].as_str().unwrap())
+                    .unwrap()
+            )
+        );
+        for field in ["ep", "cr", "up"] {
+            let exact =
+                binance_client::Decimal::from_str_exact(raw_position[field].as_str().unwrap())
+                    .unwrap();
+            assert_eq!(
+                match field {
+                    "ep" => position.ep,
+                    "cr" => position.cr,
+                    _ => position.up,
+                },
+                exact
+            );
+        }
+    }
+}
+
+// The recorded demo evidence replays through the real user-data socket path:
+// every captured frame is delivered in source order, none becomes a gap.
+macro_rules! captured_wallet_socket {
+    ($test:ident, $market:ident, $fixture:literal) => {
+        #[tokio::test]
+        async fn $test() {
+            use binance_client::$market::{Config, Environment, StreamEvent, Streams, event_payloads::UserPayload, streams::StreamPayload};
+            use binance_client::{SensitiveString, WeightPools};
+            use futures_util::{SinkExt, StreamExt};
+            use tokio_websockets::{Message, ServerBuilder};
+            let fixture: serde_json::Value = serde_json::from_str(include_str!($fixture)).unwrap();
+            let raws: Vec<String> = fixture["events"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|event| event["raw"].as_str().unwrap().to_owned())
+                .collect();
+            let server_raws = raws.clone();
+            let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let url = format!("ws://{}", listener.local_addr().unwrap());
+            let server = tokio::spawn(async move {
+                let (socket, _) = listener.accept().await.unwrap();
+                let (_, mut ws) = ServerBuilder::new().accept(socket).await.unwrap();
+                for raw in server_raws {
+                    ws.send(Message::text(raw)).await.unwrap();
+                }
+                while let Some(message) = ws.next().await {
+                    if message.unwrap().is_close() {
+                        ws.flush().await.unwrap();
+                        break;
+                    }
+                }
+            });
+            let config = Config::with_pools(Environment::Demo, &WeightPools::new()).unwrap().streams_url(&url).unwrap();
+            let (mut stream, driver) = Streams::user_data(config, &SensitiveString::new("synthetic-listen-key")).await.unwrap();
+            let driver = tokio::spawn(driver.run());
+            let generation = stream.generation();
+            assert!(matches!(stream.recv().await, Some(StreamEvent::Established(g)) if g == generation));
+            for _ in &raws {
+                let Some(StreamEvent::Data { generation: g, payload: StreamPayload::User(UserPayload::AccountUpdate(update)) }) = stream.recv().await else {
+                    panic!("captured cross-margin evidence became a socket gap");
+                };
+                assert_eq!(g, generation);
+                for position in update.a.upper_p.as_ref().unwrap() {
+                    assert_eq!(position.mt, "cross");
+                    assert_eq!(position.iw, Some(binance_client::Decimal::ZERO));
+                }
+            }
+            stream.close().await.unwrap();
+            assert!(matches!(stream.recv().await, Some(StreamEvent::Retired(g)) if g == generation));
+            driver.await.unwrap().unwrap();
+            server.await.unwrap();
+        }
+    };
+}
+captured_wallet_socket!(
+    usdm_captured_cross_margin_evidence_replays_through_the_user_data_socket,
+    usdm,
+    "fixtures/usdm-cross-margin-account-update-2026-10-11.json"
+);
+captured_wallet_socket!(
+    coinm_captured_cross_margin_evidence_replays_through_the_user_data_socket,
+    coinm,
+    "fixtures/coinm-cross-margin-account-update-2026-10-11.json"
+);
+
 #[test]
 fn account_updates_preserve_absent_isolated_wallet_without_fabricating_zero() {
     let value = position();

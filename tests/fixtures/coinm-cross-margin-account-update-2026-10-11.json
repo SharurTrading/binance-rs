@@ -1,0 +1,26 @@
+{
+  "credentialed": true,
+  "environment": {
+    "rest": "https://demo-dapi.binance.com",
+    "streamPath": "/ws/<listenKey>",
+    "streams": "wss://demo-dstream.binance.com"
+  },
+  "events": [
+    {
+      "phase": "open",
+      "raw": "{\"e\":\"ACCOUNT_UPDATE\",\"T\":1791666913117,\"E\":1791666913118,\"i\":\"TiSgmYmYfWSguX\",\"a\":{\"B\":[{\"a\":\"BTC\",\"wb\":\"0.00999952\",\"cw\":\"0.00999952\",\"bc\":\"0\"}],\"P\":[{\"s\":\"BTCUSD_PERP\",\"pa\":\"1\",\"ep\":\"82922.7\",\"bep\":\"82955.86908270\",\"cr\":\"0\",\"up\":\"-0.00000015\",\"mt\":\"cross\",\"iw\":\"0\",\"ps\":\"BOTH\",\"ma\":\"BTC\"}],\"m\":\"ORDER\"}}"
+    },
+    {
+      "phase": "close",
+      "raw": "{\"e\":\"ACCOUNT_UPDATE\",\"T\":1791666914183,\"E\":1791666914184,\"i\":\"TiSgmYmYfWSguX\",\"a\":{\"B\":[{\"a\":\"BTC\",\"wb\":\"0.00999879\",\"cw\":\"0.00999879\",\"bc\":\"0\"}],\"P\":[{\"s\":\"BTCUSD_PERP\",\"pa\":\"0\",\"ep\":\"0\",\"bep\":\"0\",\"cr\":\"-0.00000025\",\"up\":\"0\",\"mt\":\"cross\",\"iw\":\"0\",\"ps\":\"BOTH\",\"ma\":\"BTC\"}],\"m\":\"ORDER\"}}"
+    }
+  ],
+  "market": "coinm",
+  "observedAtUnixSeconds": 1791666915,
+  "positionMode": "one-way",
+  "restMarginType": "cross",
+  "run": "issue-69-coinm-cross-margin-account-update",
+  "scrub": "No API key, secret, signed URL or listen key is recorded; ACCOUNT_UPDATE carries no account identifier.",
+  "symbol": "BTCUSD_PERP",
+  "tradedQuantity": "1"
+}

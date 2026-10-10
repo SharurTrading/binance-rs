@@ -30,8 +30,8 @@ pub struct RateEvidence {
     /// HTTP Retry-After seconds, or WebSocket retry deadline converted to a duration.
     pub retry_after: Option<Duration>,
     /// The venue sent retry timing this client cannot use, so no expiry is invented
-    /// and every send sharing the owner is refused until the caller restores
-    /// verified venue authority with a fresh explicit budget owner.
+    /// and every send sharing the owner is refused until the caller releases it with
+    /// `release_unknown_ban`.
     pub retry_after_unusable: bool,
 }
 
@@ -154,8 +154,10 @@ pub enum Error {
         retry_after: Duration,
     },
     /// Venue retry timing was unusable, or an IP ban supplied no timing. No expiry is invented;
-    /// all clients sharing this owner refuse sends until the caller verifies
-    /// restored venue authority and supplies a fresh explicit budget owner.
+    /// all clients sharing this owner refuse sends until the caller decides the ban
+    /// has ended and calls `release_unknown_ban` on a configuration or client of the
+    /// pool ([`crate::Budgets::release_unknown_ban`] for an explicit owner). The release
+    /// clears only this refusal; a cooldown with a known `Retry-After` still holds.
     #[error("venue IP cooldown timing is unknown")]
     CooldownTimingUnknown,
     /// An unsent command expired.

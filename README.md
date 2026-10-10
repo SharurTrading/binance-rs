@@ -366,6 +366,35 @@ USDⓈ-M `testOrder` quota weights; an authorized demo probe
 no IP weight and one slot on each order limit, which the client charges. That validation
 endpoint does not submit to the matching engine.
 
+### Releasing a ban without timing
+
+Binance documents a `418` ban as lasting
+["from 2 minutes to 3 days"](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#http-418)
+and gives no other signal that it has ended. When the reply carries no usable
+`Retry-After`, the pool has no expiry to wait for, so every send on it is refused as
+`Error::CooldownTimingUnknown` and no reply can clear that. The client invents no
+expiry; the caller decides when to try again and says so:
+
+| Call | Reaches |
+| --- | --- |
+| `release_unknown_ban()` on a Spot, USDⓈ-M, COIN-M, Options, Wallet, Convert or Margin `Config` or `RestClient` | The pool that configuration or client draws on |
+| `Budgets::release_unknown_ban()` | An explicit owner |
+
+It clears only the unknown-timing refusal, for every client of the pool at once. A
+cooldown with a known `Retry-After` still holds until it expires. The release asserts
+nothing to the venue: a ban that has not ended answers the next send with `418` again,
+and the pool refuses again.
+
+```rust
+use binance_client::core_trading::spot;
+use binance_client::Error;
+
+let config = spot::Config::new(spot::Environment::Production)?;
+// The caller has decided the ban is over, for example after waiting out three days.
+config.release_unknown_ban()?;
+# Ok::<(), Error>(())
+```
+
 ## Development and verification
 
 See [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), and

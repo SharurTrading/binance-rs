@@ -56,7 +56,7 @@ escalation. If a `418` arrives nevertheless, its ban evidence conservatively
 blocks every shared endpoint/account owner.
 Missing/malformed ban retry timing produces `CooldownTimingUnknown` on subsequent
 admission; no expiry is invented. The caller verifies restored venue authority
-before supplying a fresh explicit owner.
+and calls `release_unknown_ban` on a Wallet, Convert or Margin configuration or client.
 Admission refuses immediately; it never queues or retries.
 
 Configuration uses the documented production SAPI host, milliseconds, caller

@@ -9,7 +9,7 @@ use std::{
 };
 
 /// Venue-sourced initial rate limits; stated exchange information limits replace the
-/// minute weight and raw-request figures.
+/// minute weight, raw-request and account order figures.
 #[derive(Clone, Debug)]
 #[non_exhaustive]
 pub struct BudgetLimits {
@@ -56,7 +56,8 @@ impl BudgetLimits {
     }
     /// Options' native minute limits, documented in its public endpoint definitions:
     /// <https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition>.
-    /// No ten-second order, daily order, raw-request or connection ceiling is stated.
+    /// No ten-second order, daily order, raw-request or connection ceiling is documented;
+    /// an exchange information statement replaces or adds each window once read.
     #[must_use]
     pub fn options() -> Self {
         Self {
@@ -72,6 +73,8 @@ impl BudgetLimits {
     }
     /// Spot's documented baseline; replace account limits with exchange evidence.
     /// Sources: Spot WebSocket rate limits and the March 2026 `RAW_REQUESTS` update.
+    /// The order figures are the documented examples (50 per ten seconds, 160,000 a
+    /// day); an exchange information statement replaces them once read.
     #[must_use]
     pub fn spot() -> Self {
         Self {
@@ -153,6 +156,11 @@ pub(super) struct State {
     // The latest limits the venue stated for this pool; the baseline stands until then.
     stated_weight_per_minute: Option<u64>,
     stated_raw_requests_per_five_minutes: Option<u64>,
+    // Per-account order limits, held with the IP owner so every account owner of the
+    // pool counts against the venue's latest figure.
+    stated_orders_per_ten_seconds: Option<u64>,
+    stated_orders_per_minute: Option<u64>,
+    stated_orders_per_day: Option<u64>,
 }
 impl State {
     /// The count of `name` in the window of `window` milliseconds holding `now`.
@@ -287,17 +295,19 @@ impl Budgets {
             (
                 "orders10",
                 10_000,
-                self.limits.orders_per_ten_seconds,
+                ip.stated_orders_per_ten_seconds
+                    .unwrap_or(self.limits.orders_per_ten_seconds),
                 c.orders10,
             ),
             (
                 "orders60",
                 60_000,
-                self.limits.orders_per_minute,
+                ip.stated_orders_per_minute
+                    .unwrap_or(self.limits.orders_per_minute),
                 c.orders60,
             ),
         ];
-        if let Some(limit) = self.limits.orders_per_day {
+        if let Some(limit) = ip.stated_orders_per_day.or(self.limits.orders_per_day) {
             account_cost.push(("ordersDay", 86_400_000, limit, c.orders_day));
         }
         if c.quote {
@@ -483,9 +493,11 @@ pub(crate) struct StatedLimit<'a> {
 }
 
 impl Budgets {
-    /// Adopt the minute request weight and five-minute raw-request limits a venue
-    /// reply states, for every client of this IP owner. `ORDERS` entries are account
-    /// limits and other windows are not counted here; neither is adopted.
+    /// Adopt the minute request weight, five-minute raw-request and ten-second,
+    /// minute and daily `ORDERS` limits a venue reply states, for every client of this
+    /// IP owner. An `ORDERS` figure is the venue's per-account limit: every account
+    /// owner of the pool, keyed or not, counts its own orders against it. Other
+    /// windows are not counted here and are not adopted.
     ///
     /// # Errors
     /// A counted window stated without a positive limit is refused as a gap and
@@ -496,10 +508,16 @@ impl Budgets {
     ) -> Result<(), Error> {
         let mut weight = None;
         let mut raw = None;
+        let mut orders10 = None;
+        let mut orders60 = None;
+        let mut orders_day = None;
         for entry in stated {
             let slot = match (entry.kind, entry.interval, entry.interval_num) {
                 (Some("REQUEST_WEIGHT"), Some("MINUTE"), Some(1)) => &mut weight,
                 (Some("RAW_REQUESTS"), Some("MINUTE"), Some(5)) => &mut raw,
+                (Some("ORDERS"), Some("SECOND"), Some(10)) => &mut orders10,
+                (Some("ORDERS"), Some("MINUTE"), Some(1)) => &mut orders60,
+                (Some("ORDERS"), Some("DAY"), Some(1)) => &mut orders_day,
                 _ => continue,
             };
             let limit = entry
@@ -510,15 +528,21 @@ impl Budgets {
             // Two statements of one window: the stricter binds.
             *slot = Some(slot.map_or(limit, |current: u64| current.min(limit)));
         }
-        let mut ip = self
+        let mut guard = self
             .ip
             .lock()
             .map_err(|_| Error::Configuration("IP budget poisoned"))?;
-        if weight.is_some() {
-            ip.stated_weight_per_minute = weight;
-        }
-        if raw.is_some() {
-            ip.stated_raw_requests_per_five_minutes = raw;
+        let ip = &mut *guard;
+        for (statement, current) in [
+            (weight, &mut ip.stated_weight_per_minute),
+            (raw, &mut ip.stated_raw_requests_per_five_minutes),
+            (orders10, &mut ip.stated_orders_per_ten_seconds),
+            (orders60, &mut ip.stated_orders_per_minute),
+            (orders_day, &mut ip.stated_orders_per_day),
+        ] {
+            if statement.is_some() {
+                *current = statement;
+            }
         }
         Ok(())
     }

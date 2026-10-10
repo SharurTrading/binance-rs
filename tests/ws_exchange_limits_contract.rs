@@ -79,8 +79,7 @@ async fn websocket_exchange_info_adopts_weight_and_raw_limits_for_other_clients(
     assert_eq!(observer.pool_usage().unwrap().request_weight.limit, 6000);
     let (url, server) = exchange_server(vec![json!({"rateLimits":[
         {"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":22},
-        {"rateLimitType":"RAW_REQUESTS","interval":"MINUTE","intervalNum":5,"limit":1},
-        {"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":0}
+        {"rateLimitType":"RAW_REQUESTS","interval":"MINUTE","intervalNum":5,"limit":1}
     ]})])
     .await;
     let (client, mut events, driver) =
@@ -136,7 +135,7 @@ async fn websocket_exchange_info_adopts_weight_and_raw_limits_for_other_clients(
 #[tokio::test]
 async fn malformed_websocket_counted_limits_leave_prior_limits_and_charges_intact() {
     let mut malformed = Vec::new();
-    for kind in ["REQUEST_WEIGHT", "RAW_REQUESTS"] {
+    for kind in ["REQUEST_WEIGHT", "RAW_REQUESTS", "ORDERS"] {
         for limit in [Some(json!(0)), Some(json!(-1)), Some(Value::Null), None] {
             let mut item = json!({"rateLimitType":kind,"interval":"MINUTE","intervalNum":if kind == "RAW_REQUESTS" {5} else {1}});
             if let Some(limit) = limit {

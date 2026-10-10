@@ -198,9 +198,10 @@ Demo and production never share a pool. Each pool starts at its documented basel
 every REST exchange information reply and Spot WebSocket API `exchangeInfo`
 result hands its `rateLimits` to the pool, and the
 latest stated `REQUEST_WEIGHT` per minute (and Spot's `RAW_REQUESTS` per five
-minutes) replaces it for every client of the pool. A counted window stated without a
-positive limit is refused as `Error::Gap` and leaves the pool unchanged. `ORDERS`
-entries are account limits and are not adopted. Every `X-MBX-USED-WEIGHT-1M` raises
+minutes) replaces it for every client of the pool; stated `ORDERS` limits replace the
+account order limits (see [Order limits](#order-limits)). A counted window stated without a
+positive limit is refused as `Error::Gap` and leaves the pool unchanged; of two
+statements of one window in a reply, the stricter binds. Every `X-MBX-USED-WEIGHT-1M` raises
 the pool's count, and a `Retry-After` or `418` holds every client of the pool. A
 request the pool cannot take is refused unsent as `Error::Admission` with its retry
 delay. The futures pool counts REST and WebSocket API weight together.
@@ -229,6 +230,40 @@ one account, name the account with an `AccountKey` (see
 daily/ten-second order counts, and connection-attempt limits. Successful ordinary
 Spot submits/cancels release the documented weight reservation; failures remain
 charged and observed venue counters are never reduced.
+
+### Order limits
+
+Binance counts orders per account. Each account owner starts from its pool's
+documented order figures:
+
+| Pool | Ten seconds | Minute | Day | Source |
+| --- | ---: | ---: | ---: | --- |
+| Spot | 50 | none | 160,000 | `rateLimits` examples in the [Spot REST API](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md) and [WebSocket API](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md) |
+| Futures | 300 | 1,200 | none | [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice), A.3 |
+| Options | none | 1,200 | none | [Options rate limiters](https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition) |
+
+Exchange information `rateLimits` lists the venue's `ORDERS` limiters. Every `ORDERS`
+entry for ten seconds, one minute or one day that a client of the pool reads, through
+REST or Spot WebSocket API `exchangeInfo`, replaces that window's figure for every
+account owner of the pool: keyed or not, drawn before the read or after. Each owner
+still counts only its own account's orders against the figure. A statement that names
+a window the pool has no figure for adds it; other intervals are not counted. In the
+futures pool, USDⓈ-M and COIN-M statements replace one shared set of figures, window
+by window.
+
+> [!NOTE]
+> The documented figures are examples and differ from what production states. On
+> 2026-10-11 production `exchangeInfo` stated Spot 100 per ten seconds and 200,000 a
+> day, USDⓈ-M 300 per ten seconds and 1,200 a minute, COIN-M 1,200 a minute only, and
+> Options 30 per ten seconds and 100 a minute. Spot's
+> [unfilled order count FAQ](https://github.com/binance/binance-spot-api-docs/blob/master/faqs/order_count_decrement.md)
+> says of its own examples: "The actual configuration on the live exchange may be
+> different." Read exchange information once per pool before relying on the figures.
+
+Exchange information is a public, unsigned read, and none of the cited pages states
+that an order or weight limit depends on VIP level or account tier. Margin's native
+order windows (`order_limits`) and FIX `LimitResponse` windows are reported by the
+venue for the account and stay as they are.
 
 ### Sharing an account
 

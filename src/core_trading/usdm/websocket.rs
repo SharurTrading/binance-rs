@@ -49,10 +49,6 @@ impl WsClient {
                     ws_weight: 5,
                     ..crate::core::Cost::default()
                 },
-                // The USDⓈ-M WebSocket API keeps its own IP weight window,
-                // apart from the REST one, so this socket's reply evidence
-                // counts that separate window.
-                separate_ws_weight: true,
                 // The futures WebSocket API documents a 3-minute server ping
                 // cadence but no per-second client-message figure for this
                 // socket family; 5 is the conservative ceiling of the

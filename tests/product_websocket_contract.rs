@@ -836,7 +836,9 @@ macro_rules! membership_contract {
                         assert!(peer.next().await.unwrap().unwrap().is_pong());
                     }
                     ponged.send(()).unwrap();
-                    for _ in 0..($incoming_limit - 2) {
+                    // Two pongs plus these controls fill the window to the slot
+                    // reserved for a pong, so one fewer control is admitted.
+                    for _ in 0..($incoming_limit - 3) {
                         let request = next_control(&mut peer).await;
                         assert_eq!(request["method"], "LIST_SUBSCRIPTIONS");
                         peer.send(Message::text(json!({"result":[],"id":request["id"]}).to_string())).await.unwrap();
@@ -847,7 +849,7 @@ macro_rules! membership_contract {
                 let driver = tokio::spawn(driver.run());
                 let generation = established(&mut events).await;
                 pongs.await.unwrap();
-                for _ in 0..($incoming_limit - 2) {
+                for _ in 0..($incoming_limit - 3) {
                     assert!(events.list_subscriptions(deadline()).await.unwrap().is_empty());
                 }
                 match events.list_subscriptions(deadline()).await {
@@ -856,6 +858,52 @@ macro_rules! membership_contract {
                     }
                     other => panic!("expected an unsent refusal, got {other:?}"),
                 }
+                retire(&mut events, driver, generation).await;
+                server.await.unwrap();
+            }
+
+            #[tokio::test]
+            async fn a_pong_due_while_controls_filled_the_window_is_still_sent() {
+                let (l, url) = listener().await;
+                let a = stream($symbol_a);
+                let name = a.name().to_owned();
+                let wire = name.clone();
+                let (refused, ping) = oneshot::channel::<()>();
+                let server = tokio::spawn(async move {
+                    let mut peer = accept(l).await;
+                    // Controls alone fill the window to the ceiling a control may
+                    // take; the venue may still ping at any instant.
+                    for _ in 0..($incoming_limit - 1) {
+                        let request = next_control(&mut peer).await;
+                        assert_eq!(request["method"], "LIST_SUBSCRIPTIONS");
+                        peer.send(Message::text(json!({"result":[],"id":request["id"]}).to_string())).await.unwrap();
+                    }
+                    // The ping is sent only once the next control is refused, so
+                    // it is due while the window holds only the reserved slot.
+                    ping.await.unwrap();
+                    peer.send(Message::ping(b"crowded".as_slice())).await.unwrap();
+                    assert!(peer.next().await.unwrap().unwrap().is_pong());
+                    peer.send(agg_trade_frame(&wire, $symbol_a)).await.unwrap();
+                    expect_only_close(peer).await;
+                });
+                let (mut events, driver) = $connect(&url, &[a]).await;
+                let driver = tokio::spawn(driver.run());
+                let generation = established(&mut events).await;
+                for _ in 0..($incoming_limit - 1) {
+                    assert!(events.list_subscriptions(deadline()).await.unwrap().is_empty());
+                }
+                // The control that would take the reserved last slot is refused
+                // unsent, before it can crowd out a pong.
+                match events.list_subscriptions(deadline()).await {
+                    Err(Error::Admission { retry_after }) => {
+                        assert!(retry_after > Duration::ZERO && retry_after <= Duration::from_secs(1));
+                        refused.send(()).unwrap();
+                    }
+                    other => panic!("expected an unsent refusal, got {other:?}"),
+                }
+                // The ping was answered with the reserved slot and the connection
+                // does not end: the trade is delivered and retirement is clean.
+                expect_trade(&mut events, generation, &name).await;
                 retire(&mut events, driver, generation).await;
                 server.await.unwrap();
             }

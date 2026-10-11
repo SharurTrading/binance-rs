@@ -6,6 +6,7 @@
 #![allow(clippy::unwrap_used, reason = "synthetic contract assertions")]
 
 use binance_client::{Decimal, coinm, spot, usdm};
+use serde::de::DeserializeOwned;
 use serde_json::json;
 
 // Official COIN-M stream schema: index price is financial evidence; delivery
@@ -186,4 +187,115 @@ fn spot_reference_price_preserves_explicit_null_and_exact_value() {
         }))
         .is_err()
     );
+}
+
+// The venue documents every kline price, the close included, in the same
+// string-encoded exact decimal form; USD-M already types the close as Decimal.
+// https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#klinecandlestick-streams
+#[test]
+fn spot_kline_close_prices_are_exact_decimal_evidence() {
+    // Recorded public Spot payload (BTCUSDT), issue #105.
+    let wire = json!({"e":"kline","s":"BTCUSDT","E":1_791_417_540_001_i64,"k":{
+        "t":1_791_417_480_000_i64,"T":1_791_417_539_999_i64,"s":"BTCUSDT","i":"1m",
+        "o":"100.1","h":"102.3","l":"99.9","c":"101.23456789","v":"12","x":true}});
+    let event: spot::stream_models::KlineEvent = serde_json::from_value(wire.clone()).unwrap();
+    assert_eq!(event.k.c, Some(Decimal::new(10_123_456_789, 8)));
+    let event: spot::stream_models::KlineOffsetEvent = serde_json::from_value(wire).unwrap();
+    assert_eq!(event.k.c, Some(Decimal::new(10_123_456_789, 8)));
+}
+
+// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#klinecandlestick-streams
+#[test]
+fn coinm_kline_close_prices_are_exact_decimal_evidence() {
+    // Official COIN-M example kline body.
+    let k = json!({"t":1_591_261_540_000_i64,"T":1_591_261_599_999_i64,"i":"1m",
+        "f":606_400,"L":606_430,"o":"9638.9","c":"9639.8","h":"9639.8","l":"9638.6",
+        "v":"156","n":31,"x":false,"q":"1.61836886","V":"73","Q":"0.75731156","B":"0"});
+    let event: coinm::stream_models::KlineCandlestickStreamsEvent = serde_json::from_value(
+        json!({"e":"kline","E":1_591_261_542_539_i64,"s":"BTCUSD_200626","k":k.clone()}),
+    )
+    .unwrap();
+    assert_eq!(event.k.c, Some(Decimal::new(96_398, 1)));
+    let event: coinm::stream_models::ContinuousContractKlineCandlestickStreamsEvent =
+        serde_json::from_value(json!({"e":"continuous_kline","E":1_591_261_542_539_i64,
+            "ps":"BTCUSD","ct":"NEXT_QUARTER","k":k.clone()}))
+        .unwrap();
+    assert_eq!(event.k.c, Some(Decimal::new(96_398, 1)));
+    let event: coinm::stream_models::IndexKlineCandlestickStreamsEvent =
+        serde_json::from_value(json!({"e":"indexPrice_kline","E":1_591_261_542_539_i64,
+            "ps":"BTCUSD","k":k.clone()}))
+        .unwrap();
+    assert_eq!(event.k.c, Some(Decimal::new(96_398, 1)));
+    let event: coinm::stream_models::MarkPriceKlineCandlestickStreamsEvent =
+        serde_json::from_value(json!({"e":"markPrice_kline","E":1_591_261_542_539_i64,
+            "ps":"BTCUSD_PERP","k":k}))
+        .unwrap();
+    assert_eq!(event.k.c, Some(Decimal::new(96_398, 1)));
+}
+
+fn refuses_non_decimal_kline_close<E: DeserializeOwned>(wire: &serde_json::Value) {
+    for close in ["not-a-price", "0.12345678901234567890123456789", ""] {
+        let mut value = wire.clone();
+        value["k"]["c"] = json!(close);
+        assert!(
+            serde_json::from_value::<E>(value).is_err(),
+            "kline close {close:?} must not decode"
+        );
+    }
+}
+
+#[test]
+fn kline_close_prices_refuse_non_decimal_evidence() {
+    let spot_wire = json!({"e":"kline","E":1,"s":"BTCUSDT","k":{"i":"1m","c":"101.23456789"}});
+    refuses_non_decimal_kline_close::<spot::stream_models::KlineEvent>(&spot_wire);
+    refuses_non_decimal_kline_close::<spot::stream_models::KlineOffsetEvent>(&spot_wire);
+    let coinm_k = json!({"i":"1m","c":"9639.8"});
+    refuses_non_decimal_kline_close::<coinm::stream_models::KlineCandlestickStreamsEvent>(
+        &json!({"e":"kline","E":1,"s":"BTCUSD_200626","k":coinm_k.clone()}),
+    );
+    refuses_non_decimal_kline_close::<
+        coinm::stream_models::ContinuousContractKlineCandlestickStreamsEvent,
+    >(
+        &json!({"e":"continuous_kline","E":1,"ps":"BTCUSD","ct":"NEXT_QUARTER","k":coinm_k.clone()})
+    );
+    refuses_non_decimal_kline_close::<coinm::stream_models::IndexKlineCandlestickStreamsEvent>(
+        &json!({"e":"indexPrice_kline","E":1,"ps":"BTCUSD","k":coinm_k.clone()}),
+    );
+    refuses_non_decimal_kline_close::<coinm::stream_models::MarkPriceKlineCandlestickStreamsEvent>(
+        &json!({"e":"markPrice_kline","E":1,"ps":"BTCUSD_PERP","k":coinm_k}),
+    );
+}
+
+#[test]
+fn kline_close_prices_keep_sibling_optionality() {
+    // `c` keeps the optionality of its sibling prices: absent or JSON-null decodes
+    // to `None` instead of failing, exactly as `o`/`h`/`l` do.
+    let event: spot::stream_models::KlineEvent = serde_json::from_value(json!({
+        "e":"kline","E":1,"s":"BTCUSDT","k":{"i":"1m","o":"1"}}))
+    .unwrap();
+    assert_eq!(event.k.c, None);
+    let event: spot::stream_models::KlineOffsetEvent = serde_json::from_value(json!({
+        "e":"kline","E":1,"s":"BTCUSDT","k":{"i":"1m","o":"1","c":null}}))
+    .unwrap();
+    assert_eq!(event.k.c, None);
+    let event: coinm::stream_models::KlineCandlestickStreamsEvent = serde_json::from_value(
+        json!({"e":"kline","E":1,"s":"BTCUSD_200626","k":{"i":"1m","o":"1"}}),
+    )
+    .unwrap();
+    assert_eq!(event.k.c, None);
+    let event: coinm::stream_models::ContinuousContractKlineCandlestickStreamsEvent =
+        serde_json::from_value(json!({"e":"continuous_kline","E":1,"ps":"BTCUSD",
+            "ct":"NEXT_QUARTER","k":{"i":"1m","o":"1","c":null}}))
+        .unwrap();
+    assert_eq!(event.k.c, None);
+    let event: coinm::stream_models::IndexKlineCandlestickStreamsEvent =
+        serde_json::from_value(json!({"e":"indexPrice_kline","E":1,"ps":"BTCUSD",
+            "k":{"i":"1m","o":"1"}}))
+        .unwrap();
+    assert_eq!(event.k.c, None);
+    let event: coinm::stream_models::MarkPriceKlineCandlestickStreamsEvent =
+        serde_json::from_value(json!({"e":"markPrice_kline","E":1,"ps":"BTCUSD_PERP",
+            "k":{"i":"1m","o":"1","c":null}}))
+        .unwrap();
+    assert_eq!(event.k.c, None);
 }

@@ -186,29 +186,67 @@ WebSocket lifecycles.
 ## Budgets
 
 Spot, Futures and Options `Config::new` draw their IP budgets from the process's pool for
-that venue pool and environment, so every client counts against one venue pool:
+that venue pool and environment, so every client counts against one weight limit:
 
 | Pool | Products | Baseline minute weight | Source |
 | --- | --- | ---: | --- |
 | Spot | Spot | 6,000 | [Spot rate limiters](https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#rate-limiters-ratelimittype) |
-| Futures | USDⓈ-M and COIN-M together | 2,400 REST; 2,400 WebSocket API | [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice), A.3; [USDⓈ-M WebSocket API general info](https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-api-general-info) |
+| Futures | USDⓈ-M and COIN-M together | 2,400 | [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice), A.3 |
 | Options | Options | 2,400 | [Options rate limiters](https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition) |
 
 Demo and production never share a pool. Each pool starts at its documented baseline;
 every REST exchange information reply and Spot WebSocket API `exchangeInfo`
 result hands its `rateLimits` to the pool, and the
 latest stated `REQUEST_WEIGHT` per minute (and Spot's `RAW_REQUESTS` per five
-minutes) replaces it for every client of the pool. A counted window stated without a
-positive limit is refused as `Error::Gap` and leaves the pool unchanged. `ORDERS`
-entries are account limits and are not adopted. Every `X-MBX-USED-WEIGHT-1M` raises
+minutes) replaces it for every client of the pool; stated `ORDERS` limits replace the
+account order limits (see [Order limits](#order-limits)). A counted window stated without a
+positive limit is refused as `Error::Gap` and leaves the pool unchanged; of two
+statements of one window in a reply, the stricter binds. Every `X-MBX-USED-WEIGHT-1M` raises
 the pool's count, and a `Retry-After` or `418` holds every client of the pool. A
 request the pool cannot take is refused unsent as `Error::Admission` with its retry
-delay. The futures pool keeps two minute weight windows: REST weight (shared by
-USDⓈ-M and COIN-M, and by COIN-M's WebSocket API, whose rate limits its own general
-info states are "shared with REST API") and the USDⓈ-M WebSocket API's own window,
-which the venue keeps apart from REST and which only USDⓈ-M WebSocket API traffic —
-plus the documented overlap of REST single/batch order place, modify and cancel —
-charges.
+delay.
+
+### Futures WebSocket API weight
+
+The futures pool keeps two minute weight counters: REST weight, which USDⓈ-M and
+COIN-M share, and the USDⓈ-M WebSocket API's own. The
+[USDⓈ-M WebSocket API](https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-api-general-info)
+states: "The WebSocket API IP weight limit (shared across `ws-fapi` and
+`ws-fapi-mm`) is **not** shared with the REST API IP weight limit (`fapi`,
+`fapi-mm`). The only overlap is that REST single/batch order place/modify/cancel
+requests are counted against the same limit as WebSocket API requests." The
+[COIN-M WebSocket API](https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-api-general-info)
+states: "Rate limits are the same as on REST API and are shared with REST API." The
+[UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice),
+A.3, states: "Requests on either fapi or dapi count against the same
+X-MBX-USED-WEIGHT-1M counter."
+
+| Traffic | REST weight | USDⓈ-M WebSocket API weight |
+| --- | :---: | :---: |
+| USDⓈ-M REST | Yes | No |
+| USDⓈ-M REST single/batch order place, modify and cancel | Yes | Yes |
+| USDⓈ-M WebSocket API, handshake included | No | Yes |
+| COIN-M REST | Yes | No |
+| COIN-M REST single/batch order place, modify and cancel | Yes | Yes, conservatively |
+| COIN-M WebSocket API, handshake included | Yes | Yes, conservatively |
+
+`X-MBX-USED-WEIGHT-1M` raises REST weight. A USDⓈ-M WebSocket API reply's
+`rateLimits` count raises the WebSocket API counter; a COIN-M reply's raises REST
+weight. A reply that also states the window's limit — a positive `REQUEST_WEIGHT`
+per-minute figure in its `rateLimits` — states it for the counter it reports, and
+of two statements the stricter binds. A COIN-M client counts its WebSocket API
+weight on REST weight with any budget owner, including an explicit one.
+
+> [!NOTE]
+> The documentation does not say whether COIN-M WebSocket API requests or COIN-M
+> REST order requests also count against the USDⓈ-M WebSocket API limit. The client
+> takes the conservative reading and charges them there too, so COIN-M traffic can
+> only lower what USDⓈ-M WebSocket API clients may send. USDⓈ-M WebSocket API weight
+> is never charged to REST weight: the notice puts COIN-M REST on the one REST
+> counter that the USDⓈ-M WebSocket API limit is stated not to share.
+
+`pool_usage()` reports both counters: `ws_request_weight` carries the WebSocket
+API window with its limit, source, use and reset time.
 
 Spot's [WebSocket exchange information](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general)
 updates the same IP owner as REST, including clients configured separately from
@@ -222,12 +260,122 @@ endpoint weight counters remain independent. Margin WebSocket API uses the Spot
 pool. Options uses its own pool and native exchange-information limits.
 `with_pools` selects an explicit registry for these products.
 
+A registry owns no clock. Every client drawn from one registry must be given one
+clock, the same `Arc<dyn Clock>` or wall time for all (the default), because each
+client charges the pool's fixed, aligned windows at the instant its own `Config::clock`
+reports; clients with different clocks charge different windows of one pool.
+
 Each `Config::new` keeps its own account owner; clone a product `Config` to share
 budgets between its REST and WebSocket clients. Across products or credentials of
-one account, pass one account owner explicitly. Spot shares REST/WS weight,
+one account, name the account with an `AccountKey` (see
+[Sharing an account](#sharing-an-account)). Spot shares REST/WS weight,
 daily/ten-second order counts, and connection-attempt limits. Successful ordinary
 Spot submits/cancels release the documented weight reservation; failures remain
 charged and observed venue counters are never reduced.
+
+Spot FIX connection attempts count twice — once against the account's own window
+and once against the IP's — because the venue checks both independently. Two
+accounts trading FIX through one IP therefore share one attempt budget:
+`AccountBudgets::with_pools_for_account` (or `new_for_account`) draws each key's
+scope from the same registry pool its Spot clients use, and a refused attempt
+never burns an account slot.
+
+### Order limits
+
+Binance counts orders per account. Each account owner starts from its pool's
+documented order figures:
+
+| Pool | Ten seconds | Minute | Day | Source |
+| --- | ---: | ---: | ---: | --- |
+| Spot | 50 | none | 160,000 | `rateLimits` examples in the [Spot REST API](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md) and [WebSocket API](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md) |
+| Futures | 300 | 1,200 | none | [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice), A.3 |
+| Options | none | 1,200 | none | [Options rate limiters](https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition) |
+
+Exchange information `rateLimits` lists the venue's `ORDERS` limiters. Every `ORDERS`
+entry for ten seconds, one minute or one day that a client of the pool reads, through
+REST or Spot WebSocket API `exchangeInfo`, replaces that window's figure for every
+account owner of the pool: keyed or not, drawn before the read or after. Each owner
+still counts only its own account's orders against the figure. A statement that names
+a window the pool has no figure for adds it; other intervals are not counted. In the
+futures pool, USDⓈ-M and COIN-M statements replace one shared set of figures, window
+by window.
+
+> [!NOTE]
+> The documented figures are examples and differ from what production states. On
+> 2026-10-11 production `exchangeInfo` stated Spot 100 per ten seconds and 200,000 a
+> day, USDⓈ-M 300 per ten seconds and 1,200 a minute, COIN-M 1,200 a minute only, and
+> Options 30 per ten seconds and 100 a minute. Spot's
+> [unfilled order count FAQ](https://github.com/binance/binance-spot-api-docs/blob/master/faqs/order_count_decrement.md)
+> says of its own examples: "The actual configuration on the live exchange may be
+> different." Read exchange information once per pool before relying on the figures.
+
+Exchange information is a public, unsigned read, and none of the cited pages states
+that an order or weight limit depends on VIP level or account tier. Margin's native
+order windows (`order_limits`) and FIX `LimitResponse` windows are reported by the
+venue for the account and stay as they are.
+
+### Sharing an account
+
+Binance counts orders per account, not per client: Spot's unfilled order count is
+[shared across all IP addresses, API keys and APIs](https://github.com/binance/binance-spot-api-docs/blob/master/faqs/order_count_decrement.md),
+and USDⓈ-M and COIN-M share one order budget
+([UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice)).
+An `AccountKey` names one account. It is opaque bytes or text the caller chooses;
+the client only compares it, redacts it from `Debug`, and zeroizes it when its last
+copy drops. A registry keeps a copy for as long as the registry lives.
+
+`new_for_account` draws from the process's registry and `with_pools_for_account`
+from an explicit one. Every configuration of one registry given an equal key, in one
+venue pool and environment, shares that pool's account owner; it still shares the
+pool's IP weight with every other client of the pool, keyed or not. Without a key,
+each configuration gets an account owner of its own, so sharing stays explicit.
+
+| Shared per key and pool | Pool |
+| --- | --- |
+| Order counts per ten seconds, minute and day, including `X-MBX-ORDER-COUNT-*` a reply reports | Spot, Futures, Options |
+| USDⓈ-M conversion quote and USDⓈ-M and COIN-M monthly download quotas | Futures |
+| UID endpoint weight and Margin's native order windows, including those `order_limits` installs | SAPI |
+| FIX order windows a `LimitResponse` reports, and FIX connection limits | Spot |
+
+| Configuration | Keyed constructors |
+| --- | --- |
+| `spot::Config`, `usdm::Config`, `coinm::Config`, `options::Config` | `new_for_account(environment, &key)`, `with_pools_for_account(environment, &pools, &key)` |
+| `wallet::Config`, `convert::Config`, `margin::Config` | `new_for_account(&key)`, `with_pools_for_account(&pools, &key)` |
+| `margin::WsConfig` | `new_for_account(&key)`, `with_pools_for_account(&pools, &key)` |
+| `spot::fix::AccountBudgets` | `new_for_account(environment, &key)`, `with_pools_for_account(environment, &pools, &key)` |
+
+Each pool keeps its own owner per key: a key shared by a Spot and a USDⓈ-M client
+names one account in each pool, not one owner across pools. `budgets` still
+replaces both scopes with an explicit owner.
+
+```rust
+use binance_client::core_trading::{coinm, usdm};
+use binance_client::{AccountKey, Error};
+
+let account = AccountKey::new("main-account");
+let um = usdm::Config::new_for_account(usdm::Environment::Production, &account)?;
+let cm = coinm::Config::new_for_account(coinm::Environment::Production, &account)?;
+# Ok::<(), Error>(())
+```
+
+A Spot FIX session joins the same account through its `AccountBudgets`. A scope
+drawn for a key counts its orders against the Spot owner that `spot::Config` of
+that key, registry and environment shares, so REST, WebSocket API and FIX orders
+draw on one count, and order limits a FIX `LimitResponse` reports hold the key's
+REST and WebSocket API clients too. It keeps the Spot pool's IP state. Every scope
+drawn for the key shares one set of FIX connection limits, which Binance
+[counts per account](https://github.com/binance/binance-spot-api-docs/blob/master/fix-api.md#connection-limits)
+for FIX and FIX SBE alike. `AccountBudgets::new` still takes an explicit owner.
+
+```rust
+use binance_client::core_trading::spot::{self, fix::AccountBudgets};
+use binance_client::{AccountKey, Error};
+
+let account = AccountKey::new("main-account");
+let rest = spot::Config::new_for_account(spot::Environment::Production, &account)?;
+let fix = AccountBudgets::new_for_account(spot::Environment::Production, &account)?;
+# Ok::<(), Error>(())
+```
 
 `Config::budgets` replaces the drawn pool with an explicit owner, isolating the
 client from every pool. `Config::with_pools` draws from a registry the caller builds
@@ -284,8 +432,8 @@ injected clock:
 
 | Field | Meaning |
 | --- | --- |
-| `request_weight` | `REQUEST_WEIGHT` per minute on the REST window; on the Spot, Options and SAPI pools it counts REST and WebSocket API weight together |
-| `ws_request_weight` | The WebSocket API's own `REQUEST_WEIGHT` minute window, where the pool counts one apart from REST (the futures pool); `None` on pools that count both transports together, whose `request_weight` already includes it |
+| `request_weight` | `REQUEST_WEIGHT` per minute. Spot and Options count REST and WebSocket API weight here together; the futures pool counts REST weight and COIN-M WebSocket API weight, not USDⓈ-M WebSocket API weight ([Futures WebSocket API weight](#futures-websocket-api-weight)) |
+| `ws_request_weight` | The USDⓈ-M WebSocket API's own minute window, where the pool counts one apart from REST (the futures pool, and explicit `BudgetLimits::usdm()` owners); `None` on pools that count both transports together, whose `request_weight` already includes it |
 | `raw_requests` | `RAW_REQUESTS` per five minutes, where the pool counts them (Spot) |
 | `key` | The pool read, as `pool_key()` names it; `None` for an explicit owner |
 | `limit`, `source` | The latest stated limit (`LimitSource::Stated`), or the documented baseline until a client of the pool reads exchange information or a WebSocket reply states one (`LimitSource::Documented`) |
@@ -323,6 +471,35 @@ USDⓈ-M `testOrder` quota weights; an authorized demo probe
 ([verification #4](https://github.com/SharurTrading/binance-rs/issues/4)) found it charges
 no IP weight and one slot on each order limit, which the client charges. That validation
 endpoint does not submit to the matching engine.
+
+### Releasing a ban without timing
+
+Binance documents a `418` ban as lasting
+["from 2 minutes to 3 days"](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#http-418)
+and gives no other signal that it has ended. When the reply carries no usable
+`Retry-After`, the pool has no expiry to wait for, so every send on it is refused as
+`Error::CooldownTimingUnknown` and no reply can clear that. The client invents no
+expiry; the caller decides when to try again and says so:
+
+| Call | Reaches |
+| --- | --- |
+| `release_unknown_ban()` on a Spot, USDⓈ-M, COIN-M, Options, Wallet, Convert or Margin `Config` or `RestClient` | The pool that configuration or client draws on |
+| `Budgets::release_unknown_ban()` | An explicit owner |
+
+It clears only the unknown-timing refusal, for every client of the pool at once. A
+cooldown with a known `Retry-After` still holds until it expires. The release asserts
+nothing to the venue: a ban that has not ended answers the next send with `418` again,
+and the pool refuses again.
+
+```rust
+use binance_client::core_trading::spot;
+use binance_client::Error;
+
+let config = spot::Config::new(spot::Environment::Production)?;
+// The caller has decided the ban is over, for example after waiting out three days.
+config.release_unknown_ban()?;
+# Ok::<(), Error>(())
+```
 
 ## Development and verification
 

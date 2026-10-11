@@ -44,18 +44,18 @@ pub struct WindowUsage {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct PoolUsage {
-    /// `REQUEST_WEIGHT` per minute on the REST IP window. On a pool that counts
-    /// REST and WebSocket API weight together (Spot, Options, SAPI) it counts
-    /// both; the futures pool counts only REST here and reports the WebSocket
-    /// API window separately.
+    /// REST `REQUEST_WEIGHT` per minute. Spot and Options count WebSocket API
+    /// weight here too; the futures pool counts COIN-M WebSocket API weight here,
+    /// while USDⓈ-M WebSocket API weight has a counter of its own, reported as
+    /// [`Self::ws_request_weight`].
     pub request_weight: WindowUsage,
     /// `RAW_REQUESTS` per five minutes, where the pool counts them (Spot).
     pub raw_requests: Option<WindowUsage>,
-    /// The WebSocket API's own `REQUEST_WEIGHT` minute window, where the pool
-    /// counts one apart from REST weight (the futures pool, and explicit
-    /// owners built from `BudgetLimits::usdm` or `coinm`); `None` where the
-    /// pool counts REST and WebSocket API weight together, in which
-    /// `request_weight` already includes it.
+    /// The USDⓈ-M WebSocket API's own `REQUEST_WEIGHT` minute window, where the
+    /// pool counts one apart from REST weight (the futures pool, and explicit
+    /// owners built from `BudgetLimits::usdm`); `None` where the pool counts
+    /// WebSocket API weight together with REST, in which `request_weight`
+    /// already includes it.
     pub ws_request_weight: Option<WindowUsage>,
     /// The venue pool read; `None` for an explicit [`Budgets`] owner.
     pub key: Option<PoolKey>,

@@ -54,6 +54,7 @@ scope before reading the body. The general-info says SAPI rate violations return
 escalation. An unexpected `418` still conservatively applies its ban evidence
 across endpoint and UID owners sharing that IP. Missing/malformed ban retry timing refuses subsequent sends
 with `CooldownTimingUnknown`; no retry delay or restored authority is fabricated.
+The caller releases it with `release_unknown_ban`.
 No Spot/Futures aggregate budget is borrowed.
 Clients start no tasks or hidden runtime. Production SAPI uses HTTPS, explicit
 credentials/proxies and caller deadlines; dependency retries are disabled.

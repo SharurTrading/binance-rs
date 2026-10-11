@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-use crate::{Budgets, Clock, Credentials, Error, WeightPools};
+use crate::{AccountKey, Budgets, Clock, Credentials, Error, WeightPools};
 use std::{sync::Arc, time::Duration};
 /// Margin production REST configuration with explicit native account order authority.
 /// Reads need no order quota configuration. Placements refuse until `order_limits`
@@ -30,6 +30,32 @@ impl Config {
             inner: crate::core::sapi::Config::with_pools(pools)?,
         })
     }
+    /// Configure the production SAPI route like [`Config::new`], with the account
+    /// owner the process's registry keeps for `account` in the SAPI pool. Every
+    /// Margin, Wallet and Convert configuration given an equal key shares its native
+    /// order windows and UID weight, so order windows that [`Config::order_limits`]
+    /// installs on one hold for all of them.
+    ///
+    /// # Errors
+    /// Returns endpoint or budget configuration failures.
+    pub fn new_for_account(account: &AccountKey) -> Result<Self, Error> {
+        Ok(Self {
+            inner: crate::core::sapi::Config::new_for_account(account)?,
+        })
+    }
+    /// Configure like [`Config::new_for_account`], drawing both the SAPI IP scopes
+    /// and the keyed account owner from `pools` instead of the process's registry.
+    ///
+    /// # Errors
+    /// Returns endpoint or shared-pool configuration failures.
+    pub fn with_pools_for_account(
+        pools: &WeightPools,
+        account: &AccountKey,
+    ) -> Result<Self, Error> {
+        Ok(Self {
+            inner: crate::core::sapi::Config::with_pools_for_account(pools, account)?,
+        })
+    }
     /// Attach caller-acquired signing credentials.
     #[must_use]
     pub fn credentials(mut self, value: Credentials) -> Self {
@@ -37,6 +63,10 @@ impl Config {
         self
     }
     /// Inject a millisecond clock for signing and native quotas.
+    ///
+    /// Clients sharing one [`WeightPools`](crate::WeightPools) registry must share one
+    /// clock (the same `Arc<dyn Clock>`, or wall time for all): each charges the pool's
+    /// fixed, aligned windows at the instant its own clock reports.
     #[must_use]
     pub fn clock(mut self, value: Arc<dyn Clock>) -> Self {
         self.inner = self.inner.clock(value);
@@ -47,6 +77,14 @@ impl Config {
     #[must_use]
     pub fn pool_key(&self) -> Option<crate::PoolKey> {
         self.inner.pool_key()
+    }
+    /// Clear an IP ban the venue gave no timing for, on the SAPI pool this
+    /// configuration's clients draw on; see [`crate::Budgets::release_unknown_ban`].
+    ///
+    /// # Errors
+    /// Returns a configuration error if the pool's lock is poisoned.
+    pub fn release_unknown_ban(&self) -> Result<(), Error> {
+        self.inner.release_unknown_ban()
     }
     /// Share the explicit IP and account owners with all clients in those scopes.
     /// Configure order evidence after selecting this owner.

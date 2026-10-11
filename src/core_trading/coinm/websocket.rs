@@ -45,14 +45,10 @@ impl WsClient {
             config.budgets,
             config.timeout,
             crate::core::socket::SocketPolicy {
-                // The handshake's documented 5 weight counts against the REST
-                // IP window this venue's WebSocket API shares, not a separate
-                // WebSocket window (COIN-M WebSocket API general info).
                 handshake: crate::core::Cost {
-                    weight: 5,
+                    ws_weight: 5,
                     ..crate::core::Cost::default()
                 },
-                separate_ws_weight: false,
                 // The futures WebSocket API documents a 3-minute server ping
                 // cadence but no per-second client-message figure for this
                 // socket family; 5 is the conservative ceiling of the
@@ -195,10 +191,8 @@ impl WsClient {
             .call(
                 op,
                 std::collections::BTreeMap::new(),
-                // Session requests charge the REST IP window this venue's
-                // WebSocket API shares, like every COIN-M WebSocket cost.
                 crate::core::Cost {
-                    weight: 2,
+                    ws_weight: 2,
                     ..Default::default()
                 },
                 id,

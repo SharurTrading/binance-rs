@@ -51,6 +51,14 @@ impl RestClient {
     pub fn pool_usage(&self) -> Result<crate::PoolUsage, crate::Error> {
         self.inner.pool_usage()
     }
+    /// Clear an IP ban the venue gave no timing for, on the pool this client draws on;
+    /// see [`Config::release_unknown_ban`].
+    ///
+    /// # Errors
+    /// Returns a configuration error if the pool's lock is poisoned.
+    pub fn release_unknown_ban(&self) -> Result<(), crate::Error> {
+        self.inner.release_unknown_ban()
+    }
     /// The venue pool this client draws on; see [`Config::pool_key`].
     #[must_use]
     pub fn pool_key(&self) -> Option<crate::PoolKey> {

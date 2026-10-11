@@ -50,6 +50,10 @@ impl MarketConfig {
         self
     }
     /// Inject the caller's clock for venue budget accounting.
+    ///
+    /// Clients sharing one [`WeightPools`](crate::WeightPools) registry must share one
+    /// clock (the same `Arc<dyn Clock>`, or wall time for all): each charges the pool's
+    /// fixed, aligned windows at the instant its own clock reports.
     #[must_use]
     pub fn clock(mut self, clock: Arc<dyn Clock>) -> Self {
         self.0 = self.0.clock(clock);
@@ -190,7 +194,6 @@ impl MarketStreams {
                     connections: 1,
                     ..Default::default()
                 },
-                separate_ws_weight: false,
                 // Documented SBE stream connection duty cycle: client
                 // PING/PONG/JSON frames count against a rate limit of
                 // "5 requests per second" (Spot SBE Market Data Streams,

@@ -31,11 +31,26 @@ pub(crate) fn cost(
         "getDownloadIdForFuturesTransactionHistory" => 6,
         _ => 0,
     };
-    // COIN-M's WebSocket API counts against the REST IP weight window, not a
-    // separate one of its own
-    // (<https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-api-general-info>),
-    // so its costs keep charging `weight` like any REST request and only the
-    // USDⓈ-M side of the futures pool charges the separate WebSocket window.
+    if op.path.starts_with("/dapi/") {
+        // Whether these count against the USDⓈ-M WebSocket API limit, as USDⓈ-M's
+        // REST order requests do, is unstated; they are charged there too.
+        if matches!(
+            op.name,
+            "newOrder"
+                | "newAlgoOrder"
+                | "modifyOrder"
+                | "cancelOrder"
+                | "cancelAlgoOrder"
+                | "placeMultipleOrders"
+                | "modifyMultipleOrders"
+                | "cancelMultipleOrders"
+        ) {
+            c.ws_weight = c.weight;
+        }
+    } else if !op.path.starts_with("/futures/") {
+        c.ws_weight = c.weight;
+        c.weight = 0;
+    }
     Ok(c)
 }
 

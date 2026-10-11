@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 use crate::core::{PoolEnvironment, VenuePool};
-use crate::{Budgets, Clock, Credentials, Error, SystemClock, WeightPools};
+use crate::{AccountKey, Budgets, Clock, Credentials, Error, SystemClock, WeightPools};
 use std::{sync::Arc, time::Duration};
 
 /// Explicit endpoint environments; no silent production fallback.
@@ -41,7 +41,8 @@ impl Config {
     ///
     /// The IP budget is the process's pool for this venue pool and environment,
     /// shared with every other client drawn from it; the account owner is this
-    /// configuration's own. [`Config::budgets`] replaces both.
+    /// configuration's own, unless [`Config::new_for_account`] names a shared one.
+    /// [`Config::budgets`] replaces both.
     ///
     /// # Errors
     /// Returns a configuration error if an endpoint or venue budget is invalid.
@@ -54,6 +55,35 @@ impl Config {
     /// # Errors
     /// Returns a configuration error if an endpoint or venue budget is invalid.
     pub fn with_pools(environment: Environment, pools: &WeightPools) -> Result<Self, Error> {
+        Self::drawn(environment, pools, None)
+    }
+    /// Select endpoints like [`Config::new`], with the account owner the process's
+    /// registry keeps for `account` in this venue pool and environment: every
+    /// configuration given an equal key shares its order counters and other
+    /// account limits, while the IP budget stays the pool's.
+    ///
+    /// # Errors
+    /// Returns a configuration error if an endpoint or venue budget is invalid.
+    pub fn new_for_account(environment: Environment, account: &AccountKey) -> Result<Self, Error> {
+        Self::with_pools_for_account(environment, WeightPools::process(), account)
+    }
+    /// Select endpoints like [`Config::new_for_account`], drawing both the IP budget
+    /// and the keyed account owner from `pools` instead of the process's registry.
+    ///
+    /// # Errors
+    /// Returns a configuration error if an endpoint or venue budget is invalid.
+    pub fn with_pools_for_account(
+        environment: Environment,
+        pools: &WeightPools,
+        account: &AccountKey,
+    ) -> Result<Self, Error> {
+        Self::drawn(environment, pools, Some(account))
+    }
+    fn drawn(
+        environment: Environment,
+        pools: &WeightPools,
+        account: Option<&AccountKey>,
+    ) -> Result<Self, Error> {
         let (rest, websocket, streams, pool) = match environment {
             Environment::Demo => (
                 "https://demo-fapi.binance.com",
@@ -74,7 +104,7 @@ impl Config {
             streams: crate::core::validate_url(streams, true)?,
             credentials: None,
             clock: Arc::new(SystemClock),
-            budgets: pools.draw(VenuePool::Futures, pool)?,
+            budgets: pools.draw(VenuePool::Futures, pool, account)?,
             timeout: Duration::from_secs(10),
             proxy: None,
         })
@@ -86,6 +116,10 @@ impl Config {
         self
     }
     /// Inject time for signing and venue budget accounting.
+    ///
+    /// Clients sharing one [`WeightPools`](crate::WeightPools) registry must share one
+    /// clock (the same `Arc<dyn Clock>`, or wall time for all): each charges the pool's
+    /// fixed, aligned windows at the instant its own clock reports.
     #[must_use]
     pub fn clock(mut self, clock: Arc<dyn Clock>) -> Self {
         self.clock = clock;
@@ -100,6 +134,15 @@ impl Config {
     /// poisoned.
     pub fn pool_usage(&self) -> Result<crate::PoolUsage, Error> {
         self.budgets.usage(self.clock.now_millis()?)
+    }
+    /// Clear an IP ban the venue gave no timing for, on the pool this configuration's
+    /// clients draw on. Every client of the pool is admitted again; a known
+    /// `Retry-After` cooldown still holds. See [`Budgets::release_unknown_ban`].
+    ///
+    /// # Errors
+    /// Returns a configuration error if the pool's lock is poisoned.
+    pub fn release_unknown_ban(&self) -> Result<(), Error> {
+        self.budgets.release_unknown_ban()
     }
     /// The venue pool this configuration's clients draw on, to group clients that
     /// count against one venue limit; `None` once [`Config::budgets`] replaces it

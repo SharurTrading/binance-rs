@@ -347,8 +347,13 @@ pub struct ContinuousContractKlineCandlestickStreamsEventK {
     )]
     pub o: Option<Decimal>,
     /// Exact `c` wire field.
-    #[serde(rename = "c", default, skip_serializing_if = "Option::is_none")]
-    pub c: Option<String>,
+    #[serde(
+        rename = "c",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub c: Option<Decimal>,
     /// Exact `h` wire field.
     #[serde(
         rename = "h",
@@ -584,8 +589,13 @@ pub struct IndexKlineCandlestickStreamsEventK {
     )]
     pub o: Option<Decimal>,
     /// Exact `c` wire field.
-    #[serde(rename = "c", default, skip_serializing_if = "Option::is_none")]
-    pub c: Option<String>,
+    #[serde(
+        rename = "c",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub c: Option<Decimal>,
     /// Exact `h` wire field.
     #[serde(
         rename = "h",
@@ -879,8 +889,13 @@ pub struct KlineCandlestickStreamsEventK {
     )]
     pub o: Option<Decimal>,
     /// Exact `c` wire field.
-    #[serde(rename = "c", default, skip_serializing_if = "Option::is_none")]
-    pub c: Option<String>,
+    #[serde(
+        rename = "c",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub c: Option<Decimal>,
     /// Exact `h` wire field.
     #[serde(
         rename = "h",
@@ -1088,8 +1103,13 @@ pub struct MarkPriceKlineCandlestickStreamsEventK {
     )]
     pub o: Option<Decimal>,
     /// Exact `c` wire field.
-    #[serde(rename = "c", default, skip_serializing_if = "Option::is_none")]
-    pub c: Option<String>,
+    #[serde(
+        rename = "c",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub c: Option<Decimal>,
     /// Exact `h` wire field.
     #[serde(
         rename = "h",

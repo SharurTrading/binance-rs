@@ -72,9 +72,6 @@ impl WsClient {
                     connections: 1,
                     ..Default::default()
                 },
-                // Spot's WebSocket API counts the REST IP weight window its
-                // pool shares, so its reply evidence charges that window.
-                separate_ws_weight: false,
                 // Spot WebSocket API sockets share the documented API-socket
                 // client-message budget: "The WebSocket server will send a
                 // `ping frame` every 20 seconds" and client frames stay within

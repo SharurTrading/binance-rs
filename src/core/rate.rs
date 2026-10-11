@@ -3,13 +3,14 @@
 
 use super::{Error, RateEvidence};
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, VecDeque},
     sync::{Arc, Mutex, OnceLock},
     time::Duration,
 };
+use tokio::time::Instant;
 
 /// Venue-sourced initial rate limits; stated exchange information limits replace the
-/// minute weight and raw-request figures.
+/// minute weight, raw-request and account order figures.
 #[derive(Clone, Debug)]
 #[non_exhaustive]
 pub struct BudgetLimits {
@@ -27,13 +28,15 @@ pub struct BudgetLimits {
     pub raw_requests_per_five_minutes: Option<u64>,
     /// Optional WebSocket connection-attempt limit per five minutes.
     pub connections_per_five_minutes: Option<u64>,
-    /// Whether REST and WebSocket request weight share one IP counter.
+    /// Whether REST and WebSocket API request weight share one IP counter. When
+    /// they do not, WebSocket API weight has a counter of its own; a client whose
+    /// product counts it on the REST counter (COIN-M) charges REST weight instead.
     pub shared_request_weight: bool,
 }
 impl BudgetLimits {
-    /// Binance's documented production USDⓈ-M limits (conservative schema baseline).
-    /// The WebSocket API minute weight window is its own, not shared with REST
-    /// (<https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-api-general-info>).
+    /// Binance's documented production USDⓈ-M limits (conservative schema baseline),
+    /// with the WebSocket API weight counter apart from REST weight. The futures pool
+    /// every USDⓈ-M and COIN-M `Config::new` draws on starts here.
     #[must_use]
     pub fn usdm() -> Self {
         Self {
@@ -47,20 +50,19 @@ impl BudgetLimits {
             shared_request_weight: false,
         }
     }
-    /// COIN-M's current shared UM/CM limits after the June 2026 integration; the
-    /// futures pool every USDⓈ-M and COIN-M `Config::new` draws on starts here.
-    /// REST weight is the UM/CM-shared window of the integration notice, while
-    /// the USDⓈ-M WebSocket API keeps its own minute window; COIN-M's WebSocket
-    /// API counts against REST
-    /// (<https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-api-general-info>),
-    /// so only USDⓈ-M WebSocket API traffic charges the separate window.
+    /// COIN-M's current shared UM/CM limits after the June 2026 integration, with
+    /// WebSocket API weight counted on the REST counter.
     #[must_use]
     pub fn coinm() -> Self {
-        Self::usdm()
+        Self {
+            shared_request_weight: true,
+            ..Self::usdm()
+        }
     }
     /// Options' native minute limits, documented in its public endpoint definitions:
     /// <https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition>.
-    /// No ten-second order, daily order, raw-request or connection ceiling is stated.
+    /// No ten-second order, daily order, raw-request or connection ceiling is documented;
+    /// an exchange information statement replaces or adds each window once read.
     #[must_use]
     pub fn options() -> Self {
         Self {
@@ -76,6 +78,8 @@ impl BudgetLimits {
     }
     /// Spot's documented baseline; replace account limits with exchange evidence.
     /// Sources: Spot WebSocket rate limits and the March 2026 `RAW_REQUESTS` update.
+    /// The order figures are the documented examples (50 per ten seconds, 160,000 a
+    /// day); an exchange information statement replaces them once read.
     #[must_use]
     pub fn spot() -> Self {
         Self {
@@ -157,6 +161,11 @@ pub(super) struct State {
     // The latest limits the venue stated for this pool; the baseline stands until then.
     stated_weight_per_minute: Option<u64>,
     stated_raw_requests_per_five_minutes: Option<u64>,
+    // Per-account order limits, held with the IP owner so every account owner of the
+    // pool counts against the venue's latest figure.
+    stated_orders_per_ten_seconds: Option<u64>,
+    stated_orders_per_minute: Option<u64>,
+    stated_orders_per_day: Option<u64>,
 }
 impl State {
     /// The count of `name` in the window of `window` milliseconds holding `now`.
@@ -179,6 +188,16 @@ impl State {
     }
 }
 
+/// FIX connection attempts one IP scope has admitted, per role window. Binance
+/// checks the Spot FIX connection limits per account and per IP address
+/// independently, and FIX shares them with FIX SBE
+/// (<https://github.com/binance/binance-spot-api-docs/blob/master/fix-api.md#connection-limits>,
+/// 2025-04-21 changelog notice).
+#[derive(Default)]
+struct FixAttempts {
+    windows: BTreeMap<u8, VecDeque<Instant>>,
+}
+
 /// Shared venue budgets. Clones share both IP and account evidence.
 ///
 /// Keep one IP owner per venue budget scope and derive account owners with
@@ -187,9 +206,12 @@ impl State {
 pub struct Budgets {
     pub(super) ip: Arc<Mutex<State>>,
     ws_ip: Arc<Mutex<State>>,
+    fix_ip: Arc<Mutex<FixAttempts>>,
     pub(super) account: Arc<Mutex<State>>,
     limits: Arc<BudgetLimits>,
     key: Option<PoolKey>,
+    // This client's WebSocket API weight and evidence belong to the REST counter.
+    ws_on_rest: bool,
 }
 impl std::fmt::Debug for Budgets {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -216,7 +238,9 @@ impl Budgets {
         Ok(Self {
             ip: Arc::default(),
             ws_ip: Arc::default(),
+            fix_ip: Arc::default(),
             account: Arc::default(),
+            ws_on_rest: limits.shared_request_weight,
             limits: Arc::new(limits),
             key: None,
         })
@@ -228,17 +252,27 @@ impl Budgets {
         Self {
             ip: self.ip.clone(),
             ws_ip: self.ws_ip.clone(),
+            fix_ip: self.fix_ip.clone(),
             account: Arc::default(),
             limits: self.limits.clone(),
             key: self.key,
+            ws_on_rest: self.ws_on_rest,
         }
+    }
+    /// This owner for a client whose WebSocket API weight the venue counts on the
+    /// REST weight counter: that weight, its refunds and its `rateLimits` evidence
+    /// go to REST weight. Where the pool also keeps a WebSocket API counter, that
+    /// counter is still charged.
+    pub(crate) fn websocket_weight_on_rest(mut self) -> Self {
+        self.ws_on_rest = true;
+        self
     }
     /// The venue pool this owner was drawn from; `None` for an explicit owner.
     pub(crate) fn pool_key(&self) -> Option<PoolKey> {
         self.key
     }
     fn ip_cost(&self, ip: &State, c: Cost) -> Vec<(&'static str, u64, u64, u64)> {
-        let weight = if self.limits.shared_request_weight {
+        let weight = if self.ws_on_rest {
             c.request_weight()
         } else {
             c.weight
@@ -291,17 +325,19 @@ impl Budgets {
             (
                 "orders10",
                 10_000,
-                self.limits.orders_per_ten_seconds,
+                ip.stated_orders_per_ten_seconds
+                    .unwrap_or(self.limits.orders_per_ten_seconds),
                 c.orders10,
             ),
             (
                 "orders60",
                 60_000,
-                self.limits.orders_per_minute,
+                ip.stated_orders_per_minute
+                    .unwrap_or(self.limits.orders_per_minute),
                 c.orders60,
             ),
         ];
-        if let Some(limit) = self.limits.orders_per_day {
+        if let Some(limit) = ip.stated_orders_per_day.or(self.limits.orders_per_day) {
             account_cost.push(("ordersDay", 86_400_000, limit, c.orders_day));
         }
         if c.quote {
@@ -356,6 +392,45 @@ impl Budgets {
         }
         Ok(())
     }
+    /// Count one FIX connection attempt against the IP window shared by every
+    /// FIX scope of this owner's pool, per role. The venue checks this window
+    /// independently of the account's own; a refused attempt charges nothing
+    /// here and the account windows stay the caller's.
+    ///
+    /// Lock order: callers hold their account `State` and then this `fix_ip`
+    /// window; nothing acquires an account `State` while holding `fix_ip`.
+    ///
+    /// # Errors
+    /// Refuses with [`Error::Admission`] and the window's retry delay once the
+    /// documented IP attempt count is reached.
+    pub(crate) fn admit_fix_connection(
+        &self,
+        role: u8,
+        attempts: usize,
+        interval: Duration,
+        now: Instant,
+    ) -> Result<(), Error> {
+        let mut ip = self
+            .fix_ip
+            .lock()
+            .map_err(|_| Error::Configuration("FIX IP budget poisoned"))?;
+        let recent = ip.windows.entry(role).or_default();
+        while recent
+            .front()
+            .is_some_and(|at| now.duration_since(*at) >= interval)
+        {
+            recent.pop_front();
+        }
+        if recent.len() >= attempts {
+            return Err(Error::Admission {
+                retry_after: recent.front().map_or(interval, |at| {
+                    interval.saturating_sub(now.duration_since(*at))
+                }),
+            });
+        }
+        recent.push_back(now);
+        Ok(())
+    }
     // FIX LimitResponse uses explicit interval/count/max, independently of HTTP headers.
     // Hold a counter floor for a full interval after observation: no reset origin is guessed.
     pub(crate) fn observe_order_window(
@@ -390,9 +465,9 @@ impl Budgets {
         &self,
         amount: u64,
         now: u64,
-        separate_ws_weight: bool,
+        websocket: bool,
     ) -> Result<(), Error> {
-        let owner = if separate_ws_weight && !self.limits.shared_request_weight {
+        let owner = if websocket && !self.ws_on_rest {
             &self.ws_ip
         } else {
             &self.ip
@@ -413,6 +488,27 @@ impl Budgets {
         }
         Ok(())
     }
+    /// Clear an IP cooldown whose timing the venue never gave, for every owner of this
+    /// IP pool.
+    ///
+    /// A `418` ban without a usable `Retry-After`, or retry timing this client cannot
+    /// read, leaves the pool refusing every send with [`Error::CooldownTimingUnknown`]:
+    /// Binance documents such a ban as lasting from two minutes to three days and offers
+    /// no signal that one has ended, so no reply can clear it. The caller decides when
+    /// the ban has ended and calls this; sends are admitted again, and the venue answers
+    /// afresh. A cooldown with a known `Retry-After` is the venue's own timing and holds
+    /// until it expires. Releasing a pool with nothing to clear changes nothing, and
+    /// releasing one too early makes the venue answer with a ban again.
+    ///
+    /// # Errors
+    /// Returns a configuration error if the pool's lock is poisoned.
+    pub fn release_unknown_ban(&self) -> Result<(), Error> {
+        self.ip
+            .lock()
+            .map_err(|_| Error::Configuration("IP budget poisoned"))?
+            .cooldown_timing_unknown = false;
+        Ok(())
+    }
     pub(crate) fn observe_ban(&self, status: u16, evidence: &RateEvidence) -> Result<(), Error> {
         // A ban, or any venue retry timing this client cannot use, leaves the owner
         // without an expiry. Refuse every send rather than invent one.
@@ -424,18 +520,7 @@ impl Budgets {
         }
         Ok(())
     }
-    /// Apply reply rate evidence. `separate_ws_weight` names the window the
-    /// venue counted the request against: a WebSocket API kept apart from REST
-    /// charges its own window, and any other socket charges the REST one.
-    ///
-    /// # Errors
-    /// Returns a configuration error if a budget lock is poisoned.
-    pub(crate) fn observe(
-        &self,
-        e: &RateEvidence,
-        now: u64,
-        separate_ws_weight: bool,
-    ) -> Result<(), Error> {
+    pub(crate) fn observe(&self, e: &RateEvidence, now: u64, websocket: bool) -> Result<(), Error> {
         let mut ip = self
             .ip
             .lock()
@@ -459,7 +544,7 @@ impl Budgets {
         for (name, count) in &e.counters {
             let (state, key, window) = match name.as_str() {
                 "x-mbx-used-weight-1m" => (
-                    if separate_ws_weight && !self.limits.shared_request_weight {
+                    if websocket && !self.ws_on_rest {
                         &mut ws_ip
                     } else {
                         &mut ip
@@ -488,7 +573,7 @@ impl Budgets {
             // A WebSocket reply's `rateLimits` states its window's limit alongside
             // the count. Like exchange information, two statements leave the
             // stricter one standing, and the same REST/WS routing applies.
-            let state = if separate_ws_weight && !self.limits.shared_request_weight {
+            let state = if websocket && !self.ws_on_rest {
                 &mut ws_ip
             } else {
                 &mut ip
@@ -513,9 +598,11 @@ pub(crate) struct StatedLimit<'a> {
 }
 
 impl Budgets {
-    /// Adopt the minute request weight and five-minute raw-request limits a venue
-    /// reply states, for every client of this IP owner. `ORDERS` entries are account
-    /// limits and other windows are not counted here; neither is adopted.
+    /// Adopt the minute request weight, five-minute raw-request and ten-second,
+    /// minute and daily `ORDERS` limits a venue reply states, for every client of this
+    /// IP owner. An `ORDERS` figure is the venue's per-account limit: every account
+    /// owner of the pool, keyed or not, counts its own orders against it. Other
+    /// windows are not counted here and are not adopted.
     ///
     /// # Errors
     /// A counted window stated without a positive limit is refused as a gap and
@@ -526,10 +613,16 @@ impl Budgets {
     ) -> Result<(), Error> {
         let mut weight = None;
         let mut raw = None;
+        let mut orders10 = None;
+        let mut orders60 = None;
+        let mut orders_day = None;
         for entry in stated {
             let slot = match (entry.kind, entry.interval, entry.interval_num) {
                 (Some("REQUEST_WEIGHT"), Some("MINUTE"), Some(1)) => &mut weight,
                 (Some("RAW_REQUESTS"), Some("MINUTE"), Some(5)) => &mut raw,
+                (Some("ORDERS"), Some("SECOND"), Some(10)) => &mut orders10,
+                (Some("ORDERS"), Some("MINUTE"), Some(1)) => &mut orders60,
+                (Some("ORDERS"), Some("DAY"), Some(1)) => &mut orders_day,
                 _ => continue,
             };
             let limit = entry
@@ -540,15 +633,21 @@ impl Budgets {
             // Two statements of one window: the stricter binds.
             *slot = Some(slot.map_or(limit, |current: u64| current.min(limit)));
         }
-        let mut ip = self
+        let mut guard = self
             .ip
             .lock()
             .map_err(|_| Error::Configuration("IP budget poisoned"))?;
-        if weight.is_some() {
-            ip.stated_weight_per_minute = weight;
-        }
-        if raw.is_some() {
-            ip.stated_raw_requests_per_five_minutes = raw;
+        let ip = &mut *guard;
+        for (statement, current) in [
+            (weight, &mut ip.stated_weight_per_minute),
+            (raw, &mut ip.stated_raw_requests_per_five_minutes),
+            (orders10, &mut ip.stated_orders_per_ten_seconds),
+            (orders60, &mut ip.stated_orders_per_minute),
+            (orders_day, &mut ip.stated_orders_per_day),
+        ] {
+            if statement.is_some() {
+                *current = statement;
+            }
         }
         Ok(())
     }
@@ -564,13 +663,9 @@ pub enum VenuePool {
     /// SAPI's independent endpoint IP scopes, shared by Wallet, Convert and Margin
     /// REST (<https://developers.binance.com/en/docs/products/wallet/general-info>).
     Sapi,
-    /// USDⓈ-M and COIN-M, which share one REST IP weight limit and one
+    /// USDⓈ-M and COIN-M, which share one IP weight limit and one
     /// `X-MBX-USED-WEIGHT-1M` counter
     /// (<https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice>, A.3).
-    /// The USDⓈ-M WebSocket API keeps its own minute weight window
-    /// (<https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-api-general-info>),
-    /// and COIN-M's WebSocket API counts against the REST window
-    /// (<https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-api-general-info>).
     Futures,
     /// Options' EAPI IP limit, independent of Spot, SAPI and Futures
     /// (<https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition>).
@@ -614,9 +709,25 @@ impl PoolKey {
 /// One IP weight pool per venue pool and environment: Spot, Options, USDⓈ-M with
 /// COIN-M together, and SAPI endpoint scopes. `Config::new` draws on the process's registry; a registry built
 /// here is independent of it and of every other.
+///
+/// The registry also keeps one account owner per venue pool, environment and
+/// [`AccountKey`] for configurations drawn with a key; an unkeyed configuration gets
+/// an account owner of its own. A Spot FIX account scope drawn with a key is kept
+/// the same way and is built on that key's Spot account owner.
+///
+/// A registry owns no clock. Clients drawn from one registry must be given one clock:
+/// the same `Arc<dyn Clock>`, or wall time for all. Each client charges the pool's
+/// fixed, aligned venue windows at the instant its own `Config::clock` reports, so
+/// clients with different clocks charge different windows of one pool.
 #[derive(Default)]
 pub struct WeightPools {
-    pools: Mutex<BTreeMap<PoolKey, Budgets>>,
+    pools: Mutex<Registry>,
+}
+#[derive(Default)]
+struct Registry {
+    ip: BTreeMap<PoolKey, Budgets>,
+    accounts: BTreeMap<(PoolKey, AccountKey), Budgets>,
+    fix: BTreeMap<(PoolKey, AccountKey), crate::spot::fix::AccountBudgets>,
 }
 impl std::fmt::Debug for WeightPools {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -633,31 +744,62 @@ impl WeightPools {
         static PROCESS: OnceLock<WeightPools> = OnceLock::new();
         PROCESS.get_or_init(Self::new)
     }
-    /// A budget counting IP traffic against `pool` in `environment`, with its own
-    /// account owner. The pool starts at the venue's documented baseline.
+    /// A budget counting IP traffic against `pool` in `environment`. Its account
+    /// owner is the one this registry keeps for `account` in that pool, or its own
+    /// when no key is given. The pool starts at the venue's documented baseline.
     pub(crate) fn draw(
         &self,
         pool: VenuePool,
         environment: PoolEnvironment,
+        account: Option<&AccountKey>,
     ) -> Result<Budgets, Error> {
-        let mut pools = self
+        let mut registry = self
             .pools
             .lock()
             .map_err(|_| Error::Configuration("weight pools poisoned"))?;
         let key = PoolKey::new(pool, environment);
-        if let Some(owner) = pools.get(&key) {
-            return Ok(owner.for_account());
-        }
-        let mut owner = match pool {
-            VenuePool::Spot => Budgets::new(BudgetLimits::spot())?,
-            VenuePool::Futures => Budgets::new(BudgetLimits::coinm())?,
-            VenuePool::Sapi => Budgets::sapi()?,
-            VenuePool::Options => Budgets::new(BudgetLimits::options())?,
+        let root = if let Some(root) = registry.ip.get(&key) {
+            root.clone()
+        } else {
+            let mut root = match pool {
+                VenuePool::Spot => Budgets::new(BudgetLimits::spot())?,
+                VenuePool::Futures => Budgets::new(BudgetLimits::usdm())?,
+                VenuePool::Sapi => Budgets::sapi()?,
+                VenuePool::Options => Budgets::new(BudgetLimits::options())?,
+            };
+            root.key = Some(key);
+            registry.ip.insert(key, root.clone());
+            root
         };
-        owner.key = Some(key);
-        let drawn = owner.for_account();
-        pools.insert(key, owner);
-        Ok(drawn)
+        let Some(account) = account else {
+            return Ok(root.for_account());
+        };
+        Ok(registry
+            .accounts
+            .entry((key, account.clone()))
+            .or_insert_with(|| root.for_account())
+            .clone())
+    }
+    /// The Spot FIX account scope this registry keeps for `account` in
+    /// `environment`. It is built on the Spot account owner [`Self::draw`] returns
+    /// for that key, so its sessions share order counts with the key's Spot clients
+    /// and the pool's IP state, and every scope drawn for the key shares one set of
+    /// FIX connection limits.
+    pub(crate) fn draw_fix(
+        &self,
+        environment: PoolEnvironment,
+        account: &AccountKey,
+    ) -> Result<crate::spot::fix::AccountBudgets, Error> {
+        let spot = self.draw(VenuePool::Spot, environment, Some(account))?;
+        let mut registry = self
+            .pools
+            .lock()
+            .map_err(|_| Error::Configuration("weight pools poisoned"))?;
+        Ok(registry
+            .fix
+            .entry((PoolKey::new(VenuePool::Spot, environment), account.clone()))
+            .or_insert_with(|| crate::spot::fix::AccountBudgets::new(spot))
+            .clone())
     }
 }
 
@@ -746,7 +888,9 @@ fn monthly_download(
     Ok(Some((key, bucket)))
 }
 
+mod account;
 mod usage;
+pub use account::AccountKey;
 pub use usage::{LimitSource, PoolUsage, WindowUsage};
 
 #[cfg(test)]
@@ -791,6 +935,29 @@ mod tests {
             Err(Error::Admission { .. })
         ));
         budgets.admit(Cost::default(), 1001).unwrap();
+    }
+
+    #[test]
+    fn release_clears_the_unknown_timing_ban_and_keeps_a_known_cooldown() {
+        let budgets = Budgets::new(BudgetLimits::spot()).unwrap();
+        let known = RateEvidence {
+            retry_after: Some(Duration::from_mins(1)),
+            ..RateEvidence::default()
+        };
+        budgets.observe(&known, 1000, false).unwrap();
+        budgets.observe_ban(418, &RateEvidence::default()).unwrap();
+        assert!(matches!(
+            budgets.admit(Cost::default(), 2000),
+            Err(Error::CooldownTimingUnknown)
+        ));
+
+        budgets.for_account().release_unknown_ban().unwrap();
+
+        assert!(matches!(
+            budgets.admit(Cost::default(), 2000),
+            Err(Error::Admission { retry_after }) if retry_after == Duration::from_secs(59)
+        ));
+        budgets.admit(Cost::default(), 61_000).unwrap();
     }
 
     #[test]

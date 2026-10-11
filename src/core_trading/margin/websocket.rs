@@ -9,8 +9,8 @@ use super::{
 use crate::core::socket::{QueueStats, SocketDriver, SocketEvents, SocketPolicy};
 use crate::core::{Cost, Operation, PoolEnvironment, Security, Socket, SocketEvent, VenuePool};
 use crate::{
-    Budgets, Clock, Error, RequestId, Response, SensitiveString, StreamControl, SystemClock,
-    WeightPools,
+    AccountKey, Budgets, Clock, Error, RequestId, Response, SensitiveString, StreamControl,
+    SystemClock, WeightPools,
 };
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, time::Duration};
@@ -44,15 +44,43 @@ impl WsConfig {
     /// # Errors
     /// Returns invalid endpoint or venue-budget configuration errors.
     pub fn with_pools(pools: &WeightPools) -> Result<Self, Error> {
+        Self::drawn(pools, None)
+    }
+    /// Configure production routes like [`WsConfig::new`], with the account owner
+    /// the process's registry keeps for `account` in the Spot production pool, shared
+    /// with every Spot configuration and Margin socket configuration given an equal
+    /// key.
+    ///
+    /// # Errors
+    /// Returns invalid endpoint or venue-budget configuration errors.
+    pub fn new_for_account(account: &AccountKey) -> Result<Self, Error> {
+        Self::with_pools_for_account(WeightPools::process(), account)
+    }
+    /// Configure like [`WsConfig::new_for_account`], drawing both the Spot IP budget
+    /// and the keyed account owner from `pools` instead of the process's registry.
+    ///
+    /// # Errors
+    /// Returns invalid endpoint or venue-budget configuration errors.
+    pub fn with_pools_for_account(
+        pools: &WeightPools,
+        account: &AccountKey,
+    ) -> Result<Self, Error> {
+        Self::drawn(pools, Some(account))
+    }
+    fn drawn(pools: &WeightPools, account: Option<&AccountKey>) -> Result<Self, Error> {
         Ok(Self {
             api: crate::core::validate_url("wss://ws-api.binance.com:443/ws-api/v3", true)?,
             risk: crate::core::validate_url("wss://margin-stream.binance.com", true)?,
             clock: Arc::new(SystemClock),
-            budgets: pools.draw(VenuePool::Spot, PoolEnvironment::Production)?,
+            budgets: pools.draw(VenuePool::Spot, PoolEnvironment::Production, account)?,
             timeout: Duration::from_secs(10),
         })
     }
     /// Use a caller's signing/expiry clock.
+    ///
+    /// Clients sharing one [`WeightPools`](crate::WeightPools) registry must share one
+    /// clock (the same `Arc<dyn Clock>`, or wall time for all): each charges the pool's
+    /// fixed, aligned windows at the instant its own clock reports.
     #[must_use]
     pub fn clock(mut self, value: Arc<dyn Clock>) -> Self {
         self.clock = value;
@@ -216,9 +244,6 @@ impl WsClient {
                     ws_weight: 2,
                     ..Cost::default()
                 },
-                // Margin's WebSocket API draws on the Spot pool, whose weight
-                // window REST and WebSocket API share.
-                separate_ws_weight: false,
                 incoming_limit: 5,
                 time_unit: crate::TimeUnit::Milliseconds,
                 binary_decoder: None,
@@ -460,7 +485,6 @@ impl RiskStream {
                     connections: 1,
                     ..Cost::default()
                 },
-                separate_ws_weight: false,
                 incoming_limit: 5,
                 time_unit: crate::TimeUnit::Milliseconds,
                 binary_decoder: None,

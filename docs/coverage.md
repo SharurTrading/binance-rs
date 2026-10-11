@@ -60,7 +60,8 @@ interval boundaries and cooldown expiry; local fixtures count outbound attempts.
 Additional quotas cover funding, history, hourly/daily conversion, and calendar-month
 downloads. Shared-pool contracts check that clients of one venue pool and environment
 share its IP weight, that Spot and futures and demo and production never share, that a
-stated exchange information limit replaces the baseline, and that venue holds reach
+stated exchange information limit replaces the baseline, that a stated `ORDERS` limit
+binds every account owner of the pool, keyed or not, and that venue holds reach
 every client of the pool while an explicit owner stays isolated. Pool-report
 contracts check, in each market, that `pool_usage()` reports the documented limit
 until exchange information states one and the stated limit after, that its usage
@@ -89,8 +90,15 @@ positions and margin calls retain an absent isolated-wallet field (`iw`) as `Non
 when supplied, it remains an exact decimal, including a reported zero. This follows
 the [official stream schema](https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-streams/1.0.0/schema.yaml),
 which leaves that conditional field optional. The deterministic fixtures exercise
-schema-permitted omission and malformed money through a real loopback socket;
-they do not claim captured live cross-margin events ([#69](https://github.com/SharurTrading/binance-rs/issues/69)). Request
+schema-permitted omission and malformed money through a real loopback socket.
+A dated authorized demo capture additionally replays the recorded cross-margin pushes
+themselves: on 2026-10-11, one-way cross-margin round trips on both the USD-M and
+COIN-M demo environments supplied `iw` as a reported zero on every position update
+rather than omitting the field, with every money value staying exact — including
+each market's `bep` break-even price, balances and margin asset
+([#69](https://github.com/SharurTrading/binance-rs/issues/69),
+`tests/fixtures/*-cross-margin-account-update-2026-10-11.json`; the recorded COIN-M
+frames carry the venue's account-alias field redacted). Request
 builders check protocol constraints; current symbol-dependent filters and market
 state remain caller/venue checks. No complete order-book or atomic account snapshot
 is promised. GTD expiry is rechecked against the injected venue clock before the wire.

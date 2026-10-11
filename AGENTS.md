@@ -78,7 +78,8 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
 - **BN-RATE-01:** Documented venue budgets govern every outbound attempt, including
   retries, subscriptions, and control traffic. Client clones share budgets. Every
   client of a venue pool and environment shares one IP pool in the process unless
-  given its own; sharing an account scope across clients stays explicit. Apply
+  given its own; sharing an account scope across clients stays explicit: give each
+  client the same account key. Apply
   provider cooldown evidence. Admission may refuse with a typed result before
   acceptance. Recheck time-sensitive authority immediately before sending. Queued
   expiration returns an outcome and prevents a late send. Preserve causal order while

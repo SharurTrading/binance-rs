@@ -73,7 +73,14 @@ fn every_interval_budget_admits_its_full_allowance_and_resets_only_at_its_bounda
         ),
     ];
     for (cost, capacity, window) in cases {
-        let budgets = Budgets::new(BudgetLimits::usdm()).unwrap();
+        // A placement counts in both order windows. To exercise the minute
+        // allowance alone, give this synthetic owner no ten-second ceiling.
+        let limits = if cost.orders60 > 0 {
+            BudgetLimits::usdm().orders(u64::MAX, 1200)
+        } else {
+            BudgetLimits::usdm()
+        };
+        let budgets = Budgets::new(limits).unwrap();
         for _ in 0..capacity {
             budgets.admit(cost, 1000).unwrap();
         }
@@ -124,12 +131,11 @@ fn refusal_in_any_scope_consumes_no_capacity_in_other_scopes() {
             ws_weight: 1,
             ..Cost::default()
         },
+        // Account placement windows are one scope; they count the same orders.
         Cost {
             orders10: 1,
-            ..Cost::default()
-        },
-        Cost {
             orders60: 1,
+            orders_day: 1,
             ..Cost::default()
         },
     ];

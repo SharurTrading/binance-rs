@@ -6907,9 +6907,13 @@ impl super::RestClient {
     }
 
     /// [rateLimitOrder](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/account).
+    /// Adopts validated limits and counts for this account owner only.
+    /// The stricter account or exchange-information statement binds.
     ///
     /// # Errors
     /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    /// Unusable limit/count evidence fails with `Outcome::ReadFailed` and retained
+    /// metadata; no limit is changed. WebSocket drivers also emit a gap.
     pub async fn rate_limit_order(
         &self,
         request: &RateLimitOrder,

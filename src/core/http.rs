@@ -83,6 +83,10 @@ impl HttpClient {
     pub(crate) fn pool_usage(&self) -> Result<super::PoolUsage, Error> {
         self.budgets.usage(self.clock.now_millis()?)
     }
+    /// The account order windows at this client's clock.
+    pub(crate) fn account_usage(&self) -> Result<super::AccountUsage, Error> {
+        self.budgets.account_usage(self.clock.now_millis()?)
+    }
     /// Clear the pool's unknown-timing ban; see [`super::Budgets::release_unknown_ban`].
     pub(crate) fn release_unknown_ban(&self) -> Result<(), Error> {
         self.budgets.release_unknown_ban()
@@ -298,6 +302,38 @@ impl HttpClient {
         {
             self.budgets
                 .refund_weight(cost.weight.saturating_sub(success), now, false)?;
+        }
+        self.decode_response(op, status, value, meta, observed_at)
+    }
+
+    /// Account query evidence is validated before changing the owner's limits/counts.
+    fn decode_response<T: DeserializeOwned>(
+        &self,
+        op: Operation,
+        status: u16,
+        value: serde_json::Value,
+        meta: ResponseMeta,
+        observed_at: u64,
+    ) -> Result<Response<T>, Error> {
+        if op.path == "/api/v3/rateLimit/order" && (200..300).contains(&status) {
+            let mut response: Response<T> = decode(op, status, value.clone(), meta)?;
+            let adoption = super::socket::order_query_rates(&value, &mut response.meta.rates)
+                .and_then(|()| {
+                    self.budgets
+                        .adopt_response_limits(None, Some(&value), false)
+                });
+            if adoption.is_err() {
+                response.meta.rates.stated_limits_unusable = true;
+                return Err(Error::Transport {
+                    client_order_ids: response.meta.client_order_ids.clone(),
+                    operation: op.name,
+                    outcome: Outcome::ReadFailed,
+                    meta: Some(Box::new(response.meta)),
+                });
+            }
+            self.budgets
+                .observe(&response.meta.rates, observed_at, false)?;
+            return Ok(response);
         }
         decode(op, status, value, meta)
     }

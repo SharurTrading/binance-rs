@@ -110,7 +110,18 @@ impl WsClient {
                 deadline,
             )
             .await?;
-        crate::core::http::decode(R::OP, meta.status, value, meta)
+        let response: Response<R::Response> =
+            crate::core::http::decode(R::OP, meta.status, value, meta)?;
+        if R::OP.path == "/account.rateLimits.orders" && response.meta.rates.stated_limits_unusable
+        {
+            return Err(Error::Transport {
+                client_order_ids: response.meta.client_order_ids.clone(),
+                operation: R::OP.name,
+                outcome: crate::Outcome::ReadFailed,
+                meta: Some(Box::new(response.meta)),
+            });
+        }
+        Ok(response)
     }
     /// Close promptly, settle unsent work and uncertain sent work, and retire the socket.
     /// Continue draining events, then join the caller-owned driver task.

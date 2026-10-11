@@ -9,8 +9,9 @@ use std::{
 };
 use tokio::time::Instant;
 
-/// Venue-sourced initial rate limits; stated exchange information limits replace the
-/// minute weight, raw-request and account order figures.
+/// Venue-sourced initial rate limits; validated exchange information, API response
+/// and account-query statements replace the fallback. The strictest subsequent
+/// statement of each counted window binds.
 #[derive(Clone, Debug)]
 #[non_exhaustive]
 pub struct BudgetLimits {
@@ -158,11 +159,11 @@ pub(super) struct State {
     pub(super) endpoints: BTreeMap<(&'static str, u64), (u64, u64)>,
     pub(super) endpoint_ip_requests: BTreeMap<&'static str, (u64, u64)>,
     pub(super) endpoint_cooldown: BTreeMap<&'static str, u64>,
-    // The latest limits the venue stated for this pool; the baseline stands until then.
+    // The strictest limits the venue stated for this pool; the baseline stands until then.
     stated_weight_per_minute: Option<u64>,
     stated_raw_requests_per_five_minutes: Option<u64>,
-    // Per-account order limits, held with the IP owner so every account owner of the
-    // pool counts against the venue's latest figure.
+    // The IP state holds common exchange-information order limits. Account
+    // state holds that owner's API response/query limits; the stricter applies.
     stated_orders_per_ten_seconds: Option<u64>,
     stated_orders_per_minute: Option<u64>,
     stated_orders_per_day: Option<u64>,
@@ -321,32 +322,22 @@ impl Budgets {
                 c.ws_weight
             },
         )];
+        let [orders10, orders60, orders_day] = self.order_limits(&ip, &account);
+        let placements = c.orders10.max(c.orders60).max(c.orders_day);
+        // Count placements in every aligned window, including a window whose
+        // ceiling the venue may state later. Product request costs identify the
+        // placement count; they do not determine which stated windows apply.
         let mut account_cost = vec![
-            (
-                "orders10",
-                10_000,
-                ip.stated_orders_per_ten_seconds
-                    .unwrap_or(self.limits.orders_per_ten_seconds),
-                c.orders10,
-            ),
-            (
-                "orders60",
-                60_000,
-                ip.stated_orders_per_minute
-                    .unwrap_or(self.limits.orders_per_minute),
-                c.orders60,
-            ),
+            ("orders10", 10_000, orders10.0, placements),
+            ("orders60", 60_000, orders60.0, placements),
+            ("ordersDay", 86_400_000, orders_day.0, placements),
         ];
-        if let Some(limit) = ip.stated_orders_per_day.or(self.limits.orders_per_day) {
-            account_cost.push(("ordersDay", 86_400_000, limit, c.orders_day));
-        }
         if c.quote {
             account_cost.extend([
                 ("quoteHour", 3_600_000, 360, 1),
                 ("quoteDay", 86_400_000, 500, 1),
             ]);
         }
-        let placements = c.orders10.max(c.orders60).max(c.orders_day);
         order_windows(&mut account, placements, now, false)?;
         let monthly = monthly_download(&account, c.download, now)?;
         for (state, costs) in [
@@ -601,7 +592,8 @@ impl Budgets {
     /// Adopt the minute request weight, five-minute raw-request and ten-second,
     /// minute and daily `ORDERS` limits a venue reply states, for every client of this
     /// IP owner. An `ORDERS` figure is the venue's per-account limit: every account
-    /// owner of the pool, keyed or not, counts its own orders against it. Other
+    /// owner of the pool, keyed or not, counts its own orders against it. The stricter of successive or duplicate
+    /// statements binds. Other
     /// windows are not counted here and are not adopted.
     ///
     /// # Errors
@@ -610,6 +602,15 @@ impl Budgets {
     pub(crate) fn adopt_stated<'a>(
         &self,
         stated: impl IntoIterator<Item = StatedLimit<'a>>,
+    ) -> Result<(), Error> {
+        self.adopt_stated_transport(stated, false, OrderLimitScope::Pool)
+    }
+
+    fn adopt_stated_transport<'a>(
+        &self,
+        stated: impl IntoIterator<Item = StatedLimit<'a>>,
+        websocket: bool,
+        orders_scope: OrderLimitScope,
     ) -> Result<(), Error> {
         let mut weight = None;
         let mut raw = None;
@@ -633,23 +634,95 @@ impl Budgets {
             // Two statements of one window: the stricter binds.
             *slot = Some(slot.map_or(limit, |current: u64| current.min(limit)));
         }
-        let mut guard = self
+        let mut ip = self
             .ip
             .lock()
             .map_err(|_| Error::Configuration("IP budget poisoned"))?;
-        let ip = &mut *guard;
+        let mut ws_ip = self
+            .ws_ip
+            .lock()
+            .map_err(|_| Error::Configuration("WS IP budget poisoned"))?;
+        let mut account = self
+            .account
+            .lock()
+            .map_err(|_| Error::Configuration("account budget poisoned"))?;
+        let weight_owner = if websocket && !self.ws_on_rest {
+            &mut *ws_ip
+        } else {
+            &mut *ip
+        };
+        merge_limit(&mut weight_owner.stated_weight_per_minute, weight);
+        merge_limit(&mut ip.stated_raw_requests_per_five_minutes, raw);
+        let orders_owner = match orders_scope {
+            OrderLimitScope::Pool => &mut *ip,
+            OrderLimitScope::Account => &mut *account,
+        };
         for (statement, current) in [
-            (weight, &mut ip.stated_weight_per_minute),
-            (raw, &mut ip.stated_raw_requests_per_five_minutes),
-            (orders10, &mut ip.stated_orders_per_ten_seconds),
-            (orders60, &mut ip.stated_orders_per_minute),
-            (orders_day, &mut ip.stated_orders_per_day),
+            (orders10, &mut orders_owner.stated_orders_per_ten_seconds),
+            (orders60, &mut orders_owner.stated_orders_per_minute),
+            (orders_day, &mut orders_owner.stated_orders_per_day),
         ] {
-            if statement.is_some() {
-                *current = statement;
-            }
+            merge_limit(current, statement);
         }
         Ok(())
+    }
+}
+
+/// Public exchange information describes common limits; authenticated statements
+/// describe the account owner whose order usage they report.
+#[derive(Clone, Copy)]
+enum OrderLimitScope {
+    Pool,
+    Account,
+}
+
+/// Keep the stricter venue statement; the documented fallback is replaced once.
+fn merge_limit(current: &mut Option<u64>, statement: Option<u64>) {
+    if let Some(stated) = statement {
+        *current = Some(current.map_or(stated, |previous| previous.min(stated)));
+    }
+}
+
+impl Budgets {
+    /// Validate the complete response's counted limits before adopting any.
+    /// Account query counts are handled separately, on the requesting owner only.
+    pub(crate) fn adopt_response_limits(
+        &self,
+        envelope: Option<&serde_json::Value>,
+        account_query: Option<&serde_json::Value>,
+        websocket: bool,
+    ) -> Result<(), Error> {
+        let mut entries = Vec::new();
+        for value in [envelope, account_query].into_iter().flatten() {
+            let array = value
+                .as_array()
+                .ok_or(Error::Gap("rate limits array required"))?;
+            for entry in array {
+                let statement = StatedLimit {
+                    kind: entry
+                        .get("rateLimitType")
+                        .and_then(serde_json::Value::as_str),
+                    interval: entry.get("interval").and_then(serde_json::Value::as_str),
+                    interval_num: entry.get("intervalNum").and_then(serde_json::Value::as_i64),
+                    limit: entry.get("limit").and_then(serde_json::Value::as_i64),
+                };
+                if statement.kind.is_none()
+                    || statement.interval.is_none()
+                    || statement.interval_num.is_none_or(|number| number <= 0)
+                {
+                    return Err(Error::Gap("rate limit window identity required"));
+                }
+                if entry
+                    .get("count")
+                    .and_then(serde_json::Value::as_u64)
+                    .is_none()
+                {
+                    return Err(Error::Gap("rate limit count required"));
+                }
+                entries.push(statement);
+            }
+        }
+        self.adopt_stated_transport(entries, websocket, OrderLimitScope::Account)
     }
 }
 
@@ -891,7 +964,7 @@ fn monthly_download(
 mod account;
 mod usage;
 pub use account::AccountKey;
-pub use usage::{LimitSource, PoolUsage, WindowUsage};
+pub use usage::{AccountUsage, LimitSource, PoolUsage, WindowUsage};
 
 #[cfg(test)]
 mod capacity_tests;

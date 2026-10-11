@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-//! What an IP pool reports of itself: each window's limit and what it has spent.
+//! Pool and account window limits and counts, read without admitting work.
 //!
 //! The report reads the same state admission reads; it neither paces nor admits.
 
@@ -13,15 +13,16 @@ use std::time::Duration;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum LimitSource {
-    /// The venue's documented figure, which stands until a client of the pool
-    /// reads a venue statement of one.
+    /// The venue's documented figure, which stands until an applicable
+    /// venue statement is read.
     Documented,
-    /// The latest venue statement a client of the pool read: an exchange
-    /// information `rateLimits` entry, or a WebSocket reply's `rateLimits`.
+    /// The strictest applicable venue statement: an exchange
+    /// information `rateLimits` entry, a WebSocket reply's `rateLimits`, or an
+    /// account order query.
     Stated,
 }
 
-/// One counted IP window of a pool, as it stood when read.
+/// One counted pool or account window, as it stood when read.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct WindowUsage {
@@ -31,10 +32,11 @@ pub struct WindowUsage {
     pub limit: u64,
     /// Whether the venue stated `limit` or it is the documented figure.
     pub source: LimitSource,
-    /// Spent in the current window: the pool's own count of admitted requests,
+    /// Spent in the current window: the owner's count of admitted requests/orders,
     /// raised to the venue's usage evidence — `X-MBX-USED-WEIGHT-1M`, or a
     /// WebSocket reply's `rateLimits` count for the separate window — whenever
-    /// a reply reported more.
+    /// a reply reported more. Account counts also follow `X-MBX-ORDER-COUNT-*`
+    /// and account order queries, and are never reduced by lower evidence.
     pub used: u64,
     /// Time until the current window ends and its count starts again from zero.
     pub resets_in: Duration,
@@ -61,8 +63,80 @@ pub struct PoolUsage {
     pub key: Option<PoolKey>,
 }
 
+/// The order windows of this client's account owner at its clock.
+///
+/// Exchange information states common pool limits. API responses and order
+/// queries state this account owner's limits. Where both state a limit, the
+/// stricter binds. Usage belongs only to this owner (shared clones or
+/// configurations using the same account key).
+/// FIX's observation-relative windows and Margin quotas have separate semantics
+/// and are not included in this aligned Spot/Futures/Options report.
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct AccountUsage {
+    /// Counted `ORDERS` windows in increasing interval order. Undocumented
+    /// windows without a venue statement are omitted, rather than reported as
+    /// an invented ceiling. Counts reset on epoch-aligned window boundaries.
+    pub orders: Vec<WindowUsage>,
+}
+
 impl Budgets {
-    /// The pool's minute weight limit: the venue's latest statement, or the
+    /// The same effective account limits used by admission and reporting.
+    pub(super) fn order_limits(&self, ip: &State, account: &State) -> [(u64, LimitSource); 3] {
+        let limit = |pool: Option<u64>, owner: Option<u64>, documented: u64| match (pool, owner) {
+            (Some(pool), Some(owner)) => (pool.min(owner), LimitSource::Stated),
+            (Some(value), None) | (None, Some(value)) => (value, LimitSource::Stated),
+            (None, None) => (documented, LimitSource::Documented),
+        };
+        [
+            limit(
+                ip.stated_orders_per_ten_seconds,
+                account.stated_orders_per_ten_seconds,
+                self.limits.orders_per_ten_seconds,
+            ),
+            limit(
+                ip.stated_orders_per_minute,
+                account.stated_orders_per_minute,
+                self.limits.orders_per_minute,
+            ),
+            limit(
+                ip.stated_orders_per_day,
+                account.stated_orders_per_day,
+                self.limits.orders_per_day.unwrap_or(u64::MAX),
+            ),
+        ]
+    }
+
+    /// Read this account's aligned order windows without modifying counters.
+    pub(crate) fn account_usage(&self, now: u64) -> Result<AccountUsage, Error> {
+        let ip = self
+            .ip
+            .lock()
+            .map_err(|_| Error::Configuration("IP budget poisoned"))?;
+        let account = self
+            .account
+            .lock()
+            .map_err(|_| Error::Configuration("account budget poisoned"))?;
+        let orders = [
+            ("orders10", 10_000),
+            ("orders60", 60_000),
+            ("ordersDay", 86_400_000),
+        ]
+        .into_iter()
+        .zip(self.order_limits(&ip, &account))
+        .filter(|(_, (limit, source))| *limit != u64::MAX || *source == LimitSource::Stated)
+        .map(|((name, window), (limit, source))| WindowUsage {
+            interval: Duration::from_millis(window),
+            limit,
+            source,
+            used: account.current(name, window, now),
+            resets_in: Duration::from_millis(window - now % window),
+        })
+        .collect();
+        Ok(AccountUsage { orders })
+    }
+
+    /// The pool's minute weight limit: the venue's strictest statement, or the
     /// documented figure until one is read. Admission and the report both use it.
     pub(super) fn weight_limit(&self, ip: &State) -> (u64, LimitSource) {
         match ip.stated_weight_per_minute {
@@ -72,7 +146,7 @@ impl Budgets {
     }
 
     /// The pool's WebSocket API minute weight limit, where it counts one apart
-    /// from REST: the venue's latest statement in a WebSocket reply's
+    /// from REST: the venue's strictest statement in a WebSocket reply's
     /// `rateLimits`, or the documented figure until one is read. Admission and
     /// the report both use it.
     pub(super) fn ws_weight_limit(&self, ws: &State) -> (u64, LimitSource) {

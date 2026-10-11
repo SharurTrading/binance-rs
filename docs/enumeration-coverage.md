@@ -109,3 +109,28 @@ it does not justify adding a variant or refusing an unknown reply.
 `generate.py` emits the types and checks their freshness. The public enumeration
 contracts exercise each documented value, exact unknown round trips, refusal of
 wrong wire types, representative native payloads and the Spot SBE projection.
+
+The October 11 follow-up review for #80 checked the own-market defining pages
+again. The evidence disposition for every candidate remains:
+
+| Market | Enum | Candidate | Qualifying evidence | Decode |
+| --- | --- | --- | --- | --- |
+| USD-M | ContractType | `CURRENT_WEEK`, `NEXT_WEEK` | Absent from own-market definition and dated observation | Exact `Unknown` |
+| USD-M, COIN-M | ContractType | `CURRENT_QUARTER DELIVERING` | Absent; the COIN-M documented spelling has an underscore | Exact `Unknown` |
+| COIN-M | ContractType | `TRADIFI_PERPETUAL` | USD-M documentation does not establish COIN-M semantics; absent from observation | Exact `Unknown` |
+| COIN-M | ContractStatus | `SETTLING`, `PRE_SETTLE`, `CLOSE` | USD-M documentation does not establish COIN-M semantics; absent from observation | Exact `Unknown` |
+
+Sources: [USD-M common definitions](https://developers.binance.info/en/docs/products/derivatives-trading-usds-futures/common-definition),
+[COIN-M common definitions](https://developers.binance.info/en/docs/products/derivatives-trading-coin-futures/common-definition),
+and [USD-M continuous contract klines](https://developers.binance.info/docs/derivatives/usds-margined-futures/market-data/rest-api/Continuous-Contract-Kline-Candlestick-Data).
+The existing named run and dated minimal fixture remain the public observation
+record. No unsupported schema variant is added; #80 remains open until an official
+own-market citation or a dated public exchange-information/contract-info capture
+carries each candidate. A schema addition then requires its own decode test.
+
+A second explicitly invoked read-only run,
+`account-order-evidence-issue-80-followup-2026-10-11`, is preserved separately in
+[the follow-up fixture](../tests/fixtures/public-exchange-info-followup-2026-10-11.json).
+Both public endpoints returned HTTP 200, again with 924 USD-M and 30 COIN-M
+symbols. No disputed own-market candidate was present. The deterministic enum
+contract validates both dated captures; neither bounded absence closes #80.

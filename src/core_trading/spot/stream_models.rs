@@ -79,8 +79,8 @@ pub struct AllMarketRollingWindowTickerEventItem {
     #[serde(rename = "l", deserialize_with = "super::wire::decimal")]
     pub l: Decimal,
     /// Exact `c` wire field.
-    #[serde(rename = "c")]
-    pub c: String,
+    #[serde(rename = "c", deserialize_with = "super::wire::decimal")]
+    pub c: Decimal,
     /// Exact `w` wire field.
     #[serde(rename = "w", deserialize_with = "super::wire::decimal")]
     pub w: Decimal,
@@ -124,8 +124,8 @@ pub struct AllMiniTickerEventItem {
     #[serde(rename = "s")]
     pub s: crate::Symbol,
     /// Exact `c` wire field.
-    #[serde(rename = "c")]
-    pub c: String,
+    #[serde(rename = "c", deserialize_with = "super::wire::decimal")]
+    pub c: Decimal,
     /// Exact `o` wire field.
     #[serde(rename = "o", deserialize_with = "super::wire::decimal")]
     pub o: Decimal,
@@ -516,8 +516,8 @@ pub struct MiniTickerEvent {
     #[serde(rename = "s")]
     pub s: crate::Symbol,
     /// Exact `c` wire field.
-    #[serde(rename = "c")]
-    pub c: String,
+    #[serde(rename = "c", deserialize_with = "super::wire::decimal")]
+    pub c: Decimal,
     /// Exact `o` wire field.
     #[serde(rename = "o", deserialize_with = "super::wire::decimal")]
     pub o: Decimal,
@@ -606,8 +606,8 @@ pub struct RollingWindowTickerEvent {
     #[serde(rename = "l", deserialize_with = "super::wire::decimal")]
     pub l: Decimal,
     /// Exact `c` wire field.
-    #[serde(rename = "c")]
-    pub c: String,
+    #[serde(rename = "c", deserialize_with = "super::wire::decimal")]
+    pub c: Decimal,
     /// Exact `w` wire field.
     #[serde(rename = "w", deserialize_with = "super::wire::decimal")]
     pub w: Decimal,
@@ -663,8 +663,8 @@ pub struct TickerEvent {
     #[serde(rename = "x", deserialize_with = "super::wire::decimal")]
     pub x: Decimal,
     /// Exact `c` wire field.
-    #[serde(rename = "c")]
-    pub c: String,
+    #[serde(rename = "c", deserialize_with = "super::wire::decimal")]
+    pub c: Decimal,
     /// Exact `Q` wire field.
     #[serde(rename = "Q", deserialize_with = "super::wire::decimal")]
     pub upper_q: Decimal,

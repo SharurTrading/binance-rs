@@ -201,8 +201,8 @@ pub struct AllMarketMiniTickersStreamEventItem {
     #[serde(rename = "ps", default, skip_serializing_if = "Option::is_none")]
     pub ps: Option<crate::Symbol>,
     /// Exact `c` wire field.
-    #[serde(rename = "c")]
-    pub c: String,
+    #[serde(rename = "c", deserialize_with = "super::wire::decimal")]
+    pub c: Decimal,
     /// Exact `o` wire field.
     #[serde(rename = "o", deserialize_with = "super::wire::decimal")]
     pub o: Decimal,
@@ -249,8 +249,8 @@ pub struct AllMarketTickersStreamsEventItem {
     #[serde(rename = "w", deserialize_with = "super::wire::decimal")]
     pub w: Decimal,
     /// Exact `c` wire field.
-    #[serde(rename = "c")]
-    pub c: String,
+    #[serde(rename = "c", deserialize_with = "super::wire::decimal")]
+    pub c: Decimal,
     /// Exact `Q` wire field.
     #[serde(rename = "Q", deserialize_with = "super::wire::decimal")]
     pub upper_q: Decimal,
@@ -743,8 +743,8 @@ pub struct IndividualSymbolMiniTickerStreamEvent {
     #[serde(rename = "ps", default, skip_serializing_if = "Option::is_none")]
     pub ps: Option<crate::Symbol>,
     /// Exact `c` wire field.
-    #[serde(rename = "c")]
-    pub c: String,
+    #[serde(rename = "c", deserialize_with = "super::wire::decimal")]
+    pub c: Decimal,
     /// Exact `o` wire field.
     #[serde(rename = "o", deserialize_with = "super::wire::decimal")]
     pub o: Decimal,
@@ -791,8 +791,8 @@ pub struct IndividualSymbolTickerStreamsEvent {
     #[serde(rename = "w", deserialize_with = "super::wire::decimal")]
     pub w: Decimal,
     /// Exact `c` wire field.
-    #[serde(rename = "c")]
-    pub c: String,
+    #[serde(rename = "c", deserialize_with = "super::wire::decimal")]
+    pub c: Decimal,
     /// Exact `Q` wire field.
     #[serde(rename = "Q", deserialize_with = "super::wire::decimal")]
     pub upper_q: Decimal,

@@ -299,7 +299,7 @@ mod tests {
                         {"rateLimitType": "REQUEST_WEIGHT", "interval": "MINUTE",
                          "intervalNum": 1, "limit": 2400, "count": 17},
                         {"rateLimitType": "ORDERS", "interval": "SECOND",
-                         "intervalNum": 10, "limit": 300}
+                         "intervalNum": 10, "limit": 300, "count": 0}
                     ],
                     "result": {"lastUpdateId": 1, "bids": [], "asks": []}})
                 .to_string(),
@@ -408,7 +408,7 @@ mod tests {
                     text
                 });
             assert_eq!(params["signature"], signature);
-            ws.send(Message::text(json!({"id":"request-1","status":200,"result":{"orderId":7},"rateLimits":[{"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"count":1}]}).to_string())).await.unwrap();
+            ws.send(Message::text(json!({"id":"request-1","status":200,"result":{"orderId":7},"rateLimits":[{"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":300,"count":1}]}).to_string())).await.unwrap();
             finish_server(ws).await;
         });
         let (client, mut events, driver) = WsClient::connect(config().websocket_url(&url).unwrap())
@@ -867,7 +867,7 @@ mod tests {
             let frame = next_json(&mut ws).await;
             seen.send(()).unwrap();
             gate.await.unwrap();
-            ws.send(Message::text(json!({"id":frame["id"],"status":200,"result":{},"rateLimits":[{"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"count":1}]}).to_string())).await.unwrap();
+            ws.send(Message::text(json!({"id":frame["id"],"status":200,"result":{},"rateLimits":[{"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":300,"count":1}]}).to_string())).await.unwrap();
             finish_server(ws).await;
         });
         let (client, mut events, driver) = WsClient::connect(config().websocket_url(&url).unwrap())

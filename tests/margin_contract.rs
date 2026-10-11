@@ -636,7 +636,7 @@ mod sockets {
             assert_eq!(frame["params"]["listenToken"], "synthetic-margin-token");
             sent.send(()).unwrap();
             permit.await.unwrap();
-            ws.send(Message::text(json!({"id":frame["id"],"status":200,"result":{"subscriptionId":7,"expirationTime":2000},"rateLimits":[{"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"count":2}]}).to_string())).await.unwrap();
+            ws.send(Message::text(json!({"id":frame["id"],"status":200,"result":{"subscriptionId":7,"expirationTime":2000},"rateLimits":[{"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":6000,"count":2}]}).to_string())).await.unwrap();
             ws.send(Message::text(json!({"subscriptionId":7,"event":{"e":"USER_LIABILITY_CHANGE","E":123,"a":"BTC","t":"REPAY","p":"1","i":"0.01"}}).to_string())).await.unwrap();
             ws.send(Message::text(
                 json!({"subscriptionId":7,"event":{"e":"eventStreamTerminated","E":124}})

@@ -29,8 +29,14 @@ pub struct RateEvidence {
     pub counters: BTreeMap<String, u64>,
     /// A positive `REQUEST_WEIGHT` per-minute limit the reply stated in its
     /// `rateLimits` alongside the counters, for the window they report; absent
-    /// when it states none, leaving the documented figure standing.
+    /// when it states none or its limit evidence is unusable, leaving the
+    /// owner's existing limit standing.
     pub stated_weight_per_minute: Option<u64>,
+    /// A counted rate-limit statement was malformed. No limit from that
+    /// statement was adopted. A WebSocket response still retains its venue
+    /// outcome and counter evidence; its driver also emits a continuity gap.
+    /// Account order queries fail with retained response metadata.
+    pub stated_limits_unusable: bool,
     /// HTTP Retry-After seconds, or WebSocket retry deadline converted to a duration.
     pub retry_after: Option<Duration>,
     /// The venue sent retry timing this client cannot use, so no expiry is invented

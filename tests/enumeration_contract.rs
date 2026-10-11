@@ -586,6 +586,29 @@ fn spot_sbe_exchange_information_decodes_into_the_same_typed_public_model() {
 #[ignore = "explicit operator invocation required: public production exchangeInfo GETs"]
 async fn record_public_exchange_information_enum_evidence() -> Result<(), Box<dyn std::error::Error>>
 {
+    capture_public_contract_facts(
+        "nonrate-contract-issues-exchange-info-2026-10-11",
+        "public-exchange-info-2026-10-11.json",
+    )
+    .await
+}
+
+/// A separate capture for the explicit #80 follow-up; preserves the earlier run.
+#[tokio::test]
+#[ignore = "explicit operator invocation required: public production exchangeInfo GETs"]
+async fn record_public_exchange_information_followup_evidence()
+-> Result<(), Box<dyn std::error::Error>> {
+    capture_public_contract_facts(
+        "account-order-evidence-issue-80-followup-2026-10-11",
+        "public-exchange-info-followup-2026-10-11.json",
+    )
+    .await
+}
+
+async fn capture_public_contract_facts(
+    run: &str,
+    filename: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
     use std::time::{Duration, SystemTime, UNIX_EPOCH};
     let run_time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
     let um = usdm::RestClient::new(usdm::Config::new(usdm::Environment::Production)?)?;
@@ -614,9 +637,10 @@ async fn record_public_exchange_information_enum_evidence() -> Result<(), Box<dy
         }
         Err(error) => json!({"safeFailure":error.to_string()}),
     };
-    let evidence = json!({"run":"nonrate-contract-issues-exchange-info-2026-10-11","observedAtUnixSeconds":run_time,"credentialed":false,"usdm":{"endpoint":"https://fapi.binance.com/fapi/v1/exchangeInfo","evidence":um_evidence},"coinm":{"endpoint":"https://dapi.binance.com/dapi/v1/exchangeInfo","evidence":cm_evidence}});
+    let evidence = json!({"run":run,"observedAtUnixSeconds":run_time,"credentialed":false,"usdm":{"endpoint":"https://fapi.binance.com/fapi/v1/exchangeInfo","evidence":um_evidence},"coinm":{"endpoint":"https://dapi.binance.com/dapi/v1/exchangeInfo","evidence":cm_evidence}});
     let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/public-exchange-info-2026-10-11.json");
+        .join("tests/fixtures")
+        .join(filename);
     std::fs::create_dir_all(path.parent().ok_or("fixture path has no parent")?)?;
     std::fs::write(&path, serde_json::to_vec_pretty(&evidence)?)?;
     println!("Public enum evidence written to {}", path.display());
@@ -625,33 +649,37 @@ async fn record_public_exchange_information_enum_evidence() -> Result<(), Box<dy
 
 #[test]
 fn dated_public_exchange_information_facts_decode_in_their_own_market() {
-    let evidence: serde_json::Value = serde_json::from_str(include_str!(
-        "fixtures/public-exchange-info-2026-10-11.json"
-    ))
-    .unwrap();
-    assert_eq!(evidence["credentialed"], false);
-    for market in ["usdm", "coinm"] {
-        assert_eq!(evidence[market]["evidence"]["httpStatus"], 200);
-        let symbols = evidence[market]["evidence"]["symbols"].as_array().unwrap();
-        assert!(!symbols.is_empty());
-        for symbol in symbols {
-            binance_client::Symbol::new(symbol["symbol"].as_str().unwrap()).unwrap();
-            let contract = symbol["contractType"].clone();
-            let status = symbol["status"].clone();
-            if market == "usdm" {
-                let decoded: usdm::enums::ContractType =
-                    serde_json::from_value(contract.clone()).unwrap();
-                assert_eq!(serde_json::to_value(decoded).unwrap(), contract);
-                let decoded: usdm::enums::ContractStatus =
-                    serde_json::from_value(status.clone()).unwrap();
-                assert_eq!(serde_json::to_value(decoded).unwrap(), status);
-            } else {
-                let decoded: coinm::enums::ContractType =
-                    serde_json::from_value(contract.clone()).unwrap();
-                assert_eq!(serde_json::to_value(decoded).unwrap(), contract);
-                let decoded: coinm::enums::ContractStatus =
-                    serde_json::from_value(status.clone()).unwrap();
-                assert_eq!(serde_json::to_value(decoded).unwrap(), status);
+    for source in [
+        include_str!("fixtures/public-exchange-info-2026-10-11.json"),
+        include_str!("fixtures/public-exchange-info-followup-2026-10-11.json"),
+    ] {
+        let evidence: serde_json::Value = serde_json::from_str(source).unwrap();
+        assert!(evidence["run"].as_str().is_some_and(|run| !run.is_empty()));
+        assert!(evidence["observedAtUnixSeconds"].as_u64().is_some());
+        assert_eq!(evidence["credentialed"], false);
+        for market in ["usdm", "coinm"] {
+            assert_eq!(evidence[market]["evidence"]["httpStatus"], 200);
+            let symbols = evidence[market]["evidence"]["symbols"].as_array().unwrap();
+            assert!(!symbols.is_empty());
+            for symbol in symbols {
+                binance_client::Symbol::new(symbol["symbol"].as_str().unwrap()).unwrap();
+                let contract = symbol["contractType"].clone();
+                let status = symbol["status"].clone();
+                if market == "usdm" {
+                    let decoded: usdm::enums::ContractType =
+                        serde_json::from_value(contract.clone()).unwrap();
+                    assert_eq!(serde_json::to_value(decoded).unwrap(), contract);
+                    let decoded: usdm::enums::ContractStatus =
+                        serde_json::from_value(status.clone()).unwrap();
+                    assert_eq!(serde_json::to_value(decoded).unwrap(), status);
+                } else {
+                    let decoded: coinm::enums::ContractType =
+                        serde_json::from_value(contract.clone()).unwrap();
+                    assert_eq!(serde_json::to_value(decoded).unwrap(), contract);
+                    let decoded: coinm::enums::ContractStatus =
+                        serde_json::from_value(status.clone()).unwrap();
+                    assert_eq!(serde_json::to_value(decoded).unwrap(), status);
+                }
             }
         }
     }

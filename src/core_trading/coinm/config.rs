@@ -137,6 +137,14 @@ impl Config {
     pub fn pool_usage(&self) -> Result<crate::PoolUsage, Error> {
         self.budgets.usage(self.clock.now_millis()?)
     }
+    /// This account owner's order windows at this configuration's clock.
+    /// See [`crate::AccountUsage`] for ownership and counted windows.
+    ///
+    /// # Errors
+    /// Returns the clock's error, or a configuration error if a budget lock is poisoned.
+    pub fn account_usage(&self) -> Result<crate::AccountUsage, Error> {
+        self.budgets.account_usage(self.clock.now_millis()?)
+    }
     /// Clear an IP ban the venue gave no timing for, on the pool this configuration's
     /// clients draw on. Every client of the pool is admitted again; a known
     /// `Retry-After` cooldown still holds. See [`Budgets::release_unknown_ban`].

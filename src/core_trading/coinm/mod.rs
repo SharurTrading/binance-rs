@@ -46,6 +46,14 @@ impl RestClient {
     pub fn pool_usage(&self) -> Result<crate::PoolUsage, crate::Error> {
         self.inner.pool_usage()
     }
+    /// This account owner's order windows at this client's clock;
+    /// see [`Config::account_usage`].
+    ///
+    /// # Errors
+    /// Returns the clock's error, or a configuration error if a budget lock is poisoned.
+    pub fn account_usage(&self) -> Result<crate::AccountUsage, crate::Error> {
+        self.inner.account_usage()
+    }
     /// Clear an IP ban the venue gave no timing for, on the pool this client draws on;
     /// see [`Config::release_unknown_ban`].
     ///

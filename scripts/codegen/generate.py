@@ -465,6 +465,11 @@ def generate(kind):
         limit_docs = ['    /// Adopts counted IP limits for every client sharing this pool.'] if kind == 'ws' and (PRODUCT, op['operationId']) == ('spot', 'exchangeInfo') else []
         limit_errors = ['    /// A counted limit without a positive value returns [`Error::Gap`] and leaves',
             '    /// the pool\'s limits unchanged; the attempt remains charged.'] if limit_docs else []
+        if PRODUCT == 'spot' and (kind, op['operationId']) in [('rest', 'rateLimitOrder'), ('ws', 'accountRateLimitsOrders')]:
+            limit_docs = ['    /// Adopts validated limits and counts for this account owner only.',
+                '    /// The stricter account or exchange-information statement binds.']
+            limit_errors = ['    /// Unusable limit/count evidence fails with `Outcome::ReadFailed` and retained',
+                '    /// metadata; no limit is changed. WebSocket drivers also emit a gap.']
         methods.append('\n'.join([f'    /// [{op["operationId"]}]({op["source"]}).', *limit_docs,
             '    ///', '    /// # Errors', '    /// Returns input/admission errors before sending, or typed venue/transport evidence.',
             *limit_errors,

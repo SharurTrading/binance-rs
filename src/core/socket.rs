@@ -689,6 +689,55 @@ impl SocketDriver {
             value,
         })
     }
+    /// Retain the response's counts while refusing an invalid limit statement.
+    /// The optional gap must be surfaced after delivery of the venue's answer.
+    fn response_rates(
+        &self,
+        p: &Pending,
+        value: &Value,
+        status: u16,
+        now: u64,
+    ) -> Result<(RateEvidence, Option<Error>), Error> {
+        let mut rates = ws_rates(value, now, self.binary_timestamps);
+        let query = if p.op.path == "/account.rateLimits.orders"
+            && (200..300).contains(&status)
+            && value
+                .get("result")
+                .or_else(|| value.get("error"))
+                .and_then(|result| result.get("code"))
+                .and_then(Value::as_i64)
+                .is_none_or(|code| code >= 0)
+        {
+            value
+                .get("result")
+                .map(Some)
+                .ok_or(Error::Gap("account order limits result missing"))
+        } else {
+            Ok(None)
+        };
+        let mut query_rates = RateEvidence::default();
+        let adoption = query.and_then(|query| {
+            query
+                .map_or(Ok(()), |query| order_query_rates(query, &mut query_rates))
+                .and_then(|()| {
+                    self.budgets
+                        .adopt_response_limits(value.get("rateLimits"), query, true)
+                })
+        });
+        if adoption.is_err() {
+            // Retain count evidence and the received answer, but adopt no limit.
+            rates.stated_weight_per_minute = None;
+            rates.stated_limits_unusable = true;
+        } else {
+            for (name, count) in query_rates.counters {
+                let current = rates.counters.entry(name).or_default();
+                *current = (*current).max(count);
+            }
+        }
+        self.budgets.observe_ban(status, &rates)?;
+        self.budgets.observe(&rates, now, true)?;
+        Ok((rates, adoption.err()))
+    }
     /// Hand one correlated answer to its caller, or surface it as a late answer.
     fn settle(&mut self, p: &mut Pending, value: &Value) -> Result<(), Error> {
         let status = value
@@ -700,9 +749,7 @@ impl SocketDriver {
             .clock
             .now_millis()
             .map_err(|_| Error::Gap("clock unavailable after response"))?;
-        let rates = ws_rates(value, now, self.binary_timestamps);
-        self.budgets.observe_ban(status, &rates)?;
-        self.budgets.observe(&rates, now, true)?;
+        let (rates, rate_gap) = self.response_rates(p, value, status, now)?;
         let meta = ResponseMeta {
             time_unit: self.time_unit,
             client_order_ids: p.client_order_ids.clone(),
@@ -710,11 +757,23 @@ impl SocketDriver {
             operation: p.op.name,
             rates,
         };
-        let payload = value
-            .get("result")
-            .or_else(|| value.get("error"))
-            .cloned()
-            .ok_or(Error::Gap("WebSocket response payload"))?;
+        let Some(payload) = value.get("result").or_else(|| value.get("error")).cloned() else {
+            // Missing payload is a correlated failure with received evidence.
+            // The original frame is retained by the caller before retirement.
+            if let Some(reply) = p.reply.take() {
+                let _ = reply.send(Err(Error::Transport {
+                    client_order_ids: meta.client_order_ids.clone(),
+                    operation: p.op.name,
+                    outcome: if p.op.mutation {
+                        Outcome::Unknown
+                    } else {
+                        Outcome::ReadFailed
+                    },
+                    meta: Some(Box::new(meta)),
+                }));
+            }
+            return Err(Error::Gap("WebSocket response payload"));
+        };
         if (200..300).contains(&status)
             && payload
                 .get("code")
@@ -746,7 +805,12 @@ impl SocketDriver {
                 meta,
             })?;
         }
-        Ok(())
+        // Deliver the accepted response before surfacing malformed limit evidence.
+        // The lifecycle reports a gap and retires; no acknowledgment is invented or lost.
+        match rate_gap {
+            Some(error) => Err(error),
+            None => Ok(()),
+        }
     }
     /// Run on the caller's runtime. This future owns the socket and every lifecycle write;
     /// it spawns no tasks. The caller joins the task if it chooses to spawn this future.
@@ -902,6 +966,32 @@ impl SocketDriver {
     }
 }
 
+/// Account query count evidence has the same aligned intervals as API envelopes.
+pub(crate) fn order_query_rates(value: &Value, evidence: &mut RateEvidence) -> Result<(), Error> {
+    let entries = value
+        .as_array()
+        .ok_or(Error::Gap("account order limits array required"))?;
+    for entry in entries {
+        let key = match (
+            entry.get("rateLimitType").and_then(Value::as_str),
+            entry.get("interval").and_then(Value::as_str),
+            entry.get("intervalNum").and_then(Value::as_u64),
+        ) {
+            (Some("ORDERS"), Some("SECOND"), Some(10)) => "x-mbx-order-count-10s",
+            (Some("ORDERS"), Some("MINUTE"), Some(1)) => "x-mbx-order-count-1m",
+            (Some("ORDERS"), Some("DAY"), Some(1)) => "x-mbx-order-count-1d",
+            _ => continue,
+        };
+        let count = entry
+            .get("count")
+            .and_then(Value::as_u64)
+            .ok_or(Error::Gap("account order count required"))?;
+        let current = evidence.counters.entry(key.to_owned()).or_default();
+        *current = (*current).max(count);
+    }
+    Ok(())
+}
+
 fn ws_rates(v: &Value, now: u64, binary_timestamps: bool) -> RateEvidence {
     let mut e = RateEvidence::default();
     if let Some(limits) = v.get("rateLimits").and_then(Value::as_array) {
@@ -922,8 +1012,11 @@ fn ws_rates(v: &Value, now: u64, binary_timestamps: bool) -> RateEvidence {
                 _ => continue,
             };
             if let Some(number) = limit.get("intervalNum").and_then(Value::as_u64) {
-                e.counters
-                    .insert(format!("{prefix}-{number}{letter}"), count);
+                let current = e
+                    .counters
+                    .entry(format!("{prefix}-{number}{letter}"))
+                    .or_default();
+                *current = (*current).max(count);
                 // The minute weight entry states its window's limit next to the
                 // count; only a positive one is evidence, and anything else
                 // leaves the documented figure standing.
@@ -935,7 +1028,10 @@ fn ws_rates(v: &Value, now: u64, binary_timestamps: bool) -> RateEvidence {
                         .and_then(Value::as_u64)
                         .filter(|stated| *stated > 0)
                 {
-                    e.stated_weight_per_minute = Some(stated);
+                    e.stated_weight_per_minute = Some(
+                        e.stated_weight_per_minute
+                            .map_or(stated, |previous| previous.min(stated)),
+                    );
                 }
             }
         }

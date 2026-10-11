@@ -35,8 +35,8 @@ pub use core_trading::{coinm, convert, margin, options, spot, usdm, wallet};
 mod core;
 
 pub use core::{
-    AccountKey, BudgetLimits, Budgets, LimitSource, PoolEnvironment, PoolKey, PoolUsage, VenuePool,
-    WeightPools, WindowUsage,
+    AccountKey, AccountUsage, BudgetLimits, Budgets, LimitSource, PoolEnvironment, PoolKey,
+    PoolUsage, VenuePool, WeightPools, WindowUsage,
 };
 pub use core::{
     Asset, ClientOrderId, Clock, Credentials, Error, OperationLeg, Outcome, PartialOperation,

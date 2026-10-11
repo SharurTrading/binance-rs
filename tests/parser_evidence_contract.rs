@@ -265,3 +265,37 @@ fn kline_close_prices_refuse_non_decimal_evidence() {
         &json!({"e":"markPrice_kline","E":1,"ps":"BTCUSD_PERP","k":coinm_k}),
     );
 }
+
+#[test]
+fn kline_close_prices_keep_sibling_optionality() {
+    // `c` keeps the optionality of its sibling prices: absent or JSON-null decodes
+    // to `None` instead of failing, exactly as `o`/`h`/`l` do.
+    let event: spot::stream_models::KlineEvent = serde_json::from_value(json!({
+        "e":"kline","E":1,"s":"BTCUSDT","k":{"i":"1m","o":"1"}}))
+    .unwrap();
+    assert_eq!(event.k.c, None);
+    let event: spot::stream_models::KlineOffsetEvent = serde_json::from_value(json!({
+        "e":"kline","E":1,"s":"BTCUSDT","k":{"i":"1m","o":"1","c":null}}))
+    .unwrap();
+    assert_eq!(event.k.c, None);
+    let event: coinm::stream_models::KlineCandlestickStreamsEvent = serde_json::from_value(
+        json!({"e":"kline","E":1,"s":"BTCUSD_200626","k":{"i":"1m","o":"1"}}),
+    )
+    .unwrap();
+    assert_eq!(event.k.c, None);
+    let event: coinm::stream_models::ContinuousContractKlineCandlestickStreamsEvent =
+        serde_json::from_value(json!({"e":"continuous_kline","E":1,"ps":"BTCUSD",
+            "ct":"NEXT_QUARTER","k":{"i":"1m","o":"1","c":null}}))
+        .unwrap();
+    assert_eq!(event.k.c, None);
+    let event: coinm::stream_models::IndexKlineCandlestickStreamsEvent =
+        serde_json::from_value(json!({"e":"indexPrice_kline","E":1,"ps":"BTCUSD",
+            "k":{"i":"1m","o":"1"}}))
+        .unwrap();
+    assert_eq!(event.k.c, None);
+    let event: coinm::stream_models::MarkPriceKlineCandlestickStreamsEvent =
+        serde_json::from_value(json!({"e":"markPrice_kline","E":1,"ps":"BTCUSD_PERP",
+            "k":{"i":"1m","o":"1","c":null}}))
+        .unwrap();
+    assert_eq!(event.k.c, None);
+}

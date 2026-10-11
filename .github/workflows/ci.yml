@@ -54,10 +54,8 @@ jobs:
           toolchain: ${{ steps.rust-toolchain.outputs.channel }}
           components: clippy, rustfmt
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
-        with:
-          # Discard caches containing extracted sources and exercise post-job cleanup.
-          key: package-sources-excluded
+      - name: Set up Kache
+        uses: ./.github/actions/setup-kache
 
       - name: Generated bindings are current
         run: python3 scripts/codegen/generate.py --check
@@ -87,11 +85,6 @@ jobs:
 
       - name: Package verification
         run: cargo package --locked
-
-      # rust-cache mistakes extracted package tests/ for a build artifact profile.
-      # Keep the ordinary target cache, removing only the verified package copy.
-      - name: Remove verified package artifacts before caching
-        run: cargo clean --target-dir target/package
 
   markdown:
     runs-on: ubuntu-latest

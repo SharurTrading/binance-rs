@@ -120,7 +120,13 @@ that key. Connection limits are per account and shared between FIX and FIX SBE
 ([connection limits](https://github.com/binance/binance-spot-api-docs/blob/master/fix-api.md#connection-limits)).
 Every outbound application/control attempt counts against role-specific message
 quotas. Account connection attempts, concurrent connections and unique components
-use the documented role limits. Closed connections retain their count for two
+use the documented role limits. The venue also checks connection attempts per IP
+address, independently of the account, so each attempt additionally counts against
+an IP window every FIX scope of one Spot pool shares — the registry's scopes for
+its keys, and every owner of an explicit scope's `Budgets` IP owner — per role and
+per the same documented limits; an attempt over the IP window is refused unsent
+with its retry delay and consumes no account attempt. Closed connections retain
+their count for two
 heartbeat intervals; unclean closure also retains component exclusion. Native
 LimitResponse count/max/interval evidence constrains future sends, of this session
 and of every client sharing its Spot owner. Counter floors are held for a full

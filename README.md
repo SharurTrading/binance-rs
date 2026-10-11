@@ -271,6 +271,13 @@ daily/ten-second order counts, and connection-attempt limits. Successful ordinar
 Spot submits/cancels release the documented weight reservation; failures remain
 charged and observed venue counters are never reduced.
 
+Spot FIX connection attempts count twice — once against the account's own window
+and once against the IP's — because the venue checks both independently. Two
+accounts trading FIX through one IP therefore share one attempt budget:
+`AccountBudgets::with_pools_for_account` (or `new_for_account`) draws each key's
+scope from the same registry pool its Spot clients use, and a refused attempt
+never burns an account slot.
+
 ### Order limits
 
 Binance counts orders per account. Each account owner starts from its pool's

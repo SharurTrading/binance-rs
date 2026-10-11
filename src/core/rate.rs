@@ -3,10 +3,11 @@
 
 use super::{Error, RateEvidence};
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, VecDeque},
     sync::{Arc, Mutex, OnceLock},
     time::Duration,
 };
+use tokio::time::Instant;
 
 /// Venue-sourced initial rate limits; stated exchange information limits replace the
 /// minute weight, raw-request and account order figures.
@@ -187,6 +188,16 @@ impl State {
     }
 }
 
+/// FIX connection attempts one IP scope has admitted, per role window. Binance
+/// checks the Spot FIX connection limits per account and per IP address
+/// independently, and FIX shares them with FIX SBE
+/// (<https://github.com/binance/binance-spot-api-docs/blob/master/fix-api.md#connection-limits>,
+/// 2025-04-21 changelog notice).
+#[derive(Default)]
+struct FixAttempts {
+    windows: BTreeMap<u8, VecDeque<Instant>>,
+}
+
 /// Shared venue budgets. Clones share both IP and account evidence.
 ///
 /// Keep one IP owner per venue budget scope and derive account owners with
@@ -195,6 +206,7 @@ impl State {
 pub struct Budgets {
     pub(super) ip: Arc<Mutex<State>>,
     ws_ip: Arc<Mutex<State>>,
+    fix_ip: Arc<Mutex<FixAttempts>>,
     pub(super) account: Arc<Mutex<State>>,
     limits: Arc<BudgetLimits>,
     key: Option<PoolKey>,
@@ -226,6 +238,7 @@ impl Budgets {
         Ok(Self {
             ip: Arc::default(),
             ws_ip: Arc::default(),
+            fix_ip: Arc::default(),
             account: Arc::default(),
             ws_on_rest: limits.shared_request_weight,
             limits: Arc::new(limits),
@@ -239,6 +252,7 @@ impl Budgets {
         Self {
             ip: self.ip.clone(),
             ws_ip: self.ws_ip.clone(),
+            fix_ip: self.fix_ip.clone(),
             account: Arc::default(),
             limits: self.limits.clone(),
             key: self.key,
@@ -376,6 +390,45 @@ impl Budgets {
                 .checked_add(1)
                 .ok_or(Error::Configuration("budget overflow"))?;
         }
+        Ok(())
+    }
+    /// Count one FIX connection attempt against the IP window shared by every
+    /// FIX scope of this owner's pool, per role. The venue checks this window
+    /// independently of the account's own; a refused attempt charges nothing
+    /// here and the account windows stay the caller's.
+    ///
+    /// Lock order: callers hold their account `State` and then this `fix_ip`
+    /// window; nothing acquires an account `State` while holding `fix_ip`.
+    ///
+    /// # Errors
+    /// Refuses with [`Error::Admission`] and the window's retry delay once the
+    /// documented IP attempt count is reached.
+    pub(crate) fn admit_fix_connection(
+        &self,
+        role: u8,
+        attempts: usize,
+        interval: Duration,
+        now: Instant,
+    ) -> Result<(), Error> {
+        let mut ip = self
+            .fix_ip
+            .lock()
+            .map_err(|_| Error::Configuration("FIX IP budget poisoned"))?;
+        let recent = ip.windows.entry(role).or_default();
+        while recent
+            .front()
+            .is_some_and(|at| now.duration_since(*at) >= interval)
+        {
+            recent.pop_front();
+        }
+        if recent.len() >= attempts {
+            return Err(Error::Admission {
+                retry_after: recent.front().map_or(interval, |at| {
+                    interval.saturating_sub(now.duration_since(*at))
+                }),
+            });
+        }
+        recent.push_back(now);
         Ok(())
     }
     // FIX LimitResponse uses explicit interval/count/max, independently of HTTP headers.

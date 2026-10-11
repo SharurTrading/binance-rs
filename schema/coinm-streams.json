@@ -1283,7 +1283,8 @@
                         "x-decimal": true
                       },
                       "c": {
-                        "type": "string"
+                        "type": "string",
+                        "x-decimal": true
                       },
                       "h": {
                         "type": "string",
@@ -1389,7 +1390,8 @@
                             "x-decimal": true
                           },
                           "c": {
-                            "type": "string"
+                            "type": "string",
+                            "x-decimal": true
                           },
                           "h": {
                             "type": "string",
@@ -2161,7 +2163,8 @@
                         "x-decimal": true
                       },
                       "c": {
-                        "type": "string"
+                        "type": "string",
+                        "x-decimal": true
                       },
                       "h": {
                         "type": "string",
@@ -2267,7 +2270,8 @@
                             "x-decimal": true
                           },
                           "c": {
-                            "type": "string"
+                            "type": "string",
+                            "x-decimal": true
                           },
                           "h": {
                             "type": "string",
@@ -3335,7 +3339,8 @@
                         "x-decimal": true
                       },
                       "c": {
-                        "type": "string"
+                        "type": "string",
+                        "x-decimal": true
                       },
                       "h": {
                         "type": "string",
@@ -3442,7 +3447,8 @@
                             "x-decimal": true
                           },
                           "c": {
-                            "type": "string"
+                            "type": "string",
+                            "x-decimal": true
                           },
                           "h": {
                             "type": "string",
@@ -3864,7 +3870,8 @@
                         "x-decimal": true
                       },
                       "c": {
-                        "type": "string"
+                        "type": "string",
+                        "x-decimal": true
                       },
                       "h": {
                         "type": "string",
@@ -3970,7 +3977,8 @@
                             "x-decimal": true
                           },
                           "c": {
-                            "type": "string"
+                            "type": "string",
+                            "x-decimal": true
                           },
                           "h": {
                             "type": "string",

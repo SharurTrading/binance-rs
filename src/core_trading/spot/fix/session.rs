@@ -196,10 +196,13 @@ pub struct SessionDriver {
 impl Session {
     /// Establish TLS/TCP without spawning a task. Run the returned driver to send
     /// Logon and consume `Established` before dispatching application requests.
-    /// Connection attempts/concurrency and component ownership share the account owner.
+    /// Connection attempts count against the account owner's windows and the
+    /// Spot pool's shared IP window; concurrency and component ownership share
+    /// the account owner.
     ///
     /// # Errors
-    /// Reports account admission, TCP/TLS or connection timeout failures safely.
+    /// Reports account or shared-IP admission, TCP/TLS or connection timeout
+    /// failures safely.
     pub async fn connect(config: Config) -> Result<(Self, Events, SessionDriver), Error> {
         let lease = config
             .budgets

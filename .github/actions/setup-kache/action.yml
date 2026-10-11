@@ -24,15 +24,22 @@ runs:
           printf 'KACHE_KEY_SALT=sharurtrading-kache-prepass-2026-10-11\n'
           printf 'KACHE_VERIFY_RESTORES=always\n'
         } >> "$GITHUB_ENV"
-        printf 'cache_dir=%s/.kache-cache/prepass-v1\n' "$target_root" >> "$GITHUB_OUTPUT"
+        printf 'cache_dir=%s/.kache-cache/prepass-v2\n' "$target_root" >> "$GITHUB_OUTPUT"
 
     - name: Install Kache
       uses: kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed # v1
       with:
         version: "1.0.0"
         cache-dir: ${{ steps.paths.outputs.cache_dir }}
-        cache-key-prefix: kache-prepass-v1
+        cache-key-prefix: kache-prepass-v2
         cache-executables: true
         github-cache: true
         save-cache: true
         pr-comment: false
+
+    - name: Initialize and verify the Kache store
+      shell: bash
+      run: |
+        set -euo pipefail
+        kache daemon start
+        kache doctor --verify

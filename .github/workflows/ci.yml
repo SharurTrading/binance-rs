@@ -86,6 +86,9 @@ jobs:
       - name: Package verification
         run: cargo package --locked
 
+      - name: Verify Kache store after compilation
+        run: kache doctor --verify
+
   markdown:
     runs-on: ubuntu-latest
     timeout-minutes: 10

@@ -471,3 +471,36 @@ fn a_stated_order_limit_replaces_each_order_window_and_the_stricter_of_two_binds
         assert_refused(&account, order, 0, window);
     }
 }
+
+#[test]
+fn websocket_stated_limits_bind_the_window_they_count_and_leave_rest_standing() {
+    let budgets = Budgets::new(BudgetLimits::usdm()).unwrap();
+    let evidence = |limit, count| RateEvidence {
+        counters: [("x-mbx-used-weight-1m".to_owned(), count)]
+            .into_iter()
+            .collect(),
+        stated_weight_per_minute: Some(limit),
+        ..RateEvidence::default()
+    };
+    budgets.observe(&evidence(5, 4), 1000, true).unwrap();
+    // A later, laxer statement does not loosen the stricter one.
+    budgets.observe(&evidence(9, 6), 1000, true).unwrap();
+    let usage = budgets.usage(2000).unwrap();
+    assert_eq!(
+        (
+            usage.ws_request_weight.unwrap().limit,
+            usage.ws_request_weight.unwrap().used
+        ),
+        (5, 6)
+    );
+    // The WebSocket statement leaves the REST window on its documented figure.
+    assert_eq!(
+        (usage.request_weight.limit, usage.request_weight.used),
+        (2400, 0)
+    );
+    let ws_call = Cost {
+        ws_weight: 1,
+        ..Cost::default()
+    };
+    assert_refused(&budgets, ws_call, 2000, 58_000);
+}

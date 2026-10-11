@@ -314,7 +314,7 @@ impl Budgets {
         let ws_cost = vec![(
             "weight",
             60_000,
-            self.limits.ws_weight_per_minute,
+            self.ws_weight_limit(&ws_ip).0,
             if self.limits.shared_request_weight {
                 0
             } else {
@@ -568,6 +568,21 @@ impl Budgets {
                 *current = (now / window, 0);
             }
             current.1 = current.1.max(*count);
+        }
+        if let Some(stated) = e.stated_weight_per_minute {
+            // A WebSocket reply's `rateLimits` states its window's limit alongside
+            // the count. Like exchange information, two statements leave the
+            // stricter one standing, and the same REST/WS routing applies.
+            let state = if websocket && !self.ws_on_rest {
+                &mut ws_ip
+            } else {
+                &mut ip
+            };
+            state.stated_weight_per_minute = Some(
+                state
+                    .stated_weight_per_minute
+                    .map_or(stated, |current: u64| current.min(stated)),
+            );
         }
         Ok(())
     }

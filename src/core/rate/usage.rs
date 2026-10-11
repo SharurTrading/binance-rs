@@ -13,10 +13,11 @@ use std::time::Duration;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum LimitSource {
-    /// The venue's documented figure, which stands until an exchange information
-    /// read by a client of the pool states one.
+    /// The venue's documented figure, which stands until a client of the pool
+    /// reads a venue statement of one.
     Documented,
-    /// The latest exchange information `rateLimits` entry a client of the pool read.
+    /// The latest venue statement a client of the pool read: an exchange
+    /// information `rateLimits` entry, or a WebSocket reply's `rateLimits`.
     Stated,
 }
 
@@ -31,7 +32,9 @@ pub struct WindowUsage {
     /// Whether the venue stated `limit` or it is the documented figure.
     pub source: LimitSource,
     /// Spent in the current window: the pool's own count of admitted requests,
-    /// raised to the venue's usage header whenever a reply reported more.
+    /// raised to the venue's usage evidence — `X-MBX-USED-WEIGHT-1M`, or a
+    /// WebSocket reply's `rateLimits` count for the separate window — whenever
+    /// a reply reported more.
     pub used: u64,
     /// Time until the current window ends and its count starts again from zero.
     pub resets_in: Duration,
@@ -43,11 +46,17 @@ pub struct WindowUsage {
 pub struct PoolUsage {
     /// REST `REQUEST_WEIGHT` per minute. Spot and Options count WebSocket API
     /// weight here too; the futures pool counts COIN-M WebSocket API weight here,
-    /// while USDⓈ-M WebSocket API weight has a counter of its own, not reported
-    /// here (issue #97).
+    /// while USDⓈ-M WebSocket API weight has a counter of its own, reported as
+    /// [`Self::ws_request_weight`].
     pub request_weight: WindowUsage,
     /// `RAW_REQUESTS` per five minutes, where the pool counts them (Spot).
     pub raw_requests: Option<WindowUsage>,
+    /// The USDⓈ-M WebSocket API's own `REQUEST_WEIGHT` minute window, where the
+    /// pool counts one apart from REST weight (the futures pool, and explicit
+    /// owners built from `BudgetLimits::usdm`); `None` where the pool counts
+    /// WebSocket API weight together with REST, in which `request_weight`
+    /// already includes it.
+    pub ws_request_weight: Option<WindowUsage>,
     /// The venue pool read; `None` for an explicit [`Budgets`] owner.
     pub key: Option<PoolKey>,
 }
@@ -59,6 +68,17 @@ impl Budgets {
         match ip.stated_weight_per_minute {
             Some(limit) => (limit, LimitSource::Stated),
             None => (self.limits.weight_per_minute, LimitSource::Documented),
+        }
+    }
+
+    /// The pool's WebSocket API minute weight limit, where it counts one apart
+    /// from REST: the venue's latest statement in a WebSocket reply's
+    /// `rateLimits`, or the documented figure until one is read. Admission and
+    /// the report both use it.
+    pub(super) fn ws_weight_limit(&self, ws: &State) -> (u64, LimitSource) {
+        match ws.stated_weight_per_minute {
+            Some(limit) => (limit, LimitSource::Stated),
+            None => (self.limits.ws_weight_per_minute, LimitSource::Documented),
         }
     }
 
@@ -83,18 +103,27 @@ impl Budgets {
             .ip
             .lock()
             .map_err(|_| Error::Configuration("IP budget poisoned"))?;
-        let window = |name: &str, window: u64, (limit, source): (u64, LimitSource)| WindowUsage {
+        let ws_ip = self
+            .ws_ip
+            .lock()
+            .map_err(|_| Error::Configuration("WS IP budget poisoned"))?;
+        let window = |state: &State,
+                      name: &str,
+                      window: u64,
+                      (limit, source): (u64, LimitSource)| WindowUsage {
             interval: Duration::from_millis(window),
             limit,
             source,
-            used: ip.current(name, window, now),
+            used: state.current(name, window, now),
             resets_in: Duration::from_millis(window - now % window),
         };
         Ok(PoolUsage {
-            request_weight: window("weight", 60_000, self.weight_limit(&ip)),
+            request_weight: window(&ip, "weight", 60_000, self.weight_limit(&ip)),
             raw_requests: self
                 .raw_request_limit(&ip)
-                .map(|limit| window("raw", 300_000, limit)),
+                .map(|limit| window(&ip, "raw", 300_000, limit)),
+            ws_request_weight: (!self.limits.shared_request_weight)
+                .then(|| window(&ws_ip, "weight", 60_000, self.ws_weight_limit(&ws_ip))),
             key: self.key,
         })
     }

@@ -232,8 +232,10 @@ X-MBX-USED-WEIGHT-1M counter."
 
 `X-MBX-USED-WEIGHT-1M` raises REST weight. A USDⓈ-M WebSocket API reply's
 `rateLimits` count raises the WebSocket API counter; a COIN-M reply's raises REST
-weight. A COIN-M client counts its WebSocket API weight on REST weight with any
-budget owner, including an explicit one.
+weight. A reply that also states the window's limit — a positive `REQUEST_WEIGHT`
+per-minute figure in its `rateLimits` — states it for the counter it reports, and
+of two statements the stricter binds. A COIN-M client counts its WebSocket API
+weight on REST weight with any budget owner, including an explicit one.
 
 > [!NOTE]
 > The documentation does not say whether COIN-M WebSocket API requests or COIN-M
@@ -243,8 +245,8 @@ budget owner, including an explicit one.
 > is never charged to REST weight: the notice puts COIN-M REST on the one REST
 > counter that the USDⓈ-M WebSocket API limit is stated not to share.
 
-`pool_usage()` reports REST weight only; reporting the WebSocket API counter is
-tracked in [#97](https://github.com/SharurTrading/binance-rs/issues/97).
+`pool_usage()` reports both counters: `ws_request_weight` carries the WebSocket
+API window with its limit, source, use and reset time.
 
 Spot's [WebSocket exchange information](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general)
 updates the same IP owner as REST, including clients configured separately from
@@ -431,10 +433,11 @@ injected clock:
 | Field | Meaning |
 | --- | --- |
 | `request_weight` | `REQUEST_WEIGHT` per minute. Spot and Options count REST and WebSocket API weight here together; the futures pool counts REST weight and COIN-M WebSocket API weight, not USDⓈ-M WebSocket API weight ([Futures WebSocket API weight](#futures-websocket-api-weight)) |
+| `ws_request_weight` | The USDⓈ-M WebSocket API's own minute window, where the pool counts one apart from REST (the futures pool, and explicit `BudgetLimits::usdm()` owners); `None` on pools that count both transports together, whose `request_weight` already includes it |
 | `raw_requests` | `RAW_REQUESTS` per five minutes, where the pool counts them (Spot) |
 | `key` | The pool read, as `pool_key()` names it; `None` for an explicit owner |
-| `limit`, `source` | The latest stated limit (`LimitSource::Stated`), or the documented baseline until a client of the pool reads exchange information (`LimitSource::Documented`) |
-| `used` | Spent in the current window: the pool's own count, raised to `X-MBX-USED-WEIGHT-1M` whenever a reply reports more |
+| `limit`, `source` | The latest stated limit (`LimitSource::Stated`), or the documented baseline until a client of the pool reads exchange information or a WebSocket reply states one (`LimitSource::Documented`) |
+| `used` | Spent in the current window: the pool's own count, raised to `X-MBX-USED-WEIGHT-1M` — or a WebSocket reply's `rateLimits` count for the separate window — whenever a reply reports more |
 | `interval`, `resets_in` | The window's length and the time until it starts again, aligned to the epoch as the venue's windows are |
 
 Every Spot, USDⓈ-M and COIN-M REST request builder has `weight()`: the weight

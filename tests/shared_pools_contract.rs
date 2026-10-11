@@ -591,6 +591,7 @@ mod pool_report {
                 0,
                 Duration::from_secs(45),
             );
+            assert_eq!(before.ws_request_weight, None);
             assert_window(
                 &before.raw_requests.unwrap(),
                 Duration::from_mins(5),
@@ -614,6 +615,7 @@ mod pool_report {
                 20,
                 Duration::from_secs(45),
             );
+            assert_eq!(after.ws_request_weight, None);
             assert_window(
                 &after.raw_requests.unwrap(),
                 Duration::from_mins(5),
@@ -765,6 +767,16 @@ mod pool_report {
                 Duration::from_secs(45),
             );
             assert_eq!(before.raw_requests, None);
+            // The WebSocket API window stands beside the REST one, unspent by
+            // REST traffic.
+            assert_window(
+                &before.ws_request_weight.unwrap(),
+                Duration::from_mins(1),
+                2400,
+                LimitSource::Documented,
+                0,
+                Duration::from_secs(45),
+            );
 
             let exchange = HttpFixture::new(200, "", ORDERS_ONLY, None, false).await;
             client(config.clone(), &exchange, &clock)
@@ -778,6 +790,10 @@ mod pool_report {
                 LimitSource::Documented,
                 1,
                 Duration::from_secs(45),
+            );
+            assert_eq!(
+                config.pool_usage().unwrap().ws_request_weight.unwrap().used,
+                0
             );
             exchange.finish().await;
         }
@@ -807,6 +823,15 @@ mod pool_report {
                 1200,
                 LimitSource::Stated,
                 1,
+                Duration::from_secs(45),
+            );
+            // A REST statement binds only the REST window.
+            assert_window(
+                &report.ws_request_weight.unwrap(),
+                Duration::from_mins(1),
+                2400,
+                LimitSource::Documented,
+                0,
                 Duration::from_secs(45),
             );
             assert_eq!(report.raw_requests, None);
@@ -922,6 +947,10 @@ mod pool_report {
                 1,
                 Duration::from_secs(45),
             );
+            assert_eq!(
+                config.pool_usage().unwrap().ws_request_weight.unwrap().used,
+                0
+            );
             exchange.finish().await;
         }
 
@@ -950,6 +979,15 @@ mod pool_report {
                 1200,
                 LimitSource::Stated,
                 1,
+                Duration::from_secs(45),
+            );
+            // A REST statement binds only the REST window.
+            assert_window(
+                &report.ws_request_weight.unwrap(),
+                Duration::from_mins(1),
+                2400,
+                LimitSource::Documented,
+                0,
                 Duration::from_secs(45),
             );
             assert_eq!(report.raw_requests, None);

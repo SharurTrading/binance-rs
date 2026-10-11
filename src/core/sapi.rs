@@ -473,7 +473,9 @@ impl Budgets {
             orders_per_day: None,
             raw_requests_per_five_minutes: None,
             connections_per_five_minutes: None,
-            shared_request_weight: false,
+            // SAPI has no WebSocket API, so no separate WebSocket window exists
+            // to report; like Options, this owner has one request-weight window.
+            shared_request_weight: true,
         })
     }
 }

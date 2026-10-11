@@ -924,6 +924,19 @@ fn ws_rates(v: &Value, now: u64, binary_timestamps: bool) -> RateEvidence {
             if let Some(number) = limit.get("intervalNum").and_then(Value::as_u64) {
                 e.counters
                     .insert(format!("{prefix}-{number}{letter}"), count);
+                // The minute weight entry states its window's limit next to the
+                // count; only a positive one is evidence, and anything else
+                // leaves the documented figure standing.
+                if prefix == "x-mbx-used-weight"
+                    && letter == "m"
+                    && number == 1
+                    && let Some(stated) = limit
+                        .get("limit")
+                        .and_then(Value::as_u64)
+                        .filter(|stated| *stated > 0)
+                {
+                    e.stated_weight_per_minute = Some(stated);
+                }
             }
         }
     }

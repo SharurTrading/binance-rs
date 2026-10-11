@@ -27,6 +27,10 @@ pub enum Outcome {
 pub struct RateEvidence {
     /// Safe rate/counter header names and values, including unknown future intervals.
     pub counters: BTreeMap<String, u64>,
+    /// A positive `REQUEST_WEIGHT` per-minute limit the reply stated in its
+    /// `rateLimits` alongside the counters, for the window they report; absent
+    /// when it states none, leaving the documented figure standing.
+    pub stated_weight_per_minute: Option<u64>,
     /// HTTP Retry-After seconds, or WebSocket retry deadline converted to a duration.
     pub retry_after: Option<Duration>,
     /// The venue sent retry timing this client cannot use, so no expiry is invented

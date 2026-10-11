@@ -13,10 +13,11 @@ use std::time::Duration;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum LimitSource {
-    /// The venue's documented figure, which stands until an exchange information
-    /// read by a client of the pool states one.
+    /// The venue's documented figure, which stands until a client of the pool
+    /// reads a venue statement of one.
     Documented,
-    /// The latest exchange information `rateLimits` entry a client of the pool read.
+    /// The latest venue statement a client of the pool read: an exchange
+    /// information `rateLimits` entry, or a WebSocket reply's `rateLimits`.
     Stated,
 }
 
@@ -31,7 +32,9 @@ pub struct WindowUsage {
     /// Whether the venue stated `limit` or it is the documented figure.
     pub source: LimitSource,
     /// Spent in the current window: the pool's own count of admitted requests,
-    /// raised to the venue's usage header whenever a reply reported more.
+    /// raised to the venue's usage evidence — `X-MBX-USED-WEIGHT-1M`, or a
+    /// WebSocket reply's `rateLimits` count for the separate window — whenever
+    /// a reply reported more.
     pub used: u64,
     /// Time until the current window ends and its count starts again from zero.
     pub resets_in: Duration,
@@ -49,10 +52,10 @@ pub struct PoolUsage {
     /// `RAW_REQUESTS` per five minutes, where the pool counts them (Spot).
     pub raw_requests: Option<WindowUsage>,
     /// The WebSocket API's own `REQUEST_WEIGHT` minute window, where the pool
-    /// counts one apart from REST weight (the futures pool, and explicit owners
-    /// built from `BudgetLimits::usdm`); `None` where the pool counts REST and
-    /// WebSocket API weight together, in which `request_weight` already
-    /// includes it.
+    /// counts one apart from REST weight (the futures pool, and explicit
+    /// owners built from `BudgetLimits::usdm` or `coinm`); `None` where the
+    /// pool counts REST and WebSocket API weight together, in which
+    /// `request_weight` already includes it.
     pub ws_request_weight: Option<WindowUsage>,
     /// The venue pool read; `None` for an explicit [`Budgets`] owner.
     pub key: Option<PoolKey>,

@@ -229,12 +229,6 @@ daily/ten-second order counts, and connection-attempt limits. Successful ordinar
 Spot submits/cancels release the documented weight reservation; failures remain
 charged and observed venue counters are never reduced.
 
-Spot FIX connection attempts count twice — once against the account and once
-against the IP — because the venue checks both independently. Two API keys
-trading FIX through one IP therefore draw on one shared attempt budget:
-`WeightPools::draw` attaches each key's FIX account scope to the same registry
-pool the Spot clients use, and a refused attempt never burns an account slot.
-
 `Config::budgets` replaces the drawn pool with an explicit owner, isolating the
 client from every pool. `Config::with_pools` draws from a registry the caller builds
 instead of the process's, so tests can share a pool without touching it:

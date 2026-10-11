@@ -317,8 +317,9 @@ impl HttpClient {
     ) -> Result<Response<T>, Error> {
         if op.path == "/api/v3/rateLimit/order" && (200..300).contains(&status) {
             let mut response: Response<T> = decode(op, status, value.clone(), meta)?;
-            let adoption = super::socket::order_query_rates(&value, &mut response.meta.rates)
-                .and_then(|()| {
+            let mut query_rates = RateEvidence::default();
+            let adoption =
+                super::socket::order_query_rates(&value, &mut query_rates).and_then(|()| {
                     self.budgets
                         .adopt_response_limits(None, Some(&value), false)
                 });
@@ -330,6 +331,10 @@ impl HttpClient {
                     outcome: Outcome::ReadFailed,
                     meta: Some(Box::new(response.meta)),
                 });
+            }
+            for (name, count) in query_rates.counters {
+                let current = response.meta.rates.counters.entry(name).or_default();
+                *current = (*current).max(count);
             }
             self.budgets
                 .observe(&response.meta.rates, observed_at, false)?;

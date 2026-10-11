@@ -703,25 +703,27 @@ impl SocketDriver {
             && (200..300).contains(&status)
             && value
                 .get("result")
+                .or_else(|| value.get("error"))
                 .and_then(|result| result.get("code"))
                 .and_then(Value::as_i64)
                 .is_none_or(|code| code >= 0)
         {
-            Some(
-                value
-                    .get("result")
-                    .ok_or(Error::Gap("account order limits result missing"))?,
-            )
+            value
+                .get("result")
+                .map(Some)
+                .ok_or(Error::Gap("account order limits result missing"))
         } else {
-            None
+            Ok(None)
         };
         let mut query_rates = RateEvidence::default();
-        let adoption = query
-            .map_or(Ok(()), |query| order_query_rates(query, &mut query_rates))
-            .and_then(|()| {
-                self.budgets
-                    .adopt_response_limits(value.get("rateLimits"), query, true)
-            });
+        let adoption = query.and_then(|query| {
+            query
+                .map_or(Ok(()), |query| order_query_rates(query, &mut query_rates))
+                .and_then(|()| {
+                    self.budgets
+                        .adopt_response_limits(value.get("rateLimits"), query, true)
+                })
+        });
         if adoption.is_err() {
             // Retain count evidence and the received answer, but adopt no limit.
             rates.stated_weight_per_minute = None;
@@ -755,11 +757,23 @@ impl SocketDriver {
             operation: p.op.name,
             rates,
         };
-        let payload = value
-            .get("result")
-            .or_else(|| value.get("error"))
-            .cloned()
-            .ok_or(Error::Gap("WebSocket response payload"))?;
+        let Some(payload) = value.get("result").or_else(|| value.get("error")).cloned() else {
+            // Missing payload is a correlated failure with received evidence.
+            // The original frame is retained by the caller before retirement.
+            if let Some(reply) = p.reply.take() {
+                let _ = reply.send(Err(Error::Transport {
+                    client_order_ids: meta.client_order_ids.clone(),
+                    operation: p.op.name,
+                    outcome: if p.op.mutation {
+                        Outcome::Unknown
+                    } else {
+                        Outcome::ReadFailed
+                    },
+                    meta: Some(Box::new(meta)),
+                }));
+            }
+            return Err(Error::Gap("WebSocket response payload"));
+        };
         if (200..300).contains(&status)
             && payload
                 .get("code")

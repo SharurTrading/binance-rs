@@ -706,6 +706,144 @@ async fn newly_stated_spot_minute_and_day_windows_count_admitted_placements() {
 }
 
 #[tokio::test]
+async fn missing_websocket_account_query_result_preserves_metadata_and_reports_a_gap() {
+    let pools = WeightPools::new();
+    let base = spot::Config::with_pools(spot::Environment::Production, &pools)
+        .unwrap()
+        .clock(clock())
+        .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap());
+    let before = base.account_usage().unwrap();
+    let (url, server) = spot_api_reply(json!({"status":200,"rateLimits":[
+        {"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":1,"count":2},
+        {"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":1,"count":7}
+    ]}))
+    .await;
+    let (client, mut events, driver) =
+        spot::WsClient::connect(base.clone().websocket_url(&url).unwrap())
+            .await
+            .unwrap();
+    let driver = tokio::spawn(driver.run());
+    let error = client
+        .account_rate_limits_orders(
+            &spot::ws_requests::AccountRateLimitsOrders::new(),
+            RequestId::new("missing-result").unwrap(),
+            deadline(),
+        )
+        .await
+        .unwrap_err();
+    assert!(
+        matches!(error, Error::Transport { outcome: Outcome::ReadFailed, meta: Some(ref meta), .. }
+        if meta.status == 200 && meta.rates.stated_limits_unusable
+        && meta.rates.counters.get("x-mbx-order-count-10s") == Some(&7))
+    );
+    let after = base.account_usage().unwrap();
+    assert_eq!(
+        (after.orders[0].limit, after.orders[0].source),
+        (before.orders[0].limit, before.orders[0].source)
+    );
+    assert_eq!(after.orders[0].used, 7);
+    assert_eq!(base.pool_usage().unwrap().request_weight.limit, 6000);
+    let mut gap = false;
+    let mut retained_frame = false;
+    while let Some(event) = events.recv().await {
+        gap |= matches!(event, spot::ApiEvent::Gap { .. });
+        retained_frame |= matches!(event, spot::ApiEvent::Unknown { ref payload, .. }
+            if payload.as_value().get("id") == Some(&json!("missing-result")));
+    }
+    assert!(gap);
+    assert!(retained_frame);
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+
+#[tokio::test]
+async fn missing_websocket_order_payload_keeps_unknown_outcome_and_client_identity() {
+    let pools = WeightPools::new();
+    let base = spot::Config::with_pools(spot::Environment::Production, &pools)
+        .unwrap()
+        .clock(clock())
+        .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap());
+    let (url, server) = spot_api_reply(json!({"status":200,"rateLimits":[
+        {"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":50,"count":1}
+    ]}))
+    .await;
+    let (client, mut events, driver) =
+        spot::WsClient::connect(base.clone().websocket_url(&url).unwrap())
+            .await
+            .unwrap();
+    let driver = tokio::spawn(driver.run());
+    let order = spot::ws_requests::OrderPlace::new()
+        .symbol(Symbol::new("BTCUSDT").unwrap())
+        .side("BUY")
+        .type_value("MARKET")
+        .quantity(Decimal::ONE)
+        .new_client_order_id(spot::ClientOrderId::new("missing-ack").unwrap());
+    let error = client
+        .order_place(&order, RequestId::new("missing-ack").unwrap(), deadline())
+        .await
+        .unwrap_err();
+    assert!(
+        matches!(error, Error::Transport { outcome: Outcome::Unknown, ref client_order_ids, meta: Some(ref meta), .. }
+        if meta.status == 200 && meta.rates.counters.get("x-mbx-order-count-10s") == Some(&1)
+        && client_order_ids.get("newClientOrderId").map(String::as_str) == Some("missing-ack")
+        && meta.client_order_ids == *client_order_ids)
+    );
+    assert_eq!(base.account_usage().unwrap().orders[0].used, 1);
+    let mut gap = false;
+    while let Some(event) = events.recv().await {
+        gap |= matches!(event, spot::ApiEvent::Gap { .. });
+    }
+    assert!(gap);
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+
+#[tokio::test]
+async fn invalid_rest_account_query_keeps_only_independent_header_counts_in_metadata() {
+    let pools = WeightPools::new();
+    let base = spot::Config::with_pools(spot::Environment::Production, &pools)
+        .unwrap()
+        .clock(clock());
+    let entries = json!([
+        {"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":1,"count":9},
+        {"rateLimitType":"ORDERS","interval":"DAY","intervalNum":1,"limit":0,"count":3}
+    ]);
+    let fixture = HttpFixture::new(
+        200,
+        "X-MBX-ORDER-COUNT-10S: 2\r\n",
+        &entries.to_string(),
+        None,
+        false,
+    )
+    .await;
+    let client = spot::RestClient::new(
+        base.clone()
+            .rest_url(&fixture.url)
+            .unwrap()
+            .credentials(Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap()),
+    )
+    .unwrap();
+    let before = base.account_usage().unwrap();
+    let error = client
+        .rate_limit_order(&spot::rest_requests::RateLimitOrder::new(), deadline())
+        .await
+        .unwrap_err();
+    assert!(
+        matches!(error, Error::Transport { outcome: Outcome::ReadFailed, meta: Some(ref meta), .. }
+        if meta.status == 200 && meta.rates.stated_limits_unusable
+        && meta.rates.counters.get("x-mbx-order-count-10s") == Some(&2)
+        && !meta.rates.counters.contains_key("x-mbx-order-count-1d"))
+    );
+    let after = base.account_usage().unwrap();
+    assert_eq!(
+        (after.orders[0].limit, after.orders[0].source),
+        (before.orders[0].limit, before.orders[0].source)
+    );
+    assert_eq!(after.orders[0].used, 2);
+    fixture.finish().await;
+}
+
+#[tokio::test]
 async fn malformed_websocket_account_query_refuses_with_metadata_and_keeps_limits() {
     for entry in [
         json!({"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":0,"count":9}),

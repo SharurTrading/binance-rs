@@ -712,7 +712,8 @@
                       "x-rust-type": "crate::Symbol"
                     },
                     "c": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true
                     },
                     "o": {
                       "type": "string",
@@ -787,7 +788,8 @@
                           "x-rust-type": "crate::Symbol"
                         },
                         "c": {
-                          "type": "string"
+                          "type": "string",
+                          "x-decimal": true
                         },
                         "o": {
                           "type": "string",
@@ -926,7 +928,8 @@
                       "x-decimal": true
                     },
                     "c": {
-                      "type": "string"
+                      "type": "string",
+                      "x-decimal": true
                     },
                     "Q": {
                       "type": "string",
@@ -1046,7 +1049,8 @@
                           "x-decimal": true
                         },
                         "c": {
-                          "type": "string"
+                          "type": "string",
+                          "x-decimal": true
                         },
                         "Q": {
                           "type": "string",
@@ -2782,7 +2786,8 @@
                     "x-rust-type": "crate::Symbol"
                   },
                   "c": {
-                    "type": "string"
+                    "type": "string",
+                    "x-decimal": true
                   },
                   "o": {
                     "type": "string",
@@ -2854,7 +2859,8 @@
                         "x-rust-type": "crate::Symbol"
                       },
                       "c": {
-                        "type": "string"
+                        "type": "string",
+                        "x-decimal": true
                       },
                       "o": {
                         "type": "string",
@@ -2998,7 +3004,8 @@
                     "x-decimal": true
                   },
                   "c": {
-                    "type": "string"
+                    "type": "string",
+                    "x-decimal": true
                   },
                   "Q": {
                     "type": "string",
@@ -3115,7 +3122,8 @@
                         "x-decimal": true
                       },
                       "c": {
-                        "type": "string"
+                        "type": "string",
+                        "x-decimal": true
                       },
                       "Q": {
                         "type": "string",

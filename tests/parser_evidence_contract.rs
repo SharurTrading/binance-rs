@@ -299,3 +299,132 @@ fn kline_close_prices_keep_sibling_optionality() {
         .unwrap();
     assert_eq!(event.k.c, None);
 }
+
+fn refuses_non_decimal_ticker_last_price<E: DeserializeOwned>(wire: &serde_json::Value) {
+    for last in ["not-a-price", "0.12345678901234567890123456789", ""] {
+        let mut value = wire.clone();
+        value["c"] = json!(last);
+        assert!(
+            serde_json::from_value::<E>(value).is_err(),
+            "ticker last price {last:?} must not decode"
+        );
+    }
+}
+
+// The venue documents the ticker last price `c` in the same string-encoded
+// exact decimal form as the other ticker prices; USD-M already types it as
+// Decimal (BN-DECIMAL-01). A non-decimal or unrepresentable last price is a
+// decode failure, never retained as text.
+#[test]
+fn spot_ticker_last_prices_are_exact_decimal_evidence() {
+    // Official 24hrTicker payload (BNBBTC), issue #106.
+    // https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#individual-symbol-ticker-streams
+    let wire = json!({"e":"24hrTicker","E":1_672_515_782_136_i64,"s":"BNBBTC",
+        "p":"0.0015","P":"250.00","w":"0.0018","x":"0.0009","c":"0.0025","Q":"10",
+        "b":"0.0024","B":"10","a":"0.0026","A":"100","o":"0.0010","h":"0.0025",
+        "l":"0.0010","v":"10000","q":"18","O":0,"C":86_400_000_i64,"F":0,"L":18_150,"n":18_151});
+    let event: spot::stream_models::TickerEvent = serde_json::from_value(wire).unwrap();
+    assert_eq!(event.c, Decimal::new(25, 4));
+    // Official 1hTicker rolling-window payload; the array streams carry the
+    // same bodies per the venue's "Same as" note.
+    // https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#individual-symbol-rolling-window-statistics-streams
+    let window = json!({"e":"1hTicker","E":1_672_515_782_136_i64,"s":"BNBBTC",
+        "p":"0.0015","P":"250.00","o":"0.0010","h":"0.0025","l":"0.0010","c":"0.0025",
+        "w":"0.0018","v":"10000","q":"18","O":0,"C":1_675_216_573_749_i64,"F":0,
+        "L":18_150,"n":18_151});
+    let event: spot::stream_models::RollingWindowTickerEvent =
+        serde_json::from_value(window.clone()).unwrap();
+    assert_eq!(event.c, Decimal::new(25, 4));
+    let item: spot::stream_models::AllMarketRollingWindowTickerEventItem =
+        serde_json::from_value(window).unwrap();
+    assert_eq!(item.c, Decimal::new(25, 4));
+    // Official 24hrMiniTicker payload.
+    // https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#individual-symbol-mini-ticker-stream
+    let mini = json!({"e":"24hrMiniTicker","E":1_672_515_782_136_i64,"s":"BNBBTC",
+        "c":"0.0025","o":"0.0010","h":"0.0025","l":"0.0010","v":"10000","q":"18"});
+    let event: spot::stream_models::MiniTickerEvent = serde_json::from_value(mini.clone()).unwrap();
+    assert_eq!(event.c, Decimal::new(25, 4));
+    let item: spot::stream_models::AllMiniTickerEventItem = serde_json::from_value(mini).unwrap();
+    assert_eq!(item.c, Decimal::new(25, 4));
+}
+
+// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#individual-symbol-ticker-streams
+#[test]
+fn coinm_ticker_last_prices_are_exact_decimal_evidence() {
+    // Official COIN-M example bodies.
+    let ticker = json!({"e":"24hrTicker","E":1_591_268_262_453_i64,"s":"BTCUSD_200626",
+        "p":"-43.4","P":"-0.452","w":"0.00147974","c":"9548.5","Q":"2","o":"9591.9",
+        "h":"10000.0","l":"7000.0","v":"487850","q":"32968676323.46222700",
+        "O":1_591_181_820_000_i64,"C":1_591_268_262_442_i64,"F":512_014,"L":615_289,
+        "n":103_272,"ps":"BTCUSD","st":1});
+    let event: coinm::stream_models::IndividualSymbolTickerStreamsEvent =
+        serde_json::from_value(ticker.clone()).unwrap();
+    assert_eq!(event.c, Decimal::new(95_485, 1));
+    let item: coinm::stream_models::AllMarketTickersStreamsEventItem =
+        serde_json::from_value(ticker).unwrap();
+    assert_eq!(item.c, Decimal::new(95_485, 1));
+    // https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#individual-symbol-mini-ticker-stream
+    let mini = json!({"e":"24hrMiniTicker","E":1_591_267_704_450_i64,
+        "s":"BTCUSD_200626","ps":"BTCUSD","c":"9561.7","o":"9580.9","h":"10000.0",
+        "l":"7000.0","v":"487476","q":"33264343847.22378500","st":1});
+    let event: coinm::stream_models::IndividualSymbolMiniTickerStreamEvent =
+        serde_json::from_value(mini.clone()).unwrap();
+    assert_eq!(event.c, Decimal::new(95_617, 1));
+    let item: coinm::stream_models::AllMarketMiniTickersStreamEventItem =
+        serde_json::from_value(mini).unwrap();
+    assert_eq!(item.c, Decimal::new(95_617, 1));
+}
+
+#[test]
+fn ticker_last_prices_refuse_non_decimal_evidence() {
+    // Official 24hrTicker payload (BNBBTC).
+    // https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#individual-symbol-ticker-streams
+    let spot_ticker = json!({"e":"24hrTicker","E":1_672_515_782_136_i64,"s":"BNBBTC",
+        "p":"0.0015","P":"250.00","w":"0.0018","x":"0.0009","c":"0.0025","Q":"10",
+        "b":"0.0024","B":"10","a":"0.0026","A":"100","o":"0.0010","h":"0.0025",
+        "l":"0.0010","v":"10000","q":"18","O":0,"C":86_400_000_i64,"F":0,"L":18_150,"n":18_151});
+    refuses_non_decimal_ticker_last_price::<spot::stream_models::TickerEvent>(&spot_ticker);
+    // Official 1hTicker rolling-window payload.
+    // https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#individual-symbol-rolling-window-statistics-streams
+    let spot_window = json!({"e":"1hTicker","E":1_672_515_782_136_i64,"s":"BNBBTC",
+        "p":"0.0015","P":"250.00","o":"0.0010","h":"0.0025","l":"0.0010","c":"0.0025",
+        "w":"0.0018","v":"10000","q":"18","O":0,"C":1_675_216_573_749_i64,"F":0,
+        "L":18_150,"n":18_151});
+    refuses_non_decimal_ticker_last_price::<spot::stream_models::RollingWindowTickerEvent>(
+        &spot_window,
+    );
+    refuses_non_decimal_ticker_last_price::<
+        spot::stream_models::AllMarketRollingWindowTickerEventItem,
+    >(&spot_window);
+    // Official 24hrMiniTicker payload.
+    // https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#individual-symbol-mini-ticker-stream
+    let spot_mini = json!({"e":"24hrMiniTicker","E":1_672_515_782_136_i64,"s":"BNBBTC",
+        "c":"0.0025","o":"0.0010","h":"0.0025","l":"0.0010","v":"10000","q":"18"});
+    refuses_non_decimal_ticker_last_price::<spot::stream_models::MiniTickerEvent>(&spot_mini);
+    refuses_non_decimal_ticker_last_price::<spot::stream_models::AllMiniTickerEventItem>(
+        &spot_mini,
+    );
+    // Official COIN-M example bodies.
+    // https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#individual-symbol-ticker-streams
+    let coinm_ticker = json!({"e":"24hrTicker","E":1_591_268_262_453_i64,"s":"BTCUSD_200626",
+        "p":"-43.4","P":"-0.452","w":"0.00147974","c":"9548.5","Q":"2","o":"9591.9",
+        "h":"10000.0","l":"7000.0","v":"487850","q":"32968676323.46222700",
+        "O":1_591_181_820_000_i64,"C":1_591_268_262_442_i64,"F":512_014,"L":615_289,
+        "n":103_272,"ps":"BTCUSD","st":1});
+    refuses_non_decimal_ticker_last_price::<coinm::stream_models::IndividualSymbolTickerStreamsEvent>(
+        &coinm_ticker,
+    );
+    refuses_non_decimal_ticker_last_price::<coinm::stream_models::AllMarketTickersStreamsEventItem>(
+        &coinm_ticker,
+    );
+    // https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#individual-symbol-mini-ticker-stream
+    let coinm_mini = json!({"e":"24hrMiniTicker","E":1_591_267_704_450_i64,
+        "s":"BTCUSD_200626","ps":"BTCUSD","c":"9561.7","o":"9580.9","h":"10000.0",
+        "l":"7000.0","v":"487476","q":"33264343847.22378500","st":1});
+    refuses_non_decimal_ticker_last_price::<
+        coinm::stream_models::IndividualSymbolMiniTickerStreamEvent,
+    >(&coinm_mini);
+    refuses_non_decimal_ticker_last_price::<
+        coinm::stream_models::AllMarketMiniTickersStreamEventItem,
+    >(&coinm_mini);
+}

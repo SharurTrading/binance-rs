@@ -282,6 +282,170 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn the_futures_pool_reports_its_websocket_weight_window_apart_from_rest() {
+        // The USDⓈ-M WebSocket API keeps its own IP weight window: "The
+        // WebSocket API IP weight limit (shared across ws-fapi and ws-fapi-mm)
+        // is not shared with the REST API IP weight limit (fapi, fapi-mm)", and
+        // every reply's `rateLimits` reports that window's count and limit
+        // (WebSocket API general info, checked 2026-10-11).
+        let (listener, url) = listener().await;
+        let server = tokio::spawn(async move {
+            let mut ws = accept(listener).await;
+            let frame = next_json(&mut ws).await;
+            assert_eq!(frame["method"], "depth");
+            ws.send(Message::text(
+                json!({"id": frame["id"], "status": 200,
+                    "rateLimits": [
+                        {"rateLimitType": "REQUEST_WEIGHT", "interval": "MINUTE",
+                         "intervalNum": 1, "limit": 2400, "count": 17},
+                        {"rateLimitType": "ORDERS", "interval": "SECOND",
+                         "intervalNum": 10, "limit": 300}
+                    ],
+                    "result": {"lastUpdateId": 1, "bids": [], "asks": []}})
+                .to_string(),
+            ))
+            .await
+            .unwrap();
+            finish_server(ws).await;
+        });
+        let pools = binance_client::WeightPools::new();
+        let base = binance_client::usdm::Config::with_pools(
+            binance_client::usdm::Environment::Production,
+            &pools,
+        )
+        .unwrap()
+        .clock(std::sync::Arc::new(support::FixedClock(1000)));
+        let (client, mut events, driver) =
+            WsClient::connect(base.clone().websocket_url(&url).unwrap())
+                .await
+                .unwrap();
+        let driver = tokio::spawn(driver.run());
+        assert!(matches!(
+            events.recv().await,
+            Some(ApiEvent::Established(_))
+        ));
+
+        // The five-weight handshake is the first spend of the window the pool
+        // now reports; the REST window carries nothing of it.
+        let window = base.pool_usage().unwrap().ws_request_weight.unwrap();
+        assert_eq!(
+            (window.limit, window.used, window.resets_in),
+            (2400, 5, Duration::from_secs(59))
+        );
+        assert_eq!(window.source, binance_client::LimitSource::Documented);
+        let rest = base.pool_usage().unwrap().request_weight;
+        assert_eq!(
+            (rest.limit, rest.used, rest.source),
+            (2400, 0, binance_client::LimitSource::Documented)
+        );
+
+        let depth = binance_client::usdm::ws_requests::OrderBook::new()
+            .symbol(Symbol::new("BTCUSDT").unwrap())
+            .limit(5);
+        client
+            .order_book(&depth, RequestId::new("depth-report").unwrap(), deadline())
+            .await
+            .unwrap();
+
+        // The reply's rateLimits raises the window's count to the venue's
+        // figure and states its limit; neither reaches the REST window.
+        let usage = base.pool_usage().unwrap();
+        let window = usage.ws_request_weight.unwrap();
+        assert_eq!(
+            (window.limit, window.source, window.used),
+            (2400, binance_client::LimitSource::Stated, 17)
+        );
+        let rest = usage.request_weight;
+        assert_eq!(
+            (rest.limit, rest.source, rest.used),
+            (2400, binance_client::LimitSource::Documented, 0)
+        );
+
+        // A pool without a separate window reports none; its `request_weight`
+        // already counts both transports.
+        let spot = binance_client::spot::Config::with_pools(
+            binance_client::spot::Environment::Production,
+            &pools,
+        )
+        .unwrap()
+        .clock(std::sync::Arc::new(support::FixedClock(1000)));
+        assert_eq!(spot.pool_usage().unwrap().ws_request_weight, None);
+
+        retire(&client, &mut events, driver).await;
+        server.await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn coinm_websocket_weight_counts_against_the_rest_window() {
+        // COIN-M's WebSocket API counts the REST IP weight window, not a
+        // separate one of its own: "Rate limits are the same as on REST API
+        // and are shared with REST API" (COIN-M WebSocket API general info),
+        // so its handshake, requests and reply evidence all charge the window
+        // the futures pool reports as `request_weight`.
+        let (listener, url) = listener().await;
+        let server = tokio::spawn(async move {
+            let mut ws = accept(listener).await;
+            let frame = next_json(&mut ws).await;
+            assert_eq!(frame["method"], "session.status");
+            ws.send(Message::text(
+                json!({"id": frame["id"], "status": 200,
+                    "rateLimits": [
+                        {"rateLimitType": "REQUEST_WEIGHT", "interval": "MINUTE",
+                         "intervalNum": 1, "limit": 2400, "count": 9}
+                    ],
+                    "result": {}})
+                .to_string(),
+            ))
+            .await
+            .unwrap();
+            finish_server(ws).await;
+        });
+        let pools = binance_client::WeightPools::new();
+        let base = binance_client::coinm::Config::with_pools(
+            binance_client::coinm::Environment::Production,
+            &pools,
+        )
+        .unwrap()
+        .clock(std::sync::Arc::new(support::FixedClock(1000)));
+        let (client, mut events, driver) =
+            binance_client::coinm::WsClient::connect(base.clone().websocket_url(&url).unwrap())
+                .await
+                .unwrap();
+        let driver = tokio::spawn(driver.run());
+        assert!(matches!(
+            events.recv().await,
+            Some(binance_client::coinm::ApiEvent::Established(_))
+        ));
+        let usage = base.pool_usage().unwrap();
+        assert_eq!(usage.request_weight.used, 5);
+        assert_eq!(usage.ws_request_weight.unwrap().used, 0);
+
+        client
+            .session_status(RequestId::new("cm-status").unwrap(), deadline())
+            .await
+            .unwrap();
+        let usage = base.pool_usage().unwrap();
+        assert_eq!(
+            (
+                usage.request_weight.limit,
+                usage.request_weight.source,
+                usage.request_weight.used
+            ),
+            (2400, binance_client::LimitSource::Stated, 9)
+        );
+        assert_eq!(usage.ws_request_weight.unwrap().used, 0);
+
+        client.close().await.unwrap();
+        assert!(matches!(
+            events.recv().await,
+            Some(binance_client::coinm::ApiEvent::Retired(g)) if g == client.generation()
+        ));
+        assert!(events.recv().await.is_none());
+        driver.await.unwrap().unwrap();
+        server.await.unwrap();
+    }
+
+    #[tokio::test]
     async fn signed_frame_keeps_decimal_strings_and_integer_timestamps() {
         let (listener, url) = listener().await;
         let server = tokio::spawn(async move {

@@ -104,6 +104,7 @@ impl Streams {
             config.timeout,
             crate::core::socket::SocketPolicy {
                 handshake: crate::core::Cost::default(),
+                separate_ws_weight: false,
                 // The codec answers every received ping, so pong servicing must
                 // stay inside the raw-stream connection's documented budget:
                 // "WebSocket connections have a limit of 10 incoming messages
@@ -153,6 +154,7 @@ impl Streams {
             config.timeout,
             crate::core::socket::SocketPolicy {
                 handshake: crate::core::Cost::default(),
+                separate_ws_weight: false,
                 // Same documented raw-stream connection duty cycle as the
                 // market route: 10 venue-incoming messages per second bound the
                 // pong stream this driver emits (Options WebSocket Market

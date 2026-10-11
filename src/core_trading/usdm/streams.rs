@@ -117,6 +117,7 @@ impl Streams {
             config.timeout,
             crate::core::socket::SocketPolicy {
                 handshake: crate::core::Cost::default(),
+                separate_ws_weight: false,
                 // Pongs and stream control messages share the connection's
                 // documented budget: "WebSocket connections have a limit of 10
                 // incoming messages per second" (USDⓈ-M WebSocket Market
@@ -166,6 +167,7 @@ impl Streams {
             config.timeout,
             crate::core::socket::SocketPolicy {
                 handshake: crate::core::Cost::default(),
+                separate_ws_weight: false,
                 // Same documented raw-stream connection duty cycle as the
                 // market route: 10 venue-incoming messages per second bound the
                 // pong stream this driver emits (USDⓈ-M WebSocket Market

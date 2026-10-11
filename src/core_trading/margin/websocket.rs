@@ -216,6 +216,9 @@ impl WsClient {
                     ws_weight: 2,
                     ..Cost::default()
                 },
+                // Margin's WebSocket API draws on the Spot pool, whose weight
+                // window REST and WebSocket API share.
+                separate_ws_weight: false,
                 incoming_limit: 5,
                 time_unit: crate::TimeUnit::Milliseconds,
                 binary_decoder: None,
@@ -457,6 +460,7 @@ impl RiskStream {
                     connections: 1,
                     ..Cost::default()
                 },
+                separate_ws_weight: false,
                 incoming_limit: 5,
                 time_unit: crate::TimeUnit::Milliseconds,
                 binary_decoder: None,

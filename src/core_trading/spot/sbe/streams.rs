@@ -190,6 +190,7 @@ impl MarketStreams {
                     connections: 1,
                     ..Default::default()
                 },
+                separate_ws_weight: false,
                 // Documented SBE stream connection duty cycle: client
                 // PING/PONG/JSON frames count against a rate limit of
                 // "5 requests per second" (Spot SBE Market Data Streams,

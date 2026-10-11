@@ -193,6 +193,7 @@ pub(crate) struct SocketDriver {
     binary_decoder: Option<BinaryDecoder>,
     binary_timestamps: bool,
     require_binary_success: bool,
+    separate_ws_weight: bool,
     pending: BTreeMap<String, Pending>,
     // IDs are evidence until generation retirement, including completed and timed-out calls.
     used_ids: BTreeSet<String>,
@@ -215,6 +216,13 @@ pub(crate) fn tls_config() -> Result<rustls::ClientConfig, Error> {
 /// Product-sourced connection/control admission, independent of wire models.
 pub(crate) struct SocketPolicy {
     pub handshake: Cost,
+    /// Whether this socket family's `REQUEST_WEIGHT` evidence counts a window
+    /// the venue keeps apart from REST: true only for the USDⓈ-M WebSocket
+    /// API; false where the venue counts WebSocket weight in the REST window
+    /// (Spot and COIN-M document theirs there) and on stream sockets, whose
+    /// replies carry no weight evidence. Reply counters, their stated limit
+    /// and weight refunds follow it.
+    pub separate_ws_weight: bool,
     /// Venue-incoming message ceiling per sliding second, charged by every pong
     /// and every stream control message. Every call site supplies this from its
     /// route's documented connection duty cycle; no default arm derives it, so an
@@ -310,6 +318,7 @@ impl Socket {
             binary_decoder: policy.binary_decoder,
             binary_timestamps: policy.binary_decoder.is_some(),
             require_binary_success: policy.binary_decoder.is_some() && !policy.api_key_header,
+            separate_ws_weight: policy.separate_ws_weight,
             pending: BTreeMap::new(),
             used_ids: BTreeSet::new(),
         };
@@ -686,7 +695,7 @@ impl SocketDriver {
             .map_err(|_| Error::Gap("clock unavailable after response"))?;
         let rates = ws_rates(value, now, self.binary_timestamps);
         self.budgets.observe_ban(status, &rates)?;
-        self.budgets.observe(&rates, now, true)?;
+        self.budgets.observe(&rates, now, self.separate_ws_weight)?;
         let meta = ResponseMeta {
             time_unit: self.time_unit,
             client_order_ids: p.client_order_ids.clone(),
@@ -706,8 +715,11 @@ impl SocketDriver {
                 .is_none_or(|c| c >= 0)
             && let Some(success) = p.op.success_weight
         {
-            self.budgets
-                .refund_weight(p.weight.saturating_sub(success), p.admitted_at, true)?;
+            self.budgets.refund_weight(
+                p.weight.saturating_sub(success),
+                p.admitted_at,
+                self.separate_ws_weight,
+            )?;
         }
         if let Some(reply) = p.reply.take() {
             if let Err(result) = reply.send(Ok((payload.clone(), meta.clone())))
@@ -906,6 +918,19 @@ fn ws_rates(v: &Value, now: u64, binary_timestamps: bool) -> RateEvidence {
             if let Some(number) = limit.get("intervalNum").and_then(Value::as_u64) {
                 e.counters
                     .insert(format!("{prefix}-{number}{letter}"), count);
+                // The minute weight entry states its window's limit next to the
+                // count; only a positive one is evidence, and anything else
+                // leaves the documented figure standing.
+                if prefix == "x-mbx-used-weight"
+                    && letter == "m"
+                    && number == 1
+                    && let Some(stated) = limit
+                        .get("limit")
+                        .and_then(Value::as_u64)
+                        .filter(|stated| *stated > 0)
+                {
+                    e.stated_weight_per_minute = Some(stated);
+                }
             }
         }
     }

@@ -103,6 +103,7 @@ impl Streams {
                     connections: 1,
                     ..Default::default()
                 },
+                separate_ws_weight: false,
                 // Documented connection duty cycle: "WebSocket connections have
                 // a limit of 5 incoming messages per second", each a ping, a pong
                 // or a JSON control message (Spot WebSocket Streams, WebSocket

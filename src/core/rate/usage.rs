@@ -41,12 +41,19 @@ pub struct WindowUsage {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct PoolUsage {
-    /// `REQUEST_WEIGHT` per minute. On a pool that counts REST and WebSocket API
-    /// weight together, which every pool drawn from [`crate::WeightPools`] does,
-    /// it counts both.
+    /// `REQUEST_WEIGHT` per minute on the REST IP window. On a pool that counts
+    /// REST and WebSocket API weight together (Spot, Options, SAPI) it counts
+    /// both; the futures pool counts only REST here and reports the WebSocket
+    /// API window separately.
     pub request_weight: WindowUsage,
     /// `RAW_REQUESTS` per five minutes, where the pool counts them (Spot).
     pub raw_requests: Option<WindowUsage>,
+    /// The WebSocket API's own `REQUEST_WEIGHT` minute window, where the pool
+    /// counts one apart from REST weight (the futures pool, and explicit owners
+    /// built from `BudgetLimits::usdm`); `None` where the pool counts REST and
+    /// WebSocket API weight together, in which `request_weight` already
+    /// includes it.
+    pub ws_request_weight: Option<WindowUsage>,
     /// The venue pool read; `None` for an explicit [`Budgets`] owner.
     pub key: Option<PoolKey>,
 }
@@ -58,6 +65,17 @@ impl Budgets {
         match ip.stated_weight_per_minute {
             Some(limit) => (limit, LimitSource::Stated),
             None => (self.limits.weight_per_minute, LimitSource::Documented),
+        }
+    }
+
+    /// The pool's WebSocket API minute weight limit, where it counts one apart
+    /// from REST: the venue's latest statement in a WebSocket reply's
+    /// `rateLimits`, or the documented figure until one is read. Admission and
+    /// the report both use it.
+    pub(super) fn ws_weight_limit(&self, ws: &State) -> (u64, LimitSource) {
+        match ws.stated_weight_per_minute {
+            Some(limit) => (limit, LimitSource::Stated),
+            None => (self.limits.ws_weight_per_minute, LimitSource::Documented),
         }
     }
 
@@ -82,18 +100,27 @@ impl Budgets {
             .ip
             .lock()
             .map_err(|_| Error::Configuration("IP budget poisoned"))?;
-        let window = |name: &str, window: u64, (limit, source): (u64, LimitSource)| WindowUsage {
+        let ws_ip = self
+            .ws_ip
+            .lock()
+            .map_err(|_| Error::Configuration("WS IP budget poisoned"))?;
+        let window = |state: &State,
+                      name: &str,
+                      window: u64,
+                      (limit, source): (u64, LimitSource)| WindowUsage {
             interval: Duration::from_millis(window),
             limit,
             source,
-            used: ip.current(name, window, now),
+            used: state.current(name, window, now),
             resets_in: Duration::from_millis(window - now % window),
         };
         Ok(PoolUsage {
-            request_weight: window("weight", 60_000, self.weight_limit(&ip)),
+            request_weight: window(&ip, "weight", 60_000, self.weight_limit(&ip)),
             raw_requests: self
                 .raw_request_limit(&ip)
-                .map(|limit| window("raw", 300_000, limit)),
+                .map(|limit| window(&ip, "raw", 300_000, limit)),
+            ws_request_weight: (!self.limits.shared_request_weight)
+                .then(|| window(&ws_ip, "weight", 60_000, self.ws_weight_limit(&ws_ip))),
             key: self.key,
         })
     }

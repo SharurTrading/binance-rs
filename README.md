@@ -186,12 +186,12 @@ WebSocket lifecycles.
 ## Budgets
 
 Spot, Futures and Options `Config::new` draw their IP budgets from the process's pool for
-that venue pool and environment, so every client counts against one weight limit:
+that venue pool and environment, so every client counts against one venue pool:
 
 | Pool | Products | Baseline minute weight | Source |
 | --- | --- | ---: | --- |
 | Spot | Spot | 6,000 | [Spot rate limiters](https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#rate-limiters-ratelimittype) |
-| Futures | USDⓈ-M and COIN-M together | 2,400 | [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice), A.3 |
+| Futures | USDⓈ-M and COIN-M together | 2,400 REST; 2,400 WebSocket API | [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice), A.3; [USDⓈ-M WebSocket API general info](https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-api-general-info) |
 | Options | Options | 2,400 | [Options rate limiters](https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition) |
 
 Demo and production never share a pool. Each pool starts at its documented baseline;
@@ -203,7 +203,12 @@ positive limit is refused as `Error::Gap` and leaves the pool unchanged. `ORDERS
 entries are account limits and are not adopted. Every `X-MBX-USED-WEIGHT-1M` raises
 the pool's count, and a `Retry-After` or `418` holds every client of the pool. A
 request the pool cannot take is refused unsent as `Error::Admission` with its retry
-delay. The futures pool counts REST and WebSocket API weight together.
+delay. The futures pool keeps two minute weight windows: REST weight (shared by
+USDⓈ-M and COIN-M, and by COIN-M's WebSocket API, whose rate limits its own general
+info states are "shared with REST API") and the USDⓈ-M WebSocket API's own window,
+which the venue keeps apart from REST and which only USDⓈ-M WebSocket API traffic —
+plus the documented overlap of REST single/batch order place, modify and cancel —
+charges.
 
 Spot's [WebSocket exchange information](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general)
 updates the same IP owner as REST, including clients configured separately from
@@ -223,6 +228,12 @@ one account, pass one account owner explicitly. Spot shares REST/WS weight,
 daily/ten-second order counts, and connection-attempt limits. Successful ordinary
 Spot submits/cancels release the documented weight reservation; failures remain
 charged and observed venue counters are never reduced.
+
+Spot FIX connection attempts count twice — once against the account and once
+against the IP — because the venue checks both independently. Two API keys
+trading FIX through one IP therefore draw on one shared attempt budget:
+`WeightPools::draw` attaches each key's FIX account scope to the same registry
+pool the Spot clients use, and a refused attempt never burns an account slot.
 
 `Config::budgets` replaces the drawn pool with an explicit owner, isolating the
 client from every pool. `Config::with_pools` draws from a registry the caller builds
@@ -279,11 +290,12 @@ injected clock:
 
 | Field | Meaning |
 | --- | --- |
-| `request_weight` | `REQUEST_WEIGHT` per minute; on every drawn pool it counts REST and WebSocket API weight together |
+| `request_weight` | `REQUEST_WEIGHT` per minute on the REST window; on the Spot, Options and SAPI pools it counts REST and WebSocket API weight together |
+| `ws_request_weight` | The WebSocket API's own `REQUEST_WEIGHT` minute window, where the pool counts one apart from REST (the futures pool); `None` on pools that count both transports together, whose `request_weight` already includes it |
 | `raw_requests` | `RAW_REQUESTS` per five minutes, where the pool counts them (Spot) |
 | `key` | The pool read, as `pool_key()` names it; `None` for an explicit owner |
-| `limit`, `source` | The latest stated limit (`LimitSource::Stated`), or the documented baseline until a client of the pool reads exchange information (`LimitSource::Documented`) |
-| `used` | Spent in the current window: the pool's own count, raised to `X-MBX-USED-WEIGHT-1M` whenever a reply reports more |
+| `limit`, `source` | The latest stated limit (`LimitSource::Stated`), or the documented baseline until a client of the pool reads exchange information or a WebSocket reply states one (`LimitSource::Documented`) |
+| `used` | Spent in the current window: the pool's own count, raised to `X-MBX-USED-WEIGHT-1M` — or a WebSocket reply's `rateLimits` count for the separate window — whenever a reply reports more |
 | `interval`, `resets_in` | The window's length and the time until it starts again, aligned to the epoch as the venue's windows are |
 
 Every Spot, USDⓈ-M and COIN-M REST request builder has `weight()`: the weight

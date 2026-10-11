@@ -32,6 +32,8 @@ pub struct BudgetLimits {
 }
 impl BudgetLimits {
     /// Binance's documented production USDⓈ-M limits (conservative schema baseline).
+    /// The WebSocket API minute weight window is its own, not shared with REST
+    /// (<https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-api-general-info>).
     #[must_use]
     pub fn usdm() -> Self {
         Self {
@@ -47,12 +49,14 @@ impl BudgetLimits {
     }
     /// COIN-M's current shared UM/CM limits after the June 2026 integration; the
     /// futures pool every USDⓈ-M and COIN-M `Config::new` draws on starts here.
+    /// REST weight is the UM/CM-shared window of the integration notice, while
+    /// the USDⓈ-M WebSocket API keeps its own minute window; COIN-M's WebSocket
+    /// API counts against REST
+    /// (<https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-api-general-info>),
+    /// so only USDⓈ-M WebSocket API traffic charges the separate window.
     #[must_use]
     pub fn coinm() -> Self {
-        Self {
-            shared_request_weight: true,
-            ..Self::usdm()
-        }
+        Self::usdm()
     }
     /// Options' native minute limits, documented in its public endpoint definitions:
     /// <https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition>.
@@ -276,7 +280,7 @@ impl Budgets {
         let ws_cost = vec![(
             "weight",
             60_000,
-            self.limits.ws_weight_per_minute,
+            self.ws_weight_limit(&ws_ip).0,
             if self.limits.shared_request_weight {
                 0
             } else {
@@ -386,9 +390,9 @@ impl Budgets {
         &self,
         amount: u64,
         now: u64,
-        websocket: bool,
+        separate_ws_weight: bool,
     ) -> Result<(), Error> {
-        let owner = if websocket && !self.limits.shared_request_weight {
+        let owner = if separate_ws_weight && !self.limits.shared_request_weight {
             &self.ws_ip
         } else {
             &self.ip
@@ -420,7 +424,18 @@ impl Budgets {
         }
         Ok(())
     }
-    pub(crate) fn observe(&self, e: &RateEvidence, now: u64, websocket: bool) -> Result<(), Error> {
+    /// Apply reply rate evidence. `separate_ws_weight` names the window the
+    /// venue counted the request against: a WebSocket API kept apart from REST
+    /// charges its own window, and any other socket charges the REST one.
+    ///
+    /// # Errors
+    /// Returns a configuration error if a budget lock is poisoned.
+    pub(crate) fn observe(
+        &self,
+        e: &RateEvidence,
+        now: u64,
+        separate_ws_weight: bool,
+    ) -> Result<(), Error> {
         let mut ip = self
             .ip
             .lock()
@@ -444,7 +459,7 @@ impl Budgets {
         for (name, count) in &e.counters {
             let (state, key, window) = match name.as_str() {
                 "x-mbx-used-weight-1m" => (
-                    if websocket && !self.limits.shared_request_weight {
+                    if separate_ws_weight && !self.limits.shared_request_weight {
                         &mut ws_ip
                     } else {
                         &mut ip
@@ -468,6 +483,21 @@ impl Budgets {
                 *current = (now / window, 0);
             }
             current.1 = current.1.max(*count);
+        }
+        if let Some(stated) = e.stated_weight_per_minute {
+            // A WebSocket reply's `rateLimits` states its window's limit alongside
+            // the count. Like exchange information, two statements leave the
+            // stricter one standing, and the same REST/WS routing applies.
+            let state = if separate_ws_weight && !self.limits.shared_request_weight {
+                &mut ws_ip
+            } else {
+                &mut ip
+            };
+            state.stated_weight_per_minute = Some(
+                state
+                    .stated_weight_per_minute
+                    .map_or(stated, |current: u64| current.min(stated)),
+            );
         }
         Ok(())
     }
@@ -534,9 +564,13 @@ pub enum VenuePool {
     /// SAPI's independent endpoint IP scopes, shared by Wallet, Convert and Margin
     /// REST (<https://developers.binance.com/en/docs/products/wallet/general-info>).
     Sapi,
-    /// USDⓈ-M and COIN-M, which share one IP weight limit and one
+    /// USDⓈ-M and COIN-M, which share one REST IP weight limit and one
     /// `X-MBX-USED-WEIGHT-1M` counter
     /// (<https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice>, A.3).
+    /// The USDⓈ-M WebSocket API keeps its own minute weight window
+    /// (<https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-api-general-info>),
+    /// and COIN-M's WebSocket API counts against the REST window
+    /// (<https://developers.binance.info/docs/derivatives/coin-margined-futures/websocket-api-general-info>).
     Futures,
     /// Options' EAPI IP limit, independent of Spot, SAPI and Futures
     /// (<https://developers.binance.com/en/docs/products/derivatives-trading-options/common-definition>).

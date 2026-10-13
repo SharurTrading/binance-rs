@@ -4515,8 +4515,9 @@
           "in": "query",
           "required": false,
           "schema": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "description": "Comma-separated list of wallet transaction IDs; the endpoint prose takes precedence over its scalar int64 annotation.",
+            "x-rust-type": "super::DepositIds"
           }
         },
         {

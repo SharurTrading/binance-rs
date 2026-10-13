@@ -378,8 +378,16 @@ def generate(kind):
             fields += [f'    #[serde(rename = {lit(key)}, skip_serializing_if = "Option::is_none")]',f'    {field}: Option<{typ}>,']
             arg = 'impl Into<String>' if typ=='String' else typ
             val = 'value.into()' if typ=='String' else 'value'
-            setters += [f'    /// Set the provider `{key}` parameter.',
-                '    #[must_use]',f'    pub fn {setter}(mut self, value: {arg}) -> Self {{ self.{field} = Some({val}); self }}']
+            if PRODUCT == 'wallet' and op['operationId'] == 'depositHistoryV2' and key == 'depositId':
+                setters += ['    /// Set one numeric provider `depositId` without changing its wire spelling.',
+                    '    #[must_use]',
+                    '    pub fn deposit_id(mut self, value: i64) -> Self { self.deposit_id = Some(value.into()); self }',
+                    '    /// Set exact native IDs as one comma-separated provider `depositId` parameter.',
+                    '    #[must_use]',
+                    '    pub fn deposit_ids(mut self, value: super::DepositIds) -> Self { self.deposit_id = Some(value); self }']
+            else:
+                setters += [f'    /// Set the provider `{key}` parameter.',
+                    '    #[must_use]',f'    pub fn {setter}(mut self, value: {arg}) -> Self {{ self.{field} = Some({val}); self }}']
             if s.get('enum'):
                 enums.append('('+lit(key)+', &['+', '.join(lit(str(v)) for v in s['enum'])+'])')
             if typ=='i64' and ('minimum' in s or 'maximum' in s):

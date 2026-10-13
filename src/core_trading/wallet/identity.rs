@@ -31,6 +31,36 @@ impl<'de> Deserialize<'de> for WithdrawalId {
     }
 }
 
+/// Nonempty V2 deposit-history IDs encoded in one comma-separated query value.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DepositIds(Vec<String>);
+impl DepositIds {
+    /// Retain every native ID exactly, including its spelling, order and duplicates.
+    ///
+    /// # Errors
+    /// Refuses an empty list or an empty ID, comma, or control character in any ID.
+    pub fn new(ids: Vec<String>) -> Result<Self, Error> {
+        if ids.is_empty()
+            || ids
+                .iter()
+                .any(|id| id.is_empty() || id.chars().any(|ch| ch == ',' || ch.is_control()))
+        {
+            return Err(Error::Validation("deposit ID list"));
+        }
+        Ok(Self(ids))
+    }
+}
+impl From<i64> for DepositIds {
+    fn from(id: i64) -> Self {
+        Self(vec![id.to_string()])
+    }
+}
+impl Serialize for DepositIds {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(&self.0.join(","))
+    }
+}
+
 /// Nonempty caller-selected dust assets, encoded as Binance's comma-separated list.
 #[derive(Clone, Debug)]
 pub struct DustAssets(Vec<crate::Asset>);

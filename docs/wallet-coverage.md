@@ -94,6 +94,18 @@ receipt evidence. `schema/wallet-coverage.json` and bindings regenerate offline.
 [Capital histories](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital) and [Travel Rule histories](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule) require explicit intervals strictly shorter than 90 days; capital and V2 Travel Rule withdrawals queried by caller ID require strictly less than 7 days.
 Dividend history allows up to and including 180 days, as specified by the [official schema notes](https://developers.binance.info/en/docs/catalog/core-trading-wallet/api/rest-api/1.0.0/schema.yaml).
 
+> [!NOTE]
+> The [V2 Travel Rule deposit history endpoint](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#deposit-history-v2)
+> describes `depositId` as a comma-separated list while annotating it as scalar
+> `int64`. The normalized request schema follows the endpoint prose for this one
+> query parameter. `DepositIds` writes one comma-separated value and preserves
+> each caller-supplied ID's text, order, leading zeros and duplicates. The
+> existing `.deposit_id(i64)` setter still writes one numeric ID. Structural
+> validation rejects empty lists, empty entries, commas within an entry and
+> control characters; no numeric interpretation or list-count cap is inferred.
+> Synthetic loopback tests prove encoding and client validation, not live venue
+> acceptance of a multi-ID request.
+
 `tests/wallet_contract.rs` covers precision, malformed/missing asset evidence,
 withdrawal caller IDs and redaction, truncated mutations without retry, quota
 headers, independent endpoints, read-only POST failure, isolated transfer symbols,
@@ -103,11 +115,14 @@ Travel Rule deposit/withdrawal intervals shorter than 90 days
 (and 7 days for V2 withdrawals queried by caller ID), and withdrawal ID-list
 bounds. V2 Travel Rule withdrawal identity lists preserve the documented
 maximum of 45 records.
-
 `tests/internal_transfer_contract.rs` exercises signed transfer and explicit
 history pages, exact Decimal and native identities, required evidence, ambiguous
 mutation outcomes without replay, and independent POST UID versus GET IP quotas
 using credential-free loopback responses.
+
+`tests/deposit_id_list_contract.rs` checks the V2 deposit-history single-ID
+compatibility, exact multi-ID query value, structural refusals before dispatch
+and a list longer than 45 IDs without borrowing the withdrawal cap.
 
 Human execution review is required before merge. [Issue #16](https://github.com/SharurTrading/binance-rs/issues/16)
 tracks this implementation. Margin and Options trading have their own clients.

@@ -3190,7 +3190,7 @@ impl Request for DepositHistoryTravelRule {
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct DepositHistoryV2 {
     #[serde(rename = "depositId", skip_serializing_if = "Option::is_none")]
-    deposit_id: Option<i64>,
+    deposit_id: Option<super::DepositIds>,
     #[serde(rename = "txId", skip_serializing_if = "Option::is_none")]
     tx_id: Option<crate::SensitiveString>,
     #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
@@ -3217,9 +3217,15 @@ impl DepositHistoryV2 {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Set the provider `depositId` parameter.
+    /// Set one numeric provider `depositId` without changing its wire spelling.
     #[must_use]
     pub fn deposit_id(mut self, value: i64) -> Self {
+        self.deposit_id = Some(value.into());
+        self
+    }
+    /// Set exact native IDs as one comma-separated provider `depositId` parameter.
+    #[must_use]
+    pub fn deposit_ids(mut self, value: super::DepositIds) -> Self {
         self.deposit_id = Some(value);
         self
     }

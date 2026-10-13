@@ -36,6 +36,17 @@ unknown codes and every 5xx remain ambiguous for mutations. Sensitive addresses,
 tags, questionnaires, personal data, and unknown fields have redacted Debug.
 Callers explicitly access provider data; the client never logs raw bodies.
 
+Universal transfer uses the signed Wallet POST with exact Decimal `amount`, native
+`asset` and transfer `type`. The provider offers no caller transaction ID for this
+endpoint. Isolated-margin transfers keep their required `fromSymbol`, `toSymbol`,
+or both. The response preserves `tranId` without treating receipt as a booked
+transfer. The signed history GET takes an explicit `current` page and `size` up to
+100; callers own pagination and may supply the documented time and isolated-symbol
+filters. Rows preserve exact amounts, native IDs and status text. Missing page
+evidence stays absent; malformed required row fields fail decoding. A future status
+spelling is retained without inventing confirmation. POST charges UID weight 300,
+while history GET charges IP weight 1, each against its own endpoint scope.
+
 SAPI limits are independent per endpoint: IP **12,000/minute** or UID
 **180,000/minute**, according to the operation's documented scope. Withdrawal
 history also retains its documented **10 requests/second** limit, pinned in the
@@ -92,6 +103,12 @@ Travel Rule deposit/withdrawal intervals shorter than 90 days
 (and 7 days for V2 withdrawals queried by caller ID), and withdrawal ID-list
 bounds. V2 Travel Rule withdrawal identity lists preserve the documented
 maximum of 45 records.
+
+`tests/internal_transfer_contract.rs` exercises signed transfer and explicit
+history pages, exact Decimal and native identities, required evidence, ambiguous
+mutation outcomes without replay, and independent POST UID versus GET IP quotas
+using credential-free loopback responses.
+
 Human execution review is required before merge. [Issue #16](https://github.com/SharurTrading/binance-rs/issues/16)
 tracks this implementation. Margin and Options trading have their own clients.
 

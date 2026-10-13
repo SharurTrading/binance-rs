@@ -60,10 +60,20 @@ pub enum KeepAliveFault {
 enum Policy {
     /// One request per connection; each response carries `Connection: close`.
     Close { hold: bool },
+    /// Read one request, then leave its response headers pending.
+    NoHeaders,
     /// Keep-alive responses with optional fault injection.
     KeepAlive { fault: Option<KeepAliveFault> },
 }
 impl HttpFixture {
+    #[allow(
+        dead_code,
+        reason = "shared fixture is compiled into other test binaries"
+    )]
+    pub async fn hold_headers() -> Self {
+        Self::spawn(Vec::new(), Policy::NoHeaders).await
+    }
+
     pub async fn new(
         status: u16,
         headers: &str,
@@ -114,6 +124,12 @@ impl HttpFixture {
                 let (mut stream, _) = accepted;
                 counter.fetch_add(1, Ordering::SeqCst);
                 match policy {
+                    Policy::NoHeaders => {
+                        let request = tokio::select! {()=cancel.cancelled()=>break,result=read_request(&mut stream)=>result};
+                        tx.send(request).unwrap();
+                        cancel.cancelled().await;
+                        break;
+                    }
                     Policy::Close { hold } => {
                         let request = tokio::select! {()=cancel.cancelled()=>break,result=read_request(&mut stream)=>result};
                         tx.send(request).unwrap();

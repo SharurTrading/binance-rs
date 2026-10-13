@@ -17,7 +17,7 @@ pub use control::StreamControl;
 pub use credentials::{Credentials, Signer};
 pub use error::{
     Error, OperationLeg, Outcome, PartialOperation, RateEvidence, Response, ResponseMeta,
-    VenueFailure,
+    TransportFailure, VenueFailure,
 };
 pub(crate) use http::HttpClient;
 pub use identity::{Asset, ClientOrderId, RequestId, SensitiveString, Symbol};

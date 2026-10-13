@@ -286,6 +286,7 @@ impl ApiEvents {
                             } else {
                                 crate::Outcome::ReadFailed
                             },
+                            failure: None,
                             meta: Some(Box::new(meta.clone())),
                         })
                         .map(|data| Response { data, meta })

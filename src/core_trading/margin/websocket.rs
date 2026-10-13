@@ -214,6 +214,7 @@ fn decode_subscription(
             client_order_ids: result.meta.client_order_ids.clone(),
             operation: SUBSCRIBE.name,
             outcome: crate::Outcome::Unknown,
+            failure: None,
             meta: Some(Box::new(result.meta)),
         });
     }

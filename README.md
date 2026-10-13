@@ -136,6 +136,17 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
   proves rejection. Query venue truth; a timeout does not cancel an order.
 - Responses/errors retain safe status, venue code, rate counters, retry timing, and
   caller order IDs (parameter paths identify nested batch members).
+  `Error::Transport.failure` provides an optional `TransportFailure` category for
+  HTTP failures: response headers, rate evidence, body read, JSON/binary decoding,
+  content type, or response model decoding. It holds no raw dependency error,
+  response body, or URL. WebSocket transport errors use `None`, apart from the
+  shared response model decoder's `ResponseDecodeFailed` category. Adding this
+  public field changes exhaustive `Error::Transport` matches and construction
+  literals; callers should use `..` when matching and continue to use `Outcome`
+  to decide whether a mutation needs venue reconciliation. A failure applying
+  rate evidence after a response now reports `Unknown` for a sent mutation or
+  `ReadFailed` for a read, retaining the received metadata and caller IDs; it
+  previously surfaced as a configuration error classified `NotSent`.
   Venue failures and market-stream control refusals also retain an exact optional
   venue explanation as `VenueMessage`. It is redacted in error formatting and
   debugging; it may echo a URL, IP address, or token. Access through

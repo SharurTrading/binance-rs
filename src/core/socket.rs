@@ -168,6 +168,7 @@ fn control_lost(control: StreamControl) -> Error {
         client_order_ids: BTreeMap::new(),
         operation: control.method(),
         outcome: control.lost_outcome(),
+        failure: None,
         meta: None,
     }
 }
@@ -276,12 +277,14 @@ impl Socket {
                 client_order_ids: BTreeMap::new(),
                 operation: "connect",
                 outcome: Outcome::NotSent,
+                failure: None,
                 meta: None,
             })?
             .map_err(|_| Error::Transport {
                 client_order_ids: BTreeMap::new(),
                 operation: "connect",
                 outcome: Outcome::NotSent,
+                failure: None,
                 meta: None,
             })?;
         let (tx, commands) = mpsc::unbounded_channel();
@@ -348,6 +351,7 @@ impl Socket {
                 client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome: Outcome::NotSent,
+                failure: None,
                 meta: None,
             })?;
         rx.await.map_err(|_| Error::Transport {
@@ -358,6 +362,7 @@ impl Socket {
             } else {
                 Outcome::ReadFailed
             },
+            failure: None,
             meta: None,
         })?
     }
@@ -380,6 +385,7 @@ impl Socket {
                 client_order_ids: BTreeMap::new(),
                 operation: control.method(),
                 outcome: Outcome::NotSent,
+                failure: None,
                 meta: None,
             })?;
         rx.await.map_err(|_| control_lost(control))?
@@ -647,6 +653,7 @@ impl SocketDriver {
                     } else {
                         Outcome::ReadFailed
                     },
+                    failure: None,
                     meta: None,
                 }));
             }
@@ -769,6 +776,7 @@ impl SocketDriver {
                     } else {
                         Outcome::ReadFailed
                     },
+                    failure: None,
                     meta: Some(Box::new(meta)),
                 }));
             }
@@ -907,6 +915,7 @@ impl SocketDriver {
                     } else {
                         Outcome::ReadFailed
                     },
+                    failure: None,
                     meta: None,
                 }));
             }

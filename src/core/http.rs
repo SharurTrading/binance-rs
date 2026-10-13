@@ -3,7 +3,7 @@
 
 use super::{
     Budgets, Clock, Credentials, Error, Operation, Outcome, RateEvidence, Request, Response,
-    ResponseMeta, Security, request,
+    ResponseMeta, Security, TransportFailure, request,
 };
 use serde::de::DeserializeOwned;
 use std::{sync::Arc, time::Duration};
@@ -108,18 +108,17 @@ impl HttpClient {
         body: &[u8],
         status: u16,
         binary_content: bool,
-    ) -> Result<serde_json::Value, Error> {
+    ) -> Result<serde_json::Value, TransportFailure> {
         if let Some((_, decode)) = self.binary {
             if binary_content {
-                decode(body)
+                decode(body).map_err(|_| TransportFailure::BinaryDecodeFailed)
             } else if !(200..300).contains(&status) {
-                serde_json::from_slice(body)
-                    .map_err(|_| Error::Gap("malformed SBE negotiation error"))
+                serde_json::from_slice(body).map_err(|_| TransportFailure::JsonDecodeFailed)
             } else {
-                Err(Error::Gap("unexpected SBE response content type"))
+                Err(TransportFailure::UnexpectedContentType)
             }
         } else {
-            serde_json::from_slice(body).map_err(|_| Error::Gap("malformed JSON response"))
+            serde_json::from_slice(body).map_err(|_| TransportFailure::JsonDecodeFailed)
         }
     }
     fn prepare<R: Request>(
@@ -231,12 +230,18 @@ impl HttpClient {
                 client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome,
+                failure: Some(TransportFailure::ResponseHeadersTimeout),
                 meta: None,
             })?
-            .map_err(|_| Error::Transport {
+            .map_err(|error| Error::Transport {
                 client_order_ids: client_order_ids.clone(),
                 operation: op.name,
                 outcome,
+                failure: Some(if error.is_timeout() {
+                    TransportFailure::ResponseHeadersTimeout
+                } else {
+                    TransportFailure::ResponseHeadersFailed
+                }),
                 meta: None,
             })?;
         let status = response.status().as_u16();
@@ -260,25 +265,21 @@ impl HttpClient {
         let observed_at = self.clock.now_millis().unwrap_or(now);
         self.budgets
             .observe_cost(cost, &meta.rates, observed_at, status)
-            .map_err(|_| Error::Transport {
-                client_order_ids: client_order_ids.clone(),
-                operation: op.name,
-                outcome,
-                meta: Some(Box::new(meta.clone())),
+            .map_err(|_| {
+                transport_after_response(&meta, outcome, TransportFailure::RateEvidenceFailed)
             })?;
         let body = tokio::time::timeout_at(attempt_deadline, response.bytes())
             .await
-            .map_err(|_| Error::Transport {
-                client_order_ids: client_order_ids.clone(),
-                operation: op.name,
-                outcome,
-                meta: Some(Box::new(meta.clone())),
+            .map_err(|_| {
+                transport_after_response(&meta, outcome, TransportFailure::ResponseBodyTimeout)
             })?
-            .map_err(|_| Error::Transport {
-                client_order_ids: client_order_ids.clone(),
-                operation: op.name,
-                outcome,
-                meta: Some(Box::new(meta.clone())),
+            .map_err(|error| {
+                let failure = if error.is_timeout() {
+                    TransportFailure::ResponseBodyTimeout
+                } else {
+                    TransportFailure::ResponseBodyFailed
+                };
+                transport_after_response(&meta, outcome, failure)
             })?;
         let decoded = if R::EMPTY_RESPONSE && (200..300).contains(&status) && body.is_empty() {
             // An explicitly documented no-data receipt, not recovery from a decode
@@ -287,12 +288,7 @@ impl HttpClient {
         } else {
             self.decode_body(&body, status, binary_content)
         };
-        let value = decoded.map_err(|_| Error::Transport {
-            client_order_ids: client_order_ids.clone(),
-            operation: op.name,
-            outcome,
-            meta: Some(Box::new(meta.clone())),
-        })?;
+        let value = decoded.map_err(|failure| transport_after_response(&meta, outcome, failure))?;
         if (200..300).contains(&status)
             && value
                 .get("code")
@@ -301,7 +297,10 @@ impl HttpClient {
             && let Some(success) = op.success_weight
         {
             self.budgets
-                .refund_weight(cost.weight.saturating_sub(success), now, false)?;
+                .refund_weight(cost.weight.saturating_sub(success), now, false)
+                .map_err(|_| {
+                    transport_after_response(&meta, outcome, TransportFailure::RateEvidenceFailed)
+                })?;
         }
         self.decode_response(op, status, value, meta, observed_at)
     }
@@ -325,22 +324,50 @@ impl HttpClient {
                 });
             if adoption.is_err() {
                 response.meta.rates.stated_limits_unusable = true;
-                return Err(Error::Transport {
-                    client_order_ids: response.meta.client_order_ids.clone(),
-                    operation: op.name,
-                    outcome: Outcome::ReadFailed,
-                    meta: Some(Box::new(response.meta)),
-                });
+                return Err(transport_after_response(
+                    &response.meta,
+                    Outcome::ReadFailed,
+                    TransportFailure::RateEvidenceFailed,
+                ));
             }
             for (name, count) in query_rates.counters {
                 let current = response.meta.rates.counters.entry(name).or_default();
                 *current = (*current).max(count);
             }
-            self.budgets
-                .observe(&response.meta.rates, observed_at, false)?;
+            self.observe_query_rates(&response.meta, observed_at)?;
             return Ok(response);
         }
         decode(op, status, value, meta)
+    }
+
+    pub(crate) fn observe_query_rates(
+        &self,
+        meta: &ResponseMeta,
+        observed_at: u64,
+    ) -> Result<(), Error> {
+        self.budgets
+            .observe(&meta.rates, observed_at, false)
+            .map_err(|_| {
+                transport_after_response(
+                    meta,
+                    Outcome::ReadFailed,
+                    TransportFailure::RateEvidenceFailed,
+                )
+            })
+    }
+}
+
+fn transport_after_response(
+    meta: &ResponseMeta,
+    outcome: Outcome,
+    failure: TransportFailure,
+) -> Error {
+    Error::Transport {
+        client_order_ids: meta.client_order_ids.clone(),
+        operation: meta.operation,
+        outcome,
+        failure: Some(failure),
+        meta: Some(Box::new(meta.clone())),
     }
 }
 
@@ -359,15 +386,13 @@ pub(crate) fn decode<T: DeserializeOwned>(
         return Err(super::error::failure_for(op, status, &value, meta.rates)
             .with_order_ids(meta.client_order_ids));
     }
-    let data = serde_json::from_value(value).map_err(|_| Error::Transport {
-        client_order_ids: meta.client_order_ids.clone(),
-        operation: op.name,
-        outcome: if op.mutation {
+    let data = serde_json::from_value(value).map_err(|_| {
+        let outcome = if op.mutation {
             Outcome::Unknown
         } else {
             Outcome::ReadFailed
-        },
-        meta: Some(Box::new(meta.clone())),
+        };
+        transport_after_response(&meta, outcome, TransportFailure::ResponseDecodeFailed)
     })?;
     Ok(Response { data, meta })
 }

@@ -118,6 +118,7 @@ impl WsClient {
                 client_order_ids: response.meta.client_order_ids.clone(),
                 operation: R::OP.name,
                 outcome: crate::Outcome::ReadFailed,
+                failure: None,
                 meta: Some(Box::new(response.meta)),
             });
         }
@@ -388,6 +389,7 @@ impl ApiEvents {
                             } else {
                                 crate::Outcome::ReadFailed
                             },
+                            failure: None,
                             meta: Some(Box::new(meta.clone())),
                         })
                         .map(|data| Response { data, meta })

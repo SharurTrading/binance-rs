@@ -9,7 +9,7 @@
 )]
 #[allow(dead_code, reason = "shared fixture helpers")]
 mod support;
-use binance_client::{Asset, Clock, Credentials, Decimal, Error, Outcome, convert};
+use binance_client::{Asset, Clock, Credentials, Decimal, Error, ExitReserve, Outcome, convert};
 use std::sync::{
     Arc,
     atomic::{AtomicUsize, Ordering},
@@ -349,7 +349,11 @@ async fn uncertain_limit_cancellation_retains_native_order_identity() {
         false,
     )
     .await;
-    let client = convert::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+    let owner = config().rest_url(&fixture.url).unwrap();
+    owner
+        .set_exit_reserve(ExitReserve::default().sapi_weight(180_000))
+        .unwrap();
+    let client = convert::RestClient::new(owner).unwrap();
     let request = convert::rest_requests::CancelLimitOrder::new()
         .order_id(convert::OrderId::new(123).unwrap())
         .build()
@@ -365,6 +369,99 @@ async fn uncertain_limit_cancellation_retains_native_order_identity() {
         panic!("transport")
     };
     assert_eq!(client_order_ids["orderId"], "123");
+    assert_eq!(fixture.connections_accepted(), 1);
+    fixture.finish().await;
+}
+
+#[tokio::test]
+async fn cancel_limit_order_uses_reserved_uid_weight_without_exceeding_venue_limit() {
+    let mut fixture = HttpFixture::new(
+        200,
+        "X-SAPI-USED-UID-WEIGHT-1M: 179800\r\n",
+        r#"{"quoteId":"venue-quote","ratio":"15.125","inverseRatio":"0.0661157","validTimestamp":2000,"fromAmount":"0.001","toAmount":"0.015125","orderId":123,"status":"CANCELED"}"#,
+        None,
+        false,
+    )
+    .await;
+    let owner = config().rest_url(&fixture.url).unwrap();
+    let client = convert::RestClient::new(owner.clone()).unwrap();
+    let cancel = convert::rest_requests::CancelLimitOrder::new()
+        .order_id(convert::OrderId::new(123).unwrap())
+        .build()
+        .unwrap();
+
+    client
+        .send_quote_request(&quote_request(), deadline())
+        .await
+        .unwrap();
+    client
+        .cancel_limit_order(&cancel, deadline())
+        .await
+        .unwrap();
+    owner
+        .set_exit_reserve(ExitReserve::default().sapi_weight(200))
+        .unwrap();
+
+    let ordinary = client
+        .send_quote_request(&quote_request(), deadline())
+        .await
+        .unwrap_err();
+    assert!(matches!(ordinary, Error::Admission { .. }));
+    assert_eq!(ordinary.outcome(), Some(Outcome::NotSent));
+    client
+        .cancel_limit_order(&cancel, deadline())
+        .await
+        .unwrap();
+    let exhausted = client
+        .cancel_limit_order(&cancel, deadline())
+        .await
+        .unwrap_err();
+    assert!(matches!(exhausted, Error::Admission { .. }));
+    assert_eq!(exhausted.outcome(), Some(Outcome::NotSent));
+    assert_eq!(fixture.connections_accepted(), 3);
+    for expected in [
+        "POST /sapi/v1/convert/getQuote",
+        "POST /sapi/v1/convert/limit/cancelOrder",
+        "POST /sapi/v1/convert/limit/cancelOrder",
+    ] {
+        assert!(fixture.requests.recv().await.unwrap().starts_with(expected));
+    }
+    fixture.finish().await;
+}
+
+#[tokio::test]
+async fn reserved_cancel_obeys_provider_cooldown_without_retry() {
+    let fixture = HttpFixture::new(
+        429,
+        "Retry-After: 30\r\n",
+        r#"{"code":-1003,"msg":"Too many requests"}"#,
+        None,
+        false,
+    )
+    .await;
+    let owner = config().rest_url(&fixture.url).unwrap();
+    owner
+        .set_exit_reserve(ExitReserve::default().sapi_weight(180_000))
+        .unwrap();
+    let client = convert::RestClient::new(owner).unwrap();
+    let cancel = convert::rest_requests::CancelLimitOrder::new()
+        .order_id(convert::OrderId::new(123).unwrap())
+        .build()
+        .unwrap();
+
+    client
+        .cancel_limit_order(&cancel, deadline())
+        .await
+        .unwrap_err();
+    let cooldown = client
+        .cancel_limit_order(&cancel, deadline())
+        .await
+        .unwrap_err();
+    assert!(matches!(
+        &cooldown,
+        Error::Admission { retry_after } if *retry_after == std::time::Duration::from_secs(30)
+    ));
+    assert_eq!(cooldown.outcome(), Some(Outcome::NotSent));
     assert_eq!(fixture.connections_accepted(), 1);
     fixture.finish().await;
 }

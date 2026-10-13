@@ -12,6 +12,7 @@ pub(crate) fn cost(op: Operation, _p: &BTreeMap<String, Value>) -> Result<Cost, 
         return Err(Error::Configuration("missing Convert quota evidence"));
     }
     Ok(Cost {
+        exit: crate::core::rate::reserve::ExitEligibility::from_flag(op.name == "cancelLimitOrder"),
         sapi: Some(SapiCost {
             requests_per_minute: None,
             endpoint: op.path,

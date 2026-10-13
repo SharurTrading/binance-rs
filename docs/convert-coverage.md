@@ -56,6 +56,10 @@ across endpoint and UID owners sharing that IP. Missing/malformed ban retry timi
 with `CooldownTimingUnknown`; no retry delay or restored authority is fabricated.
 The caller releases it with `release_unknown_ban`.
 No Spot/Futures aggregate budget is borrowed.
+The pure [`cancelLimitOrder`](https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#cancel-limit-order)
+request can use a caller-configured SAPI exit reserve at its documented 200 UID weight;
+quotes, acceptance, placement and reads remain ordinary. Both paths charge the same
+venue counter, and a reserve never overrides a provider cooldown or permits a retry.
 Clients start no tasks or hidden runtime. Production SAPI uses HTTPS, explicit
 credentials/proxies and caller deadlines; dependency retries are disabled.
 

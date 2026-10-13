@@ -786,6 +786,7 @@ macro_rules! membership_contract {
 
             #[tokio::test]
             async fn a_venue_error_reply_is_a_typed_refusal_naming_its_code() {
+                let message = "synthetic IP=192.0.2.19 signed-url=fixture-url token=fixture-token\n拒否";
                 let (l, url) = listener().await;
                 let (a, b) = (stream($symbol_a), stream($symbol_b));
                 let kept = a.name().to_owned();
@@ -795,7 +796,7 @@ macro_rules! membership_contract {
                     let request = next_control(&mut peer).await;
                     assert_eq!(request["method"], "SUBSCRIBE");
                     peer.send(Message::text(
-                        json!({"code":2,"msg":"Invalid request: too many parameters","id":request["id"]}).to_string(),
+                        json!({"code":2,"msg":message,"id":request["id"]}).to_string(),
                     ))
                     .await
                     .unwrap();
@@ -807,11 +808,17 @@ macro_rules! membership_contract {
                 let generation = established(&mut events).await;
                 let error = events.subscribe(std::slice::from_ref(&b), deadline()).await.unwrap_err();
                 assert_eq!(error.outcome(), Some(Outcome::Rejected));
+                let debug = format!("{error:?}");
+                let display = error.to_string();
+                for sentinel in ["192.0.2.19", "fixture-url", "fixture-token"] {
+                    assert!(!debug.contains(sentinel));
+                    assert!(!display.contains(sentinel));
+                }
                 match error {
-                    Error::ControlRefused { operation, code, message } => {
+                    Error::ControlRefused { operation, code, message: venue_message } => {
                         assert_eq!(operation, "SUBSCRIBE");
                         assert_eq!(code, 2);
-                        assert_eq!(message.as_deref(), Some("Invalid request: too many parameters"));
+                        assert_eq!(venue_message.as_ref().map(binance_client::VenueMessage::expose_sensitive_text), Some(message));
                     }
                     other => panic!("unexpected error {other:?}"),
                 }

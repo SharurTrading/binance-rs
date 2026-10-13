@@ -11,6 +11,7 @@ pub(crate) mod request;
 pub(crate) mod sapi;
 pub(crate) mod socket;
 mod time;
+mod venue_message;
 
 pub use control::StreamControl;
 pub use credentials::{Credentials, Signer};
@@ -30,3 +31,4 @@ pub(crate) use request::{parameters, validate_parameters};
 pub(crate) use socket::{Socket, SocketEvent};
 pub(crate) use time::validate_url;
 pub use time::{Clock, SystemClock, TimeUnit};
+pub use venue_message::VenueMessage;

@@ -9,7 +9,7 @@
 //! `Streams` delegates here so the wire shape and the per-socket stream cap are
 //! enforced once.
 
-use super::{Error, Socket};
+use super::{Error, Socket, VenueMessage};
 use std::collections::{BTreeMap, BTreeSet};
 use tokio::time::Instant;
 
@@ -68,7 +68,7 @@ impl StreamControl {
             let code = code.as_i64()?;
             let message = match envelope.get("msg") {
                 None => None,
-                Some(msg) => Some(msg.as_str()?.to_owned()),
+                Some(msg) => Some(VenueMessage::new(msg.as_str()?)),
             };
             return Some(Err(Error::ControlRefused {
                 operation: self.method(),
@@ -219,15 +219,23 @@ mod tests {
 
     #[test]
     fn refusal_codes_are_read_from_the_documented_and_the_enveloped_shape() {
+        let message = "synthetic IP=192.0.2.17 signed-url=fixture-url token=fixture-token\n拒否";
         for value in [
-            json!({"code":2,"msg":"Invalid request: too many parameters","id":1}),
-            json!({"error":{"code":2,"msg":"Invalid request: too many parameters"},"id":1}),
+            json!({"code":2,"msg":message,"id":1}),
+            json!({"error":{"code":2,"msg":message},"id":1}),
         ] {
-            assert!(matches!(
-                StreamControl::Subscribe.answer(&value),
-                Some(Err(Error::ControlRefused { operation: "SUBSCRIBE", code: 2, message: Some(m) }))
-                    if m == "Invalid request: too many parameters"
-            ));
+            let Some(Err(error)) = StreamControl::Subscribe.answer(&value) else {
+                panic!("missing control refusal")
+            };
+            let debug = format!("{error:?}");
+            let display = error.to_string();
+            for sentinel in ["192.0.2.17", "fixture-url", "fixture-token"] {
+                assert!(!debug.contains(sentinel));
+                assert!(!display.contains(sentinel));
+            }
+            assert!(matches!(error,
+                Error::ControlRefused { operation: "SUBSCRIBE", code: 2, message: Some(m) }
+                    if m.expose_sensitive_text() == message));
         }
     }
 

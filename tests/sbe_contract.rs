@@ -7,11 +7,11 @@
     clippy::panic,
     reason = "synthetic protocol assertions"
 )]
-use binance_client::WeightPools;
 use binance_client::{
     Decimal,
     spot::sbe::{MarketEvent, decode_market},
 };
+use binance_client::{TransportFailure, WeightPools};
 
 // Official schema 3:4: MyFiltersResponse has no fixed entry fields; each
 // symbol filter is a length-prefixed nested message, not a zero-byte entry.
@@ -448,7 +448,11 @@ async fn rest_sbe_negotiation_preserves_units_and_refuses_successful_json_fallba
             assert_eq!(response.data.server_time, Some(1_790_471_000_123_456));
             assert_eq!(response.meta.rates.counters["x-mbx-used-weight-1m"], 42);
         } else {
-            assert!(response.is_err());
+            assert!(matches!(response, Err(binance_client::Error::Transport {
+                failure: Some(TransportFailure::UnexpectedContentType),
+                meta: Some(meta),
+                ..
+            }) if meta.status == 200 && meta.rates.counters["x-mbx-used-weight-1m"] == 42));
         }
         server.await.unwrap();
     }
@@ -657,6 +661,7 @@ async fn malformed_binary_mutation_retains_ids_status_rates_and_never_retries() 
     assert_eq!(error.outcome(), Some(Outcome::Unknown));
     let Error::Transport {
         client_order_ids,
+        failure,
         meta: Some(meta),
         ..
     } = error
@@ -664,6 +669,7 @@ async fn malformed_binary_mutation_retains_ids_status_rates_and_never_retries() 
         panic!("safe mutation evidence")
     };
     assert_eq!(client_order_ids["newClientOrderId"], "binary-no-retry");
+    assert_eq!(failure, Some(TransportFailure::BinaryDecodeFailed));
     assert_eq!(meta.status, 200);
     assert_eq!(meta.rates.counters["x-mbx-used-weight-1m"], 42);
     assert_eq!(fixture.connections_accepted(), 1);

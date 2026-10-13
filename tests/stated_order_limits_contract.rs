@@ -26,7 +26,7 @@ mod support;
 
 use binance_client::{
     AccountKey, ClientOrderId, Clock, Credentials, Decimal, Error, Outcome, RequestId, Symbol,
-    WeightPools, spot, usdm,
+    TransportFailure, WeightPools, spot, usdm,
 };
 use futures_util::{SinkExt, StreamExt};
 use serde_json::{Value, json};
@@ -829,7 +829,7 @@ async fn invalid_rest_account_query_keeps_only_independent_header_counts_in_meta
         .await
         .unwrap_err();
     assert!(
-        matches!(error, Error::Transport { outcome: Outcome::ReadFailed, meta: Some(ref meta), .. }
+        matches!(error, Error::Transport { outcome: Outcome::ReadFailed, failure: Some(TransportFailure::RateEvidenceFailed), meta: Some(ref meta), .. }
         if meta.status == 200 && meta.rates.stated_limits_unusable
         && meta.rates.counters.get("x-mbx-order-count-10s") == Some(&2)
         && !meta.rates.counters.contains_key("x-mbx-order-count-1d"))

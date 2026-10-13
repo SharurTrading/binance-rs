@@ -12,7 +12,7 @@ use binance_client::usdm::{
     wire::BatchResult,
 };
 use binance_client::{
-    BudgetLimits, Budgets, ClientOrderId, Decimal, Error, Outcome, Signer, Symbol,
+    BudgetLimits, Budgets, ClientOrderId, Decimal, Error, Outcome, Signer, Symbol, TransportFailure,
 };
 use std::{
     sync::{Arc, Mutex},
@@ -124,7 +124,9 @@ mod tests {
         let error = client.new_order(&order(), deadline()).await.unwrap_err();
         assert_eq!(error.outcome(), Some(Outcome::Unknown));
         if let Error::Transport {
-            meta: Some(meta), ..
+            failure: Some(TransportFailure::ResponseBodyFailed),
+            meta: Some(meta),
+            ..
         } = error
         {
             assert_eq!(meta.status, 200);
@@ -143,23 +145,219 @@ mod tests {
 
     #[tokio::test]
     async fn stalled_body_obeys_transport_timeout_and_never_retries() {
-        let fixture = HttpFixture::new(200, "", "{", Some(100), true).await;
+        let mut fixture =
+            HttpFixture::new(200, "X-MBX-USED-WEIGHT-1M: 22\r\n", "{", Some(100), true).await;
         let client = RestClient::new(
             config()
                 .rest_url(&fixture.url)
                 .unwrap()
-                .timeout(Duration::from_millis(200))
+                .timeout(Duration::from_secs(5))
                 .unwrap(),
         )
         .unwrap();
-        let result = tokio::time::timeout(
-            Duration::from_secs(2),
-            client.new_order(&order(), deadline()),
-        )
+        let request_client = client.clone();
+        let pending = tokio::spawn(async move {
+            request_client
+                .new_order(
+                    &order(),
+                    tokio::time::Instant::now() + Duration::from_secs(10),
+                )
+                .await
+        });
+        let sent = tokio::time::timeout(Duration::from_secs(3), fixture.requests.recv())
+            .await
+            .expect("request must reach fixture")
+            .unwrap();
+        assert!(sent.starts_with("POST /fapi/v1/order"));
+        tokio::time::timeout(Duration::from_secs(3), async {
+            loop {
+                if client.pool_usage().unwrap().request_weight.used >= 22 {
+                    break;
+                }
+                tokio::task::yield_now().await;
+            }
+        })
         .await
-        .expect("body must honor per-attempt timeout");
-        assert_eq!(result.unwrap_err().outcome(), Some(Outcome::Unknown));
+        .expect("client must observe response headers");
+        assert_eq!(client.pool_usage().unwrap().request_weight.used, 22);
+        tokio::time::pause();
+        tokio::time::advance(Duration::from_secs(6)).await;
+        let error = pending.await.unwrap().unwrap_err();
+        assert!(matches!(
+            error,
+            Error::Transport {
+                outcome: Outcome::Unknown,
+                failure: Some(TransportFailure::ResponseBodyTimeout),
+                meta: Some(_),
+                ..
+            }
+        ));
         assert_eq!(fixture.connections_accepted(), 1);
+        assert!(fixture.requests.try_recv().is_err());
+        fixture.finish().await;
+    }
+
+    #[tokio::test]
+    async fn stalled_headers_report_timeout_without_response_metadata() {
+        let mut fixture = HttpFixture::hold_headers().await;
+        let client = RestClient::new(
+            config()
+                .rest_url(&fixture.url)
+                .unwrap()
+                .timeout(Duration::from_secs(5))
+                .unwrap(),
+        )
+        .unwrap();
+        let pending = tokio::spawn(async move {
+            client
+                .check_server_time(
+                    &CheckServerTime::new(),
+                    tokio::time::Instant::now() + Duration::from_secs(10),
+                )
+                .await
+        });
+        let sent = tokio::time::timeout(Duration::from_secs(3), fixture.requests.recv())
+            .await
+            .expect("request must reach fixture")
+            .unwrap();
+        assert!(sent.starts_with("GET /fapi/v1/time"));
+        tokio::time::pause();
+        tokio::time::advance(Duration::from_secs(6)).await;
+        let error = pending.await.unwrap().unwrap_err();
+        assert!(matches!(
+            error,
+            Error::Transport {
+                operation: "checkServerTime",
+                outcome: Outcome::ReadFailed,
+                failure: Some(TransportFailure::ResponseHeadersTimeout),
+                meta: None,
+                ..
+            }
+        ));
+        assert_eq!(fixture.connections_accepted(), 1);
+        assert!(fixture.requests.try_recv().is_err());
+        fixture.finish().await;
+    }
+
+    #[tokio::test]
+    async fn truncated_read_body_retains_headers_and_reports_body_failure() {
+        let mut fixture = HttpFixture::new(
+            200,
+            "X-MBX-USED-WEIGHT-1M: 19\r\n",
+            "{\"serverTime\":",
+            Some(100),
+            false,
+        )
+        .await;
+        let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        let error = client
+            .check_server_time(&CheckServerTime::new(), deadline())
+            .await
+            .unwrap_err();
+        let Error::Transport {
+            operation,
+            outcome,
+            failure,
+            meta: Some(meta),
+            ..
+        } = error
+        else {
+            panic!("read failure lost transport evidence")
+        };
+        assert_eq!(operation, "checkServerTime");
+        assert_eq!(outcome, Outcome::ReadFailed);
+        assert_eq!(failure, Some(TransportFailure::ResponseBodyFailed));
+        assert_eq!(meta.status, 200);
+        assert_eq!(meta.rates.counters["x-mbx-used-weight-1m"], 19);
+        assert!(
+            fixture
+                .requests
+                .recv()
+                .await
+                .unwrap()
+                .starts_with("GET /fapi/v1/time")
+        );
+        assert!(fixture.requests.try_recv().is_err());
+        assert_eq!(fixture.connections_accepted(), 1);
+        fixture.finish().await;
+    }
+
+    #[tokio::test]
+    async fn malformed_json_read_reports_json_decode_without_sensitive_text() {
+        let mut fixture = HttpFixture::new(
+            200,
+            "X-MBX-USED-WEIGHT-1M: 11\r\n",
+            "{\"serverTime\":\"fixture-secret-sentinel\"",
+            None,
+            false,
+        )
+        .await;
+        let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        let error = client
+            .check_server_time(&CheckServerTime::new(), deadline())
+            .await
+            .unwrap_err();
+        assert!(!format!("{error:?}").contains("fixture-secret-sentinel"));
+        assert!(!error.to_string().contains("fixture-secret-sentinel"));
+        let Error::Transport {
+            outcome: Outcome::ReadFailed,
+            failure: Some(TransportFailure::JsonDecodeFailed),
+            meta: Some(meta),
+            ..
+        } = error
+        else {
+            panic!("malformed JSON lost its safe category")
+        };
+        assert_eq!(meta.status, 200);
+        assert_eq!(meta.rates.counters["x-mbx-used-weight-1m"], 11);
+        assert!(
+            fixture
+                .requests
+                .recv()
+                .await
+                .unwrap()
+                .starts_with("GET /fapi/v1/time")
+        );
+        assert!(fixture.requests.try_recv().is_err());
+        fixture.finish().await;
+    }
+
+    #[tokio::test]
+    async fn valid_json_with_incompatible_read_payload_reports_response_decode() {
+        let mut fixture = HttpFixture::new(
+            200,
+            "X-MBX-USED-WEIGHT-1M: 12\r\n",
+            "{\"serverTime\":\"fixture-secret-sentinel\"}",
+            None,
+            false,
+        )
+        .await;
+        let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        let error = client
+            .check_server_time(&CheckServerTime::new(), deadline())
+            .await
+            .unwrap_err();
+        assert!(!format!("{error:?}").contains("fixture-secret-sentinel"));
+        let Error::Transport {
+            outcome: Outcome::ReadFailed,
+            failure: Some(TransportFailure::ResponseDecodeFailed),
+            meta: Some(meta),
+            ..
+        } = error
+        else {
+            panic!("incompatible response lost its safe category")
+        };
+        assert_eq!(meta.status, 200);
+        assert_eq!(meta.rates.counters["x-mbx-used-weight-1m"], 12);
+        assert!(
+            fixture
+                .requests
+                .recv()
+                .await
+                .unwrap()
+                .starts_with("GET /fapi/v1/time")
+        );
+        assert!(fixture.requests.try_recv().is_err());
         fixture.finish().await;
     }
 
@@ -204,6 +402,7 @@ mod tests {
         let Error::Transport {
             client_order_ids,
             outcome,
+            failure,
             meta,
             ..
         } = error
@@ -211,6 +410,7 @@ mod tests {
             panic!("a lost acknowledgment must surface as a transport failure");
         };
         assert_eq!(outcome, Outcome::Unknown);
+        assert_eq!(failure, Some(TransportFailure::ResponseHeadersFailed));
         assert!(
             meta.is_none(),
             "a lost acknowledgment must carry no response metadata"

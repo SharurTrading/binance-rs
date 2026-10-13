@@ -997,6 +997,214 @@ mod capacity_tests;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core_trading::spot;
+    use crate::{
+        Clock, Credentials, Decimal, Outcome, RateEvidence, ResponseMeta, Symbol, TimeUnit,
+        TransportFailure,
+    };
+    use std::sync::Arc;
+    use tokio::{
+        io::{AsyncReadExt, AsyncWriteExt},
+        net::TcpListener,
+        sync::oneshot,
+        task::JoinHandle,
+        time::Instant,
+    };
+
+    struct FixedClock;
+
+    impl Clock for FixedClock {
+        fn now_millis(&self) -> Result<u64, Error> {
+            Ok(1_700_000_001_000)
+        }
+    }
+
+    struct HeldHttp {
+        url: String,
+        seen: oneshot::Receiver<String>,
+        headers: oneshot::Sender<()>,
+        body: oneshot::Sender<()>,
+        task: JoinHandle<()>,
+    }
+
+    async fn held_http_response() -> HeldHttp {
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}", listener.local_addr().unwrap());
+        let (seen_tx, seen) = oneshot::channel();
+        let (headers, header_release) = oneshot::channel();
+        let (body, body_release) = oneshot::channel();
+        let task = tokio::spawn(async move {
+            let (mut stream, _) = listener.accept().await.unwrap();
+            let mut request = Vec::new();
+            let mut buffer = [0; 4096];
+            loop {
+                let count = stream.read(&mut buffer).await.unwrap();
+                assert!(count > 0);
+                request.extend_from_slice(&buffer[..count]);
+                if let Some(end) = request.windows(4).position(|part| part == b"\r\n\r\n") {
+                    let header = String::from_utf8(request[..end].to_vec()).unwrap();
+                    let length = header
+                        .lines()
+                        .find_map(|line| {
+                            line.to_ascii_lowercase()
+                                .strip_prefix("content-length: ")
+                                .and_then(|value| value.parse::<usize>().ok())
+                        })
+                        .unwrap_or(0);
+                    if request.len() >= end + 4 + length {
+                        break;
+                    }
+                }
+            }
+            seen_tx.send(String::from_utf8(request).unwrap()).unwrap();
+            header_release.await.unwrap();
+            let payload = r#"{"orderId":7,"clientOrderId":"fixture-order"}"#;
+            let headers = format!(
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nX-MBX-USED-WEIGHT-1M: 42\r\nConnection: close\r\n\r\n",
+                payload.len()
+            );
+            stream.write_all(headers.as_bytes()).await.unwrap();
+            body_release.await.unwrap();
+            let _ = stream.write_all(payload.as_bytes()).await;
+        });
+        HeldHttp {
+            url,
+            seen,
+            headers,
+            body,
+            task,
+        }
+    }
+
+    fn poison_ip(budgets: &Budgets) {
+        let owner = budgets.ip.clone();
+        let poisoned = std::thread::spawn(move || {
+            let _guard = owner.lock().unwrap();
+            panic!("synthetic poisoned rate owner");
+        });
+        assert!(poisoned.join().is_err());
+    }
+
+    fn spot_client(url: &str, budgets: &Budgets) -> spot::RestClient {
+        let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
+            .unwrap()
+            .rest_url(url)
+            .unwrap()
+            .clock(Arc::new(FixedClock))
+            .budgets(budgets.clone())
+            .credentials(Credentials::hmac("fixture-key", "fixture-secret").unwrap());
+        spot::RestClient::new(config).unwrap()
+    }
+
+    fn new_order() -> spot::rest_requests::NewOrder {
+        spot::rest_requests::NewOrder::new()
+            .symbol(Symbol::new("BTCUSDT").unwrap())
+            .side("BUY")
+            .type_value("MARKET")
+            .quantity(Decimal::new(1, 3))
+            .new_client_order_id(spot::ClientOrderId::new("fixture-order").unwrap())
+    }
+
+    #[tokio::test]
+    async fn poisoned_rate_owner_after_headers_keeps_unknown_mutation_evidence() {
+        let budgets = Budgets::new(BudgetLimits::spot()).unwrap();
+        let fixture = held_http_response().await;
+        let client = spot_client(&fixture.url, &budgets);
+        let pending = tokio::spawn(async move {
+            client
+                .new_order(&new_order(), Instant::now() + Duration::from_secs(10))
+                .await
+        });
+        let sent = fixture.seen.await.unwrap();
+        assert!(sent.starts_with("POST /api/v3/order"));
+        assert!(sent.contains("newClientOrderId=fixture-order"));
+        fixture.headers.send(()).unwrap();
+        tokio::time::timeout(Duration::from_secs(3), async {
+            loop {
+                if budgets
+                    .usage(1_700_000_001_000)
+                    .unwrap()
+                    .request_weight
+                    .used
+                    >= 42
+                {
+                    break;
+                }
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .expect("client must observe response headers");
+        poison_ip(&budgets);
+        fixture.body.send(()).unwrap();
+        let error = pending.await.unwrap().unwrap_err();
+        assert!(matches!(error, Error::Transport {
+            outcome: Outcome::Unknown,
+            failure: Some(TransportFailure::RateEvidenceFailed),
+            client_order_ids,
+            meta: Some(meta),
+            ..
+        } if client_order_ids.get("newClientOrderId").map(String::as_str) == Some("fixture-order")
+            && meta.status == 200
+            && meta.rates.counters.get("x-mbx-used-weight-1m") == Some(&42)));
+        fixture.task.await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn poisoned_rate_owner_on_header_observation_keeps_response_evidence() {
+        let budgets = Budgets::new(BudgetLimits::spot()).unwrap();
+        let fixture = held_http_response().await;
+        let client = spot_client(&fixture.url, &budgets);
+        let pending = tokio::spawn(async move {
+            client
+                .new_order(&new_order(), Instant::now() + Duration::from_secs(10))
+                .await
+        });
+        let sent = fixture.seen.await.unwrap();
+        assert!(sent.starts_with("POST /api/v3/order"));
+        poison_ip(&budgets);
+        fixture.headers.send(()).unwrap();
+        fixture.body.send(()).unwrap();
+        let error = pending.await.unwrap().unwrap_err();
+        assert!(matches!(error, Error::Transport {
+            outcome: Outcome::Unknown,
+            failure: Some(TransportFailure::RateEvidenceFailed),
+            client_order_ids,
+            meta: Some(meta),
+            ..
+        } if client_order_ids.get("newClientOrderId").map(String::as_str) == Some("fixture-order")
+            && meta.status == 200
+            && meta.rates.counters.get("x-mbx-used-weight-1m") == Some(&42)));
+        fixture.task.await.unwrap();
+    }
+
+    #[test]
+    fn poisoned_rate_owner_on_order_query_tail_keeps_read_evidence() {
+        let budgets = Budgets::new(BudgetLimits::spot()).unwrap();
+        let client = spot_client("http://127.0.0.1:1", &budgets);
+        let meta = ResponseMeta {
+            time_unit: TimeUnit::Milliseconds,
+            client_order_ids: BTreeMap::new(),
+            status: 200,
+            operation: "rateLimitOrder",
+            rates: RateEvidence {
+                counters: BTreeMap::from([("x-mbx-order-count-10s".to_owned(), 7)]),
+                ..RateEvidence::default()
+            },
+        };
+        poison_ip(&budgets);
+        let error = client
+            .inner
+            .observe_query_rates(&meta, 1_700_000_001_000)
+            .unwrap_err();
+        assert!(matches!(error, Error::Transport {
+            operation: "rateLimitOrder",
+            outcome: Outcome::ReadFailed,
+            failure: Some(TransportFailure::RateEvidenceFailed),
+            meta: Some(retained),
+            ..
+        } if *retained == meta));
+    }
 
     #[test]
     fn fix_order_floor_is_shared_and_does_not_guess_the_venue_reset_origin() {

@@ -41,6 +41,6 @@ pub use core::{
 pub use core::{
     Asset, ClientOrderId, Clock, Credentials, Error, OperationLeg, Outcome, PartialOperation,
     RateEvidence, RequestId, Response, ResponseMeta, SensitiveString, Signer, StreamControl,
-    Symbol, SystemClock, TimeUnit, VenueFailure, VenueMessage,
+    Symbol, SystemClock, TimeUnit, TransportFailure, VenueFailure, VenueMessage,
 };
 pub use rust_decimal::Decimal;

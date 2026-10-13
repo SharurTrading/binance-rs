@@ -22,6 +22,34 @@ pub enum Outcome {
     ReadFailed,
 }
 
+/// Safe classification of a transport or response failure.
+///
+/// The category does not reveal a raw dependency error, response body, or URL.
+/// Header and body categories describe HTTP attempts. Response model decoding is
+/// shared with WebSocket replies. A mutation timeout still has an unknown outcome.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum TransportFailure {
+    /// The request timed out before complete response headers arrived.
+    ResponseHeadersTimeout,
+    /// The request failed before complete response headers arrived.
+    ResponseHeadersFailed,
+    /// Received rate evidence could not be applied safely.
+    RateEvidenceFailed,
+    /// Complete response headers arrived, but the body timed out.
+    ResponseBodyTimeout,
+    /// Complete response headers arrived, but the body could not be read.
+    ResponseBodyFailed,
+    /// The response body was not valid JSON.
+    JsonDecodeFailed,
+    /// The response body could not be decoded as the negotiated binary format.
+    BinaryDecodeFailed,
+    /// The response used an unexpected content type for negotiated binary data.
+    UnexpectedContentType,
+    /// A decoded response could not be converted to its operation's response type.
+    ResponseDecodeFailed,
+}
+
 /// Venue rate evidence retained on successes and failures.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 #[non_exhaustive]
@@ -201,6 +229,10 @@ pub enum Error {
         operation: &'static str,
         /// The strongest outcome supported by the evidence.
         outcome: Outcome,
+        /// Safe HTTP failure category, if this error came from an HTTP attempt.
+        /// WebSocket transport errors carry `None`; the shared response decoder
+        /// can also report `ResponseDecodeFailed` for a WebSocket reply.
+        failure: Option<TransportFailure>,
         /// Metadata received before failure, including header counters.
         meta: Option<Box<ResponseMeta>>,
     },

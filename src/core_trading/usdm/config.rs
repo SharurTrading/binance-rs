@@ -159,6 +159,17 @@ impl Config {
     pub fn pool_key(&self) -> Option<crate::PoolKey> {
         self.budgets.pool_key()
     }
+    /// Replace the reserve policy for this configuration's shared budget owners.
+    ///
+    /// Every client sharing its IP/account scopes observes this policy change.
+    /// New default configurations never clear it. See [`Budgets::set_exit_reserve`].
+    ///
+    /// # Errors
+    /// Returns a configuration error if a budget mutex is poisoned.
+    pub fn set_exit_reserve(&self, reserve: crate::ExitReserve) -> Result<(), Error> {
+        self.budgets.set_exit_reserve(reserve)
+    }
+
     /// Replace the drawn pool with an explicit IP/account owner, isolating this
     /// client from every pool; clone the owner to share it across clients.
     #[must_use]

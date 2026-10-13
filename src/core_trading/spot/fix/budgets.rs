@@ -209,6 +209,7 @@ impl Drop for Lease {
     }
 }
 
+#[derive(Clone)]
 pub(super) struct MessageBudget {
     count: VecDeque<Instant>,
     limit: usize,
@@ -251,6 +252,15 @@ impl MessageBudget {
         Ok(())
     }
     pub(super) fn admit(&mut self) -> Result<(), Error> {
+        self.admit_reserved(0, false)
+    }
+
+    pub(super) fn admit_reserved(&mut self, reserve: usize, exit: bool) -> Result<(), Error> {
+        let limit = if exit {
+            self.limit
+        } else {
+            self.limit.saturating_sub(reserve)
+        };
         let now = Instant::now();
         while self
             .count
@@ -261,7 +271,7 @@ impl MessageBudget {
         }
         if self
             .observed
-            .is_some_and(|(until, count)| until > now && count >= self.limit)
+            .is_some_and(|(until, count)| until > now && count >= limit)
         {
             return Err(Error::Admission {
                 retry_after: self.observed.map_or(self.interval, |(until, _)| {
@@ -269,7 +279,7 @@ impl MessageBudget {
                 }),
             });
         }
-        if self.count.len() >= self.limit {
+        if self.count.len() >= limit {
             return Err(Error::Admission {
                 retry_after: self.count.front().map_or(self.interval, |at| {
                     self.interval.saturating_sub(now.duration_since(*at))
@@ -292,6 +302,35 @@ impl MessageBudget {
 mod tests {
     use super::*;
     use crate::{AccountKey, BudgetLimits, spot::Environment};
+    #[tokio::test(start_paused = true)]
+    async fn reserve_keeps_messages_for_cancels_and_controls_without_increasing_total_limit() {
+        let mut budget = MessageBudget::new(Role::OrderEntry);
+        budget.observe(Duration::from_secs(10), 0, 3).unwrap();
+        budget.admit_reserved(2, false).unwrap();
+        assert!(matches!(
+            budget.admit_reserved(2, false),
+            Err(Error::Admission { .. })
+        ));
+        budget.admit_reserved(2, true).unwrap();
+        budget.admit().unwrap();
+        assert!(matches!(
+            budget.admit_reserved(2, true),
+            Err(Error::Admission { .. })
+        ));
+        assert!(matches!(budget.admit(), Err(Error::Admission { .. })));
+        tokio::time::advance(Duration::from_secs(10)).await;
+        budget.admit_reserved(2, false).unwrap();
+        budget.observe(Duration::from_secs(10), 0, 1).unwrap();
+        assert!(matches!(
+            budget.admit_reserved(2, false),
+            Err(Error::Admission { .. })
+        ));
+        assert!(matches!(
+            budget.admit_reserved(2, true),
+            Err(Error::Admission { .. })
+        ));
+    }
+
     #[tokio::test(start_paused = true)]
     async fn component_and_delayed_connection_count_remain_independent() {
         let budgets = AccountBudgets::new(Budgets::new(BudgetLimits::spot()).unwrap());

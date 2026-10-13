@@ -131,6 +131,16 @@ pub(crate) fn cost(
         _ => 0,
     };
     Ok(Cost {
+        exit: crate::core::rate::reserve::ExitEligibility::from_flag(
+            matches!(
+                op.name,
+                "cancelOptionOrder"
+                    | "cancelMultipleOptionOrders"
+                    | "cancelAllOptionOrdersOnSpecificSymbol"
+                    | "cancelAllOptionOrdersByUnderlying"
+                    | "cancelBlockTradeOrder"
+            ) || crate::core::rate::reserve::reducing_placement(op.name, p, false, "orders"),
+        ),
         weight,
         orders10: orders,
         orders60: orders,
@@ -138,4 +148,68 @@ pub(crate) fn cost(
         raw_requests: 1,
         ..Cost::default()
     })
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn native_pure_cancellations_are_eligible_without_placing_orders() {
+        use crate::core::Request;
+        let empty = std::collections::BTreeMap::new();
+        for op in [
+            crate::options::rest_requests::CancelOptionOrder::OP,
+            crate::options::rest_requests::CancelMultipleOptionOrders::OP,
+            crate::options::rest_requests::CancelAllOptionOrdersOnSpecificSymbol::OP,
+            crate::options::rest_requests::CancelAllOptionOrdersByUnderlying::OP,
+            crate::options::rest_requests::CancelBlockTradeOrder::OP,
+        ] {
+            let cost = super::cost(op, &empty).unwrap();
+            assert!(cost.exit.is_eligible(), "{}", op.name);
+            assert_eq!(cost.orders10, 0, "{}", op.name);
+            assert_eq!(cost.orders60, 0, "{}", op.name);
+        }
+    }
+
+    #[test]
+    fn creation_uses_reserve_only_with_explicit_reducing_flags() {
+        use crate::core::Request;
+        use serde_json::json;
+        use std::collections::BTreeMap;
+        let op = crate::options::rest_requests::NewOrder::OP;
+        assert!(
+            !super::cost(op, &BTreeMap::new())
+                .unwrap()
+                .exit
+                .is_eligible()
+        );
+        let p = BTreeMap::from([("reduceOnly".into(), json!("true"))]);
+        assert!(super::cost(op, &p).unwrap().exit.is_eligible());
+        let op = crate::options::rest_requests::PlaceMultipleOrders::OP;
+        let reducing = BTreeMap::from([(
+            "orders".into(),
+            json!([{"reduceOnly":true},{"reduceOnly":"true"}]),
+        )]);
+        assert!(super::cost(op, &reducing).unwrap().exit.is_eligible());
+        let mixed = BTreeMap::from([(
+            "orders".into(),
+            json!([{"reduceOnly":true},{"reduceOnly":false}]),
+        )]);
+        assert!(!super::cost(op, &mixed).unwrap().exit.is_eligible());
+        let close = BTreeMap::from([("closePosition".into(), json!("true"))]);
+        assert!(
+            !super::cost(
+                op,
+                &BTreeMap::from([("orders".into(), json!([{ "closePosition": true }]))])
+            )
+            .unwrap()
+            .exit
+            .is_eligible()
+        );
+        assert!(
+            !super::cost(crate::options::rest_requests::NewOrder::OP, &close)
+                .unwrap()
+                .exit
+                .is_eligible()
+        );
+    }
 }

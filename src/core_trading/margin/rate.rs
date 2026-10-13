@@ -60,6 +60,12 @@ pub(crate) fn cost(op: Operation, p: &BTreeMap<String, Value>) -> Result<Cost, E
         return Err(Error::Configuration("missing Margin quota evidence"));
     }
     Ok(Cost {
+        exit: crate::core::rate::reserve::ExitEligibility::from_flag(matches!(
+            op.name,
+            "marginAccountCancelOrder"
+                | "marginAccountCancelOco"
+                | "marginAccountCancelAllOpenOrdersOnASymbol"
+        )),
         sapi: Some(SapiCost {
             endpoint: op.path,
             uid,
@@ -143,4 +149,38 @@ pub(crate) fn open_orders_cost(
         }),
         ..Cost::default()
     })
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn native_pure_cancellations_are_eligible_without_placing_orders() {
+        use crate::core::Request;
+        let empty = std::collections::BTreeMap::new();
+        for op in [
+            crate::margin::rest_requests::MarginAccountCancelOrder::OP,
+            crate::margin::rest_requests::MarginAccountCancelOco::OP,
+            crate::margin::rest_requests::MarginAccountCancelAllOpenOrdersOnASymbol::OP,
+        ] {
+            let cost = super::cost(op, &empty).unwrap();
+            assert!(cost.exit.is_eligible(), "{}", op.name);
+            assert_eq!(cost.orders10, 0, "{}", op.name);
+            assert_eq!(cost.orders60, 0, "{}", op.name);
+        }
+    }
+
+    #[test]
+    fn repay_flags_do_not_make_margin_placements_eligible() {
+        use crate::core::Request;
+        let p = std::collections::BTreeMap::from([(
+            "sideEffectType".into(),
+            serde_json::json!("AUTO_REPAY"),
+        )]);
+        assert!(
+            !super::cost(crate::margin::rest_requests::MarginAccountNewOrder::OP, &p)
+                .unwrap()
+                .exit
+                .is_eligible()
+        );
+    }
 }

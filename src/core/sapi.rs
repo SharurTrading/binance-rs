@@ -107,7 +107,257 @@ mod tests {
         drop(account);
         budgets.admit_sapi(cost, Cost::default(), 180_000).unwrap();
     }
+    #[test]
+    fn runtime_reserve_sapi_replacement_preserves_uid_weight_and_shared_request_usage() {
+        let budgets = Budgets::sapi().unwrap();
+        let sibling = budgets.clone();
+        let other = budgets.for_account();
+        let cost = SapiCost {
+            endpoint: "synthetic-runtime",
+            uid: true,
+            weight: 1,
+            requests_per_second: Some(4),
+            requests_per_minute: Some(4),
+        };
+        budgets.admit_sapi(cost, Cost::default(), 0).unwrap();
+        budgets
+            .set_exit_reserve(
+                crate::ExitReserve::default()
+                    .sapi_weight(179_999)
+                    .sapi_requests(3),
+            )
+            .unwrap();
+        assert!(matches!(
+            sibling.admit_sapi(cost, Cost::default(), 0),
+            Err(Error::Admission { .. })
+        ));
+        assert!(matches!(
+            other.admit_sapi(cost, Cost::default(), 0),
+            Err(Error::Admission { .. })
+        ));
+        other
+            .admit_sapi(
+                SapiCost {
+                    requests_per_minute: None,
+                    ..cost
+                },
+                Cost::default(),
+                0,
+            )
+            .unwrap();
+        sibling
+            .set_exit_reserve(
+                crate::ExitReserve::default()
+                    .sapi_weight(179_998)
+                    .sapi_requests(2),
+            )
+            .unwrap();
+        budgets.admit_sapi(cost, Cost::default(), 0).unwrap();
+        assert!(matches!(
+            sibling.admit_sapi(cost, Cost::default(), 0),
+            Err(Error::Admission { .. })
+        ));
+        budgets
+            .set_exit_reserve(crate::ExitReserve::default())
+            .unwrap();
+        sibling.admit_sapi(cost, Cost::default(), 0).unwrap();
+        sibling.admit_sapi(cost, Cost::default(), 0).unwrap();
+        assert!(matches!(
+            budgets.admit_sapi(cost, Cost::default(), 0),
+            Err(Error::Admission { .. })
+        ));
+        assert!(matches!(
+            other.admit_sapi(cost, Cost::default(), 0),
+            Err(Error::Admission { .. })
+        ));
+        assert!(matches!(
+            budgets.admit_sapi(
+                SapiCost {
+                    requests_per_second: None,
+                    requests_per_minute: None,
+                    weight: 179_997,
+                    ..cost
+                },
+                Cost::default(),
+                0
+            ),
+            Err(Error::Admission { .. })
+        ));
+    }
+
+    #[test]
+    fn endpoint_reserve_uses_native_ip_uid_scopes_and_preserves_atomic_order_admission() {
+        let budgets = Budgets::sapi().unwrap();
+        budgets
+            .set_exit_reserve(crate::ExitReserve {
+                sapi_weight: 1,
+                orders: 1,
+                ..crate::ExitReserve::default()
+            })
+            .unwrap();
+        let cost = SapiCost {
+            endpoint: "/sapi/v1/margin/order",
+            uid: false,
+            weight: 11_999,
+            requests_per_second: None,
+            requests_per_minute: None,
+        };
+        budgets.admit_sapi(cost, Cost::default(), 0).unwrap();
+        let one = SapiCost { weight: 1, ..cost };
+        assert!(matches!(
+            budgets.for_account().admit_sapi(one, Cost::default(), 0),
+            Err(Error::Admission { .. })
+        ));
+        // Same endpoint text in the UID scope remains an independent counter.
+        budgets
+            .admit_sapi(SapiCost { uid: true, ..cost }, Cost::default(), 0)
+            .unwrap();
+        budgets
+            .admit_sapi(
+                one,
+                Cost {
+                    exit: crate::core::rate::reserve::ExitEligibility::Eligible,
+                    ..Cost::default()
+                },
+                0,
+            )
+            .unwrap();
+        assert!(matches!(
+            budgets.admit_sapi(
+                one,
+                Cost {
+                    exit: crate::core::rate::reserve::ExitEligibility::Eligible,
+                    ..Cost::default()
+                },
+                0
+            ),
+            Err(Error::Admission { .. })
+        ));
+        budgets
+            .observe_sapi_order_windows(&[(2000, 0, 2)], 0)
+            .unwrap();
+        let order = Cost {
+            orders10: 1,
+            ..Cost::default()
+        };
+        let uid = SapiCost { uid: true, ..one };
+        budgets.admit_sapi(uid, order, 0).unwrap();
+        let before = budgets.account.lock().unwrap().endpoints[&(cost.endpoint, 60_000)].1;
+        assert!(matches!(
+            budgets.admit_sapi(uid, order, 0),
+            Err(Error::Admission { .. })
+        ));
+        assert_eq!(
+            budgets.account.lock().unwrap().endpoints[&(cost.endpoint, 60_000)].1,
+            before
+        );
+        // Zero-order cancellation isn't blocked by the spent ordinary order quota.
+        budgets
+            .admit_sapi(
+                uid,
+                Cost {
+                    exit: crate::core::rate::reserve::ExitEligibility::Eligible,
+                    ..Cost::default()
+                },
+                0,
+            )
+            .unwrap();
+    }
+
+    #[test]
+    fn endpoint_request_reserve_and_cooldown_remain_shared_and_counted() {
+        let budgets = Budgets::sapi().unwrap();
+        budgets
+            .set_exit_reserve(crate::ExitReserve {
+                sapi_requests: 1,
+                ..crate::ExitReserve::default()
+            })
+            .unwrap();
+        let cost = SapiCost {
+            endpoint: "synthetic-shared",
+            uid: true,
+            weight: 1,
+            requests_per_second: Some(2),
+            requests_per_minute: Some(2),
+        };
+        budgets.admit_sapi(cost, Cost::default(), 0).unwrap();
+        assert!(matches!(
+            budgets.clone().admit_sapi(cost, Cost::default(), 0),
+            Err(Error::Admission { .. })
+        ));
+        // IP minute request cap applies to a distinct UID owner too.
+        assert!(matches!(
+            budgets.for_account().admit_sapi(cost, Cost::default(), 0),
+            Err(Error::Admission { .. })
+        ));
+        budgets
+            .admit_sapi(
+                cost,
+                Cost {
+                    exit: crate::core::rate::reserve::ExitEligibility::Eligible,
+                    ..Cost::default()
+                },
+                0,
+            )
+            .unwrap();
+        assert!(matches!(
+            budgets.admit_sapi(
+                cost,
+                Cost {
+                    exit: crate::core::rate::reserve::ExitEligibility::Eligible,
+                    ..Cost::default()
+                },
+                0
+            ),
+            Err(Error::Admission { .. })
+        ));
+        budgets
+            .observe(
+                &RateEvidence {
+                    retry_after: Some(Duration::from_millis(1)),
+                    ..RateEvidence::default()
+                },
+                60_000,
+                false,
+            )
+            .unwrap();
+        assert!(matches!(
+            budgets.admit_sapi(
+                cost,
+                Cost {
+                    exit: crate::core::rate::reserve::ExitEligibility::Eligible,
+                    ..Cost::default()
+                },
+                60_000
+            ),
+            Err(Error::Admission { .. })
+        ));
+        budgets.admit_sapi(cost, Cost::default(), 60_001).unwrap();
+    }
 }
+fn check_order_admission(
+    account: &super::rate::State,
+    placements: u64,
+    now: u64,
+    exit: bool,
+) -> Result<(), Error> {
+    if placements > 0 && account.sapi_order_windows.is_empty() {
+        return Err(Error::Configuration(
+            "Margin order quota authority required",
+        ));
+    }
+    for (&window, &(bucket, count, limit)) in &account.sapi_order_windows {
+        let count = if bucket == now / window { count } else { 0 };
+        let limit = super::rate::reserve::admission_limit(limit, account.exit_reserve.orders, exit);
+        if placements > 0 && count.checked_add(placements).is_none_or(|v| v > limit) {
+            return Err(Error::Admission {
+                retry_after: Duration::from_millis(window - now % window),
+            });
+        }
+    }
+    Ok(())
+}
+
 impl Budgets {
     pub(crate) fn admit_sapi(&self, cost: SapiCost, attempt: Cost, now: u64) -> Result<(), Error> {
         // Same lock order as aggregate admission. Validate both authorities before
@@ -125,19 +375,7 @@ impl Budgets {
             .orders10
             .max(attempt.orders60)
             .max(attempt.orders_day);
-        if placements > 0 && account.sapi_order_windows.is_empty() {
-            return Err(Error::Configuration(
-                "Margin order quota authority required",
-            ));
-        }
-        for (&window, &(bucket, count, limit)) in &account.sapi_order_windows {
-            let count = if bucket == now / window { count } else { 0 };
-            if placements > 0 && count.checked_add(placements).is_none_or(|v| v > limit) {
-                return Err(Error::Admission {
-                    retry_after: Duration::from_millis(window - now % window),
-                });
-            }
-        }
+        check_order_admission(&account, placements, now, attempt.exit.is_eligible())?;
         if let Some(limit) = cost.requests_per_minute {
             if limit == 0 {
                 return Err(Error::Configuration("zero SAPI request cap"));
@@ -147,7 +385,13 @@ impl Budgets {
                 .get(cost.endpoint)
                 .copied()
                 .unwrap_or_default();
-            if bucket == now / 60_000 && count >= limit {
+            let limit = super::rate::reserve::admission_limit(
+                limit,
+                ip.exit_reserve.sapi_requests,
+                attempt.exit.is_eligible(),
+            );
+            let count = if bucket == now / 60_000 { count } else { 0 };
+            if count >= limit {
                 return Err(Error::Admission {
                     retry_after: Duration::from_millis(60_000 - now % 60_000),
                 });
@@ -175,7 +419,14 @@ impl Budgets {
                 .copied()
                 .unwrap_or_default();
             let count = if bucket == now / window { count } else { 0 };
-            if count.checked_add(amount).is_none_or(|v| v > limit) {
+            let reserve = if window == 60_000 {
+                state.exit_reserve.sapi_weight
+            } else {
+                state.exit_reserve.sapi_requests
+            };
+            let limit =
+                super::rate::reserve::admission_limit(limit, reserve, attempt.exit.is_eligible());
+            if amount > 0 && count.checked_add(amount).is_none_or(|v| v > limit) {
                 return Err(Error::Admission {
                     retry_after: Duration::from_millis(window - now % window),
                 });
@@ -425,6 +676,17 @@ impl Config {
     pub fn release_unknown_ban(&self) -> Result<(), Error> {
         self.budgets.release_unknown_ban()
     }
+    /// Replace reserve policy on the shared SAPI IP and account owners.
+    ///
+    /// Default configuration construction never resets this policy.
+    /// See [`Budgets::set_exit_reserve`] for quota units and sharing semantics.
+    ///
+    /// # Errors
+    /// Returns a configuration error if a budget mutex is poisoned.
+    pub fn set_exit_reserve(&self, reserve: crate::ExitReserve) -> Result<(), Error> {
+        self.budgets.set_exit_reserve(reserve)
+    }
+
     /// Share IP/UID scopes across every Wallet/Convert/Margin client for this account.
     #[must_use]
     pub fn budgets(mut self, value: Budgets) -> Self {

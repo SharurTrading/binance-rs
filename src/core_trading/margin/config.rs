@@ -86,6 +86,17 @@ impl Config {
     pub fn release_unknown_ban(&self) -> Result<(), Error> {
         self.inner.release_unknown_ban()
     }
+    /// Replace the reserve policy for this configuration's shared budget owners.
+    ///
+    /// Every client sharing its IP/account scopes observes this policy change.
+    /// New default configurations never clear it. See [`Budgets::set_exit_reserve`].
+    ///
+    /// # Errors
+    /// Returns a configuration error if a budget mutex is poisoned.
+    pub fn set_exit_reserve(&self, reserve: crate::ExitReserve) -> Result<(), Error> {
+        self.inner.set_exit_reserve(reserve)
+    }
+
     /// Share the explicit IP and account owners with all clients in those scopes.
     /// Configure order evidence after selecting this owner.
     #[must_use]

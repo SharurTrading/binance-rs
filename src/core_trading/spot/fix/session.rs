@@ -109,6 +109,10 @@ struct Metrics {
     drained: u64,
 }
 enum Command {
+    SetExitReserve {
+        messages: usize,
+        reply: oneshot::Sender<Result<(), Error>>,
+    },
     Send {
         id: RequestId,
         request: Request,
@@ -309,6 +313,30 @@ impl Session {
             error: Error::Gap("FIX driver interrupted send attribution"),
         })?
     }
+    /// Replace this session's message reserve without sending a wire message.
+    ///
+    /// Run the driver before awaiting this method. It applies policy in command
+    /// order and acknowledges it before returning success. Zero releases the reserve. Usage, venue limits and account
+    /// budgets remain unchanged; raising the reserve cannot recover spent capacity.
+    /// One consumer should coordinate this session's policy: replacements are not
+    /// additive leases. Dropping this future after enqueue does not retract the update.
+    /// Required protocol controls still charge the full shared message limit.
+    ///
+    /// # Errors
+    /// Returns a lifecycle gap if the driver retires before acknowledging the update.
+    pub async fn set_exit_reserve(&self, messages: usize) -> Result<(), Error> {
+        if self.stop.is_cancelled() {
+            return Err(Error::Gap("FIX generation retired before reserve update"));
+        }
+        let (reply, applied) = oneshot::channel();
+        self.tx
+            .send(Command::SetExitReserve { messages, reply })
+            .map_err(|_| Error::Gap("FIX generation retired before reserve update"))?;
+        applied
+            .await
+            .map_err(|_| Error::Gap("FIX generation retired before reserve update"))?
+    }
+
     /// Source generation for this immutable session handle.
     #[must_use]
     pub fn generation(&self) -> u64 {
@@ -679,12 +707,24 @@ impl SessionDriver {
         Ok(())
     }
     async fn command(&mut self, command: Command) -> Result<(), Error> {
-        let Command::Send {
-            id,
-            request,
-            deadline,
-            reply,
-        } = command;
+        let (id, request, deadline, reply) = match command {
+            Command::SetExitReserve { messages, reply } => {
+                let result = if self.stop.is_cancelled() {
+                    Err(Error::Gap("FIX generation retired before reserve update"))
+                } else {
+                    self.config.exit_reserve = messages;
+                    Ok(())
+                };
+                let _ = reply.send(result);
+                return Ok(());
+            }
+            Command::Send {
+                id,
+                request,
+                deadline,
+                reply,
+            } => (id, request, deadline, reply),
+        };
         let mut evidence = attempt(self.generation, &id, &request, None, Outcome::NotSent);
         let prepared = self.prepare(&id, &request, deadline, reply.is_closed());
         let (header, bytes) = match prepared {
@@ -751,7 +791,14 @@ impl SessionDriver {
         let header = self.header()?;
         let bytes = self.encode(request.kind.code(), &request.fields, &header)?;
         let count = request.order_count()?;
-        self.messages.admit()?;
+        let mut messages = self.messages.clone();
+        messages.admit_reserved(
+            self.config.exit_reserve,
+            matches!(
+                request.kind,
+                super::RequestKind::CancelOrder | super::RequestKind::CancelAll
+            ),
+        )?;
         self.config.budgets.spot.admit(
             Cost {
                 orders10: count,
@@ -761,6 +808,7 @@ impl SessionDriver {
             },
             self.config.clock.now_millis()?,
         )?;
+        self.messages = messages;
         Ok((header, bytes))
     }
     fn subscription_admission(&self, request: &Request) -> Result<(), Error> {
@@ -931,14 +979,22 @@ impl SessionDriver {
     pub async fn run(mut self) -> Result<(), Error> {
         let failure = self.drive().await.err();
         self.commands.close();
-        while let Some(Command::Send {
-            id, request, reply, ..
-        }) = self.commands.recv().await
-        {
-            let _ = reply.send(Err(SendFailure {
-                attempt: attempt(self.generation, &id, &request, None, Outcome::NotSent),
-                error: Error::Gap("FIX generation retired before send"),
-            }));
+        while let Some(command) = self.commands.recv().await {
+            match command {
+                Command::SetExitReserve { reply, .. } => {
+                    let _ = reply.send(Err(Error::Gap(
+                        "FIX generation retired before reserve update",
+                    )));
+                }
+                Command::Send {
+                    id, request, reply, ..
+                } => {
+                    let _ = reply.send(Err(SendFailure {
+                        attempt: attempt(self.generation, &id, &request, None, Outcome::NotSent),
+                        error: Error::Gap("FIX generation retired before send"),
+                    }));
+                }
+            }
         }
         let shutdown = tokio::time::timeout(self.config.timeout, self.stream.shutdown()).await;
         self.lease
@@ -1006,6 +1062,254 @@ mod tests {
         assert_eq!(read(peer).await.kind.as_str(), "A");
         peer.write_all(&frame("35=A|34=1|49=SPOT|56=CLIENT|52=20260927-01:02:03.000001|98=0|108=5|25037=synthetic-server|")).await.unwrap();
     }
+    #[tokio::test(start_paused = true)]
+    async fn account_refusal_preserves_session_message_capacity_and_controls_use_total_limit() {
+        let (_session, _events, mut driver, mut peer) = setup();
+        driver.authenticated = true;
+        driver.config = driver.config.clone().with_exit_reserve(1);
+        driver
+            .messages
+            .observe(Duration::from_secs(10), 0, 2)
+            .unwrap();
+        driver
+            .config
+            .budgets
+            .spot
+            .observe_order_window(10_000, 1, 1, driver.config.clock.now_millis().unwrap())
+            .unwrap();
+        let request = super::super::Request::builder(
+            Role::OrderEntry,
+            super::super::RequestKind::NewOrderSingle,
+        )
+        .field(
+            "ClOrdID",
+            Value::ClientId(super::super::ClientId::new("refused").unwrap()),
+        )
+        .unwrap()
+        .field(
+            "Symbol",
+            Value::Symbol(crate::Symbol::new("BTCUSDT").unwrap()),
+        )
+        .unwrap()
+        .field("Side", Value::Code("1".into()))
+        .unwrap()
+        .field("OrdType", Value::Code("1".into()))
+        .unwrap()
+        .field("OrderQty", Value::Quantity(crate::Decimal::ONE))
+        .unwrap()
+        .build()
+        .unwrap();
+        assert!(matches!(
+            driver.prepare(
+                &RequestId::new("refused").unwrap(),
+                &request,
+                Instant::now() + Duration::from_secs(1),
+                false
+            ),
+            Err(Error::Admission { .. })
+        ));
+        let limits =
+            super::super::Request::builder(Role::OrderEntry, super::super::RequestKind::Limits)
+                .field(
+                    "ReqID",
+                    Value::Id(super::super::WireId::new("limits").unwrap()),
+                )
+                .unwrap()
+                .build()
+                .unwrap();
+        // Account-refused placement did not consume the one ordinary session slot.
+        driver
+            .prepare(
+                &RequestId::new("limits").unwrap(),
+                &limits,
+                Instant::now() + Duration::from_secs(1),
+                false,
+            )
+            .unwrap();
+        assert!(matches!(
+            driver.prepare(
+                &RequestId::new("limits-again").unwrap(),
+                &limits,
+                Instant::now() + Duration::from_secs(1),
+                false
+            ),
+            Err(Error::Admission { .. })
+        ));
+        driver
+            .control("0", Fields::new(Role::OrderEntry))
+            .await
+            .unwrap();
+        assert_eq!(read(&mut peer).await.kind.as_str(), "0");
+        assert!(matches!(
+            driver.control("0", Fields::new(Role::OrderEntry)).await,
+            Err(Error::Admission { .. })
+        ));
+        driver.stream.shutdown().await.unwrap();
+        driver.lease.retire(true).unwrap();
+    }
+
+    fn limits_request(id: &str) -> Request {
+        Request::builder(Role::OrderEntry, super::super::RequestKind::Limits)
+            .field("ReqID", Value::Id(super::super::WireId::new(id).unwrap()))
+            .unwrap()
+            .build()
+            .unwrap()
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn runtime_reserve_acknowledges_fifo_replacement_without_resetting_messages() {
+        let (session, _events, mut driver, mut peer) = setup();
+        driver.authenticated = true;
+        driver
+            .messages
+            .observe(Duration::from_secs(10), 0, 3)
+            .unwrap();
+        let mut first =
+            Box::pin(session.send(RequestId::new("first").unwrap(), limits_request("first")));
+        assert!(futures_util::poll!(first.as_mut()).is_pending());
+        let mut update = Box::pin(session.set_exit_reserve(2));
+        assert!(futures_util::poll!(update.as_mut()).is_pending());
+        let command = driver.commands.recv().await.unwrap();
+        driver.command(command).await.unwrap();
+        assert_eq!(first.await.unwrap().sequence, Some(1));
+        assert_eq!(read(&mut peer).await.kind.as_str(), "XLQ");
+        assert!(futures_util::poll!(update.as_mut()).is_pending());
+        let command = driver.commands.recv().await.unwrap();
+        driver.command(command).await.unwrap();
+        update.await.unwrap();
+        assert!(matches!(
+            driver.prepare(
+                &RequestId::new("refused").unwrap(),
+                &limits_request("refused"),
+                Instant::now() + Duration::from_secs(1),
+                false
+            ),
+            Err(Error::Admission { .. })
+        ));
+        let mut release = Box::pin(session.set_exit_reserve(0));
+        assert!(futures_util::poll!(release.as_mut()).is_pending());
+        let command = driver.commands.recv().await.unwrap();
+        driver.command(command).await.unwrap();
+        release.await.unwrap();
+        let mut next =
+            Box::pin(session.send(RequestId::new("next").unwrap(), limits_request("next")));
+        assert!(futures_util::poll!(next.as_mut()).is_pending());
+        let command = driver.commands.recv().await.unwrap();
+        driver.command(command).await.unwrap();
+        assert_eq!(next.await.unwrap().sequence, Some(2));
+        assert_eq!(read(&mut peer).await.kind.as_str(), "XLQ");
+        let mut protect = Box::pin(session.set_exit_reserve(3));
+        assert!(futures_util::poll!(protect.as_mut()).is_pending());
+        let command = driver.commands.recv().await.unwrap();
+        driver.command(command).await.unwrap();
+        protect.await.unwrap();
+        driver
+            .control("0", Fields::new(Role::OrderEntry))
+            .await
+            .unwrap();
+        assert_eq!(read(&mut peer).await.kind.as_str(), "0");
+        assert!(matches!(
+            driver.control("0", Fields::new(Role::OrderEntry)).await,
+            Err(Error::Admission { .. })
+        ));
+        driver.stream.shutdown().await.unwrap();
+        driver.lease.retire(true).unwrap();
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn runtime_reserve_enqueued_update_survives_caller_cancellation() {
+        let (session, _events, mut driver, _peer) = setup();
+        driver.authenticated = true;
+        driver
+            .messages
+            .observe(Duration::from_secs(10), 0, 2)
+            .unwrap();
+        let mut update = Box::pin(session.set_exit_reserve(2));
+        assert!(futures_util::poll!(update.as_mut()).is_pending());
+        drop(update);
+        let command = driver.commands.recv().await.unwrap();
+        driver.command(command).await.unwrap();
+        assert!(matches!(
+            driver.prepare(
+                &RequestId::new("refused").unwrap(),
+                &limits_request("refused"),
+                Instant::now() + Duration::from_secs(1),
+                false
+            ),
+            Err(Error::Admission { .. })
+        ));
+        driver.stream.shutdown().await.unwrap();
+        driver.lease.retire(true).unwrap();
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn runtime_reserve_pending_and_later_updates_report_retirement() {
+        let (session, mut events, driver, mut peer) = setup();
+        let mut update = Box::pin(session.set_exit_reserve(1));
+        assert!(futures_util::poll!(update.as_mut()).is_pending());
+        session.shutdown();
+        driver.run().await.unwrap();
+        assert!(matches!(
+            update.await,
+            Err(Error::Gap("FIX generation retired before reserve update"))
+        ));
+        assert!(matches!(
+            session.set_exit_reserve(0).await,
+            Err(Error::Gap("FIX generation retired before reserve update"))
+        ));
+        assert_eq!(
+            peer.read_u8().await.unwrap_err().kind(),
+            std::io::ErrorKind::UnexpectedEof
+        );
+        assert!(matches!(
+            events.recv().await,
+            Some(Event::Gap {
+                error: Error::Gap("FIX write canceled; outcome uncertain"),
+                ..
+            })
+        ));
+        assert!(matches!(events.recv().await, Some(Event::Retired(1))));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn runtime_reserve_running_driver_applies_before_acknowledged_application() {
+        let (session, mut events, mut driver, mut peer) = setup();
+        driver
+            .messages
+            .observe(Duration::from_secs(10), 0, 3)
+            .unwrap();
+        let owner = tokio::spawn(driver.run());
+        acknowledge(&mut peer).await;
+        assert!(matches!(
+            events.recv().await,
+            Some(Event::Established { .. })
+        ));
+        session.set_exit_reserve(2).await.unwrap();
+        let refused = session
+            .send(
+                RequestId::new("refused").unwrap(),
+                limits_request("refused"),
+            )
+            .await
+            .unwrap_err();
+        assert_eq!(refused.attempt.outcome, Outcome::NotSent);
+        assert!(matches!(refused.error, Error::Admission { .. }));
+        session.set_exit_reserve(0).await.unwrap();
+        assert_eq!(
+            session
+                .send(RequestId::new("sent").unwrap(), limits_request("sent"))
+                .await
+                .unwrap()
+                .sequence,
+            Some(2)
+        );
+        assert_eq!(read(&mut peer).await.kind.as_str(), "XLQ");
+        session.shutdown();
+        assert_eq!(read(&mut peer).await.kind.as_str(), "5");
+        assert!(matches!(events.recv().await, Some(Event::Retired(1))));
+        owner.await.unwrap().unwrap();
+    }
+
     #[tokio::test(start_paused = true)]
     async fn silence_requires_a_probe_and_its_exact_echo_before_failure() {
         let (_session, mut events, driver, mut peer) = setup();

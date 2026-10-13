@@ -15,7 +15,7 @@ mod validation;
 mod wire;
 pub use crate::core::sapi::Config;
 mod identity;
-pub use identity::{DustAssets, Network, WithdrawalId};
+pub use identity::{DepositIds, DustAssets, Network, WithdrawalId};
 
 /// REST client whose clones share endpoint budgets and transport configuration.
 #[derive(Clone)]

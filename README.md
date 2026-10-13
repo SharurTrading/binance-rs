@@ -535,7 +535,8 @@ mode or consumer intent:
 | Options REST | Pure option/block-order cancellations; `newOrder` with `reduceOnly=true`; nonempty `orders` creation batches whose every member has `reduceOnly=true` |
 | Spot REST/WebSocket API | Pure single-order, order-list and all-open-order cancellations |
 | Margin SAPI REST | Pure single-order, OCO and all-open-order cancellations |
-| Wallet and Convert SAPI REST | No exit eligibility; ordinary attempts honor reserves on any scopes they share |
+| Convert SAPI REST | Pure `cancelLimitOrder` cancellation |
+| Wallet SAPI REST | No exit eligibility; ordinary attempts honor reserves on any scopes they share |
 | Spot FIX/FIX SBE | Pure `CancelOrder` and `CancelAll`, with a separately configured session message reserve |
 
 Futures batches use native `batchOrders`; Options batches use native `orders`. Boolean
@@ -551,6 +552,7 @@ These classifications follow the official
 [Options trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade),
 [Spot trading endpoints](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade),
 [Margin trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade),
+[Convert limit cancellation](https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#cancel-limit-order),
 and [Spot FIX requests](https://github.com/binance/binance-spot-api-docs/blob/master/fix-api.md).
 SAPI retains its endpoint IP/UID ownership: equal path text does not combine different
 scopes. For example, Margin new-order UID weight and cancellation IP weight remain

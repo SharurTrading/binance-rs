@@ -472,6 +472,113 @@ USDⓈ-M `testOrder` quota weights; an authorized demo probe
 no IP weight and one slot on each order limit, which the client charges. That validation
 endpoint does not submit to the matching engine.
 
+### Reserving capacity for exits
+
+The consumer chooses whether to reserve quota and how many native units to keep.
+The SDK handles transport admission only: it maintains no positions, order engine,
+accounting, or automatic flattening. Reserves default to zero. Retain the existing
+shared owner or configuration to change policy at runtime through
+`Budgets::set_exit_reserve` or a product `Config::set_exit_reserve`:
+
+```rust
+use binance_client::{AccountKey, Error, ExitReserve, usdm};
+
+let account = AccountKey::new("main-account");
+let config = usdm::Config::new_for_account(usdm::Environment::Production, &account)?;
+let owner = config.clone();
+let client = usdm::RestClient::new(config)?;
+// The outer coordinator enables protection when its work needs capacity.
+owner.set_exit_reserve(
+    ExitReserve::default()
+        .request_weight(40)
+        .websocket_weight(20)
+        .orders(5),
+)?;
+// Release protection when that work is complete; accepted usage stays charged.
+owner.set_exit_reserve(ExitReserve::default())?;
+# drop(client);
+# Ok::<(), Error>(())
+```
+
+This setter replaces policy for every client sharing those IP, WebSocket and account
+owners; constructing another default client does not clear it. IP reserves also affect
+other accounts on that IP. Their account reserves remain separate; configure each account
+owner explicitly. Set `ExitReserve::default()` to release a policy. One outer coordinator
+should own policy for each shared quota owner: replacements are last-write-wins, not
+additive leases. A lower reserve or release makes only remaining quota available;
+raising it cannot reclaim already spent quota. Counters, accepted venue limits and
+cooldowns remain intact when policy changes.
+
+| Setting | Native quota units kept per applicable window |
+| --- | --- |
+| `request_weight` | REST/shared-IP request weight; includes WebSocket weight counted on REST |
+| `websocket_weight` | Separate WebSocket API IP request weight |
+| `raw_requests` | Raw REST request count |
+| `orders` | Account order placements in every order window, including response-discovered and Margin/FIX windows |
+| `sapi_weight` | SAPI endpoint weight in its native IP or UID scope |
+| `sapi_requests` | SAPI endpoint request count in each documented second/minute window |
+
+For each charged dimension with venue limit `L` and reserve `R`, ordinary attempts stop
+at `L - R`, floored at zero; eligible attempts can use `L`. Both charge the same counter.
+Every dimension must admit before any shared counter is charged. A zero-cost dimension
+never blocks an attempt just because its counter is exhausted. New venue limit evidence
+applies immediately, even when it falls below the configured reserve: ordinary charged
+traffic then refuses, and eligible traffic still cannot exceed `L`. Reported usage and
+limits remain the full venue figures, not an ordinary admission allowance.
+
+Eligibility follows explicit provider semantics, independent of symbol, side, position
+mode or consumer intent:
+
+| Product/transport | Requests eligible for reserved capacity |
+| --- | --- |
+| USDⓈ-M and COIN-M REST/WebSocket API | Exposed pure order/algo cancellations; new orders/algo orders with explicit `reduceOnly=true` or `closePosition=true`; creation batches only when every member explicitly qualifies |
+| Options REST | Pure option/block-order cancellations; `newOrder` with `reduceOnly=true`; nonempty `orders` creation batches whose every member has `reduceOnly=true` |
+| Spot REST/WebSocket API | Pure single-order, order-list and all-open-order cancellations |
+| Margin SAPI REST | Pure single-order, OCO and all-open-order cancellations |
+| Wallet and Convert SAPI REST | No exit eligibility; ordinary attempts honor reserves on any scopes they share |
+| Spot FIX/FIX SBE | Pure `CancelOrder` and `CancelAll`, with a separately configured session message reserve |
+
+Futures batches use native `batchOrders`; Options batches use native `orders`. Boolean
+flags accept the native boolean `true` or exact string `"true"` where the request model
+supports them. Mixed batches, cancel-replace, amendments, modifications, test orders and
+auto-cancel timers remain ordinary. Hedge-side instructions without explicit reducing
+flags and spot sells have no stateless guarantee that they reduce exposure, so remain
+ordinary. Margin borrowing/repayment flags do not make an order eligible.
+
+These classifications follow the official
+[USDⓈ-M trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade),
+[COIN-M trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade),
+[Options trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade),
+[Spot trading endpoints](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade),
+[Margin trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade),
+and [Spot FIX requests](https://github.com/binance/binance-spot-api-docs/blob/master/fix-api.md).
+SAPI retains its endpoint IP/UID ownership: equal path text does not combine different
+scopes. For example, Margin new-order UID weight and cancellation IP weight remain
+independent. Additional endpoint IP request caps are checked independently of UID weight.
+
+A FIX session starts with message capacity configured by
+`spot::fix::Config::with_exit_reserve(messages)`. Retain its `Session` handle and call
+`session.set_exit_reserve(messages).await?` to replace that policy at runtime; zero
+releases it. The single session driver applies updates in FIFO command order and
+acknowledges application before the setter returns success. Policy commands send no
+wire message and consume no quota. Dropping the setter future after enqueue does not
+retract the update. Retired sessions return a typed lifecycle gap. Use one outer
+coordinator for each session's policy; replacements are not additive leases and do
+not reset or refund message usage or change accepted venue limits.
+Its ordinary applications stop below the session's message limit, while pure
+cancellations and required protocol controls use the full limit and charge the same
+counter. Required Logon, Heartbeat, TestRequest replies and Logout can consume protected
+capacity. FIX order placements also honor the shared Spot account order reserve; an
+account refusal does not spend session message capacity.
+
+> [!IMPORTANT]
+> Reserved capacity is a local admission policy, not guaranteed venue acceptance or
+> an execution priority. Venue cooldowns and bans still refuse eligible requests.
+> Other processes, manual venue traffic and required FIX controls can consume capacity.
+> An admitted cancellation can still be rejected, and conditional reducing orders
+> only execute when the venue's own conditions permit. No mutation waits or retries
+> are introduced; an uncertain outcome still belongs to the caller to reconcile.
+
 ### Releasing a ban without timing
 
 Binance documents a `418` ban as lasting

@@ -20,6 +20,7 @@ pub enum Encoding {
 /// Caller-owned FIX configuration. No runtime or task is started by this builder.
 #[derive(Clone)]
 pub struct Config {
+    pub(super) exit_reserve: usize,
     pub(super) role: Role,
     pub(super) component: CompId,
     pub(super) credentials: Credentials,
@@ -62,6 +63,7 @@ impl Config {
             Role::MarketData => "fix-md.binance.com",
         };
         Ok(Self {
+            exit_reserve: 0,
             role,
             component,
             credentials,
@@ -76,6 +78,20 @@ impl Config {
             precision: vec![],
         })
     }
+    /// Keep `messages` of this session's message window for pure cancellations.
+    ///
+    /// Zero disables the reserve. Ordinary application requests use the venue limit
+    /// minus this reserve, floored at zero. Cancellations and required protocol controls
+    /// use the full limit and charge the same counter; controls can consume the reserve.
+    /// This never changes account order limits, which remain shared with Spot APIs.
+    /// After connecting, [`super::Session::set_exit_reserve`] replaces this policy
+    /// through the session driver without resetting usage.
+    #[must_use]
+    pub fn with_exit_reserve(mut self, messages: usize) -> Self {
+        self.exit_reserve = messages;
+        self
+    }
+
     /// Select documented encoding/production port. Call before a fixture endpoint override.
     #[must_use]
     pub fn encoding(mut self, encoding: Encoding) -> Self {

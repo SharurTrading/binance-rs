@@ -115,8 +115,12 @@ impl BudgetLimits {
     }
 }
 
+pub(crate) mod reserve;
+pub use reserve::ExitReserve;
+
 #[derive(Clone, Copy, Default)]
 pub(crate) struct Cost {
+    pub exit: reserve::ExitEligibility,
     /// Caller-retained venue authority, never serialized into the wire request.
     pub authority_expiry: Option<u64>,
     pub sapi: Option<super::sapi::SapiCost>,
@@ -148,6 +152,7 @@ impl Cost {
 
 #[derive(Default)]
 pub(super) struct State {
+    pub(super) exit_reserve: ExitReserve,
     // Each counter is re-derivable: release it at the end of its aligned venue interval.
     counts: BTreeMap<&'static str, (u64, u64)>,
     pub(super) cooldown: u64,
@@ -338,14 +343,24 @@ impl Budgets {
                 ("quoteDay", 86_400_000, 500, 1),
             ]);
         }
-        order_windows(&mut account, placements, now, false)?;
+        order_windows(&mut account, placements, now, false, c.exit.is_eligible())?;
         let monthly = monthly_download(&account, c.download, now)?;
-        for (state, costs) in [
-            (&ip, &ip_cost),
-            (&ws_ip, &ws_cost),
-            (&account, &account_cost),
+        for (state, costs, weight_reserve) in [
+            (&ip, &ip_cost, ip.exit_reserve.request_weight),
+            (&ws_ip, &ws_cost, ws_ip.exit_reserve.websocket_weight),
+            (&account, &account_cost, 0),
         ] {
             for &(name, window, limit, amount) in costs {
+                if amount == 0 {
+                    continue;
+                }
+                let reserve = match name {
+                    "weight" => weight_reserve,
+                    "raw" => state.exit_reserve.raw_requests,
+                    "orders10" | "orders60" | "ordersDay" => state.exit_reserve.orders,
+                    _ => 0,
+                };
+                let limit = reserve::admission_limit(limit, reserve, c.exit.is_eligible());
                 let count = state.current(name, window, now);
                 if count.checked_add(amount).is_none_or(|v| v > limit) {
                     return Err(Error::Admission {
@@ -370,7 +385,7 @@ impl Budgets {
                     .ok_or(Error::Configuration("budget overflow"))?;
             }
         }
-        order_windows(&mut account, placements, now, true)?;
+        order_windows(&mut account, placements, now, true, c.exit.is_eligible())?;
         if let Some((key, bucket)) = monthly {
             let current = account.counts.entry(key).or_default();
             if current.0 != bucket {
@@ -876,27 +891,37 @@ impl WeightPools {
     }
 }
 
-fn order_windows(account: &mut State, amount: u64, now: u64, apply: bool) -> Result<(), Error> {
+fn order_windows(
+    account: &mut State,
+    amount: u64,
+    now: u64,
+    apply: bool,
+    exit: bool,
+) -> Result<(), Error> {
+    if amount == 0 {
+        return Ok(());
+    }
     for (&window, counter) in &mut account.order_windows {
-        if counter.0 <= now {
-            *counter = (
+        let (until, count) = if counter.0 <= now {
+            (
                 now.checked_add(window)
                     .ok_or(Error::Configuration("order window overflow"))?,
                 0,
-                counter.2,
-            );
-        }
-        let next = counter
-            .1
+            )
+        } else {
+            (counter.0, counter.1)
+        };
+        let next = count
             .checked_add(amount)
             .ok_or(Error::Configuration("order window overflow"))?;
-        if next > counter.2 && amount != 0 {
+        let limit = reserve::admission_limit(counter.2, account.exit_reserve.orders, exit);
+        if next > limit {
             return Err(Error::Admission {
-                retry_after: Duration::from_millis(counter.0 - now),
+                retry_after: Duration::from_millis(until - now),
             });
         }
         if apply {
-            counter.1 = next;
+            *counter = (until, next, counter.2);
         }
     }
     Ok(())

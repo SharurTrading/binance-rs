@@ -91,6 +91,15 @@ pub(crate) fn cost(op: Operation, p: &BTreeMap<String, Value>) -> Result<Cost, E
         _ => 0,
     };
     Ok(Cost {
+        exit: crate::core::rate::reserve::ExitEligibility::from_flag(matches!(
+            op.name,
+            "deleteOrder"
+                | "deleteOpenOrders"
+                | "deleteOrderList"
+                | "orderCancel"
+                | "openOrdersCancelAll"
+                | "orderListCancel"
+        )),
         weight: if rest { weight } else { 0 },
         ws_weight: if rest { 0 } else { weight },
         raw_requests: u64::from(rest),
@@ -147,4 +156,44 @@ pub(crate) fn adopt_stated_ws_limits(
                 limit: item.limit,
             }
         }))
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn native_pure_cancellations_are_eligible_without_placing_orders() {
+        use crate::core::Request;
+        let empty = std::collections::BTreeMap::new();
+        for op in [
+            crate::spot::rest_requests::DeleteOrder::OP,
+            crate::spot::rest_requests::DeleteOpenOrders::OP,
+            crate::spot::rest_requests::DeleteOrderList::OP,
+            crate::spot::ws_requests::OrderCancel::OP,
+            crate::spot::ws_requests::OpenOrdersCancelAll::OP,
+            crate::spot::ws_requests::OrderListCancel::OP,
+        ] {
+            let cost = super::cost(op, &empty).unwrap();
+            assert!(cost.exit.is_eligible(), "{}", op.name);
+            assert_eq!(cost.orders10, 0, "{}", op.name);
+            assert_eq!(cost.orders60, 0, "{}", op.name);
+        }
+    }
+
+    #[test]
+    fn cancel_replace_and_spot_sells_remain_ordinary() {
+        use crate::core::Request;
+        let p = std::collections::BTreeMap::from([("side".into(), serde_json::json!("SELL"))]);
+        assert!(
+            !super::cost(crate::spot::rest_requests::OrderCancelReplace::OP, &p)
+                .unwrap()
+                .exit
+                .is_eligible()
+        );
+        assert!(
+            !super::cost(crate::spot::rest_requests::NewOrder::OP, &p)
+                .unwrap()
+                .exit
+                .is_eligible()
+        );
+    }
 }

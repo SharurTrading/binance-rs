@@ -404,3 +404,39 @@ async fn coinm_websocket_weight_charges_rest_weight_on_an_explicit_separate_owne
     driver.await.unwrap().unwrap();
     assert_eq!(server.await.unwrap(), ["account.status"]);
 }
+
+#[tokio::test]
+async fn reserve_stops_ordinary_websocket_traffic_then_sends_cancel_once_within_total_limit() {
+    let pools = WeightPools::new();
+    let clock = clock();
+    let budgets =
+        binance_client::Budgets::new(binance_client::BudgetLimits::usdm().ws_weight_per_minute(7))
+            .unwrap();
+    budgets
+        .set_exit_reserve(binance_client::ExitReserve::default().websocket_weight(1))
+        .unwrap();
+    let (url, server) = venue(vec![(price_reply(), None), (json!({"orderId":7}), None)]).await;
+    let (client, events, driver) =
+        usdm_socket(usdm_config(&pools, &clock).budgets(budgets), &url).await;
+    usdm_price(&client, "ordinary").await.unwrap();
+    assert_refused(&usdm_price(&client, "ordinary-refused").await.unwrap_err());
+    let cancel = usdm::ws_requests::CancelOrder::new()
+        .symbol(Symbol::new("BTCUSDT").unwrap())
+        .order_id(7);
+    client
+        .cancel_order(&cancel, RequestId::new("cancel").unwrap(), deadline())
+        .await
+        .unwrap();
+    assert_refused(
+        &client
+            .cancel_order(
+                &cancel,
+                RequestId::new("total-refused").unwrap(),
+                deadline(),
+            )
+            .await
+            .unwrap_err(),
+    );
+    retire_usdm(client, events, driver).await;
+    assert_eq!(server.await.unwrap(), ["ticker.price", "order.cancel"]);
+}

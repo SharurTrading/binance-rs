@@ -136,6 +136,11 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
   proves rejection. Query venue truth; a timeout does not cancel an order.
 - Responses/errors retain safe status, venue code, rate counters, retry timing, and
   caller order IDs (parameter paths identify nested batch members).
+  Venue failures and market-stream control refusals also retain an exact optional
+  venue explanation as `VenueMessage`. It is redacted in error formatting and
+  debugging; it may echo a URL, IP address, or token. Access through
+  `expose_sensitive_text()` is explicit and caller-owned: do not automatically log
+  or persist the returned text.
   Batch results preserve input order and each member's success/refusal/uncertainty.
   Malformed members retain redacted `BatchResult::Unknown` evidence without hiding
   successful receipts. Resolve uncertain members with venue reads; never replay

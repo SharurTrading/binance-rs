@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
+use crate::core::VenueMessage;
 use std::{collections::BTreeMap, time::Duration};
 
 /// What the available evidence proves about an operation.
@@ -72,7 +73,7 @@ pub struct Response<T> {
     pub meta: ResponseMeta,
 }
 
-/// Safe, typed evidence for an unsuccessful venue response.
+/// Typed evidence for an unsuccessful venue response, with venue text redacted.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct VenueFailure {
@@ -84,6 +85,9 @@ pub struct VenueFailure {
     pub operation: &'static str,
     /// Venue error code, absent if the error envelope itself was malformed.
     pub code: Option<i64>,
+    /// Exact venue explanation when `msg` or `message` is a string. Explicit access
+    /// is required because the venue may echo sensitive request data in this field.
+    pub message: Option<VenueMessage>,
     /// Classification of the operation's execution outcome.
     pub outcome: Outcome,
     /// Rate evidence, even when the payload could not be read or decoded.
@@ -117,7 +121,8 @@ pub struct OperationLeg {
     pub client_order_id: Option<String>,
 }
 
-/// Client errors never retain a request URL, secret, or raw sensitive body.
+/// Client errors never retain the transport request URL or raw response body.
+/// Venue explanation fields may echo sensitive URLs and are redacted when formatted.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
@@ -207,7 +212,7 @@ pub enum Error {
         /// Venue error code, including unknown future codes.
         code: i64,
         /// The venue's own explanation, when it sent one.
-        message: Option<String>,
+        message: Option<VenueMessage>,
     },
     /// Correlation ID reused in a socket generation.
     #[error("duplicate WebSocket request ID")]
@@ -369,6 +374,11 @@ fn failure_classified(
     definitive: bool,
 ) -> Error {
     let code = value.get("code").and_then(serde_json::Value::as_i64);
+    let message = value
+        .get("msg")
+        .or_else(|| value.get("message"))
+        .and_then(serde_json::Value::as_str)
+        .map(VenueMessage::new);
     let outcome = if !mutation {
         Outcome::ReadFailed
     } else if definitive {
@@ -381,8 +391,45 @@ fn failure_classified(
         status,
         operation,
         code,
+        message,
         outcome,
         rates,
         partial: None,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn venue_message_uses_existing_msg_precedence_and_retains_only_strings() {
+        for (value, expected) in [
+            (
+                json!({"code":-1021,"msg":"first","message":"second"}),
+                Some("first"),
+            ),
+            (json!({"code":-1021,"message":"fallback"}), Some("fallback")),
+            (json!({"code":-1021,"msg":""}), Some("")),
+            (json!({"code":-1021}), None),
+            (json!({"code":-1021,"msg":null}), None),
+            (json!({"code":-1021,"msg":7,"message":"ignored"}), None),
+        ] {
+            let Error::Venue(failure) =
+                failure("new_order", true, 400, &value, RateEvidence::default())
+            else {
+                panic!("missing venue failure")
+            };
+            assert_eq!(
+                failure
+                    .message
+                    .as_ref()
+                    .map(VenueMessage::expose_sensitive_text),
+                expected
+            );
+            assert_eq!(failure.code, Some(-1021));
+            assert_eq!(failure.outcome, Outcome::Rejected);
+        }
+    }
 }

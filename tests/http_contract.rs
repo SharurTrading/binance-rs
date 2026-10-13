@@ -38,6 +38,42 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn rest_venue_failure_preserves_exact_message_without_logging_it() {
+        let message =
+            "synthetic IP=192.0.2.17 signed-url=fixture-url token=fixture-token\n订单时间偏差";
+        let body = serde_json::json!({"code": -1021, "msg": message}).to_string();
+        let fixture =
+            HttpFixture::new(400, "X-MBX-USED-WEIGHT-1M: 7\r\n", &body, None, false).await;
+        let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+        let error = client.new_order(&order(), deadline()).await.unwrap_err();
+        let debug = format!("{error:?}");
+        let display = error.to_string();
+        for sentinel in ["192.0.2.17", "fixture-url", "fixture-token"] {
+            assert!(!debug.contains(sentinel));
+            assert!(!display.contains(sentinel));
+        }
+        let Error::Venue(failure) = error else {
+            panic!("missing venue failure")
+        };
+        assert_eq!(failure.code, Some(-1021));
+        assert_eq!(failure.status, 400);
+        assert_eq!(failure.outcome, Outcome::Rejected);
+        assert_eq!(failure.rates.counters["x-mbx-used-weight-1m"], 7);
+        assert_eq!(
+            failure.client_order_ids["newClientOrderId"],
+            "fixture/order:1"
+        );
+        assert_eq!(
+            failure
+                .message
+                .as_ref()
+                .map(binance_client::VenueMessage::expose_sensitive_text),
+            Some(message)
+        );
+        fixture.finish().await;
+    }
+
+    #[tokio::test]
     async fn signed_mutation_has_exact_wire_bytes_and_no_secret_in_errors() {
         let mut fixture=HttpFixture::new(200,"","{\"orderId\":7,\"clientOrderId\":\"fixture/order:1\",\"executedQty\":\"0.001000000000000000000001\"}",None,false).await;
         let client = RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();

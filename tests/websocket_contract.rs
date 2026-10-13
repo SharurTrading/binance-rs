@@ -82,6 +82,63 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn websocket_api_failure_preserves_exact_message_without_logging_it() {
+        let (listener, url) = listener().await;
+        let message =
+            "synthetic IP=192.0.2.18 signed-url=fixture-url token=fixture-token\n時刻ずれ";
+        let server = tokio::spawn(async move {
+            let mut ws = accept(listener).await;
+            let frame = next_json(&mut ws).await;
+            ws.send(Message::text(
+                json!({"id": frame["id"], "status": 400,
+                "error": {"code": -1021, "msg": message}})
+                .to_string(),
+            ))
+            .await
+            .unwrap();
+            finish_server(ws).await;
+        });
+        let (client, mut events, driver) = WsClient::connect(config().websocket_url(&url).unwrap())
+            .await
+            .unwrap();
+        let driver = tokio::spawn(driver.run());
+        events.recv().await.unwrap();
+        let error = client
+            .new_order(
+                &order(),
+                RequestId::new("message-case").unwrap(),
+                deadline(),
+            )
+            .await
+            .unwrap_err();
+        let debug = format!("{error:?}");
+        let display = error.to_string();
+        for sentinel in ["192.0.2.18", "fixture-url", "fixture-token"] {
+            assert!(!debug.contains(sentinel));
+            assert!(!display.contains(sentinel));
+        }
+        let Error::Venue(failure) = error else {
+            panic!("missing venue failure")
+        };
+        assert_eq!(failure.code, Some(-1021));
+        assert_eq!(failure.status, 400);
+        assert_eq!(failure.outcome, Outcome::Rejected);
+        assert_eq!(
+            failure.client_order_ids["newClientOrderId"],
+            "fixture/order:1"
+        );
+        assert_eq!(
+            failure
+                .message
+                .as_ref()
+                .map(binance_client::VenueMessage::expose_sensitive_text),
+            Some(message)
+        );
+        retire(&client, &mut events, driver).await;
+        server.await.unwrap();
+    }
+
+    #[tokio::test]
     async fn websocket_weight_includes_handshake_and_uses_every_remaining_request_slot() {
         // Official handshake cost and independent REST/WS IP scopes, checked 2026-09-27:
         // https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/websocket-api-general-info

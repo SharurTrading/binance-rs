@@ -135,16 +135,17 @@ pub(crate) fn admission_limit(limit: u64, reserve: u64, exit: bool) -> u64 {
     }
 }
 
-/// Recognize only explicit creation flags, including every member of a native batch.
+fn enabled(value: Option<&serde_json::Value>) -> bool {
+    value.is_some_and(|value| value.as_bool() == Some(true) || value.as_str() == Some("true"))
+}
+
+/// Recognize explicit creation flags, including every member of a native batch.
 pub(crate) fn reducing_placement(
     operation: &str,
     parameters: &std::collections::BTreeMap<String, serde_json::Value>,
     close_position: bool,
     batch_parameter: &str,
 ) -> bool {
-    fn enabled(value: Option<&serde_json::Value>) -> bool {
-        value.is_some_and(|value| value.as_bool() == Some(true) || value.as_str() == Some("true"))
-    }
     let reducing = |reduce, close| enabled(reduce) || (close_position && enabled(close));
     match operation {
         "newOrder" | "newAlgoOrder" => reducing(
@@ -162,6 +163,45 @@ pub(crate) fn reducing_placement(
                     })
             }),
         _ => false,
+    }
+}
+
+/// Futures also treats the exact opposing side of a named hedge leg as reducing.
+pub(crate) fn futures_reducing_placement(
+    operation: &str,
+    parameters: &std::collections::BTreeMap<String, serde_json::Value>,
+) -> bool {
+    fn hedge_close(
+        side: Option<&serde_json::Value>,
+        position_side: Option<&serde_json::Value>,
+    ) -> bool {
+        matches!(
+            (
+                side.and_then(serde_json::Value::as_str),
+                position_side.and_then(serde_json::Value::as_str)
+            ),
+            (Some("SELL"), Some("LONG")) | (Some("BUY"), Some("SHORT"))
+        )
+    }
+
+    match operation {
+        "newOrder" => {
+            reducing_placement(operation, parameters, true, "batchOrders")
+                || hedge_close(parameters.get("side"), parameters.get("positionSide"))
+        }
+        "placeMultipleOrders" => parameters
+            .get("batchOrders")
+            .and_then(serde_json::Value::as_array)
+            .is_some_and(|orders| {
+                !orders.is_empty()
+                    && orders.iter().all(|order| {
+                        order.is_object()
+                            && (enabled(order.get("reduceOnly"))
+                                || enabled(order.get("closePosition"))
+                                || hedge_close(order.get("side"), order.get("positionSide")))
+                    })
+            }),
+        _ => reducing_placement(operation, parameters, true, "batchOrders"),
     }
 }
 
@@ -708,6 +748,7 @@ mod tests {
             ("positionSide".into(), json!("LONG")),
         ]);
         assert!(!reducing_placement("newOrder", &hedge, true, "batchOrders"));
+        assert!(futures_reducing_placement("newOrder", &hedge));
         for batch in [
             json!([]),
             json!([{"reduceOnly":true},{}]),
@@ -737,5 +778,62 @@ mod tests {
             false,
             "batchOrders"
         ));
+    }
+
+    #[test]
+    fn futures_regular_hedge_side_is_exact_and_every_batch_member_must_reduce() {
+        use serde_json::json;
+        use std::collections::BTreeMap;
+
+        for (side, position_side) in [("SELL", "LONG"), ("BUY", "SHORT")] {
+            let parameters = BTreeMap::from([
+                ("side".into(), json!(side)),
+                ("positionSide".into(), json!(position_side)),
+            ]);
+            assert!(futures_reducing_placement("newOrder", &parameters));
+            assert!(!futures_reducing_placement("newAlgoOrder", &parameters));
+            assert!(!reducing_placement(
+                "newOrder",
+                &parameters,
+                false,
+                "orders"
+            ));
+        }
+        for (side, position_side) in [
+            ("BUY", "LONG"),
+            ("SELL", "SHORT"),
+            ("SELL", "BOTH"),
+            ("sell", "LONG"),
+            ("SELL", "long"),
+        ] {
+            let parameters = BTreeMap::from([
+                ("side".into(), json!(side)),
+                ("positionSide".into(), json!(position_side)),
+            ]);
+            assert!(!futures_reducing_placement("newOrder", &parameters));
+        }
+        let all = BTreeMap::from([(
+            "batchOrders".into(),
+            json!([{"side":"SELL","positionSide":"LONG"},{"reduceOnly":"true"}]),
+        )]);
+        assert!(futures_reducing_placement("placeMultipleOrders", &all));
+        assert!(!reducing_placement(
+            "placeMultipleOrders",
+            &all,
+            false,
+            "orders"
+        ));
+        for batch in [
+            json!([{"side":"SELL","positionSide":"LONG"},{}]),
+            json!([{"side":"SELL","positionSide":"LONG"},{"side":"BUY","positionSide":"LONG"}]),
+            json!([{"side":"SELL","positionSide":"LONG"},true]),
+            json!([]),
+        ] {
+            let parameters = BTreeMap::from([("batchOrders".into(), batch)]);
+            assert!(!futures_reducing_placement(
+                "placeMultipleOrders",
+                &parameters
+            ));
+        }
     }
 }

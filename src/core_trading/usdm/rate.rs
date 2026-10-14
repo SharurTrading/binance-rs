@@ -19,7 +19,7 @@ pub(crate) fn cost(
                     | "cancelAllOpenOrders"
                     | "cancelAllAlgoOpenOrders"
                     | "cancelMultipleOrders"
-            ) || crate::core::rate::reserve::reducing_placement(op.name, p, true, "batchOrders"),
+            ) || crate::core::rate::reserve::futures_reducing_placement(op.name, p),
         ),
         ..Cost::default()
     };

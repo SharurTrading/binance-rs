@@ -542,12 +542,11 @@ applies immediately, even when it falls below the configured reserve: ordinary c
 traffic then refuses, and eligible traffic still cannot exceed `L`. Reported usage and
 limits remain the full venue figures, not an ordinary admission allowance.
 
-Eligibility follows explicit provider semantics, independent of symbol, side, position
-mode or consumer intent:
+Eligibility follows provider request semantics, independent of consumer intent:
 
 | Product/transport | Requests eligible for reserved capacity |
 | --- | --- |
-| USDⓈ-M and COIN-M REST/WebSocket API | Exposed pure order/algo cancellations; new orders/algo orders with explicit `reduceOnly=true` or `closePosition=true`; creation batches only when every member explicitly qualifies |
+| USDⓈ-M and COIN-M REST/WebSocket API | Exposed pure order/algo cancellations; new orders/algo orders with explicit `reduceOnly=true` or `closePosition=true`; regular new orders with exact `positionSide=LONG, side=SELL` or `positionSide=SHORT, side=BUY`; creation batches only when every member qualifies |
 | Options REST | Pure option/block-order cancellations; `newOrder` with `reduceOnly=true`; nonempty `orders` creation batches whose every member has `reduceOnly=true` |
 | Spot REST/WebSocket API | Pure single-order, order-list and all-open-order cancellations |
 | Margin SAPI REST | Pure single-order, OCO and all-open-order cancellations |
@@ -558,13 +557,19 @@ mode or consumer intent:
 Futures batches use native `batchOrders`; Options batches use native `orders`. Boolean
 flags accept the native boolean `true` or exact string `"true"` where the request model
 supports them. Mixed batches, cancel-replace, amendments, modifications, test orders and
-auto-cancel timers remain ordinary. Hedge-side instructions without explicit reducing
-flags and spot sells have no stateless guarantee that they reduce exposure, so remain
-ordinary. Margin borrowing/repayment flags do not make an order eligible.
+auto-cancel timers remain ordinary. The hedge-side rule applies only to Futures
+regular placements, not conditional algo placements or Options. A missing or `BOTH`
+position side, the opposite hedge-side pairs, and spot sells remain ordinary.
+Binance identifies the exact hedge-side pairs as reducing for its overload rule;
+eligibility does not establish a held position, venue acceptance, or exemption from
+normal order limits, IP budgets and cooldowns. Margin borrowing/repayment flags do
+not make an order eligible.
 
 These classifications follow the official
 [USDⓈ-M trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade),
 [COIN-M trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade),
+[USDⓈ-M overload rule](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/general-info),
+[COIN-M overload rule](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/general-info),
 [Options trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade),
 [Spot trading endpoints](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/rest-api/trade),
 [Margin trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-margin-trading/api/rest-api/trade),

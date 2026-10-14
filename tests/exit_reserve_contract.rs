@@ -9,7 +9,7 @@ mod support;
 
 use binance_client::{
     AccountKey, BudgetLimits, Budgets, ClientOrderId, Decimal, Error, ExitReserve, Outcome, Symbol,
-    usdm,
+    WeightPools, coinm, usdm,
 };
 use std::sync::Arc;
 use support::{FixedClock, HttpFixture, config, deadline};
@@ -19,6 +19,16 @@ fn order(id: &str) -> usdm::rest_requests::NewOrder {
     usdm::rest_requests::NewOrder::new()
         .symbol(Symbol::new("BTCUSDT").unwrap())
         .side("SELL")
+        .type_value("MARKET")
+        .quantity(Decimal::ONE)
+        .new_client_order_id(ClientOrderId::new(id).unwrap())
+}
+
+#[cfg(test)]
+fn coinm_order(id: &str) -> coinm::rest_requests::NewOrder {
+    coinm::rest_requests::NewOrder::new()
+        .symbol(Symbol::new("BTCUSD_PERP").unwrap())
+        .side("BUY")
         .type_value("MARKET")
         .quantity(Decimal::ONE)
         .new_client_order_id(ClientOrderId::new(id).unwrap())
@@ -175,5 +185,161 @@ async fn runtime_reserve_retained_configuration_replaces_policy_for_connected_si
             .unwrap_err(),
     );
     assert_eq!(fixture.connections_accepted(), 4);
+    fixture.finish().await;
+}
+
+#[tokio::test]
+async fn usdm_hedged_long_sell_uses_last_native_order_slot_without_reduce_only() {
+    let mut fixture = HttpFixture::new(
+        500,
+        "X-MBX-ORDER-COUNT-10S: 299\r\nX-MBX-ORDER-COUNT-1M: 299\r\n",
+        "{}",
+        None,
+        false,
+    )
+    .await;
+    let pools = WeightPools::new();
+    let account = AccountKey::new("hedge-owner");
+    let owner = usdm::Config::with_pools_for_account(usdm::Environment::Demo, &pools, &account)
+        .unwrap()
+        .rest_url(&fixture.url)
+        .unwrap()
+        .clock(Arc::new(FixedClock(1000)))
+        .credentials(
+            binance_client::Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap(),
+        );
+    owner
+        .set_exit_reserve(ExitReserve::default().orders(1))
+        .unwrap();
+    let client = usdm::RestClient::new(owner).unwrap();
+    let ordinary = client
+        .new_order(&order("ordinary"), deadline())
+        .await
+        .unwrap_err();
+    assert_eq!(ordinary.outcome(), Some(Outcome::Unknown));
+    for request in [
+        order("plain-sell"),
+        order("both-sell").position_side("BOTH"),
+        order("long-buy").side("BUY").position_side("LONG"),
+        order("short-sell").position_side("SHORT"),
+    ] {
+        refused(&client.new_order(&request, deadline()).await.unwrap_err());
+    }
+    let hedged = order("hedged-close").position_side("LONG");
+    let sent = client.new_order(&hedged, deadline()).await.unwrap_err();
+    assert_eq!(sent.outcome(), Some(Outcome::Unknown));
+    refused(
+        &client
+            .new_order(&order("another-close").position_side("LONG"), deadline())
+            .await
+            .unwrap_err(),
+    );
+    assert_eq!(fixture.connections_accepted(), 2);
+    let first = fixture.requests.recv().await.unwrap();
+    let second = fixture.requests.recv().await.unwrap();
+    assert!(first.starts_with("POST /fapi/v1/order"));
+    assert!(second.starts_with("POST /fapi/v1/order"));
+    assert!(second.contains("side=SELL"));
+    assert!(second.contains("positionSide=LONG"));
+    assert!(!second.contains("reduceOnly"));
+    fixture.finish().await;
+}
+
+#[tokio::test]
+async fn coinm_hedged_short_buy_spends_same_uid_futures_capacity_but_not_another_uid() {
+    let mut fixture = HttpFixture::new(
+        500,
+        "X-MBX-ORDER-COUNT-10S: 299\r\nX-MBX-ORDER-COUNT-1M: 299\r\n",
+        "{}",
+        None,
+        false,
+    )
+    .await;
+    let pools = WeightPools::new();
+    let account = AccountKey::new("shared-futures-uid");
+    let credentials =
+        || binance_client::Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap();
+    let usdm_owner =
+        usdm::Config::with_pools_for_account(usdm::Environment::Demo, &pools, &account)
+            .unwrap()
+            .rest_url(&fixture.url)
+            .unwrap()
+            .clock(Arc::new(FixedClock(1000)))
+            .credentials(credentials());
+    usdm_owner
+        .set_exit_reserve(ExitReserve::default().orders(1))
+        .unwrap();
+    let usdm = usdm::RestClient::new(usdm_owner).unwrap();
+    let coinm = coinm::RestClient::new(
+        coinm::Config::with_pools_for_account(coinm::Environment::Demo, &pools, &account)
+            .unwrap()
+            .rest_url(&fixture.url)
+            .unwrap()
+            .clock(Arc::new(FixedClock(1000)))
+            .credentials(credentials()),
+    )
+    .unwrap();
+    assert_eq!(
+        usdm.new_order(&order("um-ordinary"), deadline())
+            .await
+            .unwrap_err()
+            .outcome(),
+        Some(Outcome::Unknown)
+    );
+    refused(
+        &coinm
+            .new_order(
+                &coinm_order("cm-opener").side("SELL").position_side("SHORT"),
+                deadline(),
+            )
+            .await
+            .unwrap_err(),
+    );
+    let close = coinm_order("cm-short-close").position_side("SHORT");
+    assert_eq!(
+        coinm
+            .new_order(&close, deadline())
+            .await
+            .unwrap_err()
+            .outcome(),
+        Some(Outcome::Unknown)
+    );
+    refused(
+        &usdm
+            .new_order(
+                &order("um-close-after-full").position_side("LONG"),
+                deadline(),
+            )
+            .await
+            .unwrap_err(),
+    );
+    let other = AccountKey::new("other-futures-uid");
+    let other_client = usdm::RestClient::new(
+        usdm::Config::with_pools_for_account(usdm::Environment::Demo, &pools, &other)
+            .unwrap()
+            .rest_url(&fixture.url)
+            .unwrap()
+            .clock(Arc::new(FixedClock(1000)))
+            .credentials(credentials()),
+    )
+    .unwrap();
+    assert_eq!(
+        other_client
+            .new_order(&order("other-uid"), deadline())
+            .await
+            .unwrap_err()
+            .outcome(),
+        Some(Outcome::Unknown)
+    );
+    assert_eq!(fixture.connections_accepted(), 3);
+    let first = fixture.requests.recv().await.unwrap();
+    let second = fixture.requests.recv().await.unwrap();
+    let third = fixture.requests.recv().await.unwrap();
+    assert!(first.starts_with("POST /fapi/v1/order"));
+    assert!(second.starts_with("POST /dapi/v1/order"));
+    assert!(second.contains("side=BUY"));
+    assert!(second.contains("positionSide=SHORT"));
+    assert!(!second.contains("reduceOnly"));
+    assert!(third.starts_with("POST /fapi/v1/order"));
     fixture.finish().await;
 }

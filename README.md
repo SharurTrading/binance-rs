@@ -43,6 +43,8 @@ algo evidence remains tracked in
 [issue #11](https://github.com/SharurTrading/binance-rs/issues/11).
 [Spot FIX/SBE protocols](docs/core-protocols.md) add native ASCII/binary sessions,
 SBE API responses and four binary market streams, with explicit fixture limits.
+The [behaviour guide](docs/behaviour-guide.md) explains, in plain words, the venue
+behaviours an integrator must handle when wrapping this client.
 
 ## Boundary and architecture
 

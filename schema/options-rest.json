@@ -430,6 +430,22 @@
                                   "tickSize": {
                                     "type": "string",
                                     "x-decimal": true
+                                  }
+                                },
+                                "required": [
+                                  "minPrice",
+                                  "maxPrice",
+                                  "tickSize"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "filterType": {
+                                    "type": "string",
+                                    "enum": [
+                                      "LOT_SIZE"
+                                    ]
                                   },
                                   "minQty": {
                                     "type": "string",
@@ -445,12 +461,9 @@
                                   }
                                 },
                                 "required": [
-                                  "maxPrice",
-                                  "maxQty",
-                                  "minPrice",
                                   "minQty",
-                                  "stepSize",
-                                  "tickSize"
+                                  "maxQty",
+                                  "stepSize"
                                 ]
                               }
                             ]
@@ -3232,8 +3245,7 @@
                 "type": "object",
                 "properties": {
                   "code": {
-                    "type": "string",
-                    "x-decimal": true
+                    "type": "string"
                   },
                   "msg": {
                     "type": "string"
@@ -3427,7 +3439,7 @@
       "path": "/eapi/v1/batchOrders",
       "method": "DELETE",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-options/api/rest-api/trade#cancel-multiple-option-orders",
-      "x-parameters-notes-cn": "- `orderIds` 与 `clientOrderIds` 必须至少发送一个，不可同时发送"
+      "x-parameters-notes-cn": "- `orderIds` \u4e0e `clientOrderIds` \u5fc5\u987b\u81f3\u5c11\u53d1\u9001\u4e00\u4e2a\uff0c\u4e0d\u53ef\u540c\u65f6\u53d1\u9001"
     },
     {
       "tags": [

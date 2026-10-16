@@ -263,4 +263,17 @@ impl Stream {
         name = name.replace("{symbol}", symbol.as_str().to_lowercase().as_str());
         Self::new(name, Route::Public, "rpiDiffBookDepthStreams")
     }
+
+    /// [assetIndexForAsset](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-streams/market#asset-index).
+    ///
+    /// # Errors
+    /// Refuses an invalid documented stream parameter.
+    pub fn asset_index_for_asset(asset_symbol: &crate::Asset) -> Result<Self, Error> {
+        let mut name = "{assetSymbol}@assetIndex".to_owned();
+        name = name.replace(
+            "{assetSymbol}",
+            asset_symbol.as_str().to_lowercase().as_str(),
+        );
+        Self::new(name, Route::Market, "assetIndexForAsset")
+    }
 }

@@ -349,11 +349,11 @@ pub struct ListStatusEvent {
     #[serde(rename = "c")]
     pub c: String,
     /// Exact `l` wire field.
-    #[serde(rename = "l", deserialize_with = "super::wire::decimal")]
-    pub l: Decimal,
+    #[serde(rename = "l")]
+    pub l: String,
     /// Exact `L` wire field.
-    #[serde(rename = "L", deserialize_with = "super::wire::decimal")]
-    pub upper_l: Decimal,
+    #[serde(rename = "L")]
+    pub upper_l: String,
     /// Exact `r` wire field.
     #[serde(rename = "r")]
     pub r: String,
@@ -750,11 +750,11 @@ pub struct TradeDataStreamEventsEventVariant5 {
     #[serde(rename = "c")]
     pub c: String,
     /// Exact `l` wire field.
-    #[serde(rename = "l", deserialize_with = "super::wire::decimal")]
-    pub l: Decimal,
+    #[serde(rename = "l")]
+    pub l: String,
     /// Exact `L` wire field.
-    #[serde(rename = "L", deserialize_with = "super::wire::decimal")]
-    pub upper_l: Decimal,
+    #[serde(rename = "L")]
+    pub upper_l: String,
     /// Exact `r` wire field.
     #[serde(rename = "r")]
     pub r: String,

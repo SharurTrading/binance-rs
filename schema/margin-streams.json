@@ -455,13 +455,11 @@
           },
           "l": {
             "type": "string",
-            "description": "List Status Type",
-            "x-decimal": true
+            "description": "List Status Type"
           },
           "L": {
             "type": "string",
-            "description": "List Order Status",
-            "x-decimal": true
+            "description": "List Order Status"
           },
           "r": {
             "type": "string",

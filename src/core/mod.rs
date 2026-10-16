@@ -12,6 +12,7 @@ pub(crate) mod sapi;
 pub(crate) mod socket;
 mod time;
 mod venue_message;
+pub(crate) mod wire;
 
 pub use control::StreamControl;
 pub use credentials::{Credentials, Signer};

@@ -663,10 +663,21 @@ pub struct IndexKlineCandlestickStreamsEventK {
     pub extra: super::event_payloads::UnknownMessage,
 }
 
-/// Provider-native `IndexPriceStreamEvent` payload.
+/// Provider alternatives for `IndexPriceStreamEvent`; no member is discarded.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct IndexPriceStreamEvent {
+#[serde(untagged)]
+pub enum IndexPriceStreamEvent {
+    /// Wire alternative 1.
+    IndexName(Box<IndexPriceStreamEventVariant1>),
+    /// Wire alternative 2.
+    SymbolName(Box<IndexPriceStreamEventVariant2>),
+}
+
+/// Provider-native `IndexPriceStreamEventVariant1` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct IndexPriceStreamEventVariant1 {
     /// Exact `e` wire field.
     #[serde(rename = "e")]
     pub e: String,
@@ -679,6 +690,27 @@ pub struct IndexPriceStreamEvent {
     /// Exact `p` wire field.
     #[serde(rename = "p", deserialize_with = "super::wire::decimal")]
     pub p: Decimal,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `IndexPriceStreamEventVariant2` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct IndexPriceStreamEventVariant2 {
+    /// Exact `e` wire field.
+    #[serde(rename = "e")]
+    pub e: String,
+    /// Exact `E` wire field.
+    #[serde(rename = "E")]
+    pub upper_e: i64,
+    /// Exact `p` wire field.
+    #[serde(rename = "p", deserialize_with = "super::wire::decimal")]
+    pub p: Decimal,
+    /// Exact `s` wire field.
+    #[serde(rename = "s")]
+    pub s: crate::Symbol,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,

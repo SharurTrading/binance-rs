@@ -313,6 +313,8 @@ pub struct ExchangeInformationResponseOptionSymbolsItem {
 pub enum ExchangeInformationResponseOptionSymbolsItemFiltersItem {
     /// Provider `PRICE_FILTER` filter.
     PriceFilter(Box<ExchangeInformationResponseOptionSymbolsItemFiltersItemVariant1>),
+    /// Provider `LOT_SIZE` filter.
+    LotSize(Box<ExchangeInformationResponseOptionSymbolsItemFiltersItemVariant2>),
     /// Future filter facts, retained with redacted Debug.
     Unknown(super::event_payloads::UnknownMessage),
 }
@@ -322,6 +324,9 @@ impl<'de> Deserialize<'de> for ExchangeInformationResponseOptionSymbolsItemFilte
         match value.get("filterType").and_then(serde_json::Value::as_str) {
             Some("PRICE_FILTER") => serde_json::from_value(value)
                 .map(|v| Self::PriceFilter(Box::new(v)))
+                .map_err(serde::de::Error::custom),
+            Some("LOT_SIZE") => serde_json::from_value(value)
+                .map(|v| Self::LotSize(Box::new(v)))
                 .map_err(serde::de::Error::custom),
             Some(_) => Ok(Self::Unknown(value.into())),
             None => Err(serde::de::Error::custom("filter type required")),
@@ -345,6 +350,18 @@ pub struct ExchangeInformationResponseOptionSymbolsItemFiltersItemVariant1 {
     /// Exact `tickSize` wire field.
     #[serde(rename = "tickSize", deserialize_with = "super::wire::decimal")]
     pub tick_size: Decimal,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `ExchangeInformationResponseOptionSymbolsItemFiltersItemVariant2` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ExchangeInformationResponseOptionSymbolsItemFiltersItemVariant2 {
+    /// Exact `filterType` wire field.
+    #[serde(rename = "filterType")]
+    pub filter_type: String,
     /// Exact `minQty` wire field.
     #[serde(rename = "minQty", deserialize_with = "super::wire::decimal")]
     pub min_qty: Decimal,
@@ -1521,8 +1538,8 @@ pub struct CancelAllOptionOrdersByUnderlyingResponse {
 #[non_exhaustive]
 pub struct CancelAllOptionOrdersOnSpecificSymbolResponse {
     /// Exact `code` wire field.
-    #[serde(rename = "code", deserialize_with = "super::wire::decimal")]
-    pub code: Decimal,
+    #[serde(rename = "code")]
+    pub code: String,
     /// Exact `msg` wire field.
     #[serde(rename = "msg", default, skip_serializing_if = "Option::is_none")]
     pub msg: Option<SensitiveString>,

@@ -11,6 +11,7 @@ import re
 import subprocess
 import sys
 import advanced
+import response_shapes
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -204,11 +205,34 @@ class Models:
                         '            None => Err(serde::de::Error::custom("filter type required")),',
                         '        }', '    }', '}'])
                     return name
+                names = schema.get('x-variant-names', ['Variant'+str(i+1) for i in range(len(types))])
+                if len(names) != len(types) or len(set(names)) != len(names) or any(not re.fullmatch(r'[A-Z][A-Za-z0-9]*', n) for n in names):
+                    raise ValueError(('invalid response variant names', PRODUCT, name))
                 self.defs[name] = '\n'.join([
                     f'/// Provider alternatives for `{name}`; no member is discarded.',
                     '#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]',
                     '#[non_exhaustive]', '#[serde(untagged)]', f'pub enum {name} {{',
-                    *[f'    /// Wire alternative {i+1}.\n    Variant{i+1}(Box<{t}>),' for i,t in enumerate(types)], '}'])
+                    *[f'    /// Wire alternative {i+1}.\n    {names[i]}(Box<{t}>),' for i,t in enumerate(types)],
+                    *(['    /// Unrecognized member, retained without discarding sibling receipts.\n    Unknown(super::event_payloads::UnknownMessage),'] if schema.get('x-unknown-variant') else []), '}'])
+                if schema.get('x-order-list-discriminator'):
+                    list_index = next(i for i,v in enumerate(variants) if 'orders' in self.resolve(v).get('properties', {}))
+                    if len(types) != 2:
+                        raise ValueError(('order/list alternatives', PRODUCT, name))
+                    order_index = 1-list_index
+                    code = self.defs[name].replace('Serialize, Deserialize', 'Serialize')
+                    code += f"\nimpl<'de> Deserialize<'de> for {name} {{\n"
+                    code += "    fn deserialize<D:serde::Deserializer<'de>>(d:D)->Result<Self,D::Error>{\n"
+                    code += '        let value=serde_json::Value::deserialize(d)?;\n'
+                    keys = ['orders','orderReports','contingencyType','listStatusType','listOrderStatus','listClientOrderId']
+                    code += '        let is_list=['+','.join(lit(k) for k in keys)+'].iter().any(|key|value.get(*key).is_some());\n'
+                    code += '        let decoded=if is_list {\n'
+                    code += f'            serde_json::from_value::<{types[list_index]}>(value.clone()).map(|v|Self::{names[list_index]}(Box::new(v)))\n'
+                    code += '        }else{\n'
+                    code += f'            serde_json::from_value::<{types[order_index]}>(value.clone()).map(|v|Self::{names[order_index]}(Box::new(v)))\n'
+                    code += '        };\n'
+                    code += ('        match decoded {Ok(v)=>Ok(v),Err(_)=>Ok(Self::Unknown(value.into()))}\n'
+                             if schema.get('x-unknown-variant') else '        decoded.map_err(serde::de::Error::custom)\n')
+                    self.defs[name] = code+'    }\n}'
             return name
         typ = schema.get('type', 'object')
         if typ == 'string':
@@ -289,7 +313,7 @@ class Models:
                 required.add('e')
             for key,s in props.items():
                 t = self.type(s, name+pascal(key), response)
-                optional = key not in required or (PRODUCT in ADVANCED_PRODUCTS and (s.get('nullable', False) or s.get('x-rust-optional', False)))
+                optional = key not in required or s.get('x-rust-optional', False) or (PRODUCT in ADVANCED_PRODUCTS and s.get('nullable', False))
                 if s.get('x-deserialize-with'):
                     optional_attrs = ', default, skip_serializing_if = \"Option::is_none\"' if optional else ''
                     serde_attr = f'#[serde(rename = {lit(key)}{optional_attrs}, deserialize_with = {lit(s["x-deserialize-with"])})]'
@@ -305,7 +329,8 @@ class Models:
                     serde_attr = f'#[serde(rename = {lit(key)}, default, skip_serializing_if = "Option::is_none")]'
                 else:
                     serde_attr = f'#[serde(rename = {lit(key)})]'
-                fields += [f'    /// Exact `{key}` wire field.', '    '+serde_attr,
+                explanation = [f'    /// {s["x-empty-string-meaning"]}'] if s.get('x-empty-string-meaning') else []
+                fields += [f'    /// Exact `{key}` wire field.', *explanation, '    '+serde_attr,
                     f'    pub {snake(key)}: '+(f'Option<{t}>' if optional else t)+',']
             extra = 'BTreeMap<String, serde_json::Value>' if PRODUCT == 'usdm' else 'super::event_payloads::UnknownMessage'
             fields += ['    /// Unknown future wire fields, retained without inventing defaults; avoid logging.',
@@ -548,10 +573,10 @@ def generate_streams():
         args=[]; replacements=[]
         for param in params:
             key=param['name'];field=snake(key)
-            typ='&Symbol' if key in ['symbol','pair'] else '&crate::Symbol' if PRODUCT == 'options' and key == 'underlying' else '&str'
+            typ='&Symbol' if key in ['symbol','pair'] else '&crate::Asset' if key == 'assetSymbol' else '&crate::Symbol' if PRODUCT == 'options' and key == 'underlying' else '&str'
             args.append(f'{field}: {typ}')
-            value=f'{field}.as_str()' if typ in ['&Symbol','&crate::Symbol'] else field
-            if key in ['symbol','pair','underlying']: value+=' .to_lowercase().as_str()'
+            value=f'{field}.as_str()' if typ in ['&Symbol','&crate::Symbol','&crate::Asset'] else field
+            if key in ['symbol','pair','underlying','assetSymbol']: value+=' .to_lowercase().as_str()'
             if PRODUCT == 'options' and typ == '&str' and param.get('required',False):
                 replacements.append(f'if {field}.is_empty() {{ return Err(Error::Validation("required stream parameter")); }}')
             replacements.append(f'name=name.replace({lit("{"+key+"}")}, {value});')
@@ -730,6 +755,7 @@ def main():
     check='--check' in sys.argv
     files=['rest_models.rs','rest_requests.rs','ws_models.rs','ws_requests.rs','stream_models.rs','stream_names.rs','event_payloads.rs','enums.rs']
     paths=[*(product_root(p)/f for p in ['usdm','spot','coinm'] for f in files), ROOT/'schema/coverage.json', ROOT/'schema/spot-coverage.json', ROOT/'schema/coinm-coverage.json']
+    paths += [ROOT/'tests/support/response_shape_dispatch.rs',ROOT/'tests/support/binary_shape_dispatch.rs',ROOT/'tests/support/stream_shape_dispatch.rs',ROOT/'schema/response-shape-coverage.json']
     before={p:p.read_bytes() if p.exists() else None for p in paths}
     rest_products = ['wallet','convert','margin','options',*ADVANCED_PRODUCTS]
     paths += [*(product_root(p)/f for p in rest_products for f in ['rest_models.rs','rest_requests.rs']),*(product_root(p)/'enums.rs' for p in rest_products),*(ROOT/'schema'/f'{fact_name(p)}-coverage.json' for p in rest_products),*(CORE_TRADING/'options'/f for f in ['stream_models.rs','stream_names.rs']),CORE_TRADING/'margin/stream_models.rs']
@@ -775,6 +801,7 @@ def main():
         generate_enums()
         subprocess.run(['rustfmt','--edition','2024',*[str(product_root(PRODUCT)/f) for f in files]],check=True)
         print(PRODUCT+': '+', '.join(f'{len(v)} {k}' for k,v in coverage.items())+'.')
+    response_shapes.generate(sys.modules[__name__])
     if check:
         changed=[p for p,v in before.items() if p.read_bytes()!=v]
         for p in changed:

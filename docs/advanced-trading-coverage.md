@@ -189,7 +189,7 @@ remain exact decimals. HTTP 200 business failures become typed venue errors;
 unknown execution statuses remain uncertain. Aggregate Stocks cancellation code
 486447 preserves partial outcome without inventing per-order results.
 
-Read-only probes on 2026-10-17 did not establish authenticated live coverage.
+Read-only probes on 2026-10-16 did not establish authenticated live coverage.
 The crate's configured-proxy probes failed before response headers. Independent
 requests using the environment's trusted HTTP stack received HTTP 451 from both
 demo time endpoints and HTTP 200 (`000000`, `success: true`) from public Alpha

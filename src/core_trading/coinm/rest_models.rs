@@ -542,7 +542,13 @@ pub struct GetFuturesTransactionHistoryDownloadLinkByIdResponse {
 #[non_exhaustive]
 pub struct GetIncomeHistoryResponseItem {
     /// Exact `symbol` wire field.
-    #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
+    /// No trade symbol exists for this income record.
+    #[serde(
+        rename = "symbol",
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::core::wire::symbol_option_empty"
+    )]
     pub symbol: Option<crate::Symbol>,
     /// Exact `incomeType` wire field.
     #[serde(

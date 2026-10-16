@@ -103,8 +103,10 @@ things matter when you wrap it:
   arrived. The socket closed about 4 ms after the close reply, and a new stream had
   to be opened. Treat the socket closing as the signal; do not wait
   for `listenKeyExpired`.
-- Every socket has a 24-hour life. The client ends the generation with a gap when it
-  is reached, so plan a reconnect before then.
+- Core trading sockets and Portfolio Margin have a documented 24-hour life.
+  The client ends those generations with a gap at the limit. Other Advanced
+  products use their own documented lifetime; see the
+  [Advanced stream policies](advanced-trading-coverage.md#transport-ownership-and-verification).
 - Renewing a key is not continuity. Neither is a new socket: nothing is replayed, and
   events sent while you were away are gone from the stream.
 
@@ -289,8 +291,8 @@ Seen on Demo on 2026-10-16: USDⓈ-M in one-way mode on `BTCUSDT`, and Spot.
 | A resting `STOP_MARKET` sent with `reduceOnly=true` and a quantity equal to the whole position was not cancelled when another order closed the position. It stayed working on the flat position for the 30 seconds we watched, until we cancelled it. A `closePosition=true` stop was not recorded | After any close that did not go through the protective order, cancel the protection yourself, then read the algo open-order list |
 | `ALGO_UPDATE` arrived on the USDⓈ-M user stream when a conditional order was placed and when it was cancelled. We recorded no other transition (trigger, expiry or trigger reject), and whether an `ORDER_TRADE_UPDATE` also arrived for the placement or the cancel is not recorded | Handle it as its own event. Only the USDⓈ-M client decodes it, as `usdm::UserPayload::AlgoUpdate`; `coinm::UserPayload` has no such variant, so an `ALGO_UPDATE` on a COIN-M stream would arrive as `UserPayload::Unknown`, which is not a gap |
 | USDⓈ-M `DELETE /fapi/v1/allOpenOrders` and `DELETE /fapi/v1/algoOpenOrders` each answer `{"code":200,"msg":...}` with no order list. The cancellations show only on the user stream | Keep the stream open across the call and take the cancellations from it, then read both open-order lists |
-| Spot `DELETE /api/v3/openOrders` answers with the cancelled orders, and with one entry for each cancelled order list. A list entry carries no `orderId` | Do not expect an `orderId` on every entry. Known client gap ([#135](https://github.com/SharurTrading/binance-rs/issues/135)): the client decodes a list entry as `BatchResult::Unknown`, which is not a refusal although the entry is a cancel receipt; confirm it with venue reads |
-| Spot WebSocket API `openOrders.cancelAll` is documented to answer with the same two kinds of entry | Known client gap ([#136](https://github.com/SharurTrading/binance-rs/issues/136)): the client's model requires `orderListId`, `orders` and `orderId` together, so it decodes every member as `BatchResult::Unknown`, whichever kind it is. Confirm the cancels with venue reads |
+| Spot `DELETE /api/v3/openOrders` answers with cancelled orders and one entry for each cancelled order list. A list entry carries no `orderId` | Match `BatchResult::Success` as `DeleteOpenOrdersResponseItem::Order` or `OrderList`. List receipts retain their member orders and reports. Unknown future or malformed members remain `BatchResult::Unknown`; resolve those members with venue reads |
+| Spot WebSocket API `openOrders.cancelAll` answers with the same two kinds of entry | Match `OpenOrdersCancelAllResponseItem::Order` or `OrderList` inside each successful batch member. Keep failures and unknown receipts alongside the known receipts |
 
 ### Event order: statements and fills
 
@@ -399,7 +401,6 @@ What this client deliberately leaves to you:
 | Hedge-mode closes | Not recorded live |
 | Algo order events | Whether COIN-M pushes `ALGO_UPDATE` is not recorded, nor is any USDⓈ-M transition beyond placement and cancel, or whether an `ORDER_TRADE_UPDATE` accompanies them |
 | `closePosition=true` stop on a flat position | Not recorded; the stop seen on Demo used `reduceOnly=true` |
-| Spot cancel-all receipts | The client decodes an order-list entry of `DELETE /api/v3/openOrders` as `Unknown` ([#135](https://github.com/SharurTrading/binance-rs/issues/135)), and every member of a WebSocket `openOrders.cancelAll` reply as `Unknown` ([#136](https://github.com/SharurTrading/binance-rs/issues/136)) |
 | Futures roll notices | Unknown whether `!contractInfo` pushes a roll |
 | Undefined statuses and contract types | Tracked in [#80](https://github.com/SharurTrading/binance-rs/issues/80) |
 | Old Trades Lookup reach | "One month" has no stated length; the edge has not been measured |

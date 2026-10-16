@@ -945,69 +945,74 @@
                       "T": {
                         "type": "integer",
                         "format": "int64"
+                      },
+                      "bids": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ],
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "asks": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ],
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              {
+                                "type": "string",
+                                "x-decimal": true
+                              }
+                            ]
+                          }
+                        }
                       }
                     },
-                    "type": "object"
-                  },
-                  "bids": {
-                    "type": "array",
-                    "items": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "x-prefixItems": [
-                        {
-                          "type": "string",
-                          "x-decimal": true
-                        },
-                        {
-                          "type": "string",
-                          "x-decimal": true
-                        }
-                      ],
-                      "items": {
-                        "oneOf": [
-                          {
-                            "type": "string",
-                            "x-decimal": true
-                          },
-                          {
-                            "type": "string",
-                            "x-decimal": true
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "asks": {
-                    "type": "array",
-                    "items": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "x-prefixItems": [
-                        {
-                          "type": "string",
-                          "x-decimal": true
-                        },
-                        {
-                          "type": "string",
-                          "x-decimal": true
-                        }
-                      ],
-                      "items": {
-                        "oneOf": [
-                          {
-                            "type": "string",
-                            "x-decimal": true
-                          },
-                          {
-                            "type": "string",
-                            "x-decimal": true
-                          }
-                        ]
-                      }
-                    }
+                    "type": "object",
+                    "required": [
+                      "asks",
+                      "bids",
+                      "lastUpdateId"
+                    ]
                   },
                   "rateLimits": {
                     "type": "array",

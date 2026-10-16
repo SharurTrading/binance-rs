@@ -499,10 +499,7 @@
                   }
                 },
                 "required": [
-                  "assets",
-                  "totalAssetOfBtc",
-                  "totalLiabilityOfBtc",
-                  "totalNetAssetOfBtc"
+                  "assets"
                 ]
               }
             }
@@ -1614,12 +1611,10 @@
                         "txId",
                         "interestAccuredTime",
                         "asset",
-                        "rawAsset",
                         "principal",
                         "interest",
                         "interestRate",
-                        "type",
-                        "isolatedSymbol"
+                        "type"
                       ]
                     },
                     "description": "rows list."
@@ -1927,7 +1922,6 @@
                       },
                       "required": [
                         "type",
-                        "isolatedSymbol",
                         "amount",
                         "asset",
                         "interest",
@@ -2223,7 +2217,6 @@
                         },
                         "required": [
                           "minUsdValue",
-                          "maxUsdValue",
                           "discountRate"
                         ]
                       },
@@ -2331,8 +2324,7 @@
                     "isMarginTrade",
                     "isSellAllowed",
                     "quote",
-                    "symbol",
-                    "delistTime"
+                    "symbol"
                   ]
                 }
               }
@@ -4427,6 +4419,64 @@
                             ]
                           },
                           "description": "order Reports list."
+                        },
+                        "origClientOrderId": {
+                          "type": "string",
+                          "description": "orig Client Order Id.",
+                          "x-rust-type": "crate::margin::ClientOrderId"
+                        },
+                        "orderId": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "order Id.",
+                          "x-rust-type": "crate::margin::OrderId",
+                          "x-rust-optional": true
+                        },
+                        "clientOrderId": {
+                          "type": "string",
+                          "description": "client Order Id.",
+                          "x-rust-type": "crate::margin::ClientOrderId",
+                          "x-rust-optional": true
+                        },
+                        "price": {
+                          "type": "string",
+                          "description": "price.",
+                          "x-decimal": true
+                        },
+                        "origQty": {
+                          "type": "string",
+                          "description": "orig Qty.",
+                          "x-decimal": true
+                        },
+                        "executedQty": {
+                          "type": "string",
+                          "description": "executed Qty.",
+                          "x-decimal": true
+                        },
+                        "cummulativeQuoteQty": {
+                          "type": "string",
+                          "description": "cummulative Quote Qty.",
+                          "x-decimal": true
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "status."
+                        },
+                        "timeInForce": {
+                          "type": "string",
+                          "description": "time In Force."
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "type."
+                        },
+                        "side": {
+                          "type": "string",
+                          "description": "side."
+                        },
+                        "selfTradePreventionMode": {
+                          "type": "string",
+                          "description": "self Trade Prevention Mode."
                         }
                       },
                       "required": [
@@ -4442,7 +4492,8 @@
                         "orderReports"
                       ]
                     }
-                  ]
+                  ],
+                  "x-order-list-discriminator": true
                 }
               }
             }
@@ -7352,7 +7403,6 @@
                     "listClientOrderId",
                     "transactionTime",
                     "symbol",
-                    "isIsolated",
                     "orders"
                   ]
                 }
@@ -8871,11 +8921,7 @@
                         "status",
                         "timestamp",
                         "txId",
-                        "type",
-                        "transFrom",
-                        "transTo",
-                        "fromSymbol",
-                        "toSymbol"
+                        "type"
                       ]
                     },
                     "description": "rows list."

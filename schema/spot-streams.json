@@ -3444,7 +3444,9 @@
           },
           "T": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "x-rust-type": "Option<i64>",
+            "x-deserialize-with": "crate::core::wire::integer_option"
           }
         },
         "required": [

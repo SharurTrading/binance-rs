@@ -275,7 +275,9 @@ fn spot_cancel_all_keeps_every_member_and_its_partial_evidence() {
     ]))
     .unwrap();
     assert_eq!(result.len(), 4);
-    assert!(matches!(&result[0], BatchResult::Success(v) if v.order_id == 7));
+    assert!(
+        matches!(&result[0], BatchResult::Success(spot::rest_models::DeleteOpenOrdersResponseItem::Order(v)) if v.order_id == 7)
+    );
     assert!(matches!(&result[1], BatchResult::Unknown(_)));
     assert!(
         matches!(&result[2], BatchResult::Failure(v) if v.outcome() == binance_client::Outcome::Rejected)

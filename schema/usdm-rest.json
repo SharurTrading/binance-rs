@@ -770,91 +770,36 @@
               "schema": {
                 "properties": {
                   "indicators": {
-                    "properties": {
-                      "BTCUSDT": {
-                        "type": "array",
-                        "items": {
-                          "properties": {
-                            "isLocked": {
-                              "type": "boolean"
-                            },
-                            "plannedRecoverTime": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "indicator": {
-                              "type": "string"
-                            },
-                            "value": {
-                              "type": "number",
-                              "format": "float",
-                              "x-decimal": true
-                            },
-                            "triggerValue": {
-                              "type": "number",
-                              "format": "float",
-                              "x-decimal": true
-                            }
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "isLocked": {
+                            "type": "boolean"
                           },
-                          "type": "object"
-                        }
-                      },
-                      "ETHUSDT": {
-                        "type": "array",
-                        "items": {
-                          "properties": {
-                            "isLocked": {
-                              "type": "boolean"
-                            },
-                            "plannedRecoverTime": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "indicator": {
-                              "type": "string"
-                            },
-                            "value": {
-                              "type": "number",
-                              "format": "float",
-                              "x-decimal": true
-                            },
-                            "triggerValue": {
-                              "type": "number",
-                              "format": "float",
-                              "x-decimal": true
-                            }
+                          "plannedRecoverTime": {
+                            "type": "integer",
+                            "format": "int64"
                           },
-                          "type": "object"
-                        }
-                      },
-                      "ACCOUNT": {
-                        "type": "array",
-                        "items": {
-                          "properties": {
-                            "indicator": {
-                              "type": "string"
-                            },
-                            "value": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "triggerValue": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "plannedRecoverTime": {
-                              "type": "integer",
-                              "format": "int64"
-                            },
-                            "isLocked": {
-                              "type": "boolean"
-                            }
+                          "indicator": {
+                            "type": "string"
                           },
-                          "type": "object"
-                        }
+                          "value": {
+                            "type": "number",
+                            "format": "int64",
+                            "x-decimal": true
+                          },
+                          "triggerValue": {
+                            "type": "number",
+                            "format": "int64",
+                            "x-decimal": true
+                          }
+                        },
+                        "required": []
                       }
-                    },
-                    "type": "object"
+                    }
                   },
                   "updateTime": {
                     "type": "integer",
@@ -1857,7 +1802,11 @@
                 "items": {
                   "properties": {
                     "symbol": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol",
+                      "x-empty-string-meaning": "No trade symbol exists for this income record.",
+                      "x-rust-optional": true,
+                      "x-deserialize-with": "crate::core::wire::symbol_option_empty"
                     },
                     "incomeType": {
                       "type": "string"
@@ -4031,7 +3980,8 @@
                     },
                     "timestamp": {
                       "type": "integer",
-                      "format": "int64"
+                      "format": "int64",
+                      "x-deserialize-with": "crate::core::wire::integer_option"
                     }
                   },
                   "type": "object"
@@ -4050,7 +4000,7 @@
         "market-data"
       ],
       "operationId": "markPrice",
-      "x-weight": "**1** with symbol, **10** without symbol",
+      "x-weight": "**1** with symbol, **10**\u00a0without symbol",
       "parameters": [
         {
           "name": "symbol",
@@ -4687,7 +4637,8 @@
                     },
                     "timestamp": {
                       "type": "integer",
-                      "format": "int64"
+                      "format": "int64",
+                      "x-deserialize-with": "crate::core::wire::integer_option"
                     }
                   },
                   "type": "object"
@@ -5699,7 +5650,8 @@
                     },
                     "timestamp": {
                       "type": "integer",
-                      "format": "int64"
+                      "format": "int64",
+                      "x-deserialize-with": "crate::core::wire::integer_option"
                     }
                   },
                   "type": "object"
@@ -5993,7 +5945,8 @@
                     },
                     "timestamp": {
                       "type": "integer",
-                      "format": "int64"
+                      "format": "int64",
+                      "x-deserialize-with": "crate::core::wire::integer_option"
                     }
                   },
                   "type": "object"
@@ -6103,7 +6056,8 @@
                     },
                     "timestamp": {
                       "type": "integer",
-                      "format": "int64"
+                      "format": "int64",
+                      "x-deserialize-with": "crate::core::wire::integer_option"
                     }
                   },
                   "type": "object"

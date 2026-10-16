@@ -57,20 +57,29 @@ pub struct QueryIsolatedMarginAccountInfoResponse {
     #[serde(rename = "assets")]
     pub assets: Vec<QueryIsolatedMarginAccountInfoResponseAssetsItem>,
     /// Exact `totalAssetOfBtc` wire field.
-    #[serde(rename = "totalAssetOfBtc", deserialize_with = "super::wire::decimal")]
-    pub total_asset_of_btc: Decimal,
+    #[serde(
+        rename = "totalAssetOfBtc",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub total_asset_of_btc: Option<Decimal>,
     /// Exact `totalLiabilityOfBtc` wire field.
     #[serde(
         rename = "totalLiabilityOfBtc",
-        deserialize_with = "super::wire::decimal"
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
     )]
-    pub total_liability_of_btc: Decimal,
+    pub total_liability_of_btc: Option<Decimal>,
     /// Exact `totalNetAssetOfBtc` wire field.
     #[serde(
         rename = "totalNetAssetOfBtc",
-        deserialize_with = "super::wire::decimal"
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
     )]
-    pub total_net_asset_of_btc: Decimal,
+    pub total_net_asset_of_btc: Option<Decimal>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -510,8 +519,8 @@ pub struct GetInterestHistoryResponseRowsItem {
     #[serde(rename = "asset")]
     pub asset: crate::Asset,
     /// Exact `rawAsset` wire field.
-    #[serde(rename = "rawAsset")]
-    pub raw_asset: crate::Asset,
+    #[serde(rename = "rawAsset", default, skip_serializing_if = "Option::is_none")]
+    pub raw_asset: Option<crate::Asset>,
     /// Exact `principal` wire field.
     #[serde(rename = "principal", deserialize_with = "super::wire::decimal")]
     pub principal: Decimal,
@@ -525,8 +534,12 @@ pub struct GetInterestHistoryResponseRowsItem {
     #[serde(rename = "type")]
     pub type_value: String,
     /// Exact `isolatedSymbol` wire field.
-    #[serde(rename = "isolatedSymbol")]
-    pub isolated_symbol: crate::Symbol,
+    #[serde(
+        rename = "isolatedSymbol",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub isolated_symbol: Option<crate::Symbol>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -567,8 +580,12 @@ pub struct QueryBorrowRepayRecordsInMarginAccountResponseRowsItem {
     #[serde(rename = "type")]
     pub type_value: String,
     /// Exact `isolatedSymbol` wire field.
-    #[serde(rename = "isolatedSymbol")]
-    pub isolated_symbol: crate::Symbol,
+    #[serde(
+        rename = "isolatedSymbol",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub isolated_symbol: Option<crate::Symbol>,
     /// Exact `amount` wire field.
     #[serde(rename = "amount", deserialize_with = "super::wire::decimal")]
     pub amount: Decimal,
@@ -660,8 +677,13 @@ pub struct CrossMarginCollateralRatioResponseItemCollateralsItem {
     #[serde(rename = "minUsdValue", deserialize_with = "super::wire::decimal")]
     pub min_usd_value: Decimal,
     /// Exact `maxUsdValue` wire field.
-    #[serde(rename = "maxUsdValue", deserialize_with = "super::wire::decimal")]
-    pub max_usd_value: Decimal,
+    #[serde(
+        rename = "maxUsdValue",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub max_usd_value: Option<Decimal>,
     /// Exact `discountRate` wire field.
     #[serde(rename = "discountRate", deserialize_with = "super::wire::decimal")]
     pub discount_rate: Decimal,
@@ -699,8 +721,12 @@ pub struct GetAllCrossMarginPairsResponseItem {
     #[serde(rename = "symbol")]
     pub symbol: Symbol,
     /// Exact `delistTime` wire field.
-    #[serde(rename = "delistTime")]
-    pub delist_time: i64,
+    #[serde(
+        rename = "delistTime",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub delist_time: Option<i64>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -1174,7 +1200,7 @@ pub struct GetSmallLiabilityExchangeHistoryResponseRowsItem {
 }
 
 /// Provider alternatives for `MarginAccountCancelAllOpenOrdersOnASymbolResponseItem`; no member is discarded.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[non_exhaustive]
 #[serde(untagged)]
 pub enum MarginAccountCancelAllOpenOrdersOnASymbolResponseItem {
@@ -1182,6 +1208,33 @@ pub enum MarginAccountCancelAllOpenOrdersOnASymbolResponseItem {
     Variant1(Box<MarginAccountCancelAllOpenOrdersOnASymbolResponseItemVariant1>),
     /// Wire alternative 2.
     Variant2(Box<MarginAccountCancelAllOpenOrdersOnASymbolResponseItemVariant2>),
+}
+impl<'de> Deserialize<'de> for MarginAccountCancelAllOpenOrdersOnASymbolResponseItem {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let value = serde_json::Value::deserialize(d)?;
+        let is_list = [
+            "orders",
+            "orderReports",
+            "contingencyType",
+            "listStatusType",
+            "listOrderStatus",
+            "listClientOrderId",
+        ]
+        .iter()
+        .any(|key| value.get(*key).is_some());
+        let decoded = if is_list {
+            serde_json::from_value::<MarginAccountCancelAllOpenOrdersOnASymbolResponseItemVariant2>(
+                value.clone(),
+            )
+            .map(|v| Self::Variant2(Box::new(v)))
+        } else {
+            serde_json::from_value::<MarginAccountCancelAllOpenOrdersOnASymbolResponseItemVariant1>(
+                value.clone(),
+            )
+            .map(|v| Self::Variant1(Box::new(v)))
+        };
+        decoded.map_err(serde::de::Error::custom)
+    }
 }
 
 /// Provider-native `MarginAccountCancelAllOpenOrdersOnASymbolResponseItemVariant1` payload.
@@ -1280,6 +1333,78 @@ pub struct MarginAccountCancelAllOpenOrdersOnASymbolResponseItemVariant2 {
     #[serde(rename = "orderReports")]
     pub order_reports:
         Vec<MarginAccountCancelAllOpenOrdersOnASymbolResponseItemVariant2OrderReportsItem>,
+    /// Exact `origClientOrderId` wire field.
+    #[serde(
+        rename = "origClientOrderId",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub orig_client_order_id: Option<crate::margin::ClientOrderId>,
+    /// Exact `orderId` wire field.
+    #[serde(rename = "orderId", default, skip_serializing_if = "Option::is_none")]
+    pub order_id: Option<crate::margin::OrderId>,
+    /// Exact `clientOrderId` wire field.
+    #[serde(
+        rename = "clientOrderId",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub client_order_id: Option<crate::margin::ClientOrderId>,
+    /// Exact `price` wire field.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `origQty` wire field.
+    #[serde(
+        rename = "origQty",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub orig_qty: Option<Decimal>,
+    /// Exact `executedQty` wire field.
+    #[serde(
+        rename = "executedQty",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub executed_qty: Option<Decimal>,
+    /// Exact `cummulativeQuoteQty` wire field.
+    #[serde(
+        rename = "cummulativeQuoteQty",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub cummulative_quote_qty: Option<Decimal>,
+    /// Exact `status` wire field.
+    #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    /// Exact `timeInForce` wire field.
+    #[serde(
+        rename = "timeInForce",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub time_in_force: Option<String>,
+    /// Exact `type` wire field.
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_value: Option<String>,
+    /// Exact `side` wire field.
+    #[serde(rename = "side", default, skip_serializing_if = "Option::is_none")]
+    pub side: Option<String>,
+    /// Exact `selfTradePreventionMode` wire field.
+    #[serde(
+        rename = "selfTradePreventionMode",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub self_trade_prevention_mode: Option<String>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -2424,8 +2549,12 @@ pub struct QueryMarginAccountsAllOcoResponseItem {
     #[serde(rename = "symbol")]
     pub symbol: Symbol,
     /// Exact `isIsolated` wire field.
-    #[serde(rename = "isIsolated")]
-    pub is_isolated: bool,
+    #[serde(
+        rename = "isIsolated",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub is_isolated: Option<bool>,
     /// Exact `orders` wire field.
     #[serde(rename = "orders")]
     pub orders: Vec<QueryMarginAccountsAllOcoResponseItemOrdersItem>,
@@ -2907,17 +3036,21 @@ pub struct GetCrossMarginTransferHistoryResponseRowsItem {
     #[serde(rename = "type")]
     pub type_value: String,
     /// Exact `transFrom` wire field.
-    #[serde(rename = "transFrom")]
-    pub trans_from: String,
+    #[serde(rename = "transFrom", default, skip_serializing_if = "Option::is_none")]
+    pub trans_from: Option<String>,
     /// Exact `transTo` wire field.
-    #[serde(rename = "transTo")]
-    pub trans_to: String,
+    #[serde(rename = "transTo", default, skip_serializing_if = "Option::is_none")]
+    pub trans_to: Option<String>,
     /// Exact `fromSymbol` wire field.
-    #[serde(rename = "fromSymbol")]
-    pub from_symbol: Symbol,
+    #[serde(
+        rename = "fromSymbol",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub from_symbol: Option<Symbol>,
     /// Exact `toSymbol` wire field.
-    #[serde(rename = "toSymbol")]
-    pub to_symbol: Symbol,
+    #[serde(rename = "toSymbol", default, skip_serializing_if = "Option::is_none")]
+    pub to_symbol: Option<Symbol>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,

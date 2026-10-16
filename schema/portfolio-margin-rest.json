@@ -1261,7 +1261,11 @@
                   "type": "object",
                   "properties": {
                     "symbol": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol",
+                      "x-empty-string-meaning": "No trade symbol exists for this income record.",
+                      "x-rust-optional": true,
+                      "x-deserialize-with": "crate::core::wire::symbol_option_empty"
                     },
                     "incomeType": {
                       "type": "string"
@@ -2260,7 +2264,11 @@
                   "type": "object",
                   "properties": {
                     "symbol": {
-                      "type": "string"
+                      "type": "string",
+                      "x-rust-type": "crate::Symbol",
+                      "x-empty-string-meaning": "No trade symbol exists for this income record.",
+                      "x-rust-optional": true,
+                      "x-deserialize-with": "crate::core::wire::symbol_option_empty"
                     },
                     "incomeType": {
                       "type": "string"
@@ -2280,7 +2288,8 @@
                       "type": "integer"
                     },
                     "tranId": {
-                      "type": "string"
+                      "type": "string",
+                      "x-deserialize-with": "crate::core::wire::identity_string_option"
                     },
                     "tradeId": {
                       "type": "string"
@@ -2533,52 +2542,30 @@
                 "properties": {
                   "indicators": {
                     "type": "object",
-                    "properties": {
-                      "BTCUSDT": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "isLocked": {
-                              "type": "boolean"
-                            },
-                            "plannedRecoverTime": {
-                              "type": "integer"
-                            },
-                            "indicator": {
-                              "type": "string"
-                            },
-                            "value": {
-                              "type": "number"
-                            },
-                            "triggerValue": {
-                              "type": "number"
-                            }
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "isLocked": {
+                            "type": "boolean"
+                          },
+                          "plannedRecoverTime": {
+                            "type": "integer"
+                          },
+                          "indicator": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "number",
+                            "x-decimal": true
+                          },
+                          "triggerValue": {
+                            "type": "number",
+                            "x-decimal": true
                           }
-                        }
-                      },
-                      "ACCOUNT": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "indicator": {
-                              "type": "string"
-                            },
-                            "value": {
-                              "type": "integer"
-                            },
-                            "triggerValue": {
-                              "type": "integer"
-                            },
-                            "plannedRecoverTime": {
-                              "type": "integer"
-                            },
-                            "isLocked": {
-                              "type": "boolean"
-                            }
-                          }
-                        }
+                        },
+                        "required": []
                       }
                     }
                   },
@@ -4852,165 +4839,230 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "properties": {
-                    "symbol": {
-                      "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "orderId": {
+                          "type": "integer"
+                        },
+                        "origClientOrderId": {
+                          "type": "string"
+                        },
+                        "clientOrderId": {
+                          "type": "string"
+                        },
+                        "price": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "origQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "cummulativeQuoteQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "timeInForce": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "orderListId": {
+                          "type": "integer",
+                          "format": "int64"
+                        }
+                      },
+                      "required": [
+                        "clientOrderId",
+                        "executedQty",
+                        "orderId",
+                        "origQty",
+                        "status",
+                        "symbol"
+                      ]
                     },
-                    "origClientOrderId": {
-                      "type": "string"
-                    },
-                    "orderId": {
-                      "type": "integer"
-                    },
-                    "orderListId": {
-                      "type": "integer"
-                    },
-                    "clientOrderId": {
-                      "type": "string"
-                    },
-                    "price": {
-                      "type": "string",
-                      "x-decimal": true
-                    },
-                    "origQty": {
-                      "type": "string",
-                      "x-decimal": true
-                    },
-                    "executedQty": {
-                      "type": "string",
-                      "x-decimal": true
-                    },
-                    "cummulativeQuoteQty": {
-                      "type": "string",
-                      "x-decimal": true
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "timeInForce": {
-                      "type": "string"
-                    },
-                    "type": {
-                      "type": "string"
-                    },
-                    "side": {
-                      "type": "string"
-                    },
-                    "contingencyType": {
-                      "type": "string"
-                    },
-                    "listStatusType": {
-                      "type": "string"
-                    },
-                    "listOrderStatus": {
-                      "type": "string"
-                    },
-                    "listClientOrderId": {
-                      "type": "string"
-                    },
-                    "transactionTime": {
-                      "type": "integer"
-                    },
-                    "orders": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "symbol": {
-                            "type": "string"
-                          },
-                          "orderId": {
-                            "type": "integer"
-                          },
-                          "clientOrderId": {
-                            "type": "string"
+                    {
+                      "type": "object",
+                      "properties": {
+                        "orderListId": {
+                          "type": "integer"
+                        },
+                        "contingencyType": {
+                          "type": "string"
+                        },
+                        "listStatusType": {
+                          "type": "string"
+                        },
+                        "listOrderStatus": {
+                          "type": "string"
+                        },
+                        "listClientOrderId": {
+                          "type": "string"
+                        },
+                        "transactionTime": {
+                          "type": "integer"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "orders": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "symbol": {
+                                "type": "string"
+                              },
+                              "orderId": {
+                                "type": "integer"
+                              },
+                              "clientOrderId": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "clientOrderId",
+                              "orderId",
+                              "symbol"
+                            ]
                           }
                         },
-                        "required": [
-                          "clientOrderId",
-                          "orderId",
-                          "symbol"
-                        ]
-                      }
-                    },
-                    "orderReports": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "symbol": {
-                            "type": "string"
-                          },
-                          "origClientOrderId": {
-                            "type": "string"
-                          },
-                          "orderId": {
-                            "type": "integer"
-                          },
-                          "orderListId": {
-                            "type": "integer"
-                          },
-                          "clientOrderId": {
-                            "type": "string"
-                          },
-                          "price": {
-                            "type": "string",
-                            "x-decimal": true
-                          },
-                          "origQty": {
-                            "type": "string",
-                            "x-decimal": true
-                          },
-                          "executedQty": {
-                            "type": "string",
-                            "x-decimal": true
-                          },
-                          "cummulativeQuoteQty": {
-                            "type": "string",
-                            "x-decimal": true
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "timeInForce": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string"
-                          },
-                          "side": {
-                            "type": "string"
-                          },
-                          "stopPrice": {
-                            "type": "string",
-                            "x-decimal": true
-                          },
-                          "icebergQty": {
-                            "type": "string",
-                            "x-decimal": true
+                        "orderReports": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "symbol": {
+                                "type": "string"
+                              },
+                              "origClientOrderId": {
+                                "type": "string"
+                              },
+                              "orderId": {
+                                "type": "integer"
+                              },
+                              "orderListId": {
+                                "type": "integer"
+                              },
+                              "clientOrderId": {
+                                "type": "string"
+                              },
+                              "price": {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              "origQty": {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              "executedQty": {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              "cummulativeQuoteQty": {
+                                "type": "string",
+                                "x-decimal": true
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "timeInForce": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "side": {
+                                "type": "string"
+                              },
+                              "stopPrice": {
+                                "type": "string",
+                                "x-decimal": true
+                              }
+                            },
+                            "required": [
+                              "clientOrderId",
+                              "executedQty",
+                              "orderId",
+                              "origQty",
+                              "status",
+                              "symbol"
+                            ]
                           }
                         },
-                        "required": [
-                          "clientOrderId",
-                          "executedQty",
-                          "orderId",
-                          "origQty",
-                          "status",
-                          "symbol"
-                        ]
-                      }
+                        "orderId": {
+                          "type": "integer",
+                          "x-rust-optional": true
+                        },
+                        "origClientOrderId": {
+                          "type": "string"
+                        },
+                        "clientOrderId": {
+                          "type": "string",
+                          "x-rust-optional": true
+                        },
+                        "price": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "origQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "cummulativeQuoteQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "timeInForce": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "side": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "listClientOrderId",
+                        "listOrderStatus",
+                        "listStatusType",
+                        "orderListId",
+                        "orderReports",
+                        "orders",
+                        "symbol"
+                      ]
                     }
-                  },
-                  "required": [
-                    "clientOrderId",
-                    "executedQty",
-                    "orderId",
-                    "orders",
-                    "origQty",
-                    "status",
-                    "symbol"
-                  ]
+                  ],
+                  "x-variant-names": [
+                    "Order",
+                    "OrderList"
+                  ],
+                  "x-unknown-variant": true,
+                  "x-order-list-discriminator": true
                 }
               }
             }
@@ -5637,10 +5689,7 @@
                 },
                 "required": [
                   "clientOrderId",
-                  "executedQty",
                   "orderId",
-                  "origQty",
-                  "status",
                   "symbol"
                 ]
               }
@@ -7494,9 +7543,7 @@
                     }
                   },
                   "required": [
-                    "orderId",
                     "origQty",
-                    "status",
                     "symbol"
                   ]
                 }
@@ -8497,9 +8544,7 @@
                   }
                 },
                 "required": [
-                  "orderId",
                   "origQty",
-                  "status",
                   "symbol"
                 ]
               }

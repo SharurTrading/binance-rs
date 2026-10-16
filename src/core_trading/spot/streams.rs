@@ -111,6 +111,7 @@ impl Streams {
                 time_unit: config.time_unit,
                 binary_decoder: None,
                 api_key_header: false,
+                max_generation_age: Some(std::time::Duration::from_hours(24)),
             },
         )
         .await?;

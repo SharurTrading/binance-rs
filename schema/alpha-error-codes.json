@@ -1,0 +1,27 @@
+{
+  "source": "https://developers.binance.com/en/docs/products/alpha/error-code",
+  "checked": "2026-10-17",
+  "definitive": [
+    -2015,
+    -2014,
+    -1131,
+    -1130,
+    -1128,
+    -1127,
+    -1121,
+    -1111,
+    -1106,
+    -1105,
+    -1104,
+    -1103,
+    -1102,
+    -1101,
+    -1100,
+    -1022,
+    -1021,
+    -1020,
+    -1002
+  ],
+  "unknown_codes": "ambiguous",
+  "server_errors": "ambiguous"
+}

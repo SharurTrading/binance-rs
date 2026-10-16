@@ -1,0 +1,1474 @@
+// SPDX-FileCopyrightText: 2026 Kevin Monaghan
+// SPDX-License-Identifier: MIT-0
+
+//! Generated rest request builders.
+
+use crate::Decimal;
+use crate::Error;
+use crate::Symbol;
+use crate::core::{Operation, Request, Security, parameters, validate_parameters};
+use serde::Serialize;
+
+/// Validated request builder for [`exchangeInfo`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#exchange-info).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct ExchangeInfo {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+}
+impl ExchangeInfo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for ExchangeInfo {
+    type Response = super::rest_models::ExchangeInfoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "exchangeInfo",
+        path: "/sapi/v1/equity/market/exchangeInfo",
+        method: "GET",
+        security: Security::Key,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("exchangeInfo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`tokenizedAssets`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#tokenized-assets).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct TokenizedAssets {}
+impl TokenizedAssets {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for TokenizedAssets {
+    type Response = super::rest_models::TokenizedAssetsResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "tokenizedAssets",
+        path: "/sapi/v1/equity/market/tokenized-assets",
+        method: "GET",
+        security: Security::Key,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("tokenizedAssets", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`latestQuote`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#latest-quote).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct LatestQuote {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+}
+impl LatestQuote {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for LatestQuote {
+    type Response = super::rest_models::LatestQuoteResponse;
+    const EMPTY_RESPONSE: bool = true;
+    const EMPTY_RESPONSE_NULL: bool = true;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "latestQuote",
+        path: "/sapi/v1/equity/market/quote",
+        method: "GET",
+        security: Security::Key,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &["symbol"], &[], &[])?;
+        super::validation::validate("latestQuote", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`placeEquityOrder`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#place-equity-order).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct PlaceEquityOrder {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "quoteAsset", skip_serializing_if = "Option::is_none")]
+    quote_asset: Option<crate::Asset>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "orderType", skip_serializing_if = "Option::is_none")]
+    order_type: Option<String>,
+    #[serde(rename = "price", skip_serializing_if = "Option::is_none")]
+    price: Option<Decimal>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "notional", skip_serializing_if = "Option::is_none")]
+    notional: Option<Decimal>,
+    #[serde(rename = "timeInForce", skip_serializing_if = "Option::is_none")]
+    time_in_force: Option<String>,
+    #[serde(rename = "tradingSession", skip_serializing_if = "Option::is_none")]
+    trading_session: Option<String>,
+    #[serde(rename = "walletType", skip_serializing_if = "Option::is_none")]
+    wallet_type: Option<String>,
+    #[serde(rename = "clientOrderId", skip_serializing_if = "Option::is_none")]
+    client_order_id: Option<super::ClientOrderId>,
+    #[serde(rename = "tokenize", skip_serializing_if = "Option::is_none")]
+    tokenize: Option<bool>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl PlaceEquityOrder {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `quoteAsset` parameter.
+    #[must_use]
+    pub fn quote_asset(mut self, value: crate::Asset) -> Self {
+        self.quote_asset = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `orderType` parameter.
+    #[must_use]
+    pub fn order_type(mut self, value: impl Into<String>) -> Self {
+        self.order_type = Some(value.into());
+        self
+    }
+    /// Set the provider `price` parameter.
+    #[must_use]
+    pub fn price(mut self, value: Decimal) -> Self {
+        self.price = Some(value);
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `notional` parameter.
+    #[must_use]
+    pub fn notional(mut self, value: Decimal) -> Self {
+        self.notional = Some(value);
+        self
+    }
+    /// Set the provider `timeInForce` parameter.
+    #[must_use]
+    pub fn time_in_force(mut self, value: impl Into<String>) -> Self {
+        self.time_in_force = Some(value.into());
+        self
+    }
+    /// Set the provider `tradingSession` parameter.
+    #[must_use]
+    pub fn trading_session(mut self, value: impl Into<String>) -> Self {
+        self.trading_session = Some(value.into());
+        self
+    }
+    /// Set the provider `walletType` parameter.
+    #[must_use]
+    pub fn wallet_type(mut self, value: impl Into<String>) -> Self {
+        self.wallet_type = Some(value.into());
+        self
+    }
+    /// Set the provider `clientOrderId` parameter.
+    #[must_use]
+    pub fn client_order_id(mut self, value: super::ClientOrderId) -> Self {
+        self.client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `tokenize` parameter.
+    #[must_use]
+    pub fn tokenize(mut self, value: bool) -> Self {
+        self.tokenize = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for PlaceEquityOrder {
+    type Response = super::rest_models::PlaceEquityOrderResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "placeEquityOrder",
+        path: "/sapi/v1/equity/order/place",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["clientOrderId", "orderType", "side", "symbol"],
+            &[
+                ("side", &["BUY", "SELL"]),
+                ("orderType", &["MARKET", "LIMIT"]),
+                ("timeInForce", &["DAY", "GTC"]),
+                ("tradingSession", &["RTH", "EXTENDED", "24H"]),
+                ("walletType", &["CARD", "MAIN"]),
+            ],
+            &[],
+        )?;
+        super::validation::validate("placeEquityOrder", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`cancelEquityOrder`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#cancel-equity-order).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CancelEquityOrder {
+    #[serde(rename = "orderId", skip_serializing_if = "Option::is_none")]
+    order_id: Option<String>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl CancelEquityOrder {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `orderId` parameter.
+    #[must_use]
+    pub fn order_id(mut self, value: impl Into<String>) -> Self {
+        self.order_id = Some(value.into());
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for CancelEquityOrder {
+    type Response = super::rest_models::CancelEquityOrderResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "cancelEquityOrder",
+        path: "/sapi/v1/equity/order/cancel",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &["orderId"], &[], &[])?;
+        super::validation::validate("cancelEquityOrder", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`cancelAllEquityOrders`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#cancel-all-equity-orders).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CancelAllEquityOrders {
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl CancelAllEquityOrders {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for CancelAllEquityOrders {
+    type Response = super::rest_models::CancelAllEquityOrdersResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "cancelAllEquityOrders",
+        path: "/sapi/v1/equity/order/cancel-all",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: Some(super::validation::partial),
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("cancelAllEquityOrders", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`currentOpenOrders`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#current-open-orders).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CurrentOpenOrders {
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl CurrentOpenOrders {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for CurrentOpenOrders {
+    type Response = super::rest_models::CurrentOpenOrdersResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "currentOpenOrders",
+        path: "/sapi/v1/equity/order/open-orders",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("currentOpenOrders", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`equityOrderHistory`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-order-history).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct EquityOrderHistory {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "orderType", skip_serializing_if = "Option::is_none")]
+    order_type: Option<String>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "orderStatus", skip_serializing_if = "Option::is_none")]
+    order_status: Option<String>,
+    #[serde(rename = "startTime", skip_serializing_if = "Option::is_none")]
+    start_time: Option<i64>,
+    #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
+    end_time: Option<i64>,
+    #[serde(rename = "current", skip_serializing_if = "Option::is_none")]
+    current: Option<i64>,
+    #[serde(rename = "size", skip_serializing_if = "Option::is_none")]
+    size: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl EquityOrderHistory {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `orderType` parameter.
+    #[must_use]
+    pub fn order_type(mut self, value: impl Into<String>) -> Self {
+        self.order_type = Some(value.into());
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `orderStatus` parameter.
+    #[must_use]
+    pub fn order_status(mut self, value: impl Into<String>) -> Self {
+        self.order_status = Some(value.into());
+        self
+    }
+    /// Set the provider `startTime` parameter.
+    #[must_use]
+    pub fn start_time(mut self, value: i64) -> Self {
+        self.start_time = Some(value);
+        self
+    }
+    /// Set the provider `endTime` parameter.
+    #[must_use]
+    pub fn end_time(mut self, value: i64) -> Self {
+        self.end_time = Some(value);
+        self
+    }
+    /// Set the provider `current` parameter.
+    #[must_use]
+    pub fn current(mut self, value: i64) -> Self {
+        self.current = Some(value);
+        self
+    }
+    /// Set the provider `size` parameter.
+    #[must_use]
+    pub fn size(mut self, value: i64) -> Self {
+        self.size = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for EquityOrderHistory {
+    type Response = super::rest_models::EquityOrderHistoryResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "equityOrderHistory",
+        path: "/sapi/v1/equity/order/history",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["endTime", "startTime"],
+            &[
+                ("orderType", &["MARKET", "LIMIT"]),
+                ("side", &["BUY", "SELL"]),
+            ],
+            &[],
+        )?;
+        super::validation::validate("equityOrderHistory", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`equityOrderDetail`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-order-detail).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct EquityOrderDetail {
+    #[serde(rename = "orderId", skip_serializing_if = "Option::is_none")]
+    order_id: Option<String>,
+    #[serde(rename = "clientOrderId", skip_serializing_if = "Option::is_none")]
+    client_order_id: Option<super::ClientOrderId>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl EquityOrderDetail {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `orderId` parameter.
+    #[must_use]
+    pub fn order_id(mut self, value: impl Into<String>) -> Self {
+        self.order_id = Some(value.into());
+        self
+    }
+    /// Set the provider `clientOrderId` parameter.
+    #[must_use]
+    pub fn client_order_id(mut self, value: super::ClientOrderId) -> Self {
+        self.client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for EquityOrderDetail {
+    type Response = super::rest_models::EquityOrderDetailResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "equityOrderDetail",
+        path: "/sapi/v1/equity/order/detail",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("equityOrderDetail", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`equityTradeHistory`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-trade-history).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct EquityTradeHistory {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "orderId", skip_serializing_if = "Option::is_none")]
+    order_id: Option<String>,
+    #[serde(rename = "startTime", skip_serializing_if = "Option::is_none")]
+    start_time: Option<i64>,
+    #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
+    end_time: Option<i64>,
+    #[serde(rename = "current", skip_serializing_if = "Option::is_none")]
+    current: Option<i64>,
+    #[serde(rename = "size", skip_serializing_if = "Option::is_none")]
+    size: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl EquityTradeHistory {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `orderId` parameter.
+    #[must_use]
+    pub fn order_id(mut self, value: impl Into<String>) -> Self {
+        self.order_id = Some(value.into());
+        self
+    }
+    /// Set the provider `startTime` parameter.
+    #[must_use]
+    pub fn start_time(mut self, value: i64) -> Self {
+        self.start_time = Some(value);
+        self
+    }
+    /// Set the provider `endTime` parameter.
+    #[must_use]
+    pub fn end_time(mut self, value: i64) -> Self {
+        self.end_time = Some(value);
+        self
+    }
+    /// Set the provider `current` parameter.
+    #[must_use]
+    pub fn current(mut self, value: i64) -> Self {
+        self.current = Some(value);
+        self
+    }
+    /// Set the provider `size` parameter.
+    #[must_use]
+    pub fn size(mut self, value: i64) -> Self {
+        self.size = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for EquityTradeHistory {
+    type Response = super::rest_models::EquityTradeHistoryResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "equityTradeHistory",
+        path: "/sapi/v1/equity/trade/history",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["endTime", "startTime"],
+            &[("side", &["BUY", "SELL"])],
+            &[],
+        )?;
+        super::validation::validate("equityTradeHistory", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`tokenizedMint`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-mint).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct TokenizedMint {
+    #[serde(rename = "underlyingAsset", skip_serializing_if = "Option::is_none")]
+    underlying_asset: Option<crate::Asset>,
+    #[serde(
+        rename = "underlyingAssetAmount",
+        skip_serializing_if = "Option::is_none"
+    )]
+    underlying_asset_amount: Option<Decimal>,
+    #[serde(rename = "clientOrderId", skip_serializing_if = "Option::is_none")]
+    client_order_id: Option<super::ClientOrderId>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl TokenizedMint {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `underlyingAsset` parameter.
+    #[must_use]
+    pub fn underlying_asset(mut self, value: crate::Asset) -> Self {
+        self.underlying_asset = Some(value);
+        self
+    }
+    /// Set the provider `underlyingAssetAmount` parameter.
+    #[must_use]
+    pub fn underlying_asset_amount(mut self, value: Decimal) -> Self {
+        self.underlying_asset_amount = Some(value);
+        self
+    }
+    /// Set the provider `clientOrderId` parameter.
+    #[must_use]
+    pub fn client_order_id(mut self, value: super::ClientOrderId) -> Self {
+        self.client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for TokenizedMint {
+    type Response = super::rest_models::TokenizedMintResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "tokenizedMint",
+        path: "/sapi/v1/equity/tokenized/mint",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["clientOrderId", "underlyingAsset", "underlyingAssetAmount"],
+            &[],
+            &[],
+        )?;
+        super::validation::validate("tokenizedMint", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`tokenizedRedeem`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-redeem).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct TokenizedRedeem {
+    #[serde(rename = "tokenizedAsset", skip_serializing_if = "Option::is_none")]
+    tokenized_asset: Option<crate::Asset>,
+    #[serde(
+        rename = "tokenizedAssetAmount",
+        skip_serializing_if = "Option::is_none"
+    )]
+    tokenized_asset_amount: Option<Decimal>,
+    #[serde(rename = "clientOrderId", skip_serializing_if = "Option::is_none")]
+    client_order_id: Option<super::ClientOrderId>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl TokenizedRedeem {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `tokenizedAsset` parameter.
+    #[must_use]
+    pub fn tokenized_asset(mut self, value: crate::Asset) -> Self {
+        self.tokenized_asset = Some(value);
+        self
+    }
+    /// Set the provider `tokenizedAssetAmount` parameter.
+    #[must_use]
+    pub fn tokenized_asset_amount(mut self, value: Decimal) -> Self {
+        self.tokenized_asset_amount = Some(value);
+        self
+    }
+    /// Set the provider `clientOrderId` parameter.
+    #[must_use]
+    pub fn client_order_id(mut self, value: super::ClientOrderId) -> Self {
+        self.client_order_id = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for TokenizedRedeem {
+    type Response = super::rest_models::TokenizedRedeemResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "tokenizedRedeem",
+        path: "/sapi/v1/equity/tokenized/redeem",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["clientOrderId", "tokenizedAsset", "tokenizedAssetAmount"],
+            &[],
+            &[],
+        )?;
+        super::validation::validate("tokenizedRedeem", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`tokenizedConvertStatus`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-convert-status).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct TokenizedConvertStatus {
+    #[serde(rename = "issuerRequestId", skip_serializing_if = "Option::is_none")]
+    issuer_request_id: Option<String>,
+    #[serde(rename = "convertType", skip_serializing_if = "Option::is_none")]
+    convert_type: Option<String>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl TokenizedConvertStatus {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `issuerRequestId` parameter.
+    #[must_use]
+    pub fn issuer_request_id(mut self, value: impl Into<String>) -> Self {
+        self.issuer_request_id = Some(value.into());
+        self
+    }
+    /// Set the provider `convertType` parameter.
+    #[must_use]
+    pub fn convert_type(mut self, value: impl Into<String>) -> Self {
+        self.convert_type = Some(value.into());
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for TokenizedConvertStatus {
+    type Response = super::rest_models::TokenizedConvertStatusResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "tokenizedConvertStatus",
+        path: "/sapi/v1/equity/tokenized/convert-status",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["convertType", "issuerRequestId"],
+            &[("convertType", &["MINT", "REDEEM"])],
+            &[],
+        )?;
+        super::validation::validate("tokenizedConvertStatus", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`tokenizedConvertHistory`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-convert-history).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct TokenizedConvertHistory {
+    #[serde(rename = "startTime", skip_serializing_if = "Option::is_none")]
+    start_time: Option<i64>,
+    #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
+    end_time: Option<i64>,
+    #[serde(rename = "lastId", skip_serializing_if = "Option::is_none")]
+    last_id: Option<i64>,
+    #[serde(rename = "size", skip_serializing_if = "Option::is_none")]
+    size: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl TokenizedConvertHistory {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `startTime` parameter.
+    #[must_use]
+    pub fn start_time(mut self, value: i64) -> Self {
+        self.start_time = Some(value);
+        self
+    }
+    /// Set the provider `endTime` parameter.
+    #[must_use]
+    pub fn end_time(mut self, value: i64) -> Self {
+        self.end_time = Some(value);
+        self
+    }
+    /// Set the provider `lastId` parameter.
+    #[must_use]
+    pub fn last_id(mut self, value: i64) -> Self {
+        self.last_id = Some(value);
+        self
+    }
+    /// Set the provider `size` parameter.
+    #[must_use]
+    pub fn size(mut self, value: i64) -> Self {
+        self.size = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for TokenizedConvertHistory {
+    type Response = super::rest_models::TokenizedConvertHistoryResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "tokenizedConvertHistory",
+        path: "/sapi/v1/equity/tokenized/history",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("tokenizedConvertHistory", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`signUsEquityDisclaimer`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/account#sign-us-equity-disclaimer).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct SignUsEquityDisclaimer {
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl SignUsEquityDisclaimer {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for SignUsEquityDisclaimer {
+    type Response = super::rest_models::SignUsEquityDisclaimerResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "signUsEquityDisclaimer",
+        path: "/sapi/v1/equity/account/disclaimer",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("signUsEquityDisclaimer", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`createRenewListenKey`](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/user-data-streams#create-renew-listen-key).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CreateRenewListenKey {
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl CreateRenewListenKey {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for CreateRenewListenKey {
+    type Response = super::rest_models::CreateRenewListenKeyResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "createRenewListenKey",
+        path: "/sapi/v1/equity/listenKey",
+        method: "POST",
+        security: Security::Key,
+        mutation: true,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("createRenewListenKey", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+impl super::RestClient {
+    /// [exchangeInfo](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#exchange-info).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn exchange_info(
+        &self,
+        request: &ExchangeInfo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::ExchangeInfoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [tokenizedAssets](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#tokenized-assets).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn tokenized_assets(
+        &self,
+        request: &TokenizedAssets,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::TokenizedAssetsResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [latestQuote](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#latest-quote).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn latest_quote(
+        &self,
+        request: &LatestQuote,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::LatestQuoteResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [placeEquityOrder](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#place-equity-order).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn place_equity_order(
+        &self,
+        request: &PlaceEquityOrder,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::PlaceEquityOrderResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [cancelEquityOrder](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#cancel-equity-order).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn cancel_equity_order(
+        &self,
+        request: &CancelEquityOrder,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::CancelEquityOrderResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [cancelAllEquityOrders](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#cancel-all-equity-orders).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn cancel_all_equity_orders(
+        &self,
+        request: &CancelAllEquityOrders,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::CancelAllEquityOrdersResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [currentOpenOrders](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#current-open-orders).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn current_open_orders(
+        &self,
+        request: &CurrentOpenOrders,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::CurrentOpenOrdersResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [equityOrderHistory](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-order-history).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn equity_order_history(
+        &self,
+        request: &EquityOrderHistory,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::EquityOrderHistoryResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [equityOrderDetail](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-order-detail).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn equity_order_detail(
+        &self,
+        request: &EquityOrderDetail,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::EquityOrderDetailResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [equityTradeHistory](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-trade-history).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn equity_trade_history(
+        &self,
+        request: &EquityTradeHistory,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::EquityTradeHistoryResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [tokenizedMint](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-mint).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn tokenized_mint(
+        &self,
+        request: &TokenizedMint,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::TokenizedMintResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [tokenizedRedeem](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-redeem).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn tokenized_redeem(
+        &self,
+        request: &TokenizedRedeem,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::TokenizedRedeemResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [tokenizedConvertStatus](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-convert-status).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn tokenized_convert_status(
+        &self,
+        request: &TokenizedConvertStatus,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::TokenizedConvertStatusResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [tokenizedConvertHistory](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-convert-history).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn tokenized_convert_history(
+        &self,
+        request: &TokenizedConvertHistory,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::TokenizedConvertHistoryResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [signUsEquityDisclaimer](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/account#sign-us-equity-disclaimer).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn sign_us_equity_disclaimer(
+        &self,
+        request: &SignUsEquityDisclaimer,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::SignUsEquityDisclaimerResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [createRenewListenKey](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/user-data-streams#create-renew-listen-key).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn create_renew_listen_key(
+        &self,
+        request: &CreateRenewListenKey,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::CreateRenewListenKeyResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+}

@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2026 Kevin Monaghan
+// SPDX-License-Identifier: MIT-0
+
+//! Native stream dispatch with retained future-event evidence.
+pub use crate::core_trading::wallet::event_payloads::UnknownMessage;
+/// A native event, without cross-product account or instrument normalization.
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub enum Payload {
+    /// Native `pmProAccountUpdate` evidence.
+    PmProAccountUpdate(Box<super::stream_models::PmProAccountUpdateEvent>),
+    /// Native `risklevelchange` evidence.
+    Risklevelchange(Box<super::stream_models::RisklevelchangeEvent>),
+    /// Future native event or stream shape, retained with redacted diagnostics.
+    Unknown(UnknownMessage),
+}
+/// Decode one named market stream, or a user event when `kind` is absent.
+///
+/// # Errors
+/// Returns a gap for malformed known evidence, including financial parse failures.
+pub fn decode(kind: Option<&str>, value: serde_json::Value) -> Result<Payload, crate::Error> {
+    if kind.is_none() {
+        let event = value
+            .get("e")
+            .and_then(serde_json::Value::as_str)
+            .ok_or(crate::Error::Gap("native user event type required"))?;
+
+        return match event {
+            "PM_PRO_ACCOUNT_UPDATE" => decode_value(value, Payload::PmProAccountUpdate),
+            "riskLevelChange" => decode_value(value, Payload::Risklevelchange),
+            _ => Ok(Payload::Unknown(value.into())),
+        };
+    }
+    match kind {
+        Some("pmProAccountUpdate") => decode_market(value, None, Payload::PmProAccountUpdate),
+        Some("risklevelchange") => decode_market(value, None, Payload::Risklevelchange),
+        _ => Ok(Payload::Unknown(value.into())),
+    }
+}
+
+fn decode_value<T: serde::de::DeserializeOwned>(
+    value: serde_json::Value,
+    wrap: fn(Box<T>) -> Payload,
+) -> Result<Payload, crate::Error> {
+    serde_json::from_value(value)
+        .map(|value| wrap(Box::new(value)))
+        .map_err(|_| crate::Error::Gap("malformed native stream event"))
+}
+fn decode_market<T: serde::de::DeserializeOwned>(
+    value: serde_json::Value,
+    event: Option<&str>,
+    wrap: fn(Box<T>) -> Payload,
+) -> Result<Payload, crate::Error> {
+    if event.is_some_and(|expected| {
+        value
+            .get("e")
+            .and_then(serde_json::Value::as_str)
+            .is_some_and(|actual| actual != expected)
+    }) {
+        return Ok(Payload::Unknown(value.into()));
+    }
+    decode_value(value, wrap)
+}

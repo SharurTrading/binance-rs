@@ -1,0 +1,872 @@
+{
+  "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/1.0.0/schema.yaml",
+  "sha256": "e9c1714959e0f8c31411330b089a353de1576c572484514b3cc826908bc71227",
+  "checked": "2026-10-17",
+  "components": {
+    "schemas": {}
+  },
+  "operations": [
+    {
+      "operationId": "aggregatedTrades",
+      "path": "/bapi/defi/v1/public/alpha-trade/agg-trades",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#aggregated-trades",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "fromId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 1000
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "messageDetail": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "a": {
+                          "type": "integer"
+                        },
+                        "p": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "q": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "f": {
+                          "type": "integer"
+                        },
+                        "l": {
+                          "type": "integer"
+                        },
+                        "T": {
+                          "type": "integer"
+                        },
+                        "m": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "T",
+                        "a",
+                        "f",
+                        "l",
+                        "m",
+                        "p",
+                        "q"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "code",
+                  "data"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "fullDepth",
+      "path": "/bapi/defi/v1/public/alpha-trade/fullDepth",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#full-depth",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "enum": [
+              5,
+              10,
+              20,
+              50,
+              100,
+              500,
+              1000
+            ]
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "messageDetail": {
+                    "type": "string"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "lastUpdateId": {
+                        "type": "integer"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "bids": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ]
+                        }
+                      },
+                      "asks": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ]
+                        }
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "T": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "asks",
+                      "bids",
+                      "lastUpdateId",
+                      "symbol"
+                    ]
+                  }
+                },
+                "required": [
+                  "code",
+                  "data",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "getExchangeInfo",
+      "path": "/bapi/defi/v1/public/alpha-trade/get-exchange-info",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#get-exchange-info",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "messageDetail": {
+                    "type": "string"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "timezone": {
+                        "type": "string"
+                      },
+                      "assets": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "asset": {
+                              "type": "string",
+                              "x-rust-type": "crate::Asset"
+                            }
+                          },
+                          "required": [
+                            "asset"
+                          ]
+                        }
+                      },
+                      "symbols": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "baseAsset": {
+                              "type": "string",
+                              "x-rust-type": "crate::Asset"
+                            },
+                            "quoteAsset": {
+                              "type": "string",
+                              "x-rust-type": "crate::Asset"
+                            },
+                            "pricePrecision": {
+                              "type": "integer"
+                            },
+                            "quantityPrecision": {
+                              "type": "integer"
+                            },
+                            "baseAssetPrecision": {
+                              "type": "integer"
+                            },
+                            "quotePrecision": {
+                              "type": "integer"
+                            },
+                            "filters": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "filterType": {
+                                    "type": "string"
+                                  },
+                                  "minPrice": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "maxPrice": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "tickSize": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "stepSize": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "maxQty": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "minQty": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "limit": {
+                                    "type": "integer"
+                                  },
+                                  "minNotional": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "maxNotional": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "multiplierDown": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "multiplierUp": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "bidMultiplierUp": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "askMultiplierUp": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "bidMultiplierDown": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "askMultiplierDown": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  }
+                                }
+                              }
+                            },
+                            "orderTypes": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "required": [
+                            "baseAsset",
+                            "quoteAsset",
+                            "symbol"
+                          ]
+                        }
+                      },
+                      "orderTypes": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "code",
+                  "data",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "klines",
+      "path": "/bapi/defi/v1/public/alpha-trade/klines",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#klines",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1s",
+              "15s",
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "6h",
+              "8h",
+              "12h",
+              "1d",
+              "3d",
+              "1w",
+              "1M"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 1500
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "messageDetail": {
+                    "type": "string"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "integer"
+                          }
+                        ]
+                      },
+                      "x-prefixItems": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "code",
+                  "data",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "ticker",
+      "path": "/bapi/defi/v1/public/alpha-trade/ticker",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#ticker",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "messageDetail": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "priceChange": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "priceChangePercent": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "weightedAvgPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "lastPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "lastQty": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "openPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "highPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "lowPrice": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "volume": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "quoteVolume": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "openTime": {
+                        "type": "integer"
+                      },
+                      "closeTime": {
+                        "type": "integer"
+                      },
+                      "firstId": {
+                        "type": "integer"
+                      },
+                      "lastId": {
+                        "type": "integer"
+                      },
+                      "count": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "symbol"
+                    ]
+                  },
+                  "success": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "data",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "tokenList",
+      "path": "/bapi/defi/v1/public/wallet-direct/buw/wallet/cex/alpha/all/token/list",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#token-list",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "messageDetail": {
+                    "type": "string"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "tokenId": {
+                          "type": "string"
+                        },
+                        "chainId": {
+                          "type": "string"
+                        },
+                        "chainIconUrl": {
+                          "type": "string"
+                        },
+                        "chainName": {
+                          "type": "string"
+                        },
+                        "contractAddress": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "iconUrl": {
+                          "type": "string"
+                        },
+                        "price": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "percentChange24h": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "volume24h": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "marketCap": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "fdv": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "liquidity": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "totalSupply": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "circulatingSupply": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "holders": {
+                          "type": "string"
+                        },
+                        "decimals": {
+                          "type": "integer"
+                        },
+                        "listingCex": {
+                          "type": "boolean"
+                        },
+                        "hotTag": {
+                          "type": "boolean"
+                        },
+                        "cexCoinName": {
+                          "type": "string"
+                        },
+                        "canTransfer": {
+                          "type": "boolean"
+                        },
+                        "denomination": {
+                          "type": "integer"
+                        },
+                        "offline": {
+                          "type": "boolean"
+                        },
+                        "tradeDecimal": {
+                          "type": "integer"
+                        },
+                        "alphaId": {
+                          "type": "string"
+                        },
+                        "offsell": {
+                          "type": "boolean"
+                        },
+                        "priceHigh24h": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "priceLow24h": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "count24h": {
+                          "type": "string"
+                        },
+                        "onlineTge": {
+                          "type": "boolean"
+                        },
+                        "onlineAirdrop": {
+                          "type": "boolean"
+                        },
+                        "score": {
+                          "type": "integer"
+                        },
+                        "cexOffDisplay": {
+                          "type": "boolean"
+                        },
+                        "stockState": {
+                          "type": "boolean"
+                        },
+                        "listingTime": {
+                          "type": "integer"
+                        },
+                        "mulPoint": {
+                          "type": "integer"
+                        },
+                        "bnExclusiveState": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "code",
+                  "data",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

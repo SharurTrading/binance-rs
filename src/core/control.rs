@@ -27,6 +27,9 @@ pub enum StreamControl {
     Unsubscribe,
     /// `LIST_SUBSCRIPTIONS`: read the venue's current subscription list.
     ListSubscriptions,
+    /// Alpha's native singular list method.
+    /// <https://developers.binance.com/en/docs/products/alpha/websocket-market-data>
+    ListSubscription,
 }
 
 impl StreamControl {
@@ -37,6 +40,7 @@ impl StreamControl {
             Self::Subscribe => "SUBSCRIBE",
             Self::Unsubscribe => "UNSUBSCRIBE",
             Self::ListSubscriptions => "LIST_SUBSCRIPTIONS",
+            Self::ListSubscription => "LIST_SUBSCRIPTION",
         }
     }
 
@@ -44,7 +48,7 @@ impl StreamControl {
     pub(crate) fn lost_outcome(self) -> super::Outcome {
         match self {
             Self::Subscribe | Self::Unsubscribe => super::Outcome::Unknown,
-            Self::ListSubscriptions => super::Outcome::ReadFailed,
+            Self::ListSubscriptions | Self::ListSubscription => super::Outcome::ReadFailed,
         }
     }
 
@@ -79,7 +83,7 @@ impl StreamControl {
         let result = value.get("result")?;
         match self {
             Self::Subscribe | Self::Unsubscribe => result.is_null().then_some(Ok(None)),
-            Self::ListSubscriptions => result
+            Self::ListSubscriptions | Self::ListSubscription => result
                 .as_array()?
                 .iter()
                 .map(|name| name.as_str().map(str::to_owned))

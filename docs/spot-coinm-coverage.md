@@ -20,7 +20,7 @@ advanced order/list families and account-mode changes were not exercised.
 | Product | REST | Catalog WebSocket API | Market definitions | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
 | Spot | 48 | 52 | 15 | 6 |
-| COIN-M | 63 | 10 | 19 | 7 |
+| COIN-M | 67 | 10 | 19 | 7 |
 
 Each WebSocket client additionally exposes session logon/status/logout. Clients
 return a caller-owned driver: run it, close explicitly, drain the accepted prefix

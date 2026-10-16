@@ -103,6 +103,7 @@ impl Streams {
                 time_unit: crate::core::TimeUnit::Milliseconds,
                 binary_decoder: None,
                 api_key_header: false,
+                max_generation_age: Some(std::time::Duration::from_hours(24)),
             },
         )
         .await?;
@@ -151,6 +152,7 @@ impl Streams {
                 time_unit: crate::core::TimeUnit::Milliseconds,
                 binary_decoder: None,
                 api_key_header: false,
+                max_generation_age: Some(std::time::Duration::from_hours(24)),
             },
         )
         .await?;

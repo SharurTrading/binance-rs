@@ -1,0 +1,494 @@
+// SPDX-FileCopyrightText: 2026 Kevin Monaghan
+// SPDX-License-Identifier: MIT-0
+
+//! Generated rest request builders.
+
+use crate::Error;
+use crate::Symbol;
+use crate::core::{Operation, Request, Security, parameters, validate_parameters};
+use serde::Serialize;
+
+/// Validated request builder for [`aggregatedTrades`](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#aggregated-trades).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct AggregatedTrades {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "fromId", skip_serializing_if = "Option::is_none")]
+    from_id: Option<i64>,
+    #[serde(rename = "startTime", skip_serializing_if = "Option::is_none")]
+    start_time: Option<i64>,
+    #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
+    end_time: Option<i64>,
+    #[serde(rename = "limit", skip_serializing_if = "Option::is_none")]
+    limit: Option<i64>,
+}
+impl AggregatedTrades {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `fromId` parameter.
+    #[must_use]
+    pub fn from_id(mut self, value: i64) -> Self {
+        self.from_id = Some(value);
+        self
+    }
+    /// Set the provider `startTime` parameter.
+    #[must_use]
+    pub fn start_time(mut self, value: i64) -> Self {
+        self.start_time = Some(value);
+        self
+    }
+    /// Set the provider `endTime` parameter.
+    #[must_use]
+    pub fn end_time(mut self, value: i64) -> Self {
+        self.end_time = Some(value);
+        self
+    }
+    /// Set the provider `limit` parameter.
+    #[must_use]
+    pub fn limit(mut self, value: i64) -> Self {
+        self.limit = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for AggregatedTrades {
+    type Response = super::rest_models::AggregatedTradesResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "aggregatedTrades",
+        path: "/bapi/defi/v1/public/alpha-trade/agg-trades",
+        method: "GET",
+        security: Security::Public,
+        mutation: false,
+        weight: 0,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["symbol"],
+            &[],
+            &[("limit", -9_223_372_036_854_775_808, 1_000)],
+        )?;
+        super::validation::validate("aggregatedTrades", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`fullDepth`](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#full-depth).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct FullDepth {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "limit", skip_serializing_if = "Option::is_none")]
+    limit: Option<String>,
+}
+impl FullDepth {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `limit` parameter.
+    #[must_use]
+    pub fn limit(mut self, value: impl Into<String>) -> Self {
+        self.limit = Some(value.into());
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for FullDepth {
+    type Response = super::rest_models::FullDepthResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "fullDepth",
+        path: "/bapi/defi/v1/public/alpha-trade/fullDepth",
+        method: "GET",
+        security: Security::Public,
+        mutation: false,
+        weight: 0,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["symbol"],
+            &[("limit", &["5", "10", "20", "50", "100", "500", "1000"])],
+            &[],
+        )?;
+        super::validation::validate("fullDepth", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`getExchangeInfo`](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#get-exchange-info).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct GetExchangeInfo {}
+impl GetExchangeInfo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for GetExchangeInfo {
+    type Response = super::rest_models::GetExchangeInfoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "getExchangeInfo",
+        path: "/bapi/defi/v1/public/alpha-trade/get-exchange-info",
+        method: "GET",
+        security: Security::Public,
+        mutation: false,
+        weight: 0,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("getExchangeInfo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`klines`](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#klines).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct Klines {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "interval", skip_serializing_if = "Option::is_none")]
+    interval: Option<String>,
+    #[serde(rename = "limit", skip_serializing_if = "Option::is_none")]
+    limit: Option<i64>,
+    #[serde(rename = "startTime", skip_serializing_if = "Option::is_none")]
+    start_time: Option<i64>,
+    #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
+    end_time: Option<i64>,
+}
+impl Klines {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `interval` parameter.
+    #[must_use]
+    pub fn interval(mut self, value: impl Into<String>) -> Self {
+        self.interval = Some(value.into());
+        self
+    }
+    /// Set the provider `limit` parameter.
+    #[must_use]
+    pub fn limit(mut self, value: i64) -> Self {
+        self.limit = Some(value);
+        self
+    }
+    /// Set the provider `startTime` parameter.
+    #[must_use]
+    pub fn start_time(mut self, value: i64) -> Self {
+        self.start_time = Some(value);
+        self
+    }
+    /// Set the provider `endTime` parameter.
+    #[must_use]
+    pub fn end_time(mut self, value: i64) -> Self {
+        self.end_time = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for Klines {
+    type Response = super::rest_models::KlinesResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "klines",
+        path: "/bapi/defi/v1/public/alpha-trade/klines",
+        method: "GET",
+        security: Security::Public,
+        mutation: false,
+        weight: 0,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["interval", "symbol"],
+            &[(
+                "interval",
+                &[
+                    "1s", "15s", "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h",
+                    "12h", "1d", "3d", "1w", "1M",
+                ],
+            )],
+            &[("limit", -9_223_372_036_854_775_808, 1_500)],
+        )?;
+        super::validation::validate("klines", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`ticker`](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#ticker).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct Ticker {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+}
+impl Ticker {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for Ticker {
+    type Response = super::rest_models::TickerResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "ticker",
+        path: "/bapi/defi/v1/public/alpha-trade/ticker",
+        method: "GET",
+        security: Security::Public,
+        mutation: false,
+        weight: 0,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &["symbol"], &[], &[])?;
+        super::validation::validate("ticker", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`tokenList`](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#token-list).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct TokenList {}
+impl TokenList {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for TokenList {
+    type Response = super::rest_models::TokenListResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "tokenList",
+        path: "/bapi/defi/v1/public/wallet-direct/buw/wallet/cex/alpha/all/token/list",
+        method: "GET",
+        security: Security::Public,
+        mutation: false,
+        weight: 0,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(&p, &[], &[], &[])?;
+        super::validation::validate("tokenList", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+impl super::RestClient {
+    /// [aggregatedTrades](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#aggregated-trades).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn aggregated_trades(
+        &self,
+        request: &AggregatedTrades,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::AggregatedTradesResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [fullDepth](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#full-depth).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn full_depth(
+        &self,
+        request: &FullDepth,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::FullDepthResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [getExchangeInfo](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#get-exchange-info).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn get_exchange_info(
+        &self,
+        request: &GetExchangeInfo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::GetExchangeInfoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [klines](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#klines).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn klines(
+        &self,
+        request: &Klines,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::KlinesResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [ticker](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#ticker).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn ticker(
+        &self,
+        request: &Ticker,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::TickerResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [tokenList](https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#token-list).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn token_list(
+        &self,
+        request: &TokenList,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::TokenListResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+}

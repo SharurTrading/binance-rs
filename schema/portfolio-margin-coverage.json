@@ -1,0 +1,667 @@
+{
+  "rest": [
+    {
+      "name": "accountBalance",
+      "method": "GET",
+      "path": "/papi/v1/balance",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#account-balance"
+    },
+    {
+      "name": "accountInformation",
+      "method": "GET",
+      "path": "/papi/v1/account",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#account-information"
+    },
+    {
+      "name": "bnbTransfer",
+      "method": "POST",
+      "path": "/papi/v1/bnb-transfer",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#bnb-transfer"
+    },
+    {
+      "name": "changeAutoRepayFuturesStatus",
+      "method": "POST",
+      "path": "/papi/v1/repay-futures-switch",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#change-auto-repay-futures-status"
+    },
+    {
+      "name": "getAutoRepayFuturesStatus",
+      "method": "GET",
+      "path": "/papi/v1/repay-futures-switch",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-auto-repay-futures-status"
+    },
+    {
+      "name": "changeCmInitialLeverage",
+      "method": "POST",
+      "path": "/papi/v1/cm/leverage",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#change-cm-initial-leverage"
+    },
+    {
+      "name": "changeCmPositionMode",
+      "method": "POST",
+      "path": "/papi/v1/cm/positionSide/dual",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#change-cm-position-mode"
+    },
+    {
+      "name": "getCmCurrentPositionMode",
+      "method": "GET",
+      "path": "/papi/v1/cm/positionSide/dual",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-cm-current-position-mode"
+    },
+    {
+      "name": "changeUmInitialLeverage",
+      "method": "POST",
+      "path": "/papi/v1/um/leverage",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#change-um-initial-leverage"
+    },
+    {
+      "name": "changeUmPositionMode",
+      "method": "POST",
+      "path": "/papi/v1/um/positionSide/dual",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#change-um-position-mode"
+    },
+    {
+      "name": "getUmCurrentPositionMode",
+      "method": "GET",
+      "path": "/papi/v1/um/positionSide/dual",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-um-current-position-mode"
+    },
+    {
+      "name": "cmNotionalAndLeverageBrackets",
+      "method": "GET",
+      "path": "/papi/v1/cm/leverageBracket",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#cm-notional-and-leverage-brackets"
+    },
+    {
+      "name": "fundAutoCollection",
+      "method": "POST",
+      "path": "/papi/v1/auto-collection",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#fund-auto-collection"
+    },
+    {
+      "name": "fundCollectionByAsset",
+      "method": "POST",
+      "path": "/papi/v1/asset-collection",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#fund-collection-by-asset"
+    },
+    {
+      "name": "getCmAccountDetail",
+      "method": "GET",
+      "path": "/papi/v1/cm/account",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-cm-account-detail"
+    },
+    {
+      "name": "getCmIncomeHistory",
+      "method": "GET",
+      "path": "/papi/v1/cm/income",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-cm-income-history"
+    },
+    {
+      "name": "getDownloadIdForUmFuturesOrderHistory",
+      "method": "GET",
+      "path": "/papi/v1/um/order/asyn",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-download-id-for-um-futures-order-history"
+    },
+    {
+      "name": "getDownloadIdForUmFuturesTradeHistory",
+      "method": "GET",
+      "path": "/papi/v1/um/trade/asyn",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-download-id-for-um-futures-trade-history"
+    },
+    {
+      "name": "getDownloadIdForUmFuturesTransactionHistory",
+      "method": "GET",
+      "path": "/papi/v1/um/income/asyn",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-download-id-for-um-futures-transaction-history"
+    },
+    {
+      "name": "getMarginBorrowLoanInterestHistory",
+      "method": "GET",
+      "path": "/papi/v1/margin/marginInterestHistory",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-margin-borrow-loan-interest-history"
+    },
+    {
+      "name": "getUmAccountDetail",
+      "method": "GET",
+      "path": "/papi/v1/um/account",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-um-account-detail"
+    },
+    {
+      "name": "getUmAccountDetailV2",
+      "method": "GET",
+      "path": "/papi/v2/um/account",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-um-account-detail-v2"
+    },
+    {
+      "name": "getUmFuturesOrderDownloadLinkById",
+      "method": "GET",
+      "path": "/papi/v1/um/order/asyn/id",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-um-futures-order-download-link-by-id"
+    },
+    {
+      "name": "getUmFuturesTradeDownloadLinkById",
+      "method": "GET",
+      "path": "/papi/v1/um/trade/asyn/id",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-um-futures-trade-download-link-by-id"
+    },
+    {
+      "name": "getUmFuturesTransactionDownloadLinkById",
+      "method": "GET",
+      "path": "/papi/v1/um/income/asyn/id",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-um-futures-transaction-download-link-by-id"
+    },
+    {
+      "name": "getUmIncomeHistory",
+      "method": "GET",
+      "path": "/papi/v1/um/income",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-um-income-history"
+    },
+    {
+      "name": "getUserCommissionRateForCm",
+      "method": "GET",
+      "path": "/papi/v1/cm/commissionRate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-user-commission-rate-for-cm"
+    },
+    {
+      "name": "getUserCommissionRateForUm",
+      "method": "GET",
+      "path": "/papi/v1/um/commissionRate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#get-user-commission-rate-for-um"
+    },
+    {
+      "name": "marginMaxBorrow",
+      "method": "GET",
+      "path": "/papi/v1/margin/maxBorrowable",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#margin-max-borrow"
+    },
+    {
+      "name": "portfolioMarginUmTradingQuantitativeRulesIndicators",
+      "method": "GET",
+      "path": "/papi/v1/um/apiTradingStatus",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#portfolio-margin-um-trading-quantitative-rules-indicators"
+    },
+    {
+      "name": "queryCmPositionInformation",
+      "method": "GET",
+      "path": "/papi/v1/cm/positionRisk",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#query-cm-position-information"
+    },
+    {
+      "name": "queryMarginLoanRecord",
+      "method": "GET",
+      "path": "/papi/v1/margin/marginLoan",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#query-margin-loan-record"
+    },
+    {
+      "name": "queryMarginMaxWithdraw",
+      "method": "GET",
+      "path": "/papi/v1/margin/maxWithdraw",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#query-margin-max-withdraw"
+    },
+    {
+      "name": "queryMarginRepayRecord",
+      "method": "GET",
+      "path": "/papi/v1/margin/repayLoan",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#query-margin-repay-record"
+    },
+    {
+      "name": "queryPortfolioMarginNegativeBalanceInterestHistory",
+      "method": "GET",
+      "path": "/papi/v1/portfolio/interest-history",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#query-portfolio-margin-negative-balance-interest-history"
+    },
+    {
+      "name": "queryUmPositionInformation",
+      "method": "GET",
+      "path": "/papi/v1/um/positionRisk",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#query-um-position-information"
+    },
+    {
+      "name": "queryUserNegativeBalanceAutoExchangeRecord",
+      "method": "GET",
+      "path": "/papi/v1/portfolio/negative-balance-exchange-record",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#query-user-negative-balance-auto-exchange-record"
+    },
+    {
+      "name": "queryUserRateLimit",
+      "method": "GET",
+      "path": "/papi/v1/rateLimit/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#query-user-rate-limit"
+    },
+    {
+      "name": "repayFuturesNegativeBalance",
+      "method": "POST",
+      "path": "/papi/v1/repay-futures-negative-balance",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#repay-futures-negative-balance"
+    },
+    {
+      "name": "umFuturesAccountConfiguration",
+      "method": "GET",
+      "path": "/papi/v1/um/accountConfig",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#um-futures-account-configuration"
+    },
+    {
+      "name": "umFuturesSymbolConfiguration",
+      "method": "GET",
+      "path": "/papi/v1/um/symbolConfig",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#um-futures-symbol-configuration"
+    },
+    {
+      "name": "umNotionalAndLeverageBrackets",
+      "method": "GET",
+      "path": "/papi/v1/um/leverageBracket",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/account#um-notional-and-leverage-brackets"
+    },
+    {
+      "name": "testConnectivity",
+      "method": "GET",
+      "path": "/papi/v1/ping",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/market-data#test-connectivity"
+    },
+    {
+      "name": "cancelAllCmOpenConditionalOrders",
+      "method": "DELETE",
+      "path": "/papi/v1/cm/conditional/allOpenOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-all-cm-open-conditional-orders"
+    },
+    {
+      "name": "cancelAllCmOpenOrders",
+      "method": "DELETE",
+      "path": "/papi/v1/cm/allOpenOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-all-cm-open-orders"
+    },
+    {
+      "name": "cancelAllUmOpenOrders",
+      "method": "DELETE",
+      "path": "/papi/v1/um/allOpenOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-all-um-open-orders"
+    },
+    {
+      "name": "cancelCmConditionalOrder",
+      "method": "DELETE",
+      "path": "/papi/v1/cm/conditional/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-cm-conditional-order"
+    },
+    {
+      "name": "newCmConditionalOrder",
+      "method": "POST",
+      "path": "/papi/v1/cm/conditional/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#new-cm-conditional-order"
+    },
+    {
+      "name": "cancelCmOrder",
+      "method": "DELETE",
+      "path": "/papi/v1/cm/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-cm-order"
+    },
+    {
+      "name": "modifyCmOrder",
+      "method": "PUT",
+      "path": "/papi/v1/cm/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#modify-cm-order"
+    },
+    {
+      "name": "newCmOrder",
+      "method": "POST",
+      "path": "/papi/v1/cm/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#new-cm-order"
+    },
+    {
+      "name": "queryCmOrder",
+      "method": "GET",
+      "path": "/papi/v1/cm/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-cm-order"
+    },
+    {
+      "name": "cancelMarginAccountAllOpenOrdersOnASymbol",
+      "method": "DELETE",
+      "path": "/papi/v1/margin/allOpenOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-margin-account-all-open-orders-on-asymbol"
+    },
+    {
+      "name": "cancelMarginAccountOcoOrders",
+      "method": "DELETE",
+      "path": "/papi/v1/margin/orderList",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-margin-account-oco-orders"
+    },
+    {
+      "name": "queryMarginAccountsOco",
+      "method": "GET",
+      "path": "/papi/v1/margin/orderList",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-margin-accounts-oco"
+    },
+    {
+      "name": "cancelMarginAccountOrder",
+      "method": "DELETE",
+      "path": "/papi/v1/margin/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-margin-account-order"
+    },
+    {
+      "name": "newMarginOrder",
+      "method": "POST",
+      "path": "/papi/v1/margin/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#new-margin-order"
+    },
+    {
+      "name": "queryMarginAccountOrder",
+      "method": "GET",
+      "path": "/papi/v1/margin/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-margin-account-order"
+    },
+    {
+      "name": "cancelUmOrder",
+      "method": "DELETE",
+      "path": "/papi/v1/um/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-um-order"
+    },
+    {
+      "name": "modifyUmOrder",
+      "method": "PUT",
+      "path": "/papi/v1/um/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#modify-um-order"
+    },
+    {
+      "name": "newUmOrder",
+      "method": "POST",
+      "path": "/papi/v1/um/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#new-um-order"
+    },
+    {
+      "name": "queryUmOrder",
+      "method": "GET",
+      "path": "/papi/v1/um/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-um-order"
+    },
+    {
+      "name": "cmAccountTradeList",
+      "method": "GET",
+      "path": "/papi/v1/cm/userTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cm-account-trade-list"
+    },
+    {
+      "name": "cmPositionAdlQuantileEstimation",
+      "method": "GET",
+      "path": "/papi/v1/cm/adlQuantile",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cm-position-adl-quantile-estimation"
+    },
+    {
+      "name": "getUmFuturesBnbBurnStatus",
+      "method": "GET",
+      "path": "/papi/v1/um/feeBurn",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#get-um-futures-bnb-burn-status"
+    },
+    {
+      "name": "toggleBnbBurnOnUmFuturesTrade",
+      "method": "POST",
+      "path": "/papi/v1/um/feeBurn",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#toggle-bnb-burn-on-um-futures-trade"
+    },
+    {
+      "name": "marginAccountBorrow",
+      "method": "POST",
+      "path": "/papi/v1/marginLoan",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#margin-account-borrow"
+    },
+    {
+      "name": "marginAccountNewOco",
+      "method": "POST",
+      "path": "/papi/v1/margin/order/oco",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#margin-account-new-oco"
+    },
+    {
+      "name": "marginAccountRepay",
+      "method": "POST",
+      "path": "/papi/v1/repayLoan",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#margin-account-repay"
+    },
+    {
+      "name": "marginAccountRepayDebt",
+      "method": "POST",
+      "path": "/papi/v1/margin/repay-debt",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#margin-account-repay-debt"
+    },
+    {
+      "name": "marginAccountTradeList",
+      "method": "GET",
+      "path": "/papi/v1/margin/myTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#margin-account-trade-list"
+    },
+    {
+      "name": "queryAllCmConditionalOrders",
+      "method": "GET",
+      "path": "/papi/v1/cm/conditional/allOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-all-cm-conditional-orders"
+    },
+    {
+      "name": "queryAllCmOrders",
+      "method": "GET",
+      "path": "/papi/v1/cm/allOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-all-cm-orders"
+    },
+    {
+      "name": "queryAllCurrentCmOpenConditionalOrders",
+      "method": "GET",
+      "path": "/papi/v1/cm/conditional/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-all-current-cm-open-conditional-orders"
+    },
+    {
+      "name": "queryAllCurrentCmOpenOrders",
+      "method": "GET",
+      "path": "/papi/v1/cm/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-all-current-cm-open-orders"
+    },
+    {
+      "name": "queryAllCurrentUmOpenOrders",
+      "method": "GET",
+      "path": "/papi/v1/um/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-all-current-um-open-orders"
+    },
+    {
+      "name": "queryAllMarginAccountOrders",
+      "method": "GET",
+      "path": "/papi/v1/margin/allOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-all-margin-account-orders"
+    },
+    {
+      "name": "queryAllUmOrders",
+      "method": "GET",
+      "path": "/papi/v1/um/allOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-all-um-orders"
+    },
+    {
+      "name": "queryCmConditionalOrderHistory",
+      "method": "GET",
+      "path": "/papi/v1/cm/conditional/orderHistory",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-cm-conditional-order-history"
+    },
+    {
+      "name": "queryCmModifyOrderHistory",
+      "method": "GET",
+      "path": "/papi/v1/cm/orderAmendment",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-cm-modify-order-history"
+    },
+    {
+      "name": "queryCurrentCmOpenConditionalOrder",
+      "method": "GET",
+      "path": "/papi/v1/cm/conditional/openOrder",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-current-cm-open-conditional-order"
+    },
+    {
+      "name": "queryCurrentCmOpenOrder",
+      "method": "GET",
+      "path": "/papi/v1/cm/openOrder",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-current-cm-open-order"
+    },
+    {
+      "name": "queryCurrentMarginOpenOrder",
+      "method": "GET",
+      "path": "/papi/v1/margin/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-current-margin-open-order"
+    },
+    {
+      "name": "queryCurrentUmOpenOrder",
+      "method": "GET",
+      "path": "/papi/v1/um/openOrder",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-current-um-open-order"
+    },
+    {
+      "name": "queryMarginAccountsAllOco",
+      "method": "GET",
+      "path": "/papi/v1/margin/allOrderList",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-margin-accounts-all-oco"
+    },
+    {
+      "name": "queryMarginAccountsOpenOco",
+      "method": "GET",
+      "path": "/papi/v1/margin/openOrderList",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-margin-accounts-open-oco"
+    },
+    {
+      "name": "queryUmModifyOrderHistory",
+      "method": "GET",
+      "path": "/papi/v1/um/orderAmendment",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-um-modify-order-history"
+    },
+    {
+      "name": "queryUsersCmForceOrders",
+      "method": "GET",
+      "path": "/papi/v1/cm/forceOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-users-cm-force-orders"
+    },
+    {
+      "name": "queryUsersMarginForceOrders",
+      "method": "GET",
+      "path": "/papi/v1/margin/forceOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-users-margin-force-orders"
+    },
+    {
+      "name": "queryUsersUmForceOrders",
+      "method": "GET",
+      "path": "/papi/v1/um/forceOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-users-um-force-orders"
+    },
+    {
+      "name": "umAccountTradeList",
+      "method": "GET",
+      "path": "/papi/v1/um/userTrades",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#um-account-trade-list"
+    },
+    {
+      "name": "umPositionAdlQuantileEstimation",
+      "method": "GET",
+      "path": "/papi/v1/um/adlQuantile",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#um-position-adl-quantile-estimation"
+    },
+    {
+      "name": "newUmAlgoOrder",
+      "method": "POST",
+      "path": "/papi/v1/um/algo/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#new-um-algo-order"
+    },
+    {
+      "name": "cancelUmAlgoOrder",
+      "method": "DELETE",
+      "path": "/papi/v1/um/algo/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-um-algo-order"
+    },
+    {
+      "name": "cancelAllUmAlgoOpenOrders",
+      "method": "DELETE",
+      "path": "/papi/v1/um/algo/allOpenOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#cancel-all-um-algo-open-orders"
+    },
+    {
+      "name": "queryCurrentUmOpenAlgoOrder",
+      "method": "GET",
+      "path": "/papi/v1/um/algo/algoOrder",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-current-um-open-algo-order"
+    },
+    {
+      "name": "queryAllCurrentUmOpenAlgoOrders",
+      "method": "GET",
+      "path": "/papi/v1/um/algo/openAlgoOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-all-current-um-open-algo-orders"
+    },
+    {
+      "name": "queryUmAlgoOrderHistory",
+      "method": "GET",
+      "path": "/papi/v1/um/algo/allAlgoOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#query-um-algo-order-history"
+    },
+    {
+      "name": "futuresTradfiPerpsContract",
+      "method": "POST",
+      "path": "/papi/v1/um/stock/contract",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/trade#futures-tradfi-perps-contract"
+    },
+    {
+      "name": "closeUserDataStream",
+      "method": "DELETE",
+      "path": "/papi/v1/listenKey",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/user-data-streams#close-user-data-stream"
+    },
+    {
+      "name": "keepaliveUserDataStream",
+      "method": "PUT",
+      "path": "/papi/v1/listenKey",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/user-data-streams#keepalive-user-data-stream"
+    },
+    {
+      "name": "startUserDataStream",
+      "method": "POST",
+      "path": "/papi/v1/listenKey",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/rest-api/user-data-streams#start-user-data-stream"
+    }
+  ],
+  "streams": [],
+  "user_events": [
+    {
+      "name": "accountConfigUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "accountUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "algoOrderUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "balanceUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "conditionalOrderTradeUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "executionReport",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "liabilityChange",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "listenKeyExpired",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "openOrderLoss",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "orderTradeUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "outboundAccountPosition",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "riskLevelChange",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml"
+    }
+  ]
+}

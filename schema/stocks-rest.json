@@ -1,0 +1,1633 @@
+{
+  "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/1.0.0/schema.yaml",
+  "sha256": "aba622d64d8a44684ad3741e32d293c82a866b2804d43f49875e24d546b57fb8",
+  "checked": "2026-10-17",
+  "components": {
+    "schemas": {}
+  },
+  "operations": [
+    {
+      "operationId": "exchangeInfo",
+      "x-security-type": "MARKET_DATA",
+      "path": "/sapi/v1/equity/market/exchangeInfo",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#exchange-info",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "timezone": {
+                    "type": "string"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "tradability": {
+                          "type": "string",
+                          "enum": [
+                            "BUY_SELL",
+                            "BUY",
+                            "SELL",
+                            "NONE"
+                          ]
+                        },
+                        "tradabilityUpdateTime": {
+                          "type": "integer"
+                        },
+                        "overnightSupported": {
+                          "type": "boolean"
+                        },
+                        "fractionable": {
+                          "type": "boolean"
+                        },
+                        "fractionableEh": {
+                          "type": "boolean"
+                        },
+                        "extendedSession": {
+                          "type": "boolean"
+                        },
+                        "maxNumOrders": {
+                          "type": "integer"
+                        },
+                        "stepSize": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "multiplierUp": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "multiplierDown": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "minQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "maxQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "minNotional": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "maxNotional": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "listingTime": {
+                          "type": "integer"
+                        },
+                        "delistingTime": {
+                          "type": "integer",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "symbol"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "tokenizedAssets",
+      "x-security-type": "MARKET_DATA",
+      "path": "/sapi/v1/equity/market/tokenized-assets",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#tokenized-assets",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "assetCode": {
+                      "type": "string"
+                    },
+                    "assetName": {
+                      "type": "string"
+                    },
+                    "underlyingEquitySymbol": {
+                      "type": "string"
+                    },
+                    "multiplier": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "multiplierValid": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "latestQuote",
+      "x-security-type": "MARKET_DATA",
+      "path": "/sapi/v1/equity/market/quote",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#latest-quote",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "nullable": true,
+                "properties": {
+                  "symbol": {
+                    "type": "string"
+                  },
+                  "bidPrice": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "askPrice": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "bidSize": {
+                    "type": "integer",
+                    "x-decimal": true
+                  },
+                  "askSize": {
+                    "type": "integer",
+                    "x-decimal": true
+                  }
+                },
+                "required": [
+                  "askPrice",
+                  "askSize",
+                  "bidPrice",
+                  "bidSize",
+                  "symbol"
+                ],
+                "x-option-response": true
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1,
+      "x-empty-response": true,
+      "x-empty-response-null": true
+    },
+    {
+      "operationId": "placeEquityOrder",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/order/place",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#place-equity-order",
+      "tags": [
+        "trade"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "quoteAsset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "side",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "BUY",
+              "SELL"
+            ]
+          }
+        },
+        {
+          "name": "orderType",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "MARKET",
+              "LIMIT"
+            ]
+          }
+        },
+        {
+          "name": "price",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-decimal": true
+          }
+        },
+        {
+          "name": "quantity",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-decimal": true
+          }
+        },
+        {
+          "name": "notional",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-decimal": true
+          }
+        },
+        {
+          "name": "timeInForce",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "DAY",
+              "GTC"
+            ]
+          }
+        },
+        {
+          "name": "tradingSession",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "RTH",
+              "EXTENDED",
+              "24H"
+            ]
+          }
+        },
+        {
+          "name": "walletType",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "CARD",
+              "MAIN"
+            ]
+          }
+        },
+        {
+          "name": "clientOrderId",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "super::ClientOrderId"
+          }
+        },
+        {
+          "name": "tokenize",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  },
+                  "orderId": {
+                    "type": "string"
+                  },
+                  "clientOrderId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "clientOrderId",
+                  "orderId",
+                  "status"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "cancelEquityOrder",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/order/cancel",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#cancel-equity-order",
+      "tags": [
+        "trade"
+      ],
+      "parameters": [
+        {
+          "name": "orderId",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "orderId",
+                  "status"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "cancelAllEquityOrders",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/order/cancel-all",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#cancel-all-equity-orders",
+      "tags": [
+        "trade"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1,
+      "x-partial-result": true
+    },
+    {
+      "operationId": "currentOpenOrders",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/order/open-orders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#current-open-orders",
+      "tags": [
+        "trade"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "orderId": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "quote": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "side": {
+                      "type": "string"
+                    },
+                    "orderType": {
+                      "type": "string"
+                    },
+                    "limitPrice": {
+                      "type": "string",
+                      "x-decimal": true,
+                      "nullable": true
+                    },
+                    "avgFilledPrice": {
+                      "type": "string",
+                      "x-decimal": true,
+                      "nullable": true
+                    },
+                    "qty": {
+                      "type": "string",
+                      "x-decimal": true,
+                      "nullable": true
+                    },
+                    "notional": {
+                      "type": "string",
+                      "x-decimal": true,
+                      "nullable": true
+                    },
+                    "filledQty": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "filledTotal": {
+                      "type": "string",
+                      "x-decimal": true,
+                      "nullable": true
+                    },
+                    "fee": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "session": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "symbol"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "equityOrderHistory",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/order/history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-order-history",
+      "tags": [
+        "trade"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "orderType",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "MARKET",
+              "LIMIT"
+            ]
+          }
+        },
+        {
+          "name": "side",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "BUY",
+              "SELL"
+            ]
+          }
+        },
+        {
+          "name": "orderStatus",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "current",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer",
+                    "x-decimal": true
+                  },
+                  "page": {
+                    "type": "integer"
+                  },
+                  "size": {
+                    "type": "integer"
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "orderId": {
+                          "type": "string"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "quote": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "orderType": {
+                          "type": "string"
+                        },
+                        "limitPrice": {
+                          "type": "string",
+                          "x-decimal": true,
+                          "nullable": true
+                        },
+                        "avgFilledPrice": {
+                          "type": "string",
+                          "x-decimal": true,
+                          "nullable": true
+                        },
+                        "qty": {
+                          "type": "string",
+                          "x-decimal": true,
+                          "nullable": true
+                        },
+                        "notional": {
+                          "type": "string",
+                          "x-decimal": true,
+                          "nullable": true
+                        },
+                        "filledQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "filledTotal": {
+                          "type": "string",
+                          "x-decimal": true,
+                          "nullable": true
+                        },
+                        "fee": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "session": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "integer"
+                        },
+                        "updatedAt": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "symbol"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "equityOrderDetail",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/order/detail",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-order-detail",
+      "tags": [
+        "trade"
+      ],
+      "parameters": [
+        {
+          "name": "orderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "clientOrderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "super::ClientOrderId"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": {
+                    "type": "string"
+                  },
+                  "clientOrderId": {
+                    "type": "string"
+                  },
+                  "symbol": {
+                    "type": "string"
+                  },
+                  "quote": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "side": {
+                    "type": "string"
+                  },
+                  "orderType": {
+                    "type": "string"
+                  },
+                  "limitPrice": {
+                    "type": "string",
+                    "x-decimal": true,
+                    "nullable": true
+                  },
+                  "avgFilledPrice": {
+                    "type": "string",
+                    "x-decimal": true,
+                    "nullable": true
+                  },
+                  "qty": {
+                    "type": "string",
+                    "x-decimal": true,
+                    "nullable": true
+                  },
+                  "notional": {
+                    "type": "string",
+                    "x-decimal": true,
+                    "nullable": true
+                  },
+                  "filledQty": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "filledTotal": {
+                    "type": "string",
+                    "x-decimal": true,
+                    "nullable": true
+                  },
+                  "fee": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "session": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "integer"
+                  },
+                  "updatedAt": {
+                    "type": "integer"
+                  },
+                  "trades": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "executionId": {
+                          "type": "string"
+                        },
+                        "executionAt": {
+                          "type": "integer"
+                        },
+                        "price": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "qty": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "symbol"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "equityTradeHistory",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/trade/history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-trade-history",
+      "tags": [
+        "trade"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "side",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "BUY",
+              "SELL"
+            ]
+          }
+        },
+        {
+          "name": "orderId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "current",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer",
+                    "x-decimal": true
+                  },
+                  "page": {
+                    "type": "integer"
+                  },
+                  "size": {
+                    "type": "integer"
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "executionId": {
+                          "type": "string"
+                        },
+                        "orderId": {
+                          "type": "string"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "quote": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "orderType": {
+                          "type": "string"
+                        },
+                        "price": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "qty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "total": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executionAt": {
+                          "type": "integer"
+                        },
+                        "updatedAt": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "symbol"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "tokenizedMint",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/tokenized/mint",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-mint",
+      "tags": [
+        "tokenized"
+      ],
+      "parameters": [
+        {
+          "name": "underlyingAsset",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "underlyingAssetAmount",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-decimal": true
+          }
+        },
+        {
+          "name": "clientOrderId",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "super::ClientOrderId"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "issuerRequestId": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "P",
+                      "S",
+                      "F"
+                    ]
+                  }
+                },
+                "required": [
+                  "issuerRequestId",
+                  "status"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "tokenizedRedeem",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/tokenized/redeem",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-redeem",
+      "tags": [
+        "tokenized"
+      ],
+      "parameters": [
+        {
+          "name": "tokenizedAsset",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "tokenizedAssetAmount",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-decimal": true
+          }
+        },
+        {
+          "name": "clientOrderId",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "super::ClientOrderId"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "issuerRequestId": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "P",
+                      "S",
+                      "F"
+                    ]
+                  }
+                },
+                "required": [
+                  "issuerRequestId",
+                  "status"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "tokenizedConvertStatus",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/tokenized/convert-status",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-convert-status",
+      "tags": [
+        "tokenized"
+      ],
+      "parameters": [
+        {
+          "name": "issuerRequestId",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "convertType",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "MINT",
+              "REDEEM"
+            ]
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "underlyingAsset": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "underlyingAssetAmount": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "tokenizedAsset": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "tokenizedAssetAmount": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "issuerRequestId": {
+                    "type": "string"
+                  },
+                  "convertType": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "P",
+                      "S",
+                      "F"
+                    ]
+                  },
+                  "createdAt": {
+                    "type": "integer"
+                  },
+                  "updatedAt": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "tokenizedConvertHistory",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/tokenized/history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-convert-history",
+      "tags": [
+        "tokenized"
+      ],
+      "parameters": [
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "lastId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "underlyingAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "underlyingAssetAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "tokenizedAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "tokenizedAssetAmount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "issuerRequestId": {
+                          "type": "string"
+                        },
+                        "convertType": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "P",
+                            "S",
+                            "F"
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "integer"
+                        },
+                        "updatedAt": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  },
+                  "hasMore": {
+                    "type": "boolean"
+                  },
+                  "nextLastId": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "signUsEquityDisclaimer",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/equity/account/disclaimer",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/account#sign-us-equity-disclaimer",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    },
+    {
+      "operationId": "createRenewListenKey",
+      "x-security-type": "USER_STREAM",
+      "path": "/sapi/v1/equity/listenKey",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/user-data-streams#create-renew-listen-key",
+      "tags": [
+        "user-data-streams"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "listenKey": {
+                    "type": "string",
+                    "x-rust-type": "crate::SensitiveString"
+                  }
+                },
+                "required": [
+                  "listenKey"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "x-ip-weight": 1
+    }
+  ]
+}

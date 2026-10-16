@@ -25,18 +25,6 @@
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#daily-account-snapshot"
     },
     {
-      "name": "disableFastWithdrawSwitch",
-      "method": "POST",
-      "path": "/sapi/v1/account/disableFastWithdrawSwitch",
-      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#disable-fast-withdraw-switch"
-    },
-    {
-      "name": "enableFastWithdrawSwitch",
-      "method": "POST",
-      "path": "/sapi/v1/account/enableFastWithdrawSwitch",
-      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#enable-fast-withdraw-switch"
-    },
-    {
       "name": "getApiKeyPermission",
       "method": "GET",
       "path": "/sapi/v1/account/apiRestrictions",
@@ -175,12 +163,6 @@
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-deposit-address-list-with-network"
     },
     {
-      "name": "fetchWithdrawAddressList",
-      "method": "GET",
-      "path": "/sapi/v1/capital/withdraw/address/list",
-      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-address-list"
-    },
-    {
       "name": "fetchWithdrawQuota",
       "method": "GET",
       "path": "/sapi/v1/capital/withdraw/quota",
@@ -191,12 +173,6 @@
       "method": "POST",
       "path": "/sapi/v1/capital/deposit/credit-apply",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#one-click-arrival-deposit-apply"
-    },
-    {
-      "name": "withdraw",
-      "method": "POST",
-      "path": "/sapi/v1/capital/withdraw/apply",
-      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw"
     },
     {
       "name": "withdrawHistory",
@@ -216,12 +192,6 @@
       "method": "GET",
       "path": "/sapi/v1/system/status",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/others#system-status"
-    },
-    {
-      "name": "brokerWithdraw",
-      "method": "POST",
-      "path": "/sapi/v1/localentity/broker/withdraw/apply",
-      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#broker-withdraw"
     },
     {
       "name": "checkQuestionnaireRequirements",
@@ -246,12 +216,6 @@
       "method": "GET",
       "path": "/sapi/v2/localentity/deposit/history",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#deposit-history-v2"
-    },
-    {
-      "name": "fetchAddressVerificationList",
-      "method": "GET",
-      "path": "/sapi/v1/addressVerify/list",
-      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#fetch-address-verification-list"
     },
     {
       "name": "getRegionList",
@@ -294,12 +258,57 @@
       "method": "GET",
       "path": "/sapi/v2/localentity/withdraw/history",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-history-v2"
+    }
+  ],
+  "excluded": [
+    {
+      "name": "disableFastWithdrawSwitch",
+      "method": "POST",
+      "path": "/sapi/v1/account/disableFastWithdrawSwitch",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#disable-fast-withdraw-switch",
+      "reason": "External-wallet withdrawal configuration is outside the crate scope."
+    },
+    {
+      "name": "enableFastWithdrawSwitch",
+      "method": "POST",
+      "path": "/sapi/v1/account/enableFastWithdrawSwitch",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#enable-fast-withdraw-switch",
+      "reason": "External-wallet withdrawal configuration is outside the crate scope."
+    },
+    {
+      "name": "fetchWithdrawAddressList",
+      "method": "GET",
+      "path": "/sapi/v1/capital/withdraw/address/list",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-address-list",
+      "reason": "External-wallet withdrawal destination discovery is outside the crate scope."
+    },
+    {
+      "name": "withdraw",
+      "method": "POST",
+      "path": "/sapi/v1/capital/withdraw/apply",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw",
+      "reason": "External-wallet withdrawal submission is outside the crate scope."
+    },
+    {
+      "name": "brokerWithdraw",
+      "method": "POST",
+      "path": "/sapi/v1/localentity/broker/withdraw/apply",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#broker-withdraw",
+      "reason": "External-wallet withdrawal submission is outside the crate scope."
+    },
+    {
+      "name": "fetchAddressVerificationList",
+      "method": "GET",
+      "path": "/sapi/v1/addressVerify/list",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#fetch-address-verification-list",
+      "reason": "External-wallet withdrawal destination discovery is outside the crate scope."
     },
     {
       "name": "withdrawTravelRule",
       "method": "POST",
       "path": "/sapi/v1/localentity/withdraw/apply",
-      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-travel-rule"
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-travel-rule",
+      "reason": "External-wallet withdrawal submission is outside the crate scope."
     }
   ]
 }

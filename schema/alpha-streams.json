@@ -1,0 +1,2664 @@
+{
+  "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/1.0.0/schema.yaml",
+  "sha256": "dc090f6899f4a430b3937813610460f127a2b2cc1d8c5581fec4dc6c32bd16d9",
+  "checked": "2026-10-17",
+  "components": {
+    "schemas": {}
+  },
+  "operations": [
+    {
+      "operationId": "aggregateTradeStream",
+      "path": "/{symbol}@aggTrade",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#aggregate-trade-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "T": {
+                    "type": "integer"
+                  },
+                  "a": {
+                    "type": "integer"
+                  },
+                  "f": {
+                    "type": "integer"
+                  },
+                  "l": {
+                    "type": "integer"
+                  },
+                  "m": {
+                    "type": "boolean"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "s": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "E",
+                  "T",
+                  "a",
+                  "e",
+                  "f",
+                  "l",
+                  "m",
+                  "p",
+                  "q",
+                  "s"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "T": {
+                        "type": "integer"
+                      },
+                      "a": {
+                        "type": "integer"
+                      },
+                      "f": {
+                        "type": "integer"
+                      },
+                      "l": {
+                        "type": "integer"
+                      },
+                      "m": {
+                        "type": "boolean"
+                      },
+                      "p": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      },
+                      "s": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "aggTrade"
+    },
+    {
+      "operationId": "allBookTickerStream",
+      "path": "/!bookTicker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-book-ticker-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "T": {
+                    "type": "integer"
+                  },
+                  "u": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "b": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "B": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "a": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "A": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                },
+                "required": [
+                  "A",
+                  "B",
+                  "E",
+                  "a",
+                  "b",
+                  "e",
+                  "s"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "T": {
+                        "type": "integer"
+                      },
+                      "u": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "b": {
+                        "type": "string"
+                      },
+                      "B": {
+                        "type": "string"
+                      },
+                      "a": {
+                        "type": "string"
+                      },
+                      "A": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "bookTicker"
+    },
+    {
+      "operationId": "allMiniTickerStream",
+      "path": "/!miniTicker@arr",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-mini-ticker-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "c": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "o": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "h": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "l": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "v": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                },
+                "required": [
+                  "E",
+                  "c",
+                  "e",
+                  "h",
+                  "l",
+                  "o",
+                  "q",
+                  "s",
+                  "v"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "o": {
+                        "type": "string"
+                      },
+                      "h": {
+                        "type": "string"
+                      },
+                      "l": {
+                        "type": "string"
+                      },
+                      "v": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "24hrMiniTicker"
+    },
+    {
+      "operationId": "allTickerStream",
+      "path": "/!ticker@arr",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-ticker-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "P": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "w": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "c": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "Q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "o": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "h": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "l": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "v": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "O": {
+                    "type": "integer"
+                  },
+                  "C": {
+                    "type": "integer"
+                  },
+                  "F": {
+                    "type": "integer"
+                  },
+                  "L": {
+                    "type": "integer"
+                  },
+                  "n": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "E",
+                  "P",
+                  "Q",
+                  "c",
+                  "e",
+                  "h",
+                  "l",
+                  "o",
+                  "p",
+                  "q",
+                  "s",
+                  "v",
+                  "w"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "p": {
+                        "type": "string"
+                      },
+                      "P": {
+                        "type": "string"
+                      },
+                      "w": {
+                        "type": "string"
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "Q": {
+                        "type": "string"
+                      },
+                      "o": {
+                        "type": "string"
+                      },
+                      "h": {
+                        "type": "string"
+                      },
+                      "l": {
+                        "type": "string"
+                      },
+                      "v": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      },
+                      "O": {
+                        "type": "integer"
+                      },
+                      "C": {
+                        "type": "integer"
+                      },
+                      "F": {
+                        "type": "integer"
+                      },
+                      "L": {
+                        "type": "integer"
+                      },
+                      "n": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "24hrTicker"
+    },
+    {
+      "operationId": "allTokens24hTickerStream",
+      "path": "/came@allTokens@ticker24",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-tokens24h-ticker-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "d": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ca": {
+                          "type": "string"
+                        },
+                        "cnt24": {
+                          "type": "integer"
+                        },
+                        "fdv": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "hc": {
+                          "type": "string"
+                        },
+                        "liq": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "mc": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "p": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "pc24": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "s": {
+                          "type": "string"
+                        },
+                        "t": {
+                          "type": "integer"
+                        },
+                        "vol24": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "ca",
+                        "s"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "d",
+                  "e"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "d": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "ca": {
+                              "type": "string"
+                            },
+                            "cnt24": {
+                              "type": "integer"
+                            },
+                            "fdv": {
+                              "type": "string"
+                            },
+                            "hc": {
+                              "type": "string"
+                            },
+                            "liq": {
+                              "type": "string"
+                            },
+                            "mc": {
+                              "type": "string"
+                            },
+                            "p": {
+                              "type": "string"
+                            },
+                            "pc24": {
+                              "type": "string"
+                            },
+                            "s": {
+                              "type": "string"
+                            },
+                            "t": {
+                              "type": "integer"
+                            },
+                            "vol24": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "s"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "e"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "tickerList"
+    },
+    {
+      "operationId": "bookTickerStream",
+      "path": "/{symbol}@bookTicker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#book-ticker-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "T": {
+                    "type": "integer"
+                  },
+                  "u": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "b": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "B": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "a": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "A": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                },
+                "required": [
+                  "A",
+                  "B",
+                  "E",
+                  "a",
+                  "b",
+                  "e",
+                  "s"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "T": {
+                        "type": "integer"
+                      },
+                      "u": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "b": {
+                        "type": "string"
+                      },
+                      "B": {
+                        "type": "string"
+                      },
+                      "a": {
+                        "type": "string"
+                      },
+                      "A": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "bookTicker"
+    },
+    {
+      "operationId": "partialDepthStream",
+      "path": "/{symbol}@depth{levels}@{interval}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#partial-depth-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "levels",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              5,
+              10,
+              20
+            ]
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "0ms",
+              "100ms",
+              "500ms"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "T": {
+                    "type": "integer"
+                  },
+                  "U": {
+                    "type": "integer"
+                  },
+                  "u": {
+                    "type": "integer"
+                  },
+                  "pu": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "b": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ]
+                    }
+                  },
+                  "a": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "E",
+                  "U",
+                  "a",
+                  "b",
+                  "e",
+                  "pu",
+                  "s",
+                  "u"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "T": {
+                        "type": "integer"
+                      },
+                      "U": {
+                        "type": "integer"
+                      },
+                      "u": {
+                        "type": "integer"
+                      },
+                      "pu": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "b": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ]
+                        }
+                      },
+                      "a": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "depthUpdate"
+    },
+    {
+      "operationId": "fullDepthStream",
+      "path": "/{symbol}@fulldepth@{interval}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#full-depth-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "0ms",
+              "100ms",
+              "500ms"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "T": {
+                    "type": "integer"
+                  },
+                  "U": {
+                    "type": "integer"
+                  },
+                  "u": {
+                    "type": "integer"
+                  },
+                  "pu": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "b": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ]
+                    }
+                  },
+                  "a": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "x-prefixItems": [
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "E",
+                  "U",
+                  "a",
+                  "b",
+                  "e",
+                  "pu",
+                  "s",
+                  "u"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "T": {
+                        "type": "integer"
+                      },
+                      "U": {
+                        "type": "integer"
+                      },
+                      "u": {
+                        "type": "integer"
+                      },
+                      "pu": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "b": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ]
+                        }
+                      },
+                      "a": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "x-prefixItems": [
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            {
+                              "type": "string",
+                              "x-decimal": true
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "depthUpdate"
+    },
+    {
+      "operationId": "klineStream",
+      "path": "/{symbol}@kline_{interval}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#kline-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1m",
+              "3m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "4h",
+              "6h",
+              "8h",
+              "12h",
+              "1d",
+              "3d",
+              "1w",
+              "1M"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "k": {
+                    "type": "object",
+                    "properties": {
+                      "t": {
+                        "type": "integer"
+                      },
+                      "T": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "i": {
+                        "type": "string"
+                      },
+                      "f": {
+                        "type": "integer"
+                      },
+                      "L": {
+                        "type": "integer"
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "n": {
+                        "type": "integer"
+                      },
+                      "x": {
+                        "type": "boolean"
+                      },
+                      "q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "V": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "Q": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "B": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "Q",
+                      "T",
+                      "V",
+                      "c",
+                      "h",
+                      "i",
+                      "l",
+                      "n",
+                      "o",
+                      "q",
+                      "s",
+                      "t",
+                      "v",
+                      "x"
+                    ]
+                  }
+                },
+                "required": [
+                  "E",
+                  "e",
+                  "k",
+                  "s"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "k": {
+                        "type": "object",
+                        "properties": {
+                          "t": {
+                            "type": "integer"
+                          },
+                          "T": {
+                            "type": "integer"
+                          },
+                          "s": {
+                            "type": "string"
+                          },
+                          "i": {
+                            "type": "string"
+                          },
+                          "f": {
+                            "type": "integer"
+                          },
+                          "L": {
+                            "type": "integer"
+                          },
+                          "o": {
+                            "type": "string"
+                          },
+                          "c": {
+                            "type": "string"
+                          },
+                          "h": {
+                            "type": "string"
+                          },
+                          "l": {
+                            "type": "string"
+                          },
+                          "v": {
+                            "type": "string"
+                          },
+                          "n": {
+                            "type": "integer"
+                          },
+                          "x": {
+                            "type": "boolean"
+                          },
+                          "q": {
+                            "type": "string"
+                          },
+                          "V": {
+                            "type": "string"
+                          },
+                          "Q": {
+                            "type": "string"
+                          },
+                          "B": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "s"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "kline"
+    },
+    {
+      "operationId": "contractKlineStream",
+      "path": "/came@{contractAddress}@{chainId}@kline_{interval}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#contract-kline-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "contractAddress",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "chainId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1s",
+              "1m",
+              "5m",
+              "15m",
+              "1h",
+              "4h",
+              "1d"
+            ]
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ca": {
+                    "type": "string"
+                  },
+                  "e": {
+                    "type": "string"
+                  },
+                  "k": {
+                    "type": "object",
+                    "properties": {
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "ot": {
+                        "type": "integer"
+                      },
+                      "ct": {
+                        "type": "integer"
+                      },
+                      "i": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "c",
+                      "h",
+                      "l",
+                      "o",
+                      "v"
+                    ]
+                  }
+                },
+                "required": [
+                  "e",
+                  "k"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "ca": {
+                        "type": "string"
+                      },
+                      "e": {
+                        "type": "string"
+                      },
+                      "k": {
+                        "type": "object",
+                        "properties": {
+                          "o": {
+                            "type": "string"
+                          },
+                          "c": {
+                            "type": "string"
+                          },
+                          "h": {
+                            "type": "string"
+                          },
+                          "l": {
+                            "type": "string"
+                          },
+                          "v": {
+                            "type": "string"
+                          },
+                          "ot": {
+                            "type": "integer"
+                          },
+                          "ct": {
+                            "type": "integer"
+                          },
+                          "i": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "e"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "kline"
+    },
+    {
+      "operationId": "miniTickerStream",
+      "path": "/{symbol}@miniTicker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#mini-ticker-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "c": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "o": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "h": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "l": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "v": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                },
+                "required": [
+                  "E",
+                  "c",
+                  "e",
+                  "h",
+                  "l",
+                  "o",
+                  "q",
+                  "s",
+                  "v"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "o": {
+                        "type": "string"
+                      },
+                      "h": {
+                        "type": "string"
+                      },
+                      "l": {
+                        "type": "string"
+                      },
+                      "v": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "24hrMiniTicker"
+    },
+    {
+      "operationId": "tickerStream",
+      "path": "/{symbol}@ticker",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#ticker-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "P": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "w": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "c": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "Q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "o": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "h": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "l": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "v": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "O": {
+                    "type": "integer"
+                  },
+                  "C": {
+                    "type": "integer"
+                  },
+                  "F": {
+                    "type": "integer"
+                  },
+                  "L": {
+                    "type": "integer"
+                  },
+                  "n": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "E",
+                  "P",
+                  "Q",
+                  "c",
+                  "e",
+                  "h",
+                  "l",
+                  "o",
+                  "p",
+                  "q",
+                  "s",
+                  "v",
+                  "w"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "p": {
+                        "type": "string"
+                      },
+                      "P": {
+                        "type": "string"
+                      },
+                      "w": {
+                        "type": "string"
+                      },
+                      "c": {
+                        "type": "string"
+                      },
+                      "Q": {
+                        "type": "string"
+                      },
+                      "o": {
+                        "type": "string"
+                      },
+                      "h": {
+                        "type": "string"
+                      },
+                      "l": {
+                        "type": "string"
+                      },
+                      "v": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      },
+                      "O": {
+                        "type": "integer"
+                      },
+                      "C": {
+                        "type": "integer"
+                      },
+                      "F": {
+                        "type": "integer"
+                      },
+                      "L": {
+                        "type": "integer"
+                      },
+                      "n": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "24hrTicker"
+    },
+    {
+      "operationId": "tradeStream",
+      "path": "/{symbol}@trade",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#trade-stream",
+      "tags": [
+        "market"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "T": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "t": {
+                    "type": "integer"
+                  },
+                  "p": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "m": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "E",
+                  "T",
+                  "e",
+                  "m",
+                  "p",
+                  "q",
+                  "s",
+                  "t"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "T": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "t": {
+                        "type": "integer"
+                      },
+                      "p": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      },
+                      "m": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "trade"
+    }
+  ]
+}

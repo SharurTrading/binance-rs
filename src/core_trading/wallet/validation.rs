@@ -38,7 +38,6 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
     }
     validate_history(op, p)?;
     match op {
-        "withdraw" | "withdrawTravelRule" | "brokerWithdraw" => required(p, &["withdrawOrderId"]),
         "dustConvert" => required(p, &["clientId", "targetAsset"]),
         "queryUserWalletBalance" => required(p, &["quoteAsset"]),
         "oneClickArrivalDepositApply"

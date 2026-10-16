@@ -81,6 +81,7 @@ impl WsClient {
                 time_unit: config.time_unit,
                 binary_decoder,
                 api_key_header: false,
+                max_generation_age: Some(std::time::Duration::from_hours(24)),
             },
         )
         .await?;

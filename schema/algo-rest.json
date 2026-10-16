@@ -1,0 +1,1433 @@
+{
+  "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/1.0.0/schema.yaml",
+  "sha256": "74996f918d98c0a8a56df05f6525c9f71180d04df013b1b447d96109b7f7d378",
+  "checked": "2026-10-17",
+  "components": {
+    "schemas": {}
+  },
+  "operations": [
+    {
+      "operationId": "cancelAlgoOrderFutureAlgo",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/algo/futures/order",
+      "method": "DELETE",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#cancel-algo-order-future-algo",
+      "tags": [
+        "future-algo"
+      ],
+      "parameters": [
+        {
+          "name": "algoId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "clientAlgoId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "super::ClientAlgoId"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "algoId": {
+                    "type": "integer"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "code": {
+                    "type": "integer"
+                  },
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "algoId",
+                  "code",
+                  "msg",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "queryCurrentAlgoOpenOrdersFutureAlgo",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/algo/futures/openOrders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-current-algo-open-orders-future-algo",
+      "tags": [
+        "future-algo"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer"
+                  },
+                  "orders": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "algoId": {
+                          "type": "integer"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "positionSide": {
+                          "type": "string"
+                        },
+                        "totalQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedAmt": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "avgPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "clientAlgoId": {
+                          "type": "string",
+                          "x-rust-type": "super::ClientAlgoId"
+                        },
+                        "bookTime": {
+                          "type": "integer"
+                        },
+                        "endTime": {
+                          "type": "integer"
+                        },
+                        "algoStatus": {
+                          "type": "string"
+                        },
+                        "algoType": {
+                          "type": "string"
+                        },
+                        "urgency": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "clientAlgoId",
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "orders",
+                  "total"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "queryHistoricalAlgoOrdersFutureAlgo",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/algo/futures/historicalOrders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-historical-algo-orders-future-algo",
+      "tags": [
+        "future-algo"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "side",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "BUY",
+              "SELL"
+            ]
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer"
+                  },
+                  "orders": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "algoId": {
+                          "type": "integer"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "positionSide": {
+                          "type": "string"
+                        },
+                        "totalQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedAmt": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "avgPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "clientAlgoId": {
+                          "type": "string",
+                          "x-rust-type": "super::ClientAlgoId"
+                        },
+                        "bookTime": {
+                          "type": "integer"
+                        },
+                        "endTime": {
+                          "type": "integer"
+                        },
+                        "algoStatus": {
+                          "type": "string"
+                        },
+                        "algoType": {
+                          "type": "string"
+                        },
+                        "urgency": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "clientAlgoId",
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "orders",
+                  "total"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "querySubOrdersFutureAlgo",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/algo/futures/subOrders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-sub-orders-future-algo",
+      "tags": [
+        "future-algo"
+      ],
+      "parameters": [
+        {
+          "name": "algoId",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer"
+                  },
+                  "executedQty": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "executedAmt": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "subOrders": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "algoId": {
+                          "type": "integer"
+                        },
+                        "orderId": {
+                          "type": "integer"
+                        },
+                        "orderStatus": {
+                          "type": "string"
+                        },
+                        "executedQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedAmt": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "feeAmt": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "feeAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "bookTime": {
+                          "type": "integer"
+                        },
+                        "avgPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "subId": {
+                          "type": "integer"
+                        },
+                        "timeInForce": {
+                          "type": "string"
+                        },
+                        "origQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "subOrders",
+                  "total"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "timeWeightedAveragePriceFutureAlgo",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "x-uid-weight": 3000,
+      "path": "/sapi/v1/algo/futures/newOrderTwap",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#time-weighted-average-price-future-algo",
+      "tags": [
+        "future-algo"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "clientAlgoId",
+                "duration",
+                "quantity",
+                "side",
+                "symbol",
+                "timestamp"
+              ],
+              "properties": {
+                "symbol": {
+                  "type": "string"
+                },
+                "side": {
+                  "type": "string",
+                  "enum": [
+                    "BUY",
+                    "SELL"
+                  ]
+                },
+                "positionSide": {
+                  "type": "string",
+                  "enum": [
+                    "BOTH",
+                    "LONG",
+                    "SHORT"
+                  ]
+                },
+                "quantity": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "duration": {
+                  "type": "integer",
+                  "minimum": 300,
+                  "maximum": 86400
+                },
+                "clientAlgoId": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "x-rust-type": "super::ClientAlgoId"
+                },
+                "reduceOnly": {
+                  "type": "boolean"
+                },
+                "limitPrice": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "clientAlgoId": {
+                    "type": "string",
+                    "x-rust-type": "super::ClientAlgoId"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "code": {
+                    "type": "integer"
+                  },
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "clientAlgoId",
+                  "code",
+                  "msg",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "volumeParticipationFutureAlgo",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "x-uid-weight": 300,
+      "path": "/sapi/v1/algo/futures/newOrderVp",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#volume-participation-future-algo",
+      "tags": [
+        "future-algo"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "clientAlgoId",
+                "quantity",
+                "side",
+                "symbol",
+                "timestamp",
+                "urgency"
+              ],
+              "properties": {
+                "symbol": {
+                  "type": "string"
+                },
+                "side": {
+                  "type": "string",
+                  "enum": [
+                    "BUY",
+                    "SELL"
+                  ]
+                },
+                "positionSide": {
+                  "type": "string",
+                  "enum": [
+                    "BOTH",
+                    "LONG",
+                    "SHORT"
+                  ]
+                },
+                "quantity": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "urgency": {
+                  "type": "string",
+                  "enum": [
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH"
+                  ]
+                },
+                "clientAlgoId": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "x-rust-type": "super::ClientAlgoId"
+                },
+                "reduceOnly": {
+                  "type": "boolean"
+                },
+                "limitPrice": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "clientAlgoId": {
+                    "type": "string",
+                    "x-rust-type": "super::ClientAlgoId"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "code": {
+                    "type": "integer"
+                  },
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "clientAlgoId",
+                  "code",
+                  "msg",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "cancelAlgoOrderSpotAlgo",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/algo/spot/order",
+      "method": "DELETE",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#cancel-algo-order-spot-algo",
+      "tags": [
+        "spot-algo"
+      ],
+      "parameters": [
+        {
+          "name": "algoId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "clientAlgoId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "super::ClientAlgoId"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "algoId": {
+                    "type": "integer"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "code": {
+                    "type": "integer"
+                  },
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "algoId",
+                  "code",
+                  "msg",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "queryCurrentAlgoOpenOrdersSpotAlgo",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/algo/spot/openOrders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-current-algo-open-orders-spot-algo",
+      "tags": [
+        "spot-algo"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer"
+                  },
+                  "orders": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "algoId": {
+                          "type": "integer"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "totalQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedAmt": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "avgPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "clientAlgoId": {
+                          "type": "string",
+                          "x-rust-type": "super::ClientAlgoId"
+                        },
+                        "bookTime": {
+                          "type": "integer"
+                        },
+                        "endTime": {
+                          "type": "integer"
+                        },
+                        "algoStatus": {
+                          "type": "string"
+                        },
+                        "algoType": {
+                          "type": "string"
+                        },
+                        "urgency": {
+                          "type": "string"
+                        },
+                        "duration": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "clientAlgoId",
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "orders",
+                  "total"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "queryHistoricalAlgoOrdersSpotAlgo",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/algo/spot/historicalOrders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-historical-algo-orders-spot-algo",
+      "tags": [
+        "spot-algo"
+      ],
+      "parameters": [
+        {
+          "name": "symbol",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "side",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "BUY",
+              "SELL"
+            ]
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer"
+                  },
+                  "orders": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "algoId": {
+                          "type": "integer"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "totalQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedAmt": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "avgPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "clientAlgoId": {
+                          "type": "string",
+                          "x-rust-type": "super::ClientAlgoId"
+                        },
+                        "bookTime": {
+                          "type": "integer"
+                        },
+                        "endTime": {
+                          "type": "integer"
+                        },
+                        "algoStatus": {
+                          "type": "string"
+                        },
+                        "algoType": {
+                          "type": "string"
+                        },
+                        "urgency": {
+                          "type": "string"
+                        },
+                        "duration": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "clientAlgoId",
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "orders",
+                  "total"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "querySubOrdersSpotAlgo",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/algo/spot/subOrders",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-sub-orders-spot-algo",
+      "tags": [
+        "spot-algo"
+      ],
+      "parameters": [
+        {
+          "name": "algoId",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer"
+                  },
+                  "executedQty": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "executedAmt": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "subOrders": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "algoId": {
+                          "type": "integer"
+                        },
+                        "orderId": {
+                          "type": "integer"
+                        },
+                        "orderStatus": {
+                          "type": "string"
+                        },
+                        "executedQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "executedAmt": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "feeAmt": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "feeAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "bookTime": {
+                          "type": "integer"
+                        },
+                        "avgPrice": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "subId": {
+                          "type": "integer"
+                        },
+                        "timeInForce": {
+                          "type": "string"
+                        },
+                        "origQty": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "subOrders",
+                  "total"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "timeWeightedAveragePriceSpotAlgo",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "x-uid-weight": 3000,
+      "path": "/sapi/v1/algo/spot/newOrderTwap",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#time-weighted-average-price-spot-algo",
+      "tags": [
+        "spot-algo"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "clientAlgoId",
+                "duration",
+                "quantity",
+                "side",
+                "symbol",
+                "timestamp"
+              ],
+              "properties": {
+                "symbol": {
+                  "type": "string"
+                },
+                "side": {
+                  "type": "string",
+                  "enum": [
+                    "BUY",
+                    "SELL"
+                  ]
+                },
+                "quantity": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "duration": {
+                  "type": "integer",
+                  "minimum": 300,
+                  "maximum": 86400
+                },
+                "clientAlgoId": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "x-rust-type": "super::ClientAlgoId"
+                },
+                "limitPrice": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "clientAlgoId": {
+                    "type": "string",
+                    "x-rust-type": "super::ClientAlgoId"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "code": {
+                    "type": "integer"
+                  },
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "clientAlgoId",
+                  "code",
+                  "msg",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "volumeParticipation",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "x-uid-weight": 3000,
+      "path": "/sapi/v1/algo/spot/newOrderVp",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#volume-participation",
+      "tags": [
+        "spot-algo"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "clientAlgoId",
+                "quantity",
+                "side",
+                "symbol",
+                "timestamp",
+                "urgency"
+              ],
+              "properties": {
+                "symbol": {
+                  "type": "string"
+                },
+                "side": {
+                  "type": "string",
+                  "enum": [
+                    "BUY",
+                    "SELL"
+                  ]
+                },
+                "quantity": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "urgency": {
+                  "type": "string",
+                  "enum": [
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH"
+                  ]
+                },
+                "clientAlgoId": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "x-rust-type": "super::ClientAlgoId"
+                },
+                "vpTimeLimit": {
+                  "type": "integer",
+                  "minimum": 300,
+                  "maximum": 86400
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "clientAlgoId": {
+                    "type": "string",
+                    "x-rust-type": "super::ClientAlgoId"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "code": {
+                    "type": "integer"
+                  },
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "clientAlgoId",
+                  "code",
+                  "msg",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

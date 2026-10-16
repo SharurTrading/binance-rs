@@ -1,0 +1,1323 @@
+// SPDX-FileCopyrightText: 2026 Kevin Monaghan
+// SPDX-License-Identifier: MIT-0
+
+//! Generated rest request builders.
+
+use crate::Decimal;
+use crate::Error;
+use crate::Symbol;
+use crate::core::{Operation, Request, Security, parameters, validate_parameters};
+use serde::Serialize;
+
+/// Validated request builder for [`cancelAlgoOrderFutureAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#cancel-algo-order-future-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CancelAlgoOrderFutureAlgo {
+    #[serde(rename = "algoId", skip_serializing_if = "Option::is_none")]
+    algo_id: Option<i64>,
+    #[serde(rename = "clientAlgoId", skip_serializing_if = "Option::is_none")]
+    client_algo_id: Option<super::ClientAlgoId>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl CancelAlgoOrderFutureAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `algoId` parameter.
+    #[must_use]
+    pub fn algo_id(mut self, value: i64) -> Self {
+        self.algo_id = Some(value);
+        self
+    }
+    /// Set the provider `clientAlgoId` parameter.
+    #[must_use]
+    pub fn client_algo_id(mut self, value: super::ClientAlgoId) -> Self {
+        self.client_algo_id = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for CancelAlgoOrderFutureAlgo {
+    type Response = super::rest_models::CancelAlgoOrderFutureAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "cancelAlgoOrderFutureAlgo",
+        path: "/sapi/v1/algo/futures/order",
+        method: "DELETE",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[],
+            &[],
+            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
+        )?;
+        super::validation::validate("cancelAlgoOrderFutureAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`queryCurrentAlgoOpenOrdersFutureAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-current-algo-open-orders-future-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct QueryCurrentAlgoOpenOrdersFutureAlgo {
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl QueryCurrentAlgoOpenOrdersFutureAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for QueryCurrentAlgoOpenOrdersFutureAlgo {
+    type Response = super::rest_models::QueryCurrentAlgoOpenOrdersFutureAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "queryCurrentAlgoOpenOrdersFutureAlgo",
+        path: "/sapi/v1/algo/futures/openOrders",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[],
+            &[],
+            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
+        )?;
+        super::validation::validate("queryCurrentAlgoOpenOrdersFutureAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`queryHistoricalAlgoOrdersFutureAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-historical-algo-orders-future-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct QueryHistoricalAlgoOrdersFutureAlgo {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "startTime", skip_serializing_if = "Option::is_none")]
+    start_time: Option<i64>,
+    #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
+    end_time: Option<i64>,
+    #[serde(rename = "page", skip_serializing_if = "Option::is_none")]
+    page: Option<i64>,
+    #[serde(rename = "pageSize", skip_serializing_if = "Option::is_none")]
+    page_size: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl QueryHistoricalAlgoOrdersFutureAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `startTime` parameter.
+    #[must_use]
+    pub fn start_time(mut self, value: i64) -> Self {
+        self.start_time = Some(value);
+        self
+    }
+    /// Set the provider `endTime` parameter.
+    #[must_use]
+    pub fn end_time(mut self, value: i64) -> Self {
+        self.end_time = Some(value);
+        self
+    }
+    /// Set the provider `page` parameter.
+    #[must_use]
+    pub fn page(mut self, value: i64) -> Self {
+        self.page = Some(value);
+        self
+    }
+    /// Set the provider `pageSize` parameter.
+    #[must_use]
+    pub fn page_size(mut self, value: i64) -> Self {
+        self.page_size = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for QueryHistoricalAlgoOrdersFutureAlgo {
+    type Response = super::rest_models::QueryHistoricalAlgoOrdersFutureAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "queryHistoricalAlgoOrdersFutureAlgo",
+        path: "/sapi/v1/algo/futures/historicalOrders",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[],
+            &[("side", &["BUY", "SELL"])],
+            &[
+                ("pageSize", 1, 100),
+                ("recvWindow", -9_223_372_036_854_775_808, 60_000),
+            ],
+        )?;
+        super::validation::validate("queryHistoricalAlgoOrdersFutureAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`querySubOrdersFutureAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-sub-orders-future-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct QuerySubOrdersFutureAlgo {
+    #[serde(rename = "algoId", skip_serializing_if = "Option::is_none")]
+    algo_id: Option<i64>,
+    #[serde(rename = "page", skip_serializing_if = "Option::is_none")]
+    page: Option<i64>,
+    #[serde(rename = "pageSize", skip_serializing_if = "Option::is_none")]
+    page_size: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl QuerySubOrdersFutureAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `algoId` parameter.
+    #[must_use]
+    pub fn algo_id(mut self, value: i64) -> Self {
+        self.algo_id = Some(value);
+        self
+    }
+    /// Set the provider `page` parameter.
+    #[must_use]
+    pub fn page(mut self, value: i64) -> Self {
+        self.page = Some(value);
+        self
+    }
+    /// Set the provider `pageSize` parameter.
+    #[must_use]
+    pub fn page_size(mut self, value: i64) -> Self {
+        self.page_size = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for QuerySubOrdersFutureAlgo {
+    type Response = super::rest_models::QuerySubOrdersFutureAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "querySubOrdersFutureAlgo",
+        path: "/sapi/v1/algo/futures/subOrders",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["algoId"],
+            &[],
+            &[
+                ("pageSize", 1, 100),
+                ("recvWindow", -9_223_372_036_854_775_808, 60_000),
+            ],
+        )?;
+        super::validation::validate("querySubOrdersFutureAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`timeWeightedAveragePriceFutureAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#time-weighted-average-price-future-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct TimeWeightedAveragePriceFutureAlgo {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "positionSide", skip_serializing_if = "Option::is_none")]
+    position_side: Option<String>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "duration", skip_serializing_if = "Option::is_none")]
+    duration: Option<i64>,
+    #[serde(rename = "clientAlgoId", skip_serializing_if = "Option::is_none")]
+    client_algo_id: Option<super::ClientAlgoId>,
+    #[serde(rename = "reduceOnly", skip_serializing_if = "Option::is_none")]
+    reduce_only: Option<bool>,
+    #[serde(rename = "limitPrice", skip_serializing_if = "Option::is_none")]
+    limit_price: Option<Decimal>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl TimeWeightedAveragePriceFutureAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `positionSide` parameter.
+    #[must_use]
+    pub fn position_side(mut self, value: impl Into<String>) -> Self {
+        self.position_side = Some(value.into());
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `duration` parameter.
+    #[must_use]
+    pub fn duration(mut self, value: i64) -> Self {
+        self.duration = Some(value);
+        self
+    }
+    /// Set the provider `clientAlgoId` parameter.
+    #[must_use]
+    pub fn client_algo_id(mut self, value: super::ClientAlgoId) -> Self {
+        self.client_algo_id = Some(value);
+        self
+    }
+    /// Set the provider `reduceOnly` parameter.
+    #[must_use]
+    pub fn reduce_only(mut self, value: bool) -> Self {
+        self.reduce_only = Some(value);
+        self
+    }
+    /// Set the provider `limitPrice` parameter.
+    #[must_use]
+    pub fn limit_price(mut self, value: Decimal) -> Self {
+        self.limit_price = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for TimeWeightedAveragePriceFutureAlgo {
+    type Response = super::rest_models::TimeWeightedAveragePriceFutureAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "timeWeightedAveragePriceFutureAlgo",
+        path: "/sapi/v1/algo/futures/newOrderTwap",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 3000,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["clientAlgoId", "duration", "quantity", "side", "symbol"],
+            &[
+                ("side", &["BUY", "SELL"]),
+                ("positionSide", &["BOTH", "LONG", "SHORT"]),
+            ],
+            &[
+                ("duration", 300, 86_400),
+                ("recvWindow", -9_223_372_036_854_775_808, 60_000),
+            ],
+        )?;
+        super::validation::validate("timeWeightedAveragePriceFutureAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`volumeParticipationFutureAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#volume-participation-future-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct VolumeParticipationFutureAlgo {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "positionSide", skip_serializing_if = "Option::is_none")]
+    position_side: Option<String>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "urgency", skip_serializing_if = "Option::is_none")]
+    urgency: Option<String>,
+    #[serde(rename = "clientAlgoId", skip_serializing_if = "Option::is_none")]
+    client_algo_id: Option<super::ClientAlgoId>,
+    #[serde(rename = "reduceOnly", skip_serializing_if = "Option::is_none")]
+    reduce_only: Option<bool>,
+    #[serde(rename = "limitPrice", skip_serializing_if = "Option::is_none")]
+    limit_price: Option<Decimal>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl VolumeParticipationFutureAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `positionSide` parameter.
+    #[must_use]
+    pub fn position_side(mut self, value: impl Into<String>) -> Self {
+        self.position_side = Some(value.into());
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `urgency` parameter.
+    #[must_use]
+    pub fn urgency(mut self, value: impl Into<String>) -> Self {
+        self.urgency = Some(value.into());
+        self
+    }
+    /// Set the provider `clientAlgoId` parameter.
+    #[must_use]
+    pub fn client_algo_id(mut self, value: super::ClientAlgoId) -> Self {
+        self.client_algo_id = Some(value);
+        self
+    }
+    /// Set the provider `reduceOnly` parameter.
+    #[must_use]
+    pub fn reduce_only(mut self, value: bool) -> Self {
+        self.reduce_only = Some(value);
+        self
+    }
+    /// Set the provider `limitPrice` parameter.
+    #[must_use]
+    pub fn limit_price(mut self, value: Decimal) -> Self {
+        self.limit_price = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for VolumeParticipationFutureAlgo {
+    type Response = super::rest_models::VolumeParticipationFutureAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "volumeParticipationFutureAlgo",
+        path: "/sapi/v1/algo/futures/newOrderVp",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 300,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["clientAlgoId", "quantity", "side", "symbol", "urgency"],
+            &[
+                ("side", &["BUY", "SELL"]),
+                ("positionSide", &["BOTH", "LONG", "SHORT"]),
+                ("urgency", &["LOW", "MEDIUM", "HIGH"]),
+            ],
+            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
+        )?;
+        super::validation::validate("volumeParticipationFutureAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`cancelAlgoOrderSpotAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#cancel-algo-order-spot-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CancelAlgoOrderSpotAlgo {
+    #[serde(rename = "algoId", skip_serializing_if = "Option::is_none")]
+    algo_id: Option<i64>,
+    #[serde(rename = "clientAlgoId", skip_serializing_if = "Option::is_none")]
+    client_algo_id: Option<super::ClientAlgoId>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl CancelAlgoOrderSpotAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `algoId` parameter.
+    #[must_use]
+    pub fn algo_id(mut self, value: i64) -> Self {
+        self.algo_id = Some(value);
+        self
+    }
+    /// Set the provider `clientAlgoId` parameter.
+    #[must_use]
+    pub fn client_algo_id(mut self, value: super::ClientAlgoId) -> Self {
+        self.client_algo_id = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for CancelAlgoOrderSpotAlgo {
+    type Response = super::rest_models::CancelAlgoOrderSpotAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "cancelAlgoOrderSpotAlgo",
+        path: "/sapi/v1/algo/spot/order",
+        method: "DELETE",
+        security: Security::Signed,
+        mutation: true,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[],
+            &[],
+            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
+        )?;
+        super::validation::validate("cancelAlgoOrderSpotAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`queryCurrentAlgoOpenOrdersSpotAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-current-algo-open-orders-spot-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct QueryCurrentAlgoOpenOrdersSpotAlgo {
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl QueryCurrentAlgoOpenOrdersSpotAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for QueryCurrentAlgoOpenOrdersSpotAlgo {
+    type Response = super::rest_models::QueryCurrentAlgoOpenOrdersSpotAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "queryCurrentAlgoOpenOrdersSpotAlgo",
+        path: "/sapi/v1/algo/spot/openOrders",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[],
+            &[],
+            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
+        )?;
+        super::validation::validate("queryCurrentAlgoOpenOrdersSpotAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`queryHistoricalAlgoOrdersSpotAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-historical-algo-orders-spot-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct QueryHistoricalAlgoOrdersSpotAlgo {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "startTime", skip_serializing_if = "Option::is_none")]
+    start_time: Option<i64>,
+    #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
+    end_time: Option<i64>,
+    #[serde(rename = "page", skip_serializing_if = "Option::is_none")]
+    page: Option<i64>,
+    #[serde(rename = "pageSize", skip_serializing_if = "Option::is_none")]
+    page_size: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl QueryHistoricalAlgoOrdersSpotAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `startTime` parameter.
+    #[must_use]
+    pub fn start_time(mut self, value: i64) -> Self {
+        self.start_time = Some(value);
+        self
+    }
+    /// Set the provider `endTime` parameter.
+    #[must_use]
+    pub fn end_time(mut self, value: i64) -> Self {
+        self.end_time = Some(value);
+        self
+    }
+    /// Set the provider `page` parameter.
+    #[must_use]
+    pub fn page(mut self, value: i64) -> Self {
+        self.page = Some(value);
+        self
+    }
+    /// Set the provider `pageSize` parameter.
+    #[must_use]
+    pub fn page_size(mut self, value: i64) -> Self {
+        self.page_size = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for QueryHistoricalAlgoOrdersSpotAlgo {
+    type Response = super::rest_models::QueryHistoricalAlgoOrdersSpotAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "queryHistoricalAlgoOrdersSpotAlgo",
+        path: "/sapi/v1/algo/spot/historicalOrders",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &[],
+            &[("side", &["BUY", "SELL"])],
+            &[
+                ("pageSize", 1, 100),
+                ("recvWindow", -9_223_372_036_854_775_808, 60_000),
+            ],
+        )?;
+        super::validation::validate("queryHistoricalAlgoOrdersSpotAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`querySubOrdersSpotAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-sub-orders-spot-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct QuerySubOrdersSpotAlgo {
+    #[serde(rename = "algoId", skip_serializing_if = "Option::is_none")]
+    algo_id: Option<i64>,
+    #[serde(rename = "page", skip_serializing_if = "Option::is_none")]
+    page: Option<i64>,
+    #[serde(rename = "pageSize", skip_serializing_if = "Option::is_none")]
+    page_size: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl QuerySubOrdersSpotAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `algoId` parameter.
+    #[must_use]
+    pub fn algo_id(mut self, value: i64) -> Self {
+        self.algo_id = Some(value);
+        self
+    }
+    /// Set the provider `page` parameter.
+    #[must_use]
+    pub fn page(mut self, value: i64) -> Self {
+        self.page = Some(value);
+        self
+    }
+    /// Set the provider `pageSize` parameter.
+    #[must_use]
+    pub fn page_size(mut self, value: i64) -> Self {
+        self.page_size = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for QuerySubOrdersSpotAlgo {
+    type Response = super::rest_models::QuerySubOrdersSpotAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "querySubOrdersSpotAlgo",
+        path: "/sapi/v1/algo/spot/subOrders",
+        method: "GET",
+        security: Security::Signed,
+        mutation: false,
+        weight: 1,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["algoId"],
+            &[],
+            &[
+                ("pageSize", 1, 100),
+                ("recvWindow", -9_223_372_036_854_775_808, 60_000),
+            ],
+        )?;
+        super::validation::validate("querySubOrdersSpotAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`timeWeightedAveragePriceSpotAlgo`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#time-weighted-average-price-spot-algo).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct TimeWeightedAveragePriceSpotAlgo {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "duration", skip_serializing_if = "Option::is_none")]
+    duration: Option<i64>,
+    #[serde(rename = "clientAlgoId", skip_serializing_if = "Option::is_none")]
+    client_algo_id: Option<super::ClientAlgoId>,
+    #[serde(rename = "limitPrice", skip_serializing_if = "Option::is_none")]
+    limit_price: Option<Decimal>,
+}
+impl TimeWeightedAveragePriceSpotAlgo {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `duration` parameter.
+    #[must_use]
+    pub fn duration(mut self, value: i64) -> Self {
+        self.duration = Some(value);
+        self
+    }
+    /// Set the provider `clientAlgoId` parameter.
+    #[must_use]
+    pub fn client_algo_id(mut self, value: super::ClientAlgoId) -> Self {
+        self.client_algo_id = Some(value);
+        self
+    }
+    /// Set the provider `limitPrice` parameter.
+    #[must_use]
+    pub fn limit_price(mut self, value: Decimal) -> Self {
+        self.limit_price = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for TimeWeightedAveragePriceSpotAlgo {
+    type Response = super::rest_models::TimeWeightedAveragePriceSpotAlgoResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "timeWeightedAveragePriceSpotAlgo",
+        path: "/sapi/v1/algo/spot/newOrderTwap",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 3000,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["clientAlgoId", "duration", "quantity", "side", "symbol"],
+            &[("side", &["BUY", "SELL"])],
+            &[("duration", 300, 86_400)],
+        )?;
+        super::validation::validate("timeWeightedAveragePriceSpotAlgo", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+/// Validated request builder for [`volumeParticipation`](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#volume-participation).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct VolumeParticipation {
+    #[serde(rename = "symbol", skip_serializing_if = "Option::is_none")]
+    symbol: Option<Symbol>,
+    #[serde(rename = "side", skip_serializing_if = "Option::is_none")]
+    side: Option<String>,
+    #[serde(rename = "quantity", skip_serializing_if = "Option::is_none")]
+    quantity: Option<Decimal>,
+    #[serde(rename = "urgency", skip_serializing_if = "Option::is_none")]
+    urgency: Option<String>,
+    #[serde(rename = "clientAlgoId", skip_serializing_if = "Option::is_none")]
+    client_algo_id: Option<super::ClientAlgoId>,
+    #[serde(rename = "vpTimeLimit", skip_serializing_if = "Option::is_none")]
+    vp_time_limit: Option<i64>,
+    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
+    recv_window: Option<i64>,
+}
+impl VolumeParticipation {
+    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    /// Set the provider `symbol` parameter.
+    #[must_use]
+    pub fn symbol(mut self, value: Symbol) -> Self {
+        self.symbol = Some(value);
+        self
+    }
+    /// Set the provider `side` parameter.
+    #[must_use]
+    pub fn side(mut self, value: impl Into<String>) -> Self {
+        self.side = Some(value.into());
+        self
+    }
+    /// Set the provider `quantity` parameter.
+    #[must_use]
+    pub fn quantity(mut self, value: Decimal) -> Self {
+        self.quantity = Some(value);
+        self
+    }
+    /// Set the provider `urgency` parameter.
+    #[must_use]
+    pub fn urgency(mut self, value: impl Into<String>) -> Self {
+        self.urgency = Some(value.into());
+        self
+    }
+    /// Set the provider `clientAlgoId` parameter.
+    #[must_use]
+    pub fn client_algo_id(mut self, value: super::ClientAlgoId) -> Self {
+        self.client_algo_id = Some(value);
+        self
+    }
+    /// Set the provider `vpTimeLimit` parameter.
+    #[must_use]
+    pub fn vp_time_limit(mut self, value: i64) -> Self {
+        self.vp_time_limit = Some(value);
+        self
+    }
+    /// Set the provider `recvWindow` parameter.
+    #[must_use]
+    pub fn recv_window(mut self, value: i64) -> Self {
+        self.recv_window = Some(value);
+        self
+    }
+    /// Validate this request before dispatch.
+    ///
+    /// # Errors
+    /// Refuses missing, invalid, or contradictory provider parameters.
+    pub fn build(self) -> Result<Self, Error> {
+        self.validate()?;
+        Ok(self)
+    }
+}
+impl Request for VolumeParticipation {
+    type Response = super::rest_models::VolumeParticipationResponse;
+    fn response_failed(value: &serde_json::Value) -> bool {
+        super::validation::response_failed(Self::OP.name, value)
+    }
+    const OP: Operation = Operation {
+        name: "volumeParticipation",
+        path: "/sapi/v1/algo/spot/newOrderVp",
+        method: "POST",
+        security: Security::Signed,
+        mutation: true,
+        weight: 3000,
+        requests_per_second: None,
+        requests_per_minute: None,
+        validate_time: super::validation::validate_time,
+        definitive: super::validation::definitive,
+        success_weight: None,
+        partial: None,
+    };
+    fn validate(&self) -> Result<(), Error> {
+        let p = parameters(self)?;
+        validate_parameters(
+            &p,
+            &["clientAlgoId", "quantity", "side", "symbol", "urgency"],
+            &[
+                ("side", &["BUY", "SELL"]),
+                ("urgency", &["LOW", "MEDIUM", "HIGH"]),
+            ],
+            &[
+                ("vpTimeLimit", 300, 86_400),
+                ("recvWindow", -9_223_372_036_854_775_808, 60_000),
+            ],
+        )?;
+        super::validation::validate("volumeParticipation", &p)
+    }
+    fn cost(&self) -> Result<crate::core::Cost, Error> {
+        super::rate::cost(Self::OP, &parameters(self)?)
+    }
+}
+
+impl super::RestClient {
+    /// [cancelAlgoOrderFutureAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#cancel-algo-order-future-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn cancel_algo_order_future_algo(
+        &self,
+        request: &CancelAlgoOrderFutureAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::CancelAlgoOrderFutureAlgoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [queryCurrentAlgoOpenOrdersFutureAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-current-algo-open-orders-future-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn query_current_algo_open_orders_future_algo(
+        &self,
+        request: &QueryCurrentAlgoOpenOrdersFutureAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<
+        crate::Response<super::rest_models::QueryCurrentAlgoOpenOrdersFutureAlgoResponse>,
+        Error,
+    > {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [queryHistoricalAlgoOrdersFutureAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-historical-algo-orders-future-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn query_historical_algo_orders_future_algo(
+        &self,
+        request: &QueryHistoricalAlgoOrdersFutureAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<
+        crate::Response<super::rest_models::QueryHistoricalAlgoOrdersFutureAlgoResponse>,
+        Error,
+    > {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [querySubOrdersFutureAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-sub-orders-future-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn query_sub_orders_future_algo(
+        &self,
+        request: &QuerySubOrdersFutureAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::QuerySubOrdersFutureAlgoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [timeWeightedAveragePriceFutureAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#time-weighted-average-price-future-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn time_weighted_average_price_future_algo(
+        &self,
+        request: &TimeWeightedAveragePriceFutureAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<
+        crate::Response<super::rest_models::TimeWeightedAveragePriceFutureAlgoResponse>,
+        Error,
+    > {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [volumeParticipationFutureAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#volume-participation-future-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn volume_participation_future_algo(
+        &self,
+        request: &VolumeParticipationFutureAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::VolumeParticipationFutureAlgoResponse>, Error>
+    {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [cancelAlgoOrderSpotAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#cancel-algo-order-spot-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn cancel_algo_order_spot_algo(
+        &self,
+        request: &CancelAlgoOrderSpotAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::CancelAlgoOrderSpotAlgoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [queryCurrentAlgoOpenOrdersSpotAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-current-algo-open-orders-spot-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn query_current_algo_open_orders_spot_algo(
+        &self,
+        request: &QueryCurrentAlgoOpenOrdersSpotAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<
+        crate::Response<super::rest_models::QueryCurrentAlgoOpenOrdersSpotAlgoResponse>,
+        Error,
+    > {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [queryHistoricalAlgoOrdersSpotAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-historical-algo-orders-spot-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn query_historical_algo_orders_spot_algo(
+        &self,
+        request: &QueryHistoricalAlgoOrdersSpotAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::QueryHistoricalAlgoOrdersSpotAlgoResponse>, Error>
+    {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [querySubOrdersSpotAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-sub-orders-spot-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn query_sub_orders_spot_algo(
+        &self,
+        request: &QuerySubOrdersSpotAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::QuerySubOrdersSpotAlgoResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [timeWeightedAveragePriceSpotAlgo](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#time-weighted-average-price-spot-algo).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn time_weighted_average_price_spot_algo(
+        &self,
+        request: &TimeWeightedAveragePriceSpotAlgo,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::TimeWeightedAveragePriceSpotAlgoResponse>, Error>
+    {
+        self.inner.execute(request, deadline).await
+    }
+
+    /// [volumeParticipation](https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#volume-participation).
+    ///
+    /// # Errors
+    /// Returns input/admission errors before sending, or typed venue/transport evidence.
+    pub async fn volume_participation(
+        &self,
+        request: &VolumeParticipation,
+        deadline: tokio::time::Instant,
+    ) -> Result<crate::Response<super::rest_models::VolumeParticipationResponse>, Error> {
+        self.inner.execute(request, deadline).await
+    }
+}

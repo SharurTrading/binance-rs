@@ -193,7 +193,7 @@ pub(crate) struct SocketDriver {
     stop: CancellationToken,
     stats: Arc<Mutex<QueueMetrics>>,
     generation: u64,
-    lifetime: Instant,
+    lifetime: Option<Instant>,
     incoming_limit: usize,
     // Venue-incoming messages (pongs and control messages) sent in the last second.
     incoming: VecDeque<Instant>,
@@ -234,6 +234,8 @@ pub(crate) struct SocketPolicy {
     pub time_unit: super::TimeUnit,
     pub binary_decoder: Option<BinaryDecoder>,
     pub api_key_header: bool,
+    /// A maximum generation age only when documented by the product.
+    pub max_generation_age: Option<Duration>,
 }
 
 impl Socket {
@@ -314,7 +316,7 @@ impl Socket {
             stop,
             stats,
             generation,
-            lifetime: Instant::now() + Duration::from_hours(24),
+            lifetime: policy.max_generation_age.map(|age| Instant::now() + age),
             incoming_limit: policy.incoming_limit,
             incoming: VecDeque::new(),
             next_control: 1,
@@ -577,7 +579,7 @@ impl SocketDriver {
             return Ok(());
         };
         let body = match control {
-            StreamControl::ListSubscriptions => {
+            StreamControl::ListSubscriptions | StreamControl::ListSubscription => {
                 serde_json::json!({"method": control.method(), "id": id})
             }
             StreamControl::Subscribe | StreamControl::Unsubscribe => {
@@ -843,13 +845,12 @@ impl SocketDriver {
                         .filter(|p| p.reply.is_some())
                         .map(|p| p.deadline),
                 )
-                .min()
-                .unwrap_or(lifetime)
-                .min(lifetime);
+                .chain(lifetime)
+                .min();
             let step = tokio::select! {
                 ()=self.stop.cancelled()=>break,
-                ()=tokio::time::sleep_until(wake)=>{
-                    if Instant::now()>=lifetime {failure=Some(Error::Gap("documented 24-hour generation lifetime"));break;}
+                ()=async {match wake {Some(deadline)=>tokio::time::sleep_until(deadline).await,None=>std::future::pending::<()>().await}}=>{
+                    if lifetime.is_some_and(|deadline|Instant::now()>=deadline) {failure=Some(Error::Gap("documented 24-hour generation lifetime"));break;}
                     continue;
                 }
                 command=self.commands.recv()=>match command {

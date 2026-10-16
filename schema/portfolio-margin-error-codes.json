@@ -1,0 +1,36 @@
+{
+  "source": "https://developers.binance.com/en/docs/products/derivatives-trading-portfolio-margin/error-code",
+  "checked": "2026-10-17",
+  "definitive": [
+    -2015,
+    -2014,
+    -1130,
+    -1128,
+    -1127,
+    -1121,
+    -1111,
+    -1106,
+    -1105,
+    -1104,
+    -1103,
+    -1102,
+    -1101,
+    -1100,
+    -1022,
+    -1021,
+    -1020,
+    -1002
+  ],
+  "unknown_codes": "ambiguous",
+  "server_errors": "ambiguous except the explicitly documented definitive HTTP 503 variants",
+  "general_info_source": "https://developers.binance.com/en/docs/products/derivatives-trading-portfolio-margin/general-info#http-503-status-message-variants--handling",
+  "definitive_http_503": {
+    "messages": [
+      "Service Unavailable.",
+      "Internal error; unable to process your request. Please try again."
+    ],
+    "codes": [
+      -1008
+    ]
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-copy-trading/api/rest-api/1.0.0/schema.yaml",
+  "sha256": "968fcf27ca10e5642e972358291283323e96313c3bebf8cd298953bf11a90348",
+  "checked": "2026-10-17",
+  "components": {
+    "schemas": {}
+  },
+  "operations": [
+    {
+      "operationId": "getFuturesLeadTraderStatus",
+      "x-ip-weight": 1,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/copyTrading/futures/userStatus",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-copy-trading/api/rest-api/future-copy-trading#get-futures-lead-trader-status",
+      "tags": [
+        "future-copy-trading"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "isLeadTrader": {
+                        "type": "boolean"
+                      },
+                      "time": {
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "success": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "data",
+                  "success"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "getFuturesLeadTradingSymbolWhitelist",
+      "x-ip-weight": 1,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/copyTrading/futures/leadSymbol",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-copy-trading/api/rest-api/future-copy-trading#get-futures-lead-trading-symbol-whitelist",
+      "tags": [
+        "future-copy-trading"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "symbol": {
+                          "type": "string"
+                        },
+                        "baseAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "quoteAsset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        }
+                      },
+                      "required": [
+                        "baseAsset",
+                        "quoteAsset",
+                        "symbol"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "code",
+                  "data"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

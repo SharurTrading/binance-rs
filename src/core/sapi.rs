@@ -358,6 +358,33 @@ fn check_order_admission(
     Ok(())
 }
 
+fn check_endpoint_ip_requests(
+    ip: &super::rate::State,
+    cost: SapiCost,
+    exit: bool,
+    now: u64,
+) -> Result<(), Error> {
+    if let Some(limit) = cost.requests_per_minute {
+        if limit == 0 {
+            return Err(Error::Configuration("zero SAPI request cap"));
+        }
+        let (bucket, count) = ip
+            .endpoint_ip_requests
+            .get(cost.endpoint)
+            .copied()
+            .unwrap_or_default();
+        let limit =
+            super::rate::reserve::admission_limit(limit, ip.exit_reserve.sapi_requests, exit);
+        let count = if bucket == now / 60_000 { count } else { 0 };
+        if count >= limit {
+            return Err(Error::Admission {
+                retry_after: Duration::from_millis(60_000 - now % 60_000),
+            });
+        }
+    }
+    Ok(())
+}
+
 impl Budgets {
     pub(crate) fn admit_sapi(&self, cost: SapiCost, attempt: Cost, now: u64) -> Result<(), Error> {
         // Same lock order as aggregate admission. Validate both authorities before
@@ -371,32 +398,13 @@ impl Budgets {
             .lock()
             .map_err(|_| Error::Configuration("SAPI budget poisoned"))?;
         ip.check_cooldown(now)?;
+        account.check_rolling(attempt.rolling, now)?;
         let placements = attempt
             .orders10
             .max(attempt.orders60)
             .max(attempt.orders_day);
         check_order_admission(&account, placements, now, attempt.exit.is_eligible())?;
-        if let Some(limit) = cost.requests_per_minute {
-            if limit == 0 {
-                return Err(Error::Configuration("zero SAPI request cap"));
-            }
-            let (bucket, count) = ip
-                .endpoint_ip_requests
-                .get(cost.endpoint)
-                .copied()
-                .unwrap_or_default();
-            let limit = super::rate::reserve::admission_limit(
-                limit,
-                ip.exit_reserve.sapi_requests,
-                attempt.exit.is_eligible(),
-            );
-            let count = if bucket == now / 60_000 { count } else { 0 };
-            if count >= limit {
-                return Err(Error::Admission {
-                    retry_after: Duration::from_millis(60_000 - now % 60_000),
-                });
-            }
-        }
+        check_endpoint_ip_requests(&ip, cost, attempt.exit.is_eligible(), now)?;
         let state = if cost.uid { &mut account } else { &mut ip };
         if let Some(&until) = state.endpoint_cooldown.get(cost.endpoint)
             && now < until
@@ -464,6 +472,7 @@ impl Budgets {
                     .ok_or(Error::Configuration("Margin order budget overflow"))?;
             }
         }
+        account.charge_rolling(attempt.rolling, now);
         Ok(())
     }
     /// Install native Margin order quotas only after validating the entire observation.

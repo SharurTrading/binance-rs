@@ -1,0 +1,159 @@
+{
+  "rest": [
+    {
+      "name": "bnbTransfer",
+      "method": "POST",
+      "path": "/sapi/v1/portfolio/bnb-transfer",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#bnb-transfer"
+    },
+    {
+      "name": "changeAutoRepayFuturesStatus",
+      "method": "POST",
+      "path": "/sapi/v1/portfolio/repay-futures-switch",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#change-auto-repay-futures-status"
+    },
+    {
+      "name": "getAutoRepayFuturesStatus",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/repay-futures-switch",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-auto-repay-futures-status"
+    },
+    {
+      "name": "fundAutoCollection",
+      "method": "POST",
+      "path": "/sapi/v1/portfolio/auto-collection",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#fund-auto-collection"
+    },
+    {
+      "name": "fundCollectionByAsset",
+      "method": "POST",
+      "path": "/sapi/v1/portfolio/asset-collection",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#fund-collection-by-asset"
+    },
+    {
+      "name": "getDeltaModeStatus",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/delta-mode",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-delta-mode-status"
+    },
+    {
+      "name": "switchDeltaMode",
+      "method": "POST",
+      "path": "/sapi/v1/portfolio/delta-mode",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#switch-delta-mode"
+    },
+    {
+      "name": "getPortfolioMarginProAccountBalance",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/balance",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-portfolio-margin-pro-account-balance"
+    },
+    {
+      "name": "getPortfolioMarginProAccountInfo",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/account",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-portfolio-margin-pro-account-info"
+    },
+    {
+      "name": "getPortfolioMarginProSpanAccountInfo",
+      "method": "GET",
+      "path": "/sapi/v2/portfolio/account",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-portfolio-margin-pro-span-account-info"
+    },
+    {
+      "name": "getTransferableEarnAssetBalanceForPortfolioMargin",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/earn-asset-balance",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-transferable-earn-asset-balance-for-portfolio-margin"
+    },
+    {
+      "name": "portfolioMarginProBankruptcyLoanRepay",
+      "method": "POST",
+      "path": "/sapi/v1/portfolio/repay",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#portfolio-margin-pro-bankruptcy-loan-repay"
+    },
+    {
+      "name": "queryPortfolioMarginProBankruptcyLoanAmount",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/pmLoan",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#query-portfolio-margin-pro-bankruptcy-loan-amount"
+    },
+    {
+      "name": "queryPortfolioMarginProBankruptcyLoanRepayHistory",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/pmloan-history",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#query-portfolio-margin-pro-bankruptcy-loan-repay-history"
+    },
+    {
+      "name": "queryPortfolioMarginProNegativeBalanceInterestHistory",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/interest-history",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#query-portfolio-margin-pro-negative-balance-interest-history"
+    },
+    {
+      "name": "repayFuturesNegativeBalance",
+      "method": "POST",
+      "path": "/sapi/v1/portfolio/repay-futures-negative-balance",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#repay-futures-negative-balance"
+    },
+    {
+      "name": "transferLdusdtRwusdForPortfolioMargin",
+      "method": "POST",
+      "path": "/sapi/v1/portfolio/earn-asset-transfer",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#transfer-ldusdt-rwusd-for-portfolio-margin"
+    },
+    {
+      "name": "getMarginCallLevel",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/margin-call-level",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-margin-call-level"
+    },
+    {
+      "name": "setMarginCallLevel",
+      "method": "POST",
+      "path": "/sapi/v1/portfolio/margin-call-level",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#set-margin-call-level"
+    },
+    {
+      "name": "deleteMarginCallLevel",
+      "method": "DELETE",
+      "path": "/sapi/v1/portfolio/margin-call-level",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#delete-margin-call-level"
+    },
+    {
+      "name": "getPortfolioMarginAssetLeverage",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/margin-asset-leverage",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/market-data#get-portfolio-margin-asset-leverage"
+    },
+    {
+      "name": "portfolioMarginCollateralRate",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/collateralRate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/market-data#portfolio-margin-collateral-rate"
+    },
+    {
+      "name": "portfolioMarginProTieredCollateralRate",
+      "method": "GET",
+      "path": "/sapi/v2/portfolio/collateralRate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/market-data#portfolio-margin-pro-tiered-collateral-rate"
+    },
+    {
+      "name": "queryPortfolioMarginAssetIndexPrice",
+      "method": "GET",
+      "path": "/sapi/v1/portfolio/asset-index-price",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/market-data#query-portfolio-margin-asset-index-price"
+    }
+  ],
+  "streams": [],
+  "user_events": [
+    {
+      "name": "pmProAccountUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/ws-streams/1.0.0/schema.yaml"
+    },
+    {
+      "name": "risklevelchange",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/ws-streams/1.0.0/schema.yaml"
+    }
+  ]
+}

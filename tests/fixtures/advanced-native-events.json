@@ -1,0 +1,766 @@
+{
+  "description": "Synthetic native typing fixtures: official field examples establish categories; all values are public schema examples or synthetic data, never captured private account payloads.",
+  "cases": [
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "accountConfigUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "ACCOUNT_CONFIG_UPDATE",
+        "fs": "UM",
+        "E": 1,
+        "T": 1,
+        "ac": {
+          "s": "BTCUSD_PERP",
+          "l": 1
+        }
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "accountUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "ACCOUNT_UPDATE",
+        "fs": "UM",
+        "E": 1,
+        "T": 1,
+        "i": "",
+        "a": {
+          "m": "ORDER",
+          "B": [
+            {
+              "a": "USDT",
+              "wb": "122624.12345678",
+              "cw": "100.12345678",
+              "bc": "50.12345678"
+            }
+          ],
+          "P": [
+            {
+              "s": "BTCUSDT",
+              "pa": "0",
+              "ep": "0.00000",
+              "cr": "200",
+              "up": "0",
+              "ps": "BOTH",
+              "bep": "0.00000"
+            }
+          ],
+          "S": "BTCUSDT"
+        }
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "algoOrderUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "ALGO_UPDATE",
+        "T": 1,
+        "E": 1,
+        "fs": "UM",
+        "ao": {
+          "caid": "Q5xaq5EGKgXXa0fD7fs0Ip",
+          "aid": 1,
+          "at": "CONDITIONAL",
+          "o": "TAKE_PROFIT",
+          "s": "BNBUSDT",
+          "S": "SELL",
+          "ps": "BOTH",
+          "f": "GTC",
+          "q": "0.01",
+          "X": "CANCELED",
+          "ai": "",
+          "ap": "0.00000",
+          "aq": "0.00000",
+          "act": "0",
+          "tp": "750",
+          "p": "750",
+          "V": "EXPIRE_MAKER",
+          "wt": "CONTRACT_PRICE",
+          "pm": "NONE",
+          "cp": false,
+          "pP": false,
+          "R": false,
+          "tt": 1,
+          "gtd": 1,
+          "rm": "",
+          "ia": false
+        }
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "balanceUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "balanceUpdate",
+        "E": 1,
+        "a": "BTC",
+        "d": "100.00000000",
+        "U": 1,
+        "T": 1
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "conditionalOrderTradeUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "CONDITIONAL_ORDER_TRADE_UPDATE",
+        "T": 1,
+        "E": 1,
+        "fs": "UM",
+        "so": {
+          "s": "BTCUSDT",
+          "c": "TEST",
+          "si": 1,
+          "S": "SELL",
+          "st": "TRAILING_STOP_MARKET",
+          "f": "GTC",
+          "q": "0.001",
+          "p": "0",
+          "sp": "7103.04",
+          "os": "NEW",
+          "T": 1,
+          "ut": 1,
+          "R": false,
+          "wt": "MARK_PRICE",
+          "ps": "LONG",
+          "cp": false,
+          "AP": "7476.89",
+          "cr": "5.0",
+          "i": 1,
+          "V": "EXPIRE_TAKER",
+          "gtd": 1
+        }
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "executionReport",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "executionReport",
+        "E": 1,
+        "s": "ETHBTC",
+        "c": "mUvoqJxFIILMdfAW5iGSOW",
+        "S": "BUY",
+        "o": "LIMIT",
+        "f": "GTC",
+        "q": "1.00000000",
+        "p": "0.10264410",
+        "P": "0.00000000",
+        "d": 1,
+        "F": "0.00000000",
+        "g": 1,
+        "C": "",
+        "x": "NEW",
+        "X": "NEW",
+        "r": "NONE",
+        "i": 1,
+        "l": "0.00000000",
+        "z": "0.00000000",
+        "L": "0.00000000",
+        "n": "0",
+        "N": null,
+        "T": 1,
+        "t": 1,
+        "v": 1,
+        "I": 1,
+        "w": false,
+        "m": false,
+        "O": 1,
+        "Z": "0.00000000",
+        "Y": "0.00000000",
+        "Q": "0.00000000",
+        "D": 1,
+        "j": 1,
+        "J": 1,
+        "W": 1,
+        "V": "EXPIRE_MAKER",
+        "u": 1,
+        "U": 1,
+        "A": "3.000000",
+        "B": "3.000000",
+        "Cs": "BTCUSDT",
+        "pl": "2.123456",
+        "pL": "0.10000001",
+        "pY": "0.21234562",
+        "eR": "INSUFFICIENT_LIQUIDITY"
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "liabilityChange",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "liabilityChange",
+        "E": 1,
+        "a": "BTC",
+        "t": "BORROW",
+        "T": 1,
+        "p": "1.03453430",
+        "i": "0",
+        "l": "1.03476851"
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "listenKeyExpired",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "listenKeyExpired",
+        "E": 1
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "openOrderLoss",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "openOrderLoss",
+        "E": 1,
+        "O": [
+          {
+            "a": "BUSD",
+            "o": "-0.1232313"
+          }
+        ]
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "orderTradeUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "ORDER_TRADE_UPDATE",
+        "fs": "UM",
+        "E": 1,
+        "T": 1,
+        "i": "",
+        "o": {
+          "s": "BTCUSDT",
+          "c": "TEST",
+          "S": "SELL",
+          "o": "MARKET",
+          "f": "GTC",
+          "q": "0.001",
+          "p": "0",
+          "ap": "0",
+          "sp": "7103.04",
+          "x": "NEW",
+          "X": "NEW",
+          "i": 1,
+          "M": "44444",
+          "l": "0",
+          "z": "0",
+          "L": "0",
+          "N": "USDT",
+          "n": "0",
+          "T": 1,
+          "t": 1,
+          "b": "0",
+          "a": "9.91",
+          "m": false,
+          "R": false,
+          "ps": "LONG",
+          "rp": "0",
+          "st": "C_TAKE_PROFIT",
+          "si": 1,
+          "V": "EXPIRE_TAKER",
+          "gtd": 1
+        }
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "outboundAccountPosition",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "outboundAccountPosition",
+        "E": 1,
+        "u": 1,
+        "U": 1,
+        "B": [
+          {
+            "a": "ETH",
+            "f": "10000.000000",
+            "l": "0.000000"
+          }
+        ]
+      }
+    },
+    {
+      "product": "portfolio_margin",
+      "kind": null,
+      "name": "riskLevelChange",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "riskLevelChange",
+        "E": 1,
+        "u": "1.99999999",
+        "s": "MARGIN_CALL",
+        "eq": "30.23416728",
+        "ae": "30.23416728",
+        "m": "15.11708371"
+      }
+    },
+    {
+      "product": "portfolio_margin_pro",
+      "kind": null,
+      "name": "pmProAccountUpdate",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "PM_PRO_ACCOUNT_UPDATE",
+        "E": 1,
+        "u": "1.99999999",
+        "eq": "30.23416728",
+        "ae": "30.23416728",
+        "im": "20.6783833",
+        "mm": "15.11708371",
+        "avb": "3.98972738",
+        "vmw": "3.98972738"
+      }
+    },
+    {
+      "product": "portfolio_margin_pro",
+      "kind": null,
+      "name": "risklevelchange",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/ws-streams/1.0.0/schema.yaml",
+      "frame": {
+        "e": "riskLevelChange",
+        "E": 1,
+        "u": "1.99999999",
+        "s": "MARGIN_CALL",
+        "eq": "30.23416728",
+        "ae": "30.23416728",
+        "m": "15.11708371"
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "aggregateTradeStream",
+      "name": "aggregateTradeStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#aggregate-trade-stream",
+      "frame": {
+        "e": "aggTrade",
+        "E": 1,
+        "T": 1,
+        "a": 1,
+        "f": 1,
+        "l": 1,
+        "m": false,
+        "p": "0.08530000",
+        "q": "879.24000000",
+        "s": "ALPHA_474USDT"
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "allBookTickerStream",
+      "name": "allBookTickerStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-book-ticker-stream",
+      "frame": {
+        "e": "bookTicker",
+        "E": 1,
+        "T": 1,
+        "u": 1,
+        "s": "ALPHA_116USDT",
+        "b": "8.30000000",
+        "B": "0.91076900",
+        "a": "9.30000000",
+        "A": "2.00353200"
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "allMiniTickerStream",
+      "name": "allMiniTickerStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-mini-ticker-stream",
+      "frame": {
+        "e": "24hrMiniTicker",
+        "E": 1,
+        "s": "ALPHA_116USDT",
+        "c": "8.40000000",
+        "o": "8.40000000",
+        "h": "8.50000000",
+        "l": "8.30000000",
+        "v": "64739.03978900",
+        "q": "543810.36005090"
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "allTickerStream",
+      "name": "allTickerStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-ticker-stream",
+      "frame": {
+        "e": "24hrTicker",
+        "E": 1,
+        "s": "ALPHA_116USDT",
+        "p": "0.00000000",
+        "P": "0.00",
+        "w": "8.40003127",
+        "c": "8.40000000",
+        "Q": "0.49293200",
+        "o": "8.40000000",
+        "h": "8.50000000",
+        "l": "8.30000000",
+        "v": "64750.63418500",
+        "q": "543907.35169250",
+        "O": 1,
+        "C": 1,
+        "F": 1,
+        "L": 1,
+        "n": 1
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "allTokens24hTickerStream",
+      "name": "allTokens24hTickerStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-tokens24h-ticker-stream",
+      "frame": {
+        "e": "tickerList",
+        "d": [
+          {
+            "ca": "0x8fce...@56",
+            "cnt24": 1,
+            "fdv": "72834145.18711072",
+            "hc": "6822",
+            "liq": "1442996.98151177662835",
+            "mc": "13542034.24008014",
+            "p": "0.072849536538593663",
+            "pc24": "-2.32",
+            "s": "1",
+            "t": 1,
+            "vol24": "12930712.213702157742688594285"
+          }
+        ]
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "bookTickerStream",
+      "name": "bookTickerStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#book-ticker-stream",
+      "frame": {
+        "e": "bookTicker",
+        "E": 1,
+        "T": 1,
+        "u": 1,
+        "s": "ALPHA_116USDT",
+        "b": "8.30000000",
+        "B": "0.91076900",
+        "a": "9.30000000",
+        "A": "2.00353200"
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "partialDepthStream",
+      "name": "partialDepthStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#partial-depth-stream",
+      "frame": {
+        "e": "depthUpdate",
+        "E": 1,
+        "T": 1,
+        "U": 1,
+        "u": 1,
+        "pu": 1,
+        "s": "ALPHA_116USDT",
+        "b": [
+          [
+            "0.16480000",
+            "1.23456789123456789"
+          ]
+        ],
+        "a": [
+          [
+            "0.16490000",
+            "1.23456789123456789"
+          ]
+        ]
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "fullDepthStream",
+      "name": "fullDepthStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#full-depth-stream",
+      "frame": {
+        "e": "depthUpdate",
+        "E": 1,
+        "T": 1,
+        "U": 1,
+        "u": 1,
+        "pu": 1,
+        "s": "ALPHA_474USDT",
+        "b": [
+          [
+            "0.16480000",
+            "1.23456789123456789"
+          ]
+        ],
+        "a": [
+          [
+            "0.16490000",
+            "1.23456789123456789"
+          ]
+        ]
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "klineStream",
+      "name": "klineStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#kline-stream",
+      "frame": {
+        "e": "kline",
+        "E": 1,
+        "s": "ALPHA_116USDT",
+        "k": {
+          "t": 1,
+          "T": 1,
+          "s": "ALPHA_116USDT",
+          "i": "1m",
+          "f": 1,
+          "L": 1,
+          "o": "8.40000000",
+          "c": "8.40000000",
+          "h": "8.40000000",
+          "l": "8.40000000",
+          "v": "63.64876300",
+          "n": 1,
+          "x": false,
+          "q": "534.64960920",
+          "V": "63.64876300",
+          "Q": "534.64960920",
+          "B": "0"
+        }
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "contractKlineStream",
+      "name": "contractKlineStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#contract-kline-stream",
+      "frame": {
+        "ca": "G7vQW...@CT_501",
+        "e": "kline",
+        "k": {
+          "o": "0.15584372258086979622",
+          "c": "0.15584957424118055058",
+          "h": "0.15584957424118055058",
+          "l": "0.15584372258086979622",
+          "v": "2.8584092999332775480",
+          "ot": 1,
+          "ct": 1,
+          "i": "1s"
+        }
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "miniTickerStream",
+      "name": "miniTickerStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#mini-ticker-stream",
+      "frame": {
+        "e": "24hrMiniTicker",
+        "E": 1,
+        "s": "ALPHA_116USDT",
+        "c": "8.40000000",
+        "o": "8.40000000",
+        "h": "8.50000000",
+        "l": "8.30000000",
+        "v": "64739.03978900",
+        "q": "543810.36005090"
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "tickerStream",
+      "name": "tickerStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#ticker-stream",
+      "frame": {
+        "e": "24hrTicker",
+        "E": 1,
+        "s": "ALPHA_116USDT",
+        "p": "0.00000000",
+        "P": "0.00",
+        "w": "8.40003127",
+        "c": "8.40000000",
+        "Q": "0.49293200",
+        "o": "8.40000000",
+        "h": "8.50000000",
+        "l": "8.30000000",
+        "v": "64750.63418500",
+        "q": "543907.35169250",
+        "O": 1,
+        "C": 1,
+        "F": 1,
+        "L": 1,
+        "n": 1
+      }
+    },
+    {
+      "product": "alpha",
+      "kind": "tradeStream",
+      "name": "tradeStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#trade-stream",
+      "frame": {
+        "e": "trade",
+        "E": 1,
+        "T": 1,
+        "s": "ALPHA_116USDT",
+        "t": 1,
+        "p": "8.40000000",
+        "q": "0.97915700",
+        "m": false
+      }
+    },
+    {
+      "product": "stocks",
+      "kind": "priceStream",
+      "name": "priceStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#price-stream",
+      "frame": {
+        "e": "price",
+        "rates": [
+          {
+            "s": "AAPL",
+            "ac": "EQ_AAPL",
+            "p": "182.5",
+            "t": null,
+            "pc": "181.2000",
+            "tc": "182.0000",
+            "mp": "C"
+          }
+        ]
+      }
+    },
+    {
+      "product": "stocks",
+      "kind": "quoteStream",
+      "name": "quoteStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#quote-stream",
+      "frame": {
+        "e": "quote",
+        "E": 1,
+        "s": "AAPL",
+        "bp": "182.50",
+        "ap": "182.55",
+        "bs": 1,
+        "as": 1,
+        "T": null
+      }
+    },
+    {
+      "product": "stocks",
+      "kind": "klineStream",
+      "name": "klineStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#kline-stream",
+      "frame": {
+        "e": "kline",
+        "E": 1,
+        "s": "AAPL",
+        "k": {
+          "t": 1,
+          "ct": 1,
+          "s": "AAPL",
+          "i": "5m",
+          "o": "182.50",
+          "c": "183.20",
+          "h": "183.50",
+          "l": "182.30",
+          "v": "15000",
+          "n": null,
+          "x": false,
+          "vw": null
+        }
+      }
+    },
+    {
+      "product": "stocks",
+      "kind": "calendarStream",
+      "name": "calendarStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#calendar-stream",
+      "frame": {
+        "e": "calendar",
+        "from": "MARKET_CLOSED",
+        "to": "MARKET_CLOSED",
+        "ts": 1
+      }
+    },
+    {
+      "product": "stocks",
+      "kind": "tradabilityStream",
+      "name": "tradabilityStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#tradability-stream",
+      "frame": {
+        "e": "tradability",
+        "symbol": "AAPL",
+        "assetCode": null,
+        "tradability": "BUY_SELL",
+        "t": 1
+      }
+    },
+    {
+      "product": "stocks",
+      "kind": "tradingStatusStream",
+      "name": "tradingStatusStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#trading-status-stream",
+      "frame": {
+        "e": "tradingStatus",
+        "symbol": "AAPL",
+        "assetCode": "EQ_AAPL",
+        "status": "TRADING_HALTED",
+        "msg": "MATERIAL_NEWS",
+        "time": 1,
+        "z": "C",
+        "tradability": "BUY_SELL"
+      }
+    },
+    {
+      "product": "stocks",
+      "kind": "orderReportStream",
+      "name": "orderReportStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/user-streams#order-report-stream",
+      "frame": {
+        "e": "orderReport",
+        "E": 1,
+        "x": "ORDER_UPDATE",
+        "i": "b0b6dd9d-8b9b-48a9-ba46-b9d54906e415",
+        "ai": "4ce9353c-66d1-46c2-898f-fce867ab0247",
+        "b": "EQ_AAPL",
+        "q": "USD",
+        "S": "buy",
+        "o": "limit",
+        "p": null,
+        "Q": "1.125",
+        "N": null,
+        "fq": "1.125",
+        "FN": "1.125",
+        "tc": "1.125",
+        "Z": "1.125",
+        "n": "Regular",
+        "s": "partially_filled",
+        "T": 1,
+        "U": 1
+      }
+    }
+  ]
+}

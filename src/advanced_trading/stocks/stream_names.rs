@@ -1,0 +1,96 @@
+// SPDX-FileCopyrightText: 2026 Kevin Monaghan
+// SPDX-License-Identifier: MIT-0
+
+//! Generated native market stream names.
+
+impl crate::advanced_trading::streams::Stream<super::Protocol> {
+    /// Native `priceStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#price-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn price_stream() -> Result<Self, crate::Error> {
+        let name = "price".to_owned();
+        Self::new(name, "priceStream")
+    }
+
+    /// Native `quoteStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#quote-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn quote_stream(symbol: &crate::Symbol) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@quote".to_owned();
+        if !symbol
+            .as_str()
+            .chars()
+            .all(|c| c.is_ascii_uppercase() || matches!(c, '.' | '-'))
+        {
+            return Err(crate::Error::Validation("native stock ticker"));
+        }
+        name = name.replace("{symbol}", symbol.as_str());
+        Self::new(name, "quoteStream")
+    }
+
+    /// Native `klineStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#kline-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn kline_stream(symbol: &crate::Symbol, interval: &str) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@kline_{interval}".to_owned();
+        if !symbol
+            .as_str()
+            .chars()
+            .all(|c| c.is_ascii_uppercase() || matches!(c, '.' | '-'))
+        {
+            return Err(crate::Error::Validation("native stock ticker"));
+        }
+        name = name.replace("{symbol}", symbol.as_str());
+        if interval.is_empty() || interval.contains(['/', '?', '&', '#']) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        name = name.replace("{interval}", interval);
+        Self::new(name, "klineStream")
+    }
+
+    /// Native `calendarStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#calendar-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn calendar_stream() -> Result<Self, crate::Error> {
+        let name = "calendar".to_owned();
+        Self::new(name, "calendarStream")
+    }
+
+    /// Native `tradabilityStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#tradability-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn tradability_stream(symbol: &crate::Symbol) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@tradability".to_owned();
+        if !symbol
+            .as_str()
+            .chars()
+            .all(|c| c.is_ascii_uppercase() || matches!(c, '.' | '-'))
+        {
+            return Err(crate::Error::Validation("native stock ticker"));
+        }
+        name = name.replace("{symbol}", symbol.as_str());
+        Self::new(name, "tradabilityStream")
+    }
+
+    /// Native `tradingStatusStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#trading-status-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn trading_status_stream(symbol: &crate::Symbol) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@tradingStatus".to_owned();
+        if !symbol
+            .as_str()
+            .chars()
+            .all(|c| c.is_ascii_uppercase() || matches!(c, '.' | '-'))
+        {
+            return Err(crate::Error::Validation("native stock ticker"));
+        }
+        name = name.replace("{symbol}", symbol.as_str());
+        Self::new(name, "tradingStatusStream")
+    }
+}

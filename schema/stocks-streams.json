@@ -1,0 +1,1374 @@
+{
+  "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/1.0.0/schema.yaml",
+  "sha256": "66154a1470e55f17ed94d6a50d6a3952753b310f5ff0d3e229d27c4de70cf054",
+  "checked": "2026-10-17",
+  "components": {
+    "schemas": {}
+  },
+  "operations": [
+    {
+      "operationId": "priceStream",
+      "path": "/price",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#price-stream",
+      "tags": [
+        "market-streams"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "rates": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "s": {
+                          "type": "string"
+                        },
+                        "ac": {
+                          "type": "string"
+                        },
+                        "p": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "t": {
+                          "type": "integer",
+                          "nullable": true
+                        },
+                        "pc": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "tc": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "mp": {
+                          "type": "string",
+                          "enum": [
+                            "C",
+                            true,
+                            "PRE",
+                            "O",
+                            "POST"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "p",
+                        "s",
+                        "t"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "e",
+                  "rates"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "rates": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "s": {
+                              "type": "string"
+                            },
+                            "ac": {
+                              "type": "string"
+                            },
+                            "p": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "t": {
+                              "type": "integer",
+                              "nullable": true
+                            },
+                            "pc": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "tc": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "mp": {
+                              "type": "string",
+                              "enum": [
+                                "C",
+                                true,
+                                "PRE",
+                                "O",
+                                "POST"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "s"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "e"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "price"
+    },
+    {
+      "operationId": "quoteStream",
+      "path": "/{symbol}@quote",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#quote-stream",
+      "tags": [
+        "market-streams"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "bp": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "ap": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "bs": {
+                    "type": "integer",
+                    "x-decimal": true
+                  },
+                  "as": {
+                    "type": "integer",
+                    "x-decimal": true
+                  },
+                  "T": {
+                    "type": "integer",
+                    "nullable": true
+                  }
+                },
+                "required": [
+                  "E",
+                  "T",
+                  "ap",
+                  "as",
+                  "bp",
+                  "bs",
+                  "e",
+                  "s"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "bp": {
+                        "type": "string"
+                      },
+                      "ap": {
+                        "type": "string"
+                      },
+                      "bs": {
+                        "type": "integer"
+                      },
+                      "as": {
+                        "type": "integer"
+                      },
+                      "T": {
+                        "type": "integer",
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "quote"
+    },
+    {
+      "operationId": "klineStream",
+      "path": "/{symbol}@kline_{interval}",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#kline-stream",
+      "tags": [
+        "market-streams"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "k": {
+                    "type": "object",
+                    "properties": {
+                      "t": {
+                        "type": "integer"
+                      },
+                      "ct": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "i": {
+                        "type": "string",
+                        "enum": [
+                          "5m",
+                          "1h",
+                          "1d",
+                          "1w",
+                          "1M"
+                        ]
+                      },
+                      "o": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "c": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "h": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "l": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "v": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "n": {
+                        "type": "integer",
+                        "nullable": true
+                      },
+                      "x": {
+                        "type": "boolean"
+                      },
+                      "vw": {
+                        "type": "string",
+                        "nullable": true,
+                        "x-decimal": true
+                      }
+                    },
+                    "required": [
+                      "c",
+                      "h",
+                      "i",
+                      "l",
+                      "o",
+                      "s",
+                      "t",
+                      "v",
+                      "x"
+                    ]
+                  }
+                },
+                "required": [
+                  "E",
+                  "e",
+                  "k",
+                  "s"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "k": {
+                        "type": "object",
+                        "properties": {
+                          "t": {
+                            "type": "integer"
+                          },
+                          "ct": {
+                            "type": "integer"
+                          },
+                          "s": {
+                            "type": "string"
+                          },
+                          "i": {
+                            "type": "string",
+                            "enum": [
+                              "5m",
+                              "1h",
+                              "1d",
+                              "1w",
+                              "1M"
+                            ]
+                          },
+                          "o": {
+                            "type": "string"
+                          },
+                          "c": {
+                            "type": "string"
+                          },
+                          "h": {
+                            "type": "string"
+                          },
+                          "l": {
+                            "type": "string"
+                          },
+                          "v": {
+                            "type": "string"
+                          },
+                          "n": {
+                            "type": "integer",
+                            "nullable": true
+                          },
+                          "x": {
+                            "type": "boolean"
+                          },
+                          "vw": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "s"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "kline"
+    },
+    {
+      "operationId": "calendarStream",
+      "path": "/calendar",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#calendar-stream",
+      "tags": [
+        "market-streams"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "from": {
+                    "type": "string",
+                    "enum": [
+                      "MARKET_CLOSED",
+                      "OVERNIGHT",
+                      "PRE_MARKET",
+                      "MARKET_OPEN",
+                      "POST_MARKET"
+                    ]
+                  },
+                  "to": {
+                    "type": "string",
+                    "enum": [
+                      "MARKET_CLOSED",
+                      "OVERNIGHT",
+                      "PRE_MARKET",
+                      "MARKET_OPEN",
+                      "POST_MARKET"
+                    ]
+                  },
+                  "ts": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "from": {
+                        "type": "string",
+                        "enum": [
+                          "MARKET_CLOSED",
+                          "OVERNIGHT",
+                          "PRE_MARKET",
+                          "MARKET_OPEN",
+                          "POST_MARKET"
+                        ]
+                      },
+                      "to": {
+                        "type": "string",
+                        "enum": [
+                          "MARKET_CLOSED",
+                          "OVERNIGHT",
+                          "PRE_MARKET",
+                          "MARKET_OPEN",
+                          "POST_MARKET"
+                        ]
+                      },
+                      "ts": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "calendar"
+    },
+    {
+      "operationId": "tradabilityStream",
+      "path": "/{symbol}@tradability",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#tradability-stream",
+      "tags": [
+        "market-streams"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "symbol": {
+                    "type": "string"
+                  },
+                  "assetCode": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "tradability": {
+                    "type": "string",
+                    "enum": [
+                      "BUY_SELL",
+                      "BUY",
+                      "SELL",
+                      "NONE",
+                      "OFFMARKET",
+                      "DELISTING"
+                    ]
+                  },
+                  "t": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "e",
+                  "symbol",
+                  "tradability"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "assetCode": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "tradability": {
+                        "type": "string",
+                        "enum": [
+                          "BUY_SELL",
+                          "BUY",
+                          "SELL",
+                          "NONE",
+                          "OFFMARKET",
+                          "DELISTING"
+                        ]
+                      },
+                      "t": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "symbol"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "tradability"
+    },
+    {
+      "operationId": "tradingStatusStream",
+      "path": "/{symbol}@tradingStatus",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#trading-status-stream",
+      "tags": [
+        "market-streams"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "symbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "symbol": {
+                    "type": "string"
+                  },
+                  "assetCode": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "TRADING_HALTED",
+                      "TRADING_PAUSED",
+                      "SHORT_SALE_RESTRICTED",
+                      "TRADING_RESUMED",
+                      "QUOTATION_RESUMED",
+                      "TRADING_SUSPENDED",
+                      "UNAVAILABLE"
+                    ]
+                  },
+                  "msg": {
+                    "type": "string"
+                  },
+                  "time": {
+                    "type": "integer"
+                  },
+                  "z": {
+                    "type": "string",
+                    "enum": [
+                      "C",
+                      "N"
+                    ]
+                  },
+                  "tradability": {
+                    "type": "string",
+                    "enum": [
+                      "BUY_SELL",
+                      "BUY",
+                      "SELL",
+                      "NONE"
+                    ]
+                  }
+                },
+                "required": [
+                  "e",
+                  "status",
+                  "symbol"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "assetCode": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "TRADING_HALTED",
+                          "TRADING_PAUSED",
+                          "SHORT_SALE_RESTRICTED",
+                          "TRADING_RESUMED",
+                          "QUOTATION_RESUMED",
+                          "TRADING_SUSPENDED",
+                          "UNAVAILABLE"
+                        ]
+                      },
+                      "msg": {
+                        "type": "string"
+                      },
+                      "time": {
+                        "type": "integer"
+                      },
+                      "z": {
+                        "type": "string",
+                        "enum": [
+                          "C",
+                          "N"
+                        ]
+                      },
+                      "tradability": {
+                        "type": "string",
+                        "enum": [
+                          "BUY_SELL",
+                          "BUY",
+                          "SELL",
+                          "NONE"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "symbol"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "tradingStatus"
+    },
+    {
+      "operationId": "orderReportStream",
+      "path": "/{listenKey}@orderReport",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/user-streams#order-report-stream",
+      "tags": [
+        "user-streams"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "listenKey",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::SensitiveString"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "method",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string"
+                  },
+                  "E": {
+                    "type": "integer"
+                  },
+                  "x": {
+                    "type": "string",
+                    "enum": [
+                      "ORDER_UPDATE",
+                      "ORDER_TERMINAL"
+                    ]
+                  },
+                  "i": {
+                    "type": "string"
+                  },
+                  "ai": {
+                    "type": "string"
+                  },
+                  "b": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "q": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "S": {
+                    "type": "string"
+                  },
+                  "o": {
+                    "type": "string"
+                  },
+                  "p": {
+                    "type": "number",
+                    "nullable": true,
+                    "x-decimal": true
+                  },
+                  "Q": {
+                    "type": "number",
+                    "x-decimal": true
+                  },
+                  "N": {
+                    "type": "number",
+                    "nullable": true,
+                    "x-decimal": true
+                  },
+                  "fq": {
+                    "type": "number",
+                    "x-decimal": true
+                  },
+                  "FN": {
+                    "type": "number",
+                    "x-decimal": true
+                  },
+                  "tc": {
+                    "type": "number",
+                    "x-decimal": true
+                  },
+                  "Z": {
+                    "type": "number",
+                    "x-decimal": true
+                  },
+                  "n": {
+                    "type": "string"
+                  },
+                  "s": {
+                    "type": "string"
+                  },
+                  "T": {
+                    "type": "integer"
+                  },
+                  "U": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "E",
+                  "S",
+                  "b",
+                  "e",
+                  "i",
+                  "o",
+                  "q",
+                  "s"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string"
+                      },
+                      "E": {
+                        "type": "integer"
+                      },
+                      "x": {
+                        "type": "string",
+                        "enum": [
+                          "ORDER_UPDATE",
+                          "ORDER_TERMINAL"
+                        ]
+                      },
+                      "i": {
+                        "type": "string"
+                      },
+                      "ai": {
+                        "type": "string"
+                      },
+                      "b": {
+                        "type": "string"
+                      },
+                      "q": {
+                        "type": "string"
+                      },
+                      "S": {
+                        "type": "string"
+                      },
+                      "o": {
+                        "type": "string"
+                      },
+                      "p": {
+                        "type": "number",
+                        "nullable": true
+                      },
+                      "Q": {
+                        "type": "number"
+                      },
+                      "N": {
+                        "type": "number",
+                        "nullable": true
+                      },
+                      "fq": {
+                        "type": "number"
+                      },
+                      "FN": {
+                        "type": "number"
+                      },
+                      "tc": {
+                        "type": "number"
+                      },
+                      "Z": {
+                        "type": "number"
+                      },
+                      "n": {
+                        "type": "string"
+                      },
+                      "s": {
+                        "type": "string"
+                      },
+                      "T": {
+                        "type": "integer"
+                      },
+                      "U": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
+                  }
+                },
+                "required": [
+                  "data",
+                  "stream"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "x-event-type": "orderReport"
+    }
+  ]
+}

@@ -1,0 +1,1613 @@
+{
+  "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/1.0.0/schema.yaml",
+  "sha256": "5c07da042ed719183461f773b2b64a58b9486199898001e8eafd1ecff756bd75",
+  "checked": "2026-10-17",
+  "components": {
+    "schemas": {}
+  },
+  "operations": [
+    {
+      "operationId": "bnbTransfer",
+      "x-ip-weight": 1500,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/bnb-transfer",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#bnb-transfer",
+      "tags": [
+        "account"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "amount",
+                "timestamp",
+                "transferSide"
+              ],
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "transferSide": {
+                  "type": "string",
+                  "enum": [
+                    "TO_UM",
+                    "FROM_UM"
+                  ]
+                },
+                "recvWindow": {
+                  "type": "integer"
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tranId": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "tranId"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "changeAutoRepayFuturesStatus",
+      "x-ip-weight": 1500,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/repay-futures-switch",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#change-auto-repay-futures-status",
+      "tags": [
+        "account"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "autoRepay",
+                "timestamp"
+              ],
+              "properties": {
+                "autoRepay": {
+                  "type": "string",
+                  "enum": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "recvWindow": {
+                  "type": "integer"
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "msg"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "getAutoRepayFuturesStatus",
+      "x-ip-weight": 30,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/repay-futures-switch",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-auto-repay-futures-status",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "autoRepay": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "fundAutoCollection",
+      "x-ip-weight": 1500,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/auto-collection",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#fund-auto-collection",
+      "tags": [
+        "account"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "recvWindow": {
+                  "type": "integer"
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "msg"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "fundCollectionByAsset",
+      "x-ip-weight": 60,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/asset-collection",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#fund-collection-by-asset",
+      "tags": [
+        "account"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "asset",
+                "timestamp"
+              ],
+              "properties": {
+                "asset": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "amount": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "futureType": {
+                  "type": "string",
+                  "enum": [
+                    "UM",
+                    "CM",
+                    "OPTION"
+                  ]
+                },
+                "recvWindow": {
+                  "type": "integer"
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "msg"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "getDeltaModeStatus",
+      "x-ip-weight": 1500,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/delta-mode",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-delta-mode-status",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "deltaEnabled": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "switchDeltaMode",
+      "x-ip-weight": 1500,
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/delta-mode",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#switch-delta-mode",
+      "tags": [
+        "account"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "deltaEnabled",
+                "timestamp"
+              ],
+              "properties": {
+                "deltaEnabled": {
+                  "type": "string",
+                  "enum": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "recvWindow": {
+                  "type": "integer"
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "msg"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "getPortfolioMarginProAccountBalance",
+      "x-ip-weight": 20,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/balance",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-portfolio-margin-pro-account-balance",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "asset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "totalWalletBalance": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "crossMarginAsset": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "crossMarginBorrowed": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "crossMarginFree": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "crossMarginInterest": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "crossMarginLocked": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "umWalletBalance": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "umUnrealizedPNL": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "cmWalletBalance": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "cmUnrealizedPNL": {
+                      "type": "string",
+                      "x-decimal": true,
+                      "x-deserialize-with": "super::wire::decimal_empty_option",
+                      "x-rust-optional": true
+                    },
+                    "updateTime": {
+                      "type": "integer"
+                    },
+                    "negativeBalance": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "optionWalletBalance": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "optionEquity": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "required": [
+                    "asset",
+                    "totalWalletBalance"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "getPortfolioMarginProAccountInfo",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 5,
+      "path": "/sapi/v1/portfolio/account",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-portfolio-margin-pro-account-info",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "uniMMR": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "accountEquity": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "actualEquity": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "accountMaintMargin": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "accountInitialMargin": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "accountStatus": {
+                    "type": "string"
+                  },
+                  "accountType": {
+                    "type": "string"
+                  }
+                },
+                "x-ignored-fields": {
+                  "totalAvailableBalance": "Documented ignored legacy field; retained in redacted unknown evidence."
+                },
+                "required": [
+                  "accountEquity",
+                  "accountInitialMargin",
+                  "accountMaintMargin",
+                  "accountStatus",
+                  "accountType",
+                  "actualEquity",
+                  "uniMMR"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "getPortfolioMarginProSpanAccountInfo",
+      "x-ip-weight": 5,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v2/portfolio/account",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-portfolio-margin-pro-span-account-info",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "uniMMR": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "accountEquity": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "actualEquity": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "accountMaintMargin": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "riskUnitMMList": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "asset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "uniMaintainUsd": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "required": [
+                        "asset"
+                      ]
+                    }
+                  },
+                  "marginMM": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "otherMM": {
+                    "type": "string",
+                    "x-decimal": true
+                  },
+                  "accountStatus": {
+                    "type": "string"
+                  },
+                  "accountType": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "accountEquity",
+                  "accountMaintMargin",
+                  "accountStatus",
+                  "accountType",
+                  "actualEquity",
+                  "uniMMR"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "getTransferableEarnAssetBalanceForPortfolioMargin",
+      "x-ip-weight": 1500,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/earn-asset-balance",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-transferable-earn-asset-balance-for-portfolio-margin",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "asset",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "transferType",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "EARN_TO_FUTURE",
+              "FUTURE_TO_EARN"
+            ]
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "asset": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "amount": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                },
+                "required": [
+                  "asset"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "portfolioMarginProBankruptcyLoanRepay",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "x-uid-weight": 3000,
+      "path": "/sapi/v1/portfolio/repay",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#portfolio-margin-pro-bankruptcy-loan-repay",
+      "tags": [
+        "account"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "enum": [
+                    "SPOT",
+                    "MARGIN"
+                  ]
+                },
+                "recvWindow": {
+                  "type": "integer"
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tranId": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "tranId"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "queryPortfolioMarginProBankruptcyLoanAmount",
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "x-uid-weight": 500,
+      "path": "/sapi/v1/portfolio/pmLoan",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#query-portfolio-margin-pro-bankruptcy-loan-amount",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "asset": {
+                    "type": "string",
+                    "x-rust-type": "crate::Asset"
+                  },
+                  "amount": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                },
+                "required": [
+                  "asset"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "queryPortfolioMarginProBankruptcyLoanRepayHistory",
+      "x-ip-weight": 500,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/pmloan-history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#query-portfolio-margin-pro-bankruptcy-loan-repay-history",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 100
+          }
+        },
+        {
+          "name": "current",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "integer"
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "asset": {
+                          "type": "string",
+                          "x-rust-type": "crate::Asset"
+                        },
+                        "amount": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "repayTime": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "asset"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "queryPortfolioMarginProNegativeBalanceInterestHistory",
+      "x-ip-weight": 50,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/interest-history",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#query-portfolio-margin-pro-negative-balance-interest-history",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "asset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 100
+          }
+        },
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "interest": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "interestAccruedTime": {
+                      "type": "integer"
+                    },
+                    "interestRate": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "principal": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "required": [
+                    "asset"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "repayFuturesNegativeBalance",
+      "x-ip-weight": 1500,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/repay-futures-negative-balance",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#repay-futures-negative-balance",
+      "tags": [
+        "account"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "timestamp"
+              ],
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "enum": [
+                    "SPOT",
+                    "MARGIN"
+                  ]
+                },
+                "recvWindow": {
+                  "type": "integer"
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "msg"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "transferLdusdtRwusdForPortfolioMargin",
+      "x-security-type": "TRADE",
+      "x-signed": true,
+      "x-uid-weight": 1500,
+      "path": "/sapi/v1/portfolio/earn-asset-transfer",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#transfer-ldusdt-rwusd-for-portfolio-margin",
+      "tags": [
+        "account"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "amount",
+                "asset",
+                "timestamp",
+                "transferType"
+              ],
+              "properties": {
+                "asset": {
+                  "type": "string",
+                  "enum": [
+                    "LDUSDT",
+                    "RWUSD"
+                  ],
+                  "x-rust-type": "crate::Asset"
+                },
+                "transferType": {
+                  "type": "string",
+                  "enum": [
+                    "EARN_TO_FUTURE",
+                    "FUTURE_TO_EARN"
+                  ]
+                },
+                "amount": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "recvWindow": {
+                  "type": "integer"
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "msg"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "getMarginCallLevel",
+      "x-ip-weight": 1500,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/margin-call-level",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#get-margin-call-level",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "marginCallLevel": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "setMarginCallLevel",
+      "x-ip-weight": 1500,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/margin-call-level",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#set-margin-call-level",
+      "tags": [
+        "account"
+      ],
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "marginCallLevel",
+                "timestamp"
+              ],
+              "properties": {
+                "marginCallLevel": {
+                  "type": "number",
+                  "x-decimal": true
+                },
+                "recvWindow": {
+                  "type": "integer",
+                  "maximum": 60000
+                },
+                "timestamp": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "marginCallLevel": {
+                    "type": "string",
+                    "x-decimal": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "deleteMarginCallLevel",
+      "x-ip-weight": 1500,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/margin-call-level",
+      "method": "DELETE",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/account#delete-margin-call-level",
+      "tags": [
+        "account"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 60000
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "msg": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "msg"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "getPortfolioMarginAssetLeverage",
+      "x-ip-weight": 50,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v1/portfolio/margin-asset-leverage",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/market-data#get-portfolio-margin-asset-leverage",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "leverage": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "asset"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "portfolioMarginCollateralRate",
+      "x-ip-weight": 50,
+      "x-security-type": "MARKET_DATA",
+      "path": "/sapi/v1/portfolio/collateralRate",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/market-data#portfolio-margin-collateral-rate",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "collateralRate": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "required": [
+                    "asset"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "portfolioMarginProTieredCollateralRate",
+      "x-ip-weight": 50,
+      "x-security-type": "USER_DATA",
+      "x-signed": true,
+      "path": "/sapi/v2/portfolio/collateralRate",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/market-data#portfolio-margin-pro-tiered-collateral-rate",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [
+        {
+          "name": "recvWindow",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "collateralInfo": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tierFloor": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "tierCap": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "collateralRate": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "cum": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "asset"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operationId": "queryPortfolioMarginAssetIndexPrice",
+      "x-security-type": "MARKET_DATA",
+      "x-weight": "- 1 if `asset` is sent\n- 50 if `asset` is not sent",
+      "path": "/sapi/v1/portfolio/asset-index-price",
+      "method": "GET",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/rest-api/market-data#query-portfolio-margin-asset-index-price",
+      "tags": [
+        "market-data"
+      ],
+      "parameters": [
+        {
+          "name": "asset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "assetIndexPrice": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "time": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "asset"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

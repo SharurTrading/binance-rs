@@ -38,6 +38,12 @@ pub(crate) trait Request: Serialize + Send + Sync {
     const OP: Operation;
     /// Only explicit provider no-data contracts permit a successful empty body.
     const EMPTY_RESPONSE: bool = false;
+    /// Only a documented absence contract maps an empty successful body to null.
+    const EMPTY_RESPONSE_NULL: bool = false;
+    /// A product-documented unsuccessful envelope, including one carried by HTTP 200.
+    fn response_failed(_value: &Value) -> bool {
+        false
+    }
     fn validate(&self) -> Result<(), Error>;
     fn validate_authority(&self, _now: u64) -> Result<(), Error> {
         Ok(())
@@ -80,6 +86,8 @@ pub(crate) fn order_ids(p: &BTreeMap<String, Value>) -> BTreeMap<String, String>
                 if field.ends_with("ClientOrderId")
                     || field.ends_with("ClientAlgoId")
                     || field == "clientAlgoId"
+                    || field.ends_with("ClientStrategyId")
+                    || matches!(field, "algoId" | "strategyId" | "issuerRequestId")
                     || field == "withdrawOrderId"
                     || field == "clientId"
                     || field == "clientOrderId"
@@ -94,10 +102,10 @@ pub(crate) fn order_ids(p: &BTreeMap<String, Value>) -> BTreeMap<String, String>
                 }
             }
             Value::Number(id)
-                if path
-                    .rsplit('.')
-                    .next()
-                    .is_some_and(|field| field == "orderId" || field.starts_with("orderIds[")) =>
+                if path.rsplit('.').next().is_some_and(|field| {
+                    matches!(field, "orderId" | "algoId" | "strategyId")
+                        || field.starts_with("orderIds[")
+                }) =>
             {
                 ids.insert(path.to_owned(), id.to_string());
             }

@@ -348,24 +348,6 @@ pub struct DailyAccountSnapshotResponseSnapshotVosItemDataPositionItem {
     pub extra: super::event_payloads::UnknownMessage,
 }
 
-/// Provider empty object receipt with retained future fields.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct DisableFastWithdrawSwitchResponse {
-    /// Future fields; never logged implicitly.
-    #[serde(flatten)]
-    pub extra: super::event_payloads::UnknownMessage,
-}
-
-/// Provider empty object receipt with retained future fields.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct EnableFastWithdrawSwitchResponse {
-    /// Future fields; never logged implicitly.
-    #[serde(flatten)]
-    pub extra: super::event_payloads::UnknownMessage,
-}
-
 /// Provider-native `GetApiKeyPermissionResponse` payload.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -1845,54 +1827,6 @@ pub struct FetchDepositAddressListWithNetworkResponseItem {
 pub type FetchDepositAddressListWithNetworkResponse =
     Vec<FetchDepositAddressListWithNetworkResponseItem>;
 
-/// Provider-native `FetchWithdrawAddressListResponseItem` payload.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct FetchWithdrawAddressListResponseItem {
-    /// Exact `address` wire field.
-    #[serde(rename = "address", default, skip_serializing_if = "Option::is_none")]
-    pub address: Option<crate::SensitiveString>,
-    /// Exact `addressTag` wire field.
-    #[serde(
-        rename = "addressTag",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub address_tag: Option<crate::SensitiveString>,
-    /// Exact `coin` wire field.
-    #[serde(rename = "coin")]
-    pub coin: crate::Asset,
-    /// Exact `name` wire field.
-    #[serde(rename = "name", default, skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
-    /// Exact `network` wire field.
-    #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<super::Network>,
-    /// Exact `origin` wire field.
-    #[serde(rename = "origin", default, skip_serializing_if = "Option::is_none")]
-    pub origin: Option<String>,
-    /// Exact `originType` wire field.
-    #[serde(
-        rename = "originType",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub origin_type: Option<String>,
-    /// Exact `whiteStatus` wire field.
-    #[serde(
-        rename = "whiteStatus",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub white_status: Option<bool>,
-    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
-    #[serde(flatten)]
-    pub extra: super::event_payloads::UnknownMessage,
-}
-
-/// Exact response for `fetchWithdrawAddressList`.
-pub type FetchWithdrawAddressListResponse = Vec<FetchWithdrawAddressListResponseItem>;
-
 /// Provider-native `FetchWithdrawQuotaResponse` payload.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -1934,18 +1868,6 @@ pub struct OneClickArrivalDepositApplyResponse {
     /// Exact `success` wire field.
     #[serde(rename = "success", default, skip_serializing_if = "Option::is_none")]
     pub success: Option<bool>,
-    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
-    #[serde(flatten)]
-    pub extra: super::event_payloads::UnknownMessage,
-}
-
-/// Provider-native `WithdrawResponse` payload.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct WithdrawResponse {
-    /// Exact `id` wire field.
-    #[serde(rename = "id")]
-    pub id: String,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -2064,24 +1986,6 @@ pub struct SystemStatusResponse {
     /// Exact `msg` wire field.
     #[serde(rename = "msg", default, skip_serializing_if = "Option::is_none")]
     pub msg: Option<crate::SensitiveString>,
-    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
-    #[serde(flatten)]
-    pub extra: super::event_payloads::UnknownMessage,
-}
-
-/// Provider-native `BrokerWithdrawResponse` payload.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct BrokerWithdrawResponse {
-    /// Exact `trId` wire field.
-    #[serde(rename = "trId")]
-    pub tr_id: i64,
-    /// Exact `accepted` wire field.
-    #[serde(rename = "accepted")]
-    pub accepted: bool,
-    /// Exact `info` wire field.
-    #[serde(rename = "info", default, skip_serializing_if = "Option::is_none")]
-    pub info: Option<crate::SensitiveString>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -2376,74 +2280,6 @@ pub struct DepositHistoryV2ResponseItemQuestionnaire {
 
 /// Exact response for `depositHistoryV2`.
 pub type DepositHistoryV2Response = Vec<DepositHistoryV2ResponseItem>;
-
-/// Provider-native `FetchAddressVerificationListResponseItem` payload.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct FetchAddressVerificationListResponseItem {
-    /// Exact `status` wire field.
-    #[serde(rename = "status", default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<String>,
-    /// Exact `token` wire field.
-    #[serde(rename = "token", default, skip_serializing_if = "Option::is_none")]
-    pub token: Option<String>,
-    /// Exact `network` wire field.
-    #[serde(rename = "network", default, skip_serializing_if = "Option::is_none")]
-    pub network: Option<super::Network>,
-    /// Exact `walletAddress` wire field.
-    #[serde(
-        rename = "walletAddress",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub wallet_address: Option<crate::SensitiveString>,
-    /// Exact `addressQuestionnaire` wire field.
-    #[serde(
-        rename = "addressQuestionnaire",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub address_questionnaire: Option<FetchAddressVerificationListResponseItemAddressQuestionnaire>,
-    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
-    #[serde(flatten)]
-    pub extra: super::event_payloads::UnknownMessage,
-}
-
-/// Provider-native `FetchAddressVerificationListResponseItemAddressQuestionnaire` payload.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct FetchAddressVerificationListResponseItemAddressQuestionnaire {
-    /// Exact `sendTo` wire field.
-    #[serde(rename = "sendTo", default, skip_serializing_if = "Option::is_none")]
-    pub send_to: Option<i64>,
-    /// Exact `satoshiToken` wire field.
-    #[serde(
-        rename = "satoshiToken",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub satoshi_token: Option<String>,
-    /// Exact `isAddressOwner` wire field.
-    #[serde(
-        rename = "isAddressOwner",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub is_address_owner: Option<i64>,
-    /// Exact `verifyMethod` wire field.
-    #[serde(
-        rename = "verifyMethod",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub verify_method: Option<i64>,
-    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
-    #[serde(flatten)]
-    pub extra: super::event_payloads::UnknownMessage,
-}
-
-/// Exact response for `fetchAddressVerificationList`.
-pub type FetchAddressVerificationListResponse = Vec<FetchAddressVerificationListResponseItem>;
 
 /// Provider-native `GetRegionListResponse` payload.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -2786,21 +2622,3 @@ pub struct WithdrawHistoryV2ResponseItem {
 
 /// Exact response for `withdrawHistoryV2`.
 pub type WithdrawHistoryV2Response = Vec<WithdrawHistoryV2ResponseItem>;
-
-/// Provider-native `WithdrawTravelRuleResponse` payload.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct WithdrawTravelRuleResponse {
-    /// Exact `trId` wire field.
-    #[serde(rename = "trId")]
-    pub tr_id: i64,
-    /// Exact `accepted` wire field.
-    #[serde(rename = "accepted")]
-    pub accepted: bool,
-    /// Exact `info` wire field.
-    #[serde(rename = "info", default, skip_serializing_if = "Option::is_none")]
-    pub info: Option<crate::SensitiveString>,
-    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
-    #[serde(flatten)]
-    pub extra: super::event_payloads::UnknownMessage,
-}

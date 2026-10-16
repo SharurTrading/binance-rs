@@ -1,0 +1,150 @@
+{
+  "rest": [
+    {
+      "name": "exchangeInfo",
+      "method": "GET",
+      "path": "/sapi/v1/equity/market/exchangeInfo",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#exchange-info"
+    },
+    {
+      "name": "tokenizedAssets",
+      "method": "GET",
+      "path": "/sapi/v1/equity/market/tokenized-assets",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#tokenized-assets"
+    },
+    {
+      "name": "latestQuote",
+      "method": "GET",
+      "path": "/sapi/v1/equity/market/quote",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data#latest-quote"
+    },
+    {
+      "name": "placeEquityOrder",
+      "method": "POST",
+      "path": "/sapi/v1/equity/order/place",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#place-equity-order"
+    },
+    {
+      "name": "cancelEquityOrder",
+      "method": "POST",
+      "path": "/sapi/v1/equity/order/cancel",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#cancel-equity-order"
+    },
+    {
+      "name": "cancelAllEquityOrders",
+      "method": "POST",
+      "path": "/sapi/v1/equity/order/cancel-all",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#cancel-all-equity-orders"
+    },
+    {
+      "name": "currentOpenOrders",
+      "method": "GET",
+      "path": "/sapi/v1/equity/order/open-orders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#current-open-orders"
+    },
+    {
+      "name": "equityOrderHistory",
+      "method": "GET",
+      "path": "/sapi/v1/equity/order/history",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-order-history"
+    },
+    {
+      "name": "equityOrderDetail",
+      "method": "GET",
+      "path": "/sapi/v1/equity/order/detail",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-order-detail"
+    },
+    {
+      "name": "equityTradeHistory",
+      "method": "GET",
+      "path": "/sapi/v1/equity/trade/history",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/trade#equity-trade-history"
+    },
+    {
+      "name": "tokenizedMint",
+      "method": "POST",
+      "path": "/sapi/v1/equity/tokenized/mint",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-mint"
+    },
+    {
+      "name": "tokenizedRedeem",
+      "method": "POST",
+      "path": "/sapi/v1/equity/tokenized/redeem",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-redeem"
+    },
+    {
+      "name": "tokenizedConvertStatus",
+      "method": "GET",
+      "path": "/sapi/v1/equity/tokenized/convert-status",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-convert-status"
+    },
+    {
+      "name": "tokenizedConvertHistory",
+      "method": "GET",
+      "path": "/sapi/v1/equity/tokenized/history",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/tokenized#tokenized-convert-history"
+    },
+    {
+      "name": "signUsEquityDisclaimer",
+      "method": "POST",
+      "path": "/sapi/v1/equity/account/disclaimer",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/account#sign-us-equity-disclaimer"
+    },
+    {
+      "name": "createRenewListenKey",
+      "method": "POST",
+      "path": "/sapi/v1/equity/listenKey",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/user-data-streams#create-renew-listen-key"
+    }
+  ],
+  "streams": [
+    {
+      "name": "priceStream",
+      "path": "/price",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#price-stream",
+      "private": false
+    },
+    {
+      "name": "quoteStream",
+      "path": "/{symbol}@quote",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#quote-stream",
+      "private": false
+    },
+    {
+      "name": "klineStream",
+      "path": "/{symbol}@kline_{interval}",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#kline-stream",
+      "private": false
+    },
+    {
+      "name": "calendarStream",
+      "path": "/calendar",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#calendar-stream",
+      "private": false
+    },
+    {
+      "name": "tradabilityStream",
+      "path": "/{symbol}@tradability",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#tradability-stream",
+      "private": false
+    },
+    {
+      "name": "tradingStatusStream",
+      "path": "/{symbol}@tradingStatus",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/market-streams#trading-status-stream",
+      "private": false
+    },
+    {
+      "name": "orderReportStream",
+      "path": "/{listenKey}@orderReport",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/user-streams#order-report-stream",
+      "private": true
+    }
+  ],
+  "user_events": [
+    {
+      "name": "orderReportStream",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/ws-streams/user-streams#order-report-stream"
+    }
+  ]
+}

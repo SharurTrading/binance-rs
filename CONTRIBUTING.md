@@ -46,3 +46,22 @@ Python standard library and the pinned rustfmt; it performs no downloads. Read
 [coverage and provenance](docs/coverage.md) before updating facts, required event
 evidence, financial classification, or rate weights. Generated code remains under
 the same strict Rust gates as handwritten transport.
+
+## Local build cache
+
+Kache is optional and speeds up only local builds of this repository. Crates that
+depend on this one never use it, and CI does not use it (it caches with
+`Swatinem/rust-cache`). To opt in, install it and run its one-time setup, which
+covers every repository on the machine:
+
+```sh
+cargo install kache --locked
+kache init
+kache doctor
+```
+
+[.kache.toml](.kache.toml) keeps the cache local-only, with no remote backends or
+planner, and isolates this repository's entries under its own key salt;
+`kache doctor` lists it as the config file. The
+[Kache quick start](https://ninja.kunobi.com/docs/kache/getting-started/quick-start)
+covers the rest.

@@ -259,7 +259,7 @@ last millisecond. Drop the newest millisecond from a full page and ask again fro
 | Client order ids | The client requires `newClientOrderId` on every new order and `clientAlgoId` on every new algo order, on USDⓈ-M, COIN-M and Spot, although the venue treats both as optional (documented). Keep your own and query by it later |
 | USDⓈ-M conditional orders | Stop, take-profit and trailing orders go to the algo endpoint (`/fapi/v1/algoOrder`) with `clientAlgoId`. Regular `newOrder` takes only `LIMIT` and `MARKET` |
 | Two namespaces | Regular and algo orders have separate ids, open-order lists and cancel-all calls. Check both lists before you call an account clear |
-| COIN-M conditional orders | The client has no COIN-M conditional cancel-all. Its COIN-M algo calls are `newAlgoOrder`, `cancelAlgoOrder` (one order) and `openAlgoOrders`, so cancel them one at a time |
+| COIN-M conditional orders | COIN-M documents no conditional cancel-all (USDⓈ-M has `DELETE /fapi/v1/algoOpenOrders`; COIN-M lists only `/dapi/v1/algoOrder` and `/dapi/v1/openAlgoOrders`), so the client offers `newAlgoOrder`, `cancelAlgoOrder` (one order) and `openAlgoOrders`: list them and cancel each one |
 | Post-only | Futures `GTX`; Spot uses order type `LIMIT_MAKER` instead of a time in force |
 | GTD | Expiry must be more than 600 seconds after venue time; the client rechecks just before sending |
 | GTC lifetime | Futures GTC orders live one calendar year ([2024-04-09 change log](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log#2024-04-09)) |

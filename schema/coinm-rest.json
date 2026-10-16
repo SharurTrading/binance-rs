@@ -1014,7 +1014,10 @@
                   "properties": {
                     "symbol": {
                       "type": "string",
-                      "x-rust-type": "crate::Symbol"
+                      "x-rust-type": "crate::Symbol",
+                      "x-empty-string-meaning": "No trade symbol exists for this income record.",
+                      "x-rust-optional": true,
+                      "x-deserialize-with": "crate::core::wire::symbol_option_empty"
                     },
                     "incomeType": {
                       "type": "string"

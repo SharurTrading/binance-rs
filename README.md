@@ -24,11 +24,15 @@ excluded from this crate. Internal Binance transfers and read-only withdrawal
 history/status remain available. A platform withdrawal shield also requires API
 credentials without withdrawal permission.
 
+The [response-shape audit](docs/response-shape-audit.md) records source-linked
+fixtures for every supported JSON method, market route and private event kind,
+plus the pinned SBE and FIX definitions.
+
 Seven separate JSON product clients are available under `binance_client::core_trading`:
 
 | Product | REST | WebSocket API | Market streams | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
-| USDⓈ-M | 95 | 18 + 3 session methods | 20 | 10 |
+| USDⓈ-M | 95 | 18 + 3 session methods | 21 | 10 |
 | Spot (JSON catalog) | 48 | 52 + 3 session methods | 15 | 6 |
 | Wallet | 43 | — | — | — |
 | Convert | 9 | — | — | — |

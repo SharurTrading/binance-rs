@@ -5,8 +5,8 @@ SPDX-License-Identifier: MIT-0
 
 # USDⓈ-M coverage and protocol evidence
 
-Checked **2026-09-26**. Bindings implement the operations in Binance's official
-versioned catalog: 95 REST, 18 WebSocket API, 20 market stream definitions, and
+Catalog checked **2026-09-26**; response shapes reviewed **2026-10-16**. Bindings implement the operations in Binance's official
+versioned catalog: 95 REST, 18 WebSocket API, 21 market stream definitions, and
 10 user-data event schemas. Three session methods come from the WebSocket general
 reference. This is source coverage, not a claim that every endpoint has been
 exercised against a venue. Demo may omit production features; historical/deprecated

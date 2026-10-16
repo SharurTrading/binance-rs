@@ -455,14 +455,19 @@ pub struct ExecutionReportEvent {
     #[serde(rename = "d", default, skip_serializing_if = "Option::is_none")]
     pub d: Option<i64>,
     /// Exact `F` wire field.
-    #[serde(rename = "F", deserialize_with = "super::wire::decimal")]
-    pub upper_f: Decimal,
+    #[serde(
+        rename = "F",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub upper_f: Option<Decimal>,
     /// Exact `g` wire field.
     #[serde(rename = "g")]
     pub g: i64,
     /// Exact `C` wire field.
-    #[serde(rename = "C")]
-    pub upper_c: String,
+    #[serde(rename = "C", default, skip_serializing_if = "Option::is_none")]
+    pub upper_c: Option<String>,
     /// Exact `x` wire field.
     #[serde(rename = "x")]
     pub x: String,
@@ -470,8 +475,8 @@ pub struct ExecutionReportEvent {
     #[serde(rename = "X")]
     pub upper_x: String,
     /// Exact `r` wire field.
-    #[serde(rename = "r")]
-    pub r: String,
+    #[serde(rename = "r", default, skip_serializing_if = "Option::is_none")]
+    pub r: Option<String>,
     /// Exact `i` wire field.
     #[serde(rename = "i")]
     pub i: i64,
@@ -518,8 +523,13 @@ pub struct ExecutionReportEvent {
     #[serde(rename = "Y", deserialize_with = "super::wire::decimal")]
     pub upper_y: Decimal,
     /// Exact `Q` wire field.
-    #[serde(rename = "Q", deserialize_with = "super::wire::decimal")]
-    pub upper_q: Decimal,
+    #[serde(
+        rename = "Q",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub upper_q: Option<Decimal>,
     /// Exact `D` wire field.
     #[serde(rename = "D", default, skip_serializing_if = "Option::is_none")]
     pub upper_d: Option<i64>,

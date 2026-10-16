@@ -230,7 +230,7 @@ pub(crate) fn partial(status: u16, value: &Value) -> Option<crate::PartialOperat
                     .is_ok()
             } else {
                 serde_json::from_value::<
-                    super::rest_models::OrderCancelReplaceResponseNewOrderResponse,
+                    super::rest_models::OrderCancelReplaceResponseNewOrderResponseValue,
                 >(v.clone())
                 .is_ok()
             }

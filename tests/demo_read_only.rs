@@ -63,7 +63,7 @@ mod tests {
         client.close().await.unwrap();
         while events.recv().await.is_some() {}
         task.await.unwrap().unwrap();
-        assert!(result.unwrap().data.last_update_id.is_some());
+        assert!(result.unwrap().data.last_update_id >= 0);
     }
 
     #[tokio::test]

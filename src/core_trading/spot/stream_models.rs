@@ -801,8 +801,8 @@ pub struct BalanceUpdateEvent {
     #[serde(rename = "d", deserialize_with = "super::wire::decimal")]
     pub d: Decimal,
     /// Exact `T` wire field.
-    #[serde(rename = "T")]
-    pub upper_t: i64,
+    #[serde(rename = "T", deserialize_with = "crate::core::wire::integer_option")]
+    pub upper_t: Option<i64>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,

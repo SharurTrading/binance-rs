@@ -896,7 +896,9 @@ pub struct FuturesTradingQuantitativeRulesIndicatorsResponse {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub indicators: Option<FuturesTradingQuantitativeRulesIndicatorsResponseIndicators>,
+    pub indicators: Option<
+        BTreeMap<String, Vec<FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsValueItem>>,
+    >,
     /// Exact `updateTime` wire field.
     #[serde(
         rename = "updateTime",
@@ -909,31 +911,10 @@ pub struct FuturesTradingQuantitativeRulesIndicatorsResponse {
     pub extra: BTreeMap<String, serde_json::Value>,
 }
 
-/// Provider-native `FuturesTradingQuantitativeRulesIndicatorsResponseIndicators` payload.
+/// Provider-native `FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsValueItem` payload.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct FuturesTradingQuantitativeRulesIndicatorsResponseIndicators {
-    /// Exact `BTCUSDT` wire field.
-    #[serde(rename = "BTCUSDT", default, skip_serializing_if = "Option::is_none")]
-    pub upper_btcusdt:
-        Option<Vec<FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsUpperBtcusdtItem>>,
-    /// Exact `ETHUSDT` wire field.
-    #[serde(rename = "ETHUSDT", default, skip_serializing_if = "Option::is_none")]
-    pub upper_ethusdt:
-        Option<Vec<FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsUpperEthusdtItem>>,
-    /// Exact `ACCOUNT` wire field.
-    #[serde(rename = "ACCOUNT", default, skip_serializing_if = "Option::is_none")]
-    pub upper_account:
-        Option<Vec<FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsUpperAccountItem>>,
-    /// Unknown future wire fields, retained without inventing defaults.
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, serde_json::Value>,
-}
-
-/// Provider-native `FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsUpperBtcusdtItem` payload.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsUpperBtcusdtItem {
+pub struct FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsValueItem {
     /// Exact `isLocked` wire field.
     #[serde(rename = "isLocked", default, skip_serializing_if = "Option::is_none")]
     pub is_locked: Option<bool>,
@@ -963,76 +944,6 @@ pub struct FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsUpperBtcus
         skip_serializing_if = "Option::is_none"
     )]
     pub trigger_value: Option<Decimal>,
-    /// Unknown future wire fields, retained without inventing defaults.
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, serde_json::Value>,
-}
-
-/// Provider-native `FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsUpperEthusdtItem` payload.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsUpperEthusdtItem {
-    /// Exact `isLocked` wire field.
-    #[serde(rename = "isLocked", default, skip_serializing_if = "Option::is_none")]
-    pub is_locked: Option<bool>,
-    /// Exact `plannedRecoverTime` wire field.
-    #[serde(
-        rename = "plannedRecoverTime",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub planned_recover_time: Option<i64>,
-    /// Exact `indicator` wire field.
-    #[serde(rename = "indicator", default, skip_serializing_if = "Option::is_none")]
-    pub indicator: Option<String>,
-    /// Exact `value` wire field.
-    #[serde(
-        rename = "value",
-        default,
-        deserialize_with = "super::wire::decimal_option",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub value: Option<Decimal>,
-    /// Exact `triggerValue` wire field.
-    #[serde(
-        rename = "triggerValue",
-        default,
-        deserialize_with = "super::wire::decimal_option",
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub trigger_value: Option<Decimal>,
-    /// Unknown future wire fields, retained without inventing defaults.
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, serde_json::Value>,
-}
-
-/// Provider-native `FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsUpperAccountItem` payload.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct FuturesTradingQuantitativeRulesIndicatorsResponseIndicatorsUpperAccountItem {
-    /// Exact `indicator` wire field.
-    #[serde(rename = "indicator", default, skip_serializing_if = "Option::is_none")]
-    pub indicator: Option<String>,
-    /// Exact `value` wire field.
-    #[serde(rename = "value", default, skip_serializing_if = "Option::is_none")]
-    pub value: Option<i64>,
-    /// Exact `triggerValue` wire field.
-    #[serde(
-        rename = "triggerValue",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub trigger_value: Option<i64>,
-    /// Exact `plannedRecoverTime` wire field.
-    #[serde(
-        rename = "plannedRecoverTime",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub planned_recover_time: Option<i64>,
-    /// Exact `isLocked` wire field.
-    #[serde(rename = "isLocked", default, skip_serializing_if = "Option::is_none")]
-    pub is_locked: Option<bool>,
     /// Unknown future wire fields, retained without inventing defaults.
     #[serde(flatten)]
     pub extra: BTreeMap<String, serde_json::Value>,
@@ -1306,8 +1217,14 @@ pub struct GetFuturesTransactionHistoryDownloadLinkByIdResponse {
 #[non_exhaustive]
 pub struct GetIncomeHistoryResponseItem {
     /// Exact `symbol` wire field.
-    #[serde(rename = "symbol", default, skip_serializing_if = "Option::is_none")]
-    pub symbol: Option<Symbol>,
+    /// No trade symbol exists for this income record.
+    #[serde(
+        rename = "symbol",
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::core::wire::symbol_option_empty"
+    )]
+    pub symbol: Option<crate::Symbol>,
     /// Exact `incomeType` wire field.
     #[serde(
         rename = "incomeType",
@@ -2529,7 +2446,12 @@ pub struct LongShortRatioResponseItem {
     )]
     pub short_account: Option<String>,
     /// Exact `timestamp` wire field.
-    #[serde(rename = "timestamp", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "timestamp",
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::core::wire::integer_option"
+    )]
     pub timestamp: Option<i64>,
     /// Unknown future wire fields, retained without inventing defaults.
     #[serde(flatten)]
@@ -2973,7 +2895,12 @@ pub struct OpenInterestStatisticsResponseItem {
     )]
     pub cmc_circulating_supply: Option<Decimal>,
     /// Exact `timestamp` wire field.
-    #[serde(rename = "timestamp", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "timestamp",
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::core::wire::integer_option"
+    )]
     pub timestamp: Option<i64>,
     /// Unknown future wire fields, retained without inventing defaults.
     #[serde(flatten)]
@@ -3522,7 +3449,12 @@ pub struct TakerBuySellVolumeResponseItem {
     )]
     pub sell_vol: Option<Decimal>,
     /// Exact `timestamp` wire field.
-    #[serde(rename = "timestamp", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "timestamp",
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::core::wire::integer_option"
+    )]
     pub timestamp: Option<i64>,
     /// Unknown future wire fields, retained without inventing defaults.
     #[serde(flatten)]
@@ -3790,7 +3722,12 @@ pub struct TopTraderLongShortRatioAccountsResponseItem {
     )]
     pub short_account: Option<String>,
     /// Exact `timestamp` wire field.
-    #[serde(rename = "timestamp", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "timestamp",
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::core::wire::integer_option"
+    )]
     pub timestamp: Option<i64>,
     /// Unknown future wire fields, retained without inventing defaults.
     #[serde(flatten)]
@@ -3830,7 +3767,12 @@ pub struct TopTraderLongShortRatioPositionsResponseItem {
     )]
     pub short_account: Option<String>,
     /// Exact `timestamp` wire field.
-    #[serde(rename = "timestamp", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "timestamp",
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::core::wire::integer_option"
+    )]
     pub timestamp: Option<i64>,
     /// Unknown future wire fields, retained without inventing defaults.
     #[serde(flatten)]

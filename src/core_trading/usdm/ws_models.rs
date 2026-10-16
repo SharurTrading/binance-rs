@@ -3,6 +3,7 @@
 
 //! Generated ws response DTOs; regenerate with scripts/codegen/generate.py.
 
+use super::wire::PriceLevel;
 use crate::ClientOrderId;
 use crate::Decimal;
 use crate::SensitiveString;
@@ -843,18 +844,20 @@ pub type FuturesAccountBalanceV2Response = Vec<FuturesAccountBalanceV2ResponseIt
 #[non_exhaustive]
 pub struct OrderBookResponse {
     /// Exact `lastUpdateId` wire field.
-    #[serde(
-        rename = "lastUpdateId",
-        default,
-        skip_serializing_if = "Option::is_none"
-    )]
-    pub last_update_id: Option<i64>,
+    #[serde(rename = "lastUpdateId")]
+    pub last_update_id: i64,
     /// Exact `E` wire field.
     #[serde(rename = "E", default, skip_serializing_if = "Option::is_none")]
     pub upper_e: Option<i64>,
     /// Exact `T` wire field.
     #[serde(rename = "T", default, skip_serializing_if = "Option::is_none")]
     pub upper_t: Option<i64>,
+    /// Exact `bids` wire field.
+    #[serde(rename = "bids")]
+    pub bids: Vec<PriceLevel>,
+    /// Exact `asks` wire field.
+    #[serde(rename = "asks")]
+    pub asks: Vec<PriceLevel>,
     /// Unknown future wire fields, retained without inventing defaults.
     #[serde(flatten)]
     pub extra: BTreeMap<String, serde_json::Value>,

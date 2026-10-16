@@ -2409,47 +2409,8 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "e": {
-                    "type": "string",
-                    "enum": [
-                      "indexPriceUpdate"
-                    ]
-                  },
-                  "E": {
-                    "type": "integer",
-                    "format": "int64"
-                  },
-                  "i": {
-                    "type": "string",
-                    "x-rust-type": "crate::Symbol"
-                  },
-                  "p": {
-                    "type": "string",
-                    "x-decimal": true
-                  }
-                },
-                "required": [
-                  "e",
-                  "E",
-                  "i",
-                  "p"
-                ]
-              }
-            }
-          }
-        },
-        "Combined Stream": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "stream": {
-                    "type": "string"
-                  },
-                  "data": {
+                "oneOf": [
+                  {
                     "type": "object",
                     "properties": {
                       "e": {
@@ -2476,6 +2437,119 @@
                       "E",
                       "i",
                       "p"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "indexPriceUpdate"
+                        ]
+                      },
+                      "E": {
+                        "type": "integer",
+                        "format": "int64"
+                      },
+                      "p": {
+                        "type": "string",
+                        "x-decimal": true
+                      },
+                      "s": {
+                        "type": "string",
+                        "x-rust-type": "crate::Symbol"
+                      }
+                    },
+                    "required": [
+                      "e",
+                      "E",
+                      "s",
+                      "p"
+                    ]
+                  }
+                ],
+                "x-variant-names": [
+                  "IndexName",
+                  "SymbolName"
+                ]
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "e": {
+                            "type": "string",
+                            "enum": [
+                              "indexPriceUpdate"
+                            ]
+                          },
+                          "E": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "i": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          },
+                          "p": {
+                            "type": "string",
+                            "x-decimal": true
+                          }
+                        },
+                        "required": [
+                          "e",
+                          "E",
+                          "i",
+                          "p"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "e": {
+                            "type": "string",
+                            "enum": [
+                              "indexPriceUpdate"
+                            ]
+                          },
+                          "E": {
+                            "type": "integer",
+                            "format": "int64"
+                          },
+                          "p": {
+                            "type": "string",
+                            "x-decimal": true
+                          },
+                          "s": {
+                            "type": "string",
+                            "x-rust-type": "crate::Symbol"
+                          }
+                        },
+                        "required": [
+                          "e",
+                          "E",
+                          "s",
+                          "p"
+                        ]
+                      }
+                    ],
+                    "x-variant-names": [
+                      "IndexName",
+                      "SymbolName"
                     ]
                   }
                 },

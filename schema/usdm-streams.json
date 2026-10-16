@@ -2566,7 +2566,8 @@
                   },
                   "r": {
                     "type": "string",
-                    "x-decimal": true
+                    "x-decimal": true,
+                    "x-decimal-unavailable": ""
                   },
                   "ap": {
                     "type": "string",
@@ -2624,7 +2625,8 @@
                       },
                       "r": {
                         "type": "string",
-                        "x-decimal": true
+                        "x-decimal": true,
+                        "x-decimal-unavailable": ""
                       },
                       "ap": {
                         "type": "string",
@@ -2638,7 +2640,12 @@
                         "type": "integer"
                       }
                     },
-                    "type": "object"
+                    "type": "object",
+                    "required": [
+                      "E",
+                      "e",
+                      "s"
+                    ]
                   }
                 },
                 "type": "object",
@@ -2747,7 +2754,8 @@
                     },
                     "r": {
                       "type": "string",
-                      "x-decimal": true
+                      "x-decimal": true,
+                      "x-decimal-unavailable": ""
                     },
                     "ap": {
                       "type": "string",
@@ -2808,7 +2816,8 @@
                         },
                         "r": {
                           "type": "string",
-                          "x-decimal": true
+                          "x-decimal": true,
+                          "x-decimal-unavailable": ""
                         },
                         "ap": {
                           "type": "string",
@@ -2822,7 +2831,12 @@
                           "type": "integer"
                         }
                       },
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "E",
+                        "e",
+                        "s"
+                      ]
                     }
                   }
                 },
@@ -4347,6 +4361,198 @@
       "path": "/{symbol}@rpiDepth@500ms",
       "method": "POST",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-streams/public#rpi-diff-book-depth-streams"
+    },
+    {
+      "tags": [
+        "market"
+      ],
+      "operationId": "assetIndexForAsset",
+      "parameters": [
+        {
+          "name": "assetSymbol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "SUBSCRIBE"
+                  ]
+                },
+                "params": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "type": "object",
+              "required": [
+                "method",
+                "params",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "responses": {
+        "Raw Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "properties": {
+                    "e": {
+                      "type": "string"
+                    },
+                    "E": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "s": {
+                      "type": "string"
+                    },
+                    "i": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "b": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "a": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "B": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "A": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "q": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "g": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "Q": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "G": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "E",
+                    "e",
+                    "s"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "Combined Stream": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "stream": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "e": {
+                          "type": "string"
+                        },
+                        "E": {
+                          "type": "integer",
+                          "format": "int64"
+                        },
+                        "s": {
+                          "type": "string"
+                        },
+                        "i": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "b": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "a": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "B": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "A": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "q": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "g": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "Q": {
+                          "type": "string",
+                          "x-decimal": true
+                        },
+                        "G": {
+                          "type": "string",
+                          "x-decimal": true
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "stream",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      },
+      "path": "/{assetSymbol}@assetIndex",
+      "method": "POST",
+      "source": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-streams/market#asset-index"
     }
   ],
   "components": {

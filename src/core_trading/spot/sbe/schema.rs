@@ -137,7 +137,7 @@ fn primitive_size(name: &str) -> Option<usize> {
     match name {
         "char" | "int8" | "uint8" => Some(1),
         "int16" | "uint16" => Some(2),
-        "int32" | "uint32" => Some(4),
+        "int32" | "uint32" | "float" => Some(4),
         "int64" | "uint64" => Some(8),
         _ => None,
     }
@@ -222,6 +222,9 @@ impl<'a> Reader<'a> {
             .attr("primitiveType")
             .or_else(|| ty.attr("encodingType"))
             .ok_or(Error::Configuration("scalar encoding"))?;
+        if primitive == "float" {
+            return self.binary_float(node);
+        }
         let width = self.schema.size(name)?;
         let value = self.integer(
             if name == "mantissa128" {
@@ -294,6 +297,20 @@ impl<'a> Reader<'a> {
                 .map(Value::from)
                 .map_err(|_| self.error("signed integer range"))
         }
+    }
+    fn binary_float(&mut self, node: &Node) -> Result<Value, Error> {
+        let bytes: [u8; 4] = self
+            .take(4)?
+            .try_into()
+            .map_err(|_| Error::Configuration("binary float width"))?;
+        let bits = u32::from_le_bytes(bytes);
+        let nan = bits & 0x7f80_0000 == 0x7f80_0000 && bits & 0x007f_ffff != 0;
+        if nan && node.attr("presence") == Some("optional") {
+            return Ok(Value::Null);
+        }
+        super::float::exact(bits)
+            .map(|decimal| Value::String(decimal.to_string()))
+            .ok_or_else(|| self.error("binary float cannot be represented exactly"))
     }
     fn set_value(&self, ty: &Node, value: i128) -> Result<Value, Error> {
         let mut names = Vec::new();
@@ -547,7 +564,15 @@ fn decode_nested(
     let id = u16::try_from(r.integer("uint16", 2)?).map_err(|_| r.error("schema range"))?;
     let version = u16::try_from(r.integer("uint16", 2)?).map_err(|_| r.error("version range"))?;
     r.template = Some(template);
-    if r.ancestors.contains(&template) {
+    // API ErrorResponse100.data may contain CancelReplace307, whose failure
+    // legs may themselves contain ErrorResponse100 (official schema comments).
+    // Permit that finite repetition once; every other repeated template is a
+    // cycle. The pinned finite template set bounds nesting without a depth guess.
+    let partial_error_leg = schema.id == 3
+        && template == 100
+        && r.ancestors.last() == Some(&307)
+        && r.ancestors.iter().filter(|id| **id == 100).count() == 1;
+    if r.ancestors.contains(&template) && !partial_error_leg {
         return Err(r.error("recursive binary envelope"));
     }
     r.ancestors.push(template);
@@ -621,6 +646,28 @@ fn decode_nested(
     Ok(value)
 }
 fn api_projection(name: &str, value: &mut Value) -> Result<(), Error> {
+    match name {
+        "WebSocketSessionSubscriptionsResponse" => {
+            *value = value
+                .get_mut("subscriptions")
+                .filter(|v| v.is_array())
+                .ok_or(Error::Gap("SBE subscription list shape"))?
+                .take();
+        }
+        "CancelOpenOrdersResponse" => {
+            for row in value
+                .as_array_mut()
+                .ok_or(Error::Gap("SBE cancel-all array"))?
+            {
+                *row = row
+                    .get_mut("response")
+                    .ok_or(Error::Gap("SBE cancel-all member"))?
+                    .take();
+            }
+        }
+        "OrderAmendKeepPriorityResponse" => project_amend(value)?,
+        _ => {}
+    }
     if name == "KlinesResponse" {
         let rows = value.as_array_mut().ok_or(Error::Gap("SBE kline shape"))?;
         for row in rows {
@@ -645,6 +692,44 @@ fn api_projection(name: &str, value: &mut Value) -> Result<(), Error> {
     if let Some(subscription) = map.remove("subscriptionId") {
         *value = serde_json::json!({"subscriptionId":subscription,"event":value.take()});
     }
+    Ok(())
+}
+// Template317 encodes order fields flat and an optional list-status group,
+// while both documented JSON APIs use amendedOrder and one listStatus object.
+fn project_amend(value: &mut Value) -> Result<(), Error> {
+    let mut fields = value
+        .take()
+        .as_object()
+        .cloned()
+        .ok_or(Error::Gap("SBE amend shape"))?;
+    let statuses = fields
+        .remove("listStatus")
+        .ok_or(Error::Gap("SBE amend list-status group"))?;
+    let mut statuses = statuses
+        .as_array()
+        .cloned()
+        .ok_or(Error::Gap("SBE amend list-status array"))?;
+    if statuses.len() > 1 {
+        return Err(Error::Gap("SBE amend list-status cardinality"));
+    }
+    let mut result = Map::new();
+    for key in ["transactTime", "executionId"] {
+        result.insert(
+            key.into(),
+            fields
+                .remove(key)
+                .ok_or(Error::Gap("SBE amend root identity"))?,
+        );
+    }
+    // relatedOrders is a separate schema group; retain its native evidence.
+    if let Some(related) = fields.remove("relatedOrders") {
+        result.insert("relatedOrders".into(), related);
+    }
+    result.insert("amendedOrder".into(), Value::Object(fields));
+    if let Some(status) = statuses.pop() {
+        result.insert("listStatus".into(), status);
+    }
+    *value = Value::Object(result);
     Ok(())
 }
 pub(crate) fn decode_api_value(bytes: &[u8]) -> Result<Value, Error> {

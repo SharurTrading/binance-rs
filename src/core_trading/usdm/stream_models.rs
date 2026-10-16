@@ -1052,7 +1052,7 @@ pub struct MarkPriceStreamEvent {
     #[serde(
         rename = "r",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub r: Option<Decimal>,
@@ -1116,7 +1116,7 @@ pub struct MarkPriceStreamForAllMarketEventItem {
     #[serde(
         rename = "r",
         default,
-        deserialize_with = "super::wire::decimal_option",
+        deserialize_with = "super::wire::decimal_option_empty",
         skip_serializing_if = "Option::is_none"
     )]
     pub r: Option<Decimal>,
@@ -1498,6 +1498,96 @@ pub struct RpiDiffBookDepthStreamsEvent {
     /// Exact `st` wire field.
     #[serde(rename = "st", default, skip_serializing_if = "Option::is_none")]
     pub st: Option<i64>,
+    /// Unknown future wire fields, retained without inventing defaults.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, serde_json::Value>,
+}
+
+/// Provider-native `AssetIndexForAssetEventItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct AssetIndexForAssetEventItem {
+    /// Exact `e` wire field.
+    #[serde(rename = "e")]
+    pub e: String,
+    /// Exact `E` wire field.
+    #[serde(rename = "E")]
+    pub upper_e: i64,
+    /// Exact `s` wire field.
+    #[serde(rename = "s")]
+    pub s: String,
+    /// Exact `i` wire field.
+    #[serde(
+        rename = "i",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub i: Option<Decimal>,
+    /// Exact `b` wire field.
+    #[serde(
+        rename = "b",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub b: Option<Decimal>,
+    /// Exact `a` wire field.
+    #[serde(
+        rename = "a",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub a: Option<Decimal>,
+    /// Exact `B` wire field.
+    #[serde(
+        rename = "B",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub upper_b: Option<Decimal>,
+    /// Exact `A` wire field.
+    #[serde(
+        rename = "A",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub upper_a: Option<Decimal>,
+    /// Exact `q` wire field.
+    #[serde(
+        rename = "q",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub q: Option<Decimal>,
+    /// Exact `g` wire field.
+    #[serde(
+        rename = "g",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub g: Option<Decimal>,
+    /// Exact `Q` wire field.
+    #[serde(
+        rename = "Q",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub upper_q: Option<Decimal>,
+    /// Exact `G` wire field.
+    #[serde(
+        rename = "G",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub upper_g: Option<Decimal>,
     /// Unknown future wire fields, retained without inventing defaults.
     #[serde(flatten)]
     pub extra: BTreeMap<String, serde_json::Value>,

@@ -801,6 +801,12 @@
       "path": "/{symbol}@rpiDepth@500ms",
       "route": "public",
       "type": "RpiDiffBookDepthStreamsEvent"
+    },
+    {
+      "name": "AssetIndexForAsset",
+      "path": "/{assetSymbol}@assetIndex",
+      "route": "market",
+      "type": "Vec<AssetIndexForAssetEventItem>"
     }
   ]
 }

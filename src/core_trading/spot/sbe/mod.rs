@@ -4,6 +4,7 @@
 //! Spot SBE protocols retain native schemas, timestamp units and financial values.
 //! Market schema 1:0 is documented in `docs/core-protocols.md`.
 
+mod float;
 mod market;
 pub(crate) mod schema;
 mod streams;

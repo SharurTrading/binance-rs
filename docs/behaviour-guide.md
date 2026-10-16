@@ -37,7 +37,7 @@ is a promise about production behaviour.
 | Error `-2015` covers a bad key, a wrong IP or a missing permission. It does not prove the secret is wrong | Show the operator all three possibilities |
 | A cheap signed read proves a key: Spot `GET /api/v3/account` (weight 20, add `omitZeroBalances=true`), USDⓈ-M `GET /fapi/v1/accountConfig` (5), COIN-M `GET /dapi/v1/balance` (1) | Prove the key once at connect, before you open any stream |
 | The Spot account reply carries the account `uid`. No signed Futures read we know of returns it | Futures callers must be told the UID; you cannot discover it |
-| The Spot `uid` need not match the number held for the same key's USDⓈ-M account: on Demo (2026-10-16) the two differed on one key | Identify a Spot account from its own signed `GET /api/v3/account` reply; do not reuse a Futures number for it |
+| The Spot `uid` need not match the UID supplied for the same key's USDⓈ-M account, since no Futures read returns one. On Demo (2026-10-16) the Spot `uid` differed from the UID supplied for the USDⓈ-M Demo account on one key. Demo Spot and Futures are separate hosts, and production keys were not compared | Identify a Spot account from its own signed `GET /api/v3/account` reply; do not reuse a Futures UID for it |
 | Venue error text can echo URLs, IP addresses or tokens. The client keeps it behind `VenueMessage`, redacted in `Debug` and `Display` | Call `expose_sensitive_text()` only when you mean to, and never log or store the result automatically |
 
 ### Demo and production
@@ -69,7 +69,7 @@ for the whole process, so every client you build shares it. The details are in t
 | A `418` ban can last "from 2 minutes to 3 days" with no end signal | Without `Retry-After` the client refuses every send until you call `release_unknown_ban()` |
 | All clients on one pool must share one clock | Give every client of a registry the same `Arc<dyn Clock>`, or they charge different windows |
 | Futures order limits are per account, across keys and across USDⓈ-M and COIN-M | Give every config for one account the same `AccountKey`, or each gets its own count and you over-send |
-| A full USDⓈ-M account read (balances, position risk and open orders) cost about 95 weight on Demo (2026-10-16); a symbol-scoped read cost about 7. Polled each second, the full read exhausts the 2,400-weight minute | Poll the symbol, and take the full read only when you need it, such as at connect or after a gap. An open-order list is documented at 40 weight unscoped and 1 with a symbol |
+| A full USDⓈ-M account read cost 95 weight on Demo (2026-10-16): Account V3 (5), Balance V3 (5), Position Information V3 (5) and both open-order lists, regular and algo, without a symbol (40 each). The symbol-scoped read cost 7: Position Information V3 (5) and both lists with a symbol (1 each), with no balance read. Both matched the documented weights, so you can price your own read. Polled each second, the full read exhausts the documented 2,400-weight Futures minute, which USDⓈ-M and COIN-M share | Poll the symbol, and take the full read only when you need it, such as at connect or after a gap. The scoped read does not refresh balances, so read them separately. An open-order list is documented at 40 weight unscoped and 1 with a symbol |
 
 ### Keeping capacity for exits
 
@@ -256,10 +256,10 @@ last millisecond. Drop the newest millisecond from a full page and ask again fro
 
 | Topic | Behaviour |
 | --- | --- |
-| Client order ids | The client requires `newClientOrderId` on every new order and `clientAlgoId` on every new algo order, on USDⓈ-M, COIN-M and Spot, although the venue treats both as optional (documented). Keep your own and query by it later |
+| Client order ids | The client requires `newClientOrderId` on every new order on USDⓈ-M, COIN-M and Spot, and `clientAlgoId` on every new algo order on USDⓈ-M and COIN-M (Spot has no algo orders), although the venue treats both as optional (documented). A Spot order list needs `listClientOrderId` and a client id for each leg. Keep your own and query by it later |
 | USDⓈ-M conditional orders | Stop, take-profit and trailing orders go to the algo endpoint (`/fapi/v1/algoOrder`) with `clientAlgoId`. Regular `newOrder` takes only `LIMIT` and `MARKET` |
-| Two namespaces | Regular and algo orders have separate ids, open-order lists and cancel-all calls. Check both lists before you call an account clear |
-| COIN-M conditional orders | COIN-M documents no conditional cancel-all (USDⓈ-M has `DELETE /fapi/v1/algoOpenOrders`; COIN-M lists only `/dapi/v1/algoOrder` and `/dapi/v1/openAlgoOrders`), so the client offers `newAlgoOrder`, `cancelAlgoOrder` (one order) and `openAlgoOrders`: list them and cancel each one |
+| Two namespaces | Regular and algo orders have separate ids and open-order lists, and on USDⓈ-M separate cancel-all calls (COIN-M has no conditional cancel-all, below). Check both lists before you call an account clear |
+| COIN-M conditional orders | Binance documents no COIN-M conditional cancel-all. The [UM/CM integration notice](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice), section C.5, names only `POST` and `DELETE /dapi/v1/algoOrder` and `GET /dapi/v1/openAlgoOrders`, where USDⓈ-M also has `DELETE /fapi/v1/algoOpenOrders`. The client offers `new_algo_order`, `cancel_algo_order` (one order) and `open_algo_orders`: list the open algo orders and cancel each one |
 | Post-only | Futures `GTX`; Spot uses order type `LIMIT_MAKER` instead of a time in force |
 | GTD | Expiry must be more than 600 seconds after venue time; the client rechecks just before sending |
 | GTC lifetime | Futures GTC orders live one calendar year ([2024-04-09 change log](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log#2024-04-09)) |
@@ -286,10 +286,11 @@ Seen on Demo on 2026-10-16: USDⓈ-M in one-way mode on `BTCUSDT`, and Spot.
 
 | Fact | What to do |
 | --- | --- |
-| A resting reduce-only `STOP_MARKET` for the whole position was not cancelled when another order closed the position. It stayed working on the flat position for the 30 seconds we watched, until we cancelled it | After any close that did not go through the protective order, cancel the protection yourself, then read the algo open-order list |
-| `ALGO_UPDATE` arrives on the Futures user stream when a conditional order is placed and when it is cancelled, apart from `ORDER_TRADE_UPDATE`. We recorded no other transition | Handle it as its own event; the client decodes it as `UserPayload::AlgoUpdate` |
+| A resting `STOP_MARKET` sent with `reduceOnly=true` and a quantity equal to the whole position was not cancelled when another order closed the position. It stayed working on the flat position for the 30 seconds we watched, until we cancelled it. A `closePosition=true` stop was not recorded | After any close that did not go through the protective order, cancel the protection yourself, then read the algo open-order list |
+| `ALGO_UPDATE` arrived on the USDⓈ-M user stream when a conditional order was placed and when it was cancelled. We recorded no other transition (trigger, expiry or trigger reject), and whether an `ORDER_TRADE_UPDATE` also arrived for the placement or the cancel is not recorded | Handle it as its own event. Only the USDⓈ-M client decodes it, as `usdm::UserPayload::AlgoUpdate`; `coinm::UserPayload` has no such variant, so an `ALGO_UPDATE` on a COIN-M stream would arrive as `UserPayload::Unknown`, which is not a gap |
 | USDⓈ-M `DELETE /fapi/v1/allOpenOrders` and `DELETE /fapi/v1/algoOpenOrders` each answer `{"code":200,"msg":...}` with no order list. The cancellations show only on the user stream | Keep the stream open across the call and take the cancellations from it, then read both open-order lists |
-| Spot `DELETE /api/v3/openOrders` answers with the list of cancelled orders. Order-list entries in it carry no `orderId` | Do not expect an `orderId` on every entry. The client keeps an entry without one as `BatchResult::Unknown`, which is not a refusal; confirm it with venue reads |
+| Spot `DELETE /api/v3/openOrders` answers with the cancelled orders, and with one entry for each cancelled order list. A list entry carries no `orderId` | Do not expect an `orderId` on every entry. Known client gap ([#135](https://github.com/SharurTrading/binance-rs/issues/135)): the client decodes a list entry as `BatchResult::Unknown`, which is not a refusal although the entry is a cancel receipt; confirm it with venue reads |
+| Spot WebSocket API `openOrders.cancelAll` is documented to answer with the same two kinds of entry | Known client gap ([#136](https://github.com/SharurTrading/binance-rs/issues/136)): the client's model requires `orderListId`, `orders` and `orderId` together, so it decodes every member as `BatchResult::Unknown`, whichever kind it is. Confirm the cancels with venue reads |
 
 ### Event order: statements and fills
 
@@ -396,6 +397,9 @@ What this client deliberately leaves to you:
 | Fills during a lost connection | What the stream drops and what history then returns is not proven |
 | COIN-M and Spot fill order | No fill recorded on either |
 | Hedge-mode closes | Not recorded live |
+| Algo order events | Whether COIN-M pushes `ALGO_UPDATE` is not recorded, nor is any USDⓈ-M transition beyond placement and cancel, or whether an `ORDER_TRADE_UPDATE` accompanies them |
+| `closePosition=true` stop on a flat position | Not recorded; the stop seen on Demo used `reduceOnly=true` |
+| Spot cancel-all receipts | The client decodes an order-list entry of `DELETE /api/v3/openOrders` as `Unknown` ([#135](https://github.com/SharurTrading/binance-rs/issues/135)), and every member of a WebSocket `openOrders.cancelAll` reply as `Unknown` ([#136](https://github.com/SharurTrading/binance-rs/issues/136)) |
 | Futures roll notices | Unknown whether `!contractInfo` pushes a roll |
 | Undefined statuses and contract types | Tracked in [#80](https://github.com/SharurTrading/binance-rs/issues/80) |
 | Old Trades Lookup reach | "One month" has no stated length; the edge has not been measured |

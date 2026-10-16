@@ -1,0 +1,187 @@
+// SPDX-FileCopyrightText: 2026 Kevin Monaghan
+// SPDX-License-Identifier: MIT-0
+
+//! Generated native market stream names.
+
+impl crate::advanced_trading::streams::Stream<super::Protocol> {
+    /// Native `aggregateTradeStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#aggregate-trade-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn aggregate_trade_stream(symbol: &crate::Symbol) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@aggTrade".to_owned();
+        name = name.replace("{symbol}", &symbol.as_str().to_lowercase());
+        Self::new(name, "aggregateTradeStream")
+    }
+
+    /// Native `allBookTickerStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-book-ticker-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn all_book_ticker_stream() -> Result<Self, crate::Error> {
+        let name = "!bookTicker".to_owned();
+        Self::new(name, "allBookTickerStream")
+    }
+
+    /// Native `allMiniTickerStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-mini-ticker-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn all_mini_ticker_stream() -> Result<Self, crate::Error> {
+        let name = "!miniTicker@arr".to_owned();
+        Self::new(name, "allMiniTickerStream")
+    }
+
+    /// Native `allTickerStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-ticker-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn all_ticker_stream() -> Result<Self, crate::Error> {
+        let name = "!ticker@arr".to_owned();
+        Self::new(name, "allTickerStream")
+    }
+
+    /// Native `allTokens24hTickerStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-tokens24h-ticker-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn all_tokens24h_ticker_stream() -> Result<Self, crate::Error> {
+        let name = "came@allTokens@ticker24".to_owned();
+        Self::new(name, "allTokens24hTickerStream")
+    }
+
+    /// Native `bookTickerStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#book-ticker-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn book_ticker_stream(symbol: &crate::Symbol) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@bookTicker".to_owned();
+        name = name.replace("{symbol}", &symbol.as_str().to_lowercase());
+        Self::new(name, "bookTickerStream")
+    }
+
+    /// Native `partialDepthStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#partial-depth-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn partial_depth_stream(
+        symbol: &crate::Symbol,
+        levels: &str,
+        interval: &str,
+    ) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@depth{levels}@{interval}".to_owned();
+        name = name.replace("{symbol}", &symbol.as_str().to_lowercase());
+        if levels.is_empty() || levels.contains(['/', '?', '&', '#']) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        if !["5", "10", "20"].contains(&levels) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        name = name.replace("{levels}", levels);
+        if interval.is_empty() || interval.contains(['/', '?', '&', '#']) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        if !["0ms", "100ms", "500ms"].contains(&interval) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        name = name.replace("{interval}", interval);
+        Self::new(name, "partialDepthStream")
+    }
+
+    /// Native `fullDepthStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#full-depth-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn full_depth_stream(symbol: &crate::Symbol, interval: &str) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@fulldepth@{interval}".to_owned();
+        name = name.replace("{symbol}", &symbol.as_str().to_lowercase());
+        if interval.is_empty() || interval.contains(['/', '?', '&', '#']) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        if !["0ms", "100ms", "500ms"].contains(&interval) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        name = name.replace("{interval}", interval);
+        Self::new(name, "fullDepthStream")
+    }
+
+    /// Native `klineStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#kline-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn kline_stream(symbol: &crate::Symbol, interval: &str) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@kline_{interval}".to_owned();
+        name = name.replace("{symbol}", &symbol.as_str().to_lowercase());
+        if interval.is_empty() || interval.contains(['/', '?', '&', '#']) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        if ![
+            "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d", "3d", "1w",
+            "1M",
+        ]
+        .contains(&interval)
+        {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        name = name.replace("{interval}", interval);
+        Self::new(name, "klineStream")
+    }
+
+    /// Native `contractKlineStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#contract-kline-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn contract_kline_stream(
+        contract_address: &str,
+        chain_id: &str,
+        interval: &str,
+    ) -> Result<Self, crate::Error> {
+        let mut name = "came@{contractAddress}@{chainId}@kline_{interval}".to_owned();
+        if contract_address.is_empty() || contract_address.contains(['/', '?', '&', '#']) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        name = name.replace("{contractAddress}", contract_address);
+        if chain_id.is_empty() || chain_id.contains(['/', '?', '&', '#']) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        name = name.replace("{chainId}", chain_id);
+        if interval.is_empty() || interval.contains(['/', '?', '&', '#']) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        if !["1s", "1m", "5m", "15m", "1h", "4h", "1d"].contains(&interval) {
+            return Err(crate::Error::Validation("native stream parameter"));
+        }
+        name = name.replace("{interval}", interval);
+        Self::new(name, "contractKlineStream")
+    }
+
+    /// Native `miniTickerStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#mini-ticker-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn mini_ticker_stream(symbol: &crate::Symbol) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@miniTicker".to_owned();
+        name = name.replace("{symbol}", &symbol.as_str().to_lowercase());
+        Self::new(name, "miniTickerStream")
+    }
+
+    /// Native `tickerStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#ticker-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn ticker_stream(symbol: &crate::Symbol) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@ticker".to_owned();
+        name = name.replace("{symbol}", &symbol.as_str().to_lowercase());
+        Self::new(name, "tickerStream")
+    }
+
+    /// Native `tradeStream` stream; see <https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#trade-stream>.
+    ///
+    /// # Errors
+    /// Refuses invalid native parameters or stream-path delimiters.
+    pub fn trade_stream(symbol: &crate::Symbol) -> Result<Self, crate::Error> {
+        let mut name = "{symbol}@trade".to_owned();
+        name = name.replace("{symbol}", &symbol.as_str().to_lowercase());
+        Self::new(name, "tradeStream")
+    }
+}

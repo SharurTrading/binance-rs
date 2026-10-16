@@ -53,24 +53,42 @@ fn asset_evidence_is_required_and_exact() {
         .is_err()
     );
 }
-#[test]
-fn withdrawal_requires_caller_id_and_redacts_destination() {
-    use wallet::rest_requests::Withdraw;
-    let request = Withdraw::new()
-        .coin(Asset::new("BTC").unwrap())
-        .address(binance_client::SensitiveString::new(
-            "synthetic-destination",
-        ))
-        .amount(Decimal::ONE);
-    assert!(request.clone().build().is_err());
-    let request = request
-        .withdraw_order_id(wallet::WithdrawalId::new("caller-withdrawal").unwrap())
+#[tokio::test]
+async fn withdrawal_history_retains_read_only_reconciliation_and_redacts_destination() {
+    let mut fixture = HttpFixture::new(
+        200,
+        "",
+        r#"[{"coin":"BTC","amount":"0.125","withdrawOrderId":"caller-history","address":"synthetic-destination","txId":"synthetic-transaction"}]"#,
+        None,
+        false,
+    )
+    .await;
+    let client = wallet::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+    let request = wallet::rest_requests::WithdrawHistory::new()
+        .withdraw_order_id(wallet::WithdrawalId::new("caller-history").unwrap())
         .build()
         .unwrap();
-    assert!(!format!("{request:?}").contains("synthetic-destination"));
+    let response = client.withdraw_history(&request, deadline()).await.unwrap();
+    assert_eq!(response.data[0].coin.as_str(), "BTC");
+    assert_eq!(response.data[0].amount, Decimal::new(125, 3));
+    assert_eq!(
+        response.data[0]
+            .withdraw_order_id
+            .as_ref()
+            .unwrap()
+            .as_str(),
+        "caller-history"
+    );
+    let debug = format!("{:?}", response.data);
+    assert!(!debug.contains("synthetic-destination"));
+    assert!(!debug.contains("synthetic-transaction"));
+    let request = fixture.requests.recv().await.unwrap();
+    assert!(request.starts_with("GET /sapi/v1/capital/withdraw/history?"));
+    assert!(request.contains("withdrawOrderId=caller-history"));
+    fixture.finish().await;
 }
 #[tokio::test]
-async fn endpoint_weight_headers_survive_truncated_withdrawal_without_retry() {
+async fn endpoint_weight_headers_survive_truncated_transfer_without_retry() {
     let fixture = HttpFixture::new(
         200,
         "X-SAPI-USED-UID-WEIGHT-1M: 180000\r\n",
@@ -80,16 +98,16 @@ async fn endpoint_weight_headers_survive_truncated_withdrawal_without_retry() {
     )
     .await;
     let client = wallet::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
-    let request = wallet::rest_requests::Withdraw::new()
-        .coin(Asset::new("BTC").unwrap())
-        .address(binance_client::SensitiveString::new(
-            "synthetic-destination",
-        ))
+    let request = wallet::rest_requests::UserUniversalTransfer::new()
+        .type_value("MAIN_UMFUTURE")
+        .asset(Asset::new("BTC").unwrap())
         .amount(Decimal::ONE)
-        .withdraw_order_id(wallet::WithdrawalId::new("caller-withdrawal").unwrap())
         .build()
         .unwrap();
-    let error = client.withdraw(&request, deadline()).await.unwrap_err();
+    let error = client
+        .user_universal_transfer(&request, deadline())
+        .await
+        .unwrap_err();
     assert_eq!(error.outcome(), Some(Outcome::Unknown));
     let Error::Transport {
         meta: Some(meta),
@@ -100,9 +118,12 @@ async fn endpoint_weight_headers_survive_truncated_withdrawal_without_retry() {
         panic!("transport evidence")
     };
     assert_eq!(meta.rates.counters["x-sapi-used-uid-weight-1m"], 180_000);
-    assert_eq!(client_order_ids["withdrawOrderId"], "caller-withdrawal");
+    assert!(client_order_ids.is_empty());
     assert!(matches!(
-        client.clone().withdraw(&request, deadline()).await,
+        client
+            .clone()
+            .user_universal_transfer(&request, deadline())
+            .await,
         Err(Error::Admission { .. })
     ));
     assert_eq!(fixture.connections_accepted(), 1);
@@ -120,13 +141,10 @@ async fn definitive_codes_match_the_pinned_error_code_snapshot() {
     ))
     .unwrap();
     let snapshot: serde_json::Value = serde_json::from_str(&snapshot).unwrap();
-    let request = wallet::rest_requests::Withdraw::new()
-        .coin(Asset::new("BTC").unwrap())
-        .address(binance_client::SensitiveString::new(
-            "synthetic-destination",
-        ))
+    let request = wallet::rest_requests::UserUniversalTransfer::new()
+        .type_value("MAIN_UMFUTURE")
+        .asset(Asset::new("BTC").unwrap())
         .amount(Decimal::ONE)
-        .withdraw_order_id(wallet::WithdrawalId::new("caller-withdrawal").unwrap())
         .build()
         .unwrap();
     for (field, expected) in [
@@ -138,7 +156,10 @@ async fn definitive_codes_match_the_pinned_error_code_snapshot() {
             let fixture =
                 HttpFixture::new(400, "", &format!("{{\"code\":{code}}}"), None, false).await;
             let client = wallet::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
-            let error = client.withdraw(&request, deadline()).await.unwrap_err();
+            let error = client
+                .user_universal_transfer(&request, deadline())
+                .await
+                .unwrap_err();
             assert_eq!(error.outcome(), Some(expected), "code {code}");
             assert_eq!(fixture.connections_accepted(), 1);
             fixture.finish().await;
@@ -148,7 +169,10 @@ async fn definitive_codes_match_the_pinned_error_code_snapshot() {
         let code = entry["code"].as_i64().unwrap();
         let fixture = HttpFixture::new(503, "", &format!("{{\"code\":{code}}}"), None, false).await;
         let client = wallet::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
-        let error = client.withdraw(&request, deadline()).await.unwrap_err();
+        let error = client
+            .user_universal_transfer(&request, deadline())
+            .await
+            .unwrap_err();
         assert_eq!(error.outcome(), Some(Outcome::Unknown), "5xx code {code}");
         fixture.finish().await;
     }
@@ -397,7 +421,7 @@ fn capital_and_dividend_history_ranges_match_documented_boundaries() {
 fn native_network_identity_is_validated_without_inferring_asset() {
     assert!(wallet::Network::new("").is_err());
     assert!(wallet::Network::new("bad\nnetwork").is_err());
-    let request = wallet::rest_requests::Withdraw::new()
+    let request = wallet::rest_requests::DepositAddress::new()
         .network(wallet::Network::new("SYNTHETIC_NETWORK").unwrap());
     assert_eq!(
         serde_json::to_value(request).unwrap()["network"],

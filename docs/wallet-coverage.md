@@ -5,7 +5,8 @@ SPDX-License-Identifier: MIT-0
 
 # Wallet REST coverage and protocol evidence
 
-Checked **2026-10-10** against the official catalog: 50 REST operations.
+Checked **2026-10-10** against the official catalog: 50 REST operations, of which
+43 are executable bindings and 7 are explicitly excluded by crate scope.
 Bindings and synthetic transport tests establish the described JSON contracts;
 no credentialed or live mutation probe was run.
 
@@ -24,10 +25,19 @@ wallet rows. Dust conversion results similarly retain the chosen target asset.
 The provenance wrapper is not a fabricated venue response field. Fixed BTC/BNB
 valuation fields retain their documented names; the client never computes them.
 
-Withdrawals require a caller-owned `WithdrawalId`. Errors retain that identity,
-HTTP status, venue code, and quota evidence. Transfer endpoints without a caller
-ID retain their native venue transaction identity; uncertain results require
-venue history reads. Every mutation is attempted once, including after truncated
+External-wallet withdrawal submission, withdrawal switches and withdrawal
+address discovery are outside this crate's scope. The normalized schema retains
+those seven operations as excluded evidence; the generator emits no request builders,
+response models or client methods for them. Read-only withdrawal history, quota/status and account/network evidence remain
+available, along
+with internal Binance transfers and deposit workflows. Historical caller-supplied
+withdrawal identities use `WithdrawalId` without enabling submission. This API
+boundary does not enforce venue account permissions: a platform withdrawal shield
+also requires credentials without withdrawal permission.
+
+Transfer endpoints without a caller ID retain their native venue transaction
+identity; uncertain results require venue history reads. Errors retain HTTP status,
+venue code and quota evidence. Every mutation is attempted once, including after truncated
 bodies, timeout, 5xx, and decode failure. Read-only POST queries report `ReadFailed`.
 Definitive request refusals are pinned in `schema/wallet-error-codes.json`
 against the product's documented error-code page and machine-checked in CI;
@@ -107,7 +117,8 @@ Dividend history allows up to and including 180 days, as specified by the [offic
 > acceptance of a multi-ID request.
 
 `tests/wallet_contract.rs` covers precision, malformed/missing asset evidence,
-withdrawal caller IDs and redaction, truncated mutations without retry, quota
+read-only withdrawal caller-ID filters and redaction, truncated internal transfer
+mutations without retry, quota
 headers, independent endpoints, read-only POST failure, isolated transfer symbols,
 comma-separated dust assets, requested quote/target asset provenance, and native
 capital/dividend history range, daily snapshot intervals shorter than 30 days,
@@ -129,9 +140,10 @@ tracks this implementation. Margin and Options trading have their own clients.
 
 The [Wallet change log](https://developers.binance.com/en/docs/products/wallet/change-log)
 adds Brazil questionnaire support on 2026-09-30 and clarifies purpose/relationship
-codes on 2026-10-01. Questionnaire answers remain explicit caller-supplied sensitive
-JSON, so jurisdictional selection and requirements are never fabricated by this
-client. The refreshed schema contains the same 50 operations. Catalog sample
+codes on 2026-10-01. Deposit questionnaire answers remain explicit caller-supplied
+sensitive JSON, so jurisdictional selection and requirements are never fabricated
+by this client. The refreshed schema contains the same 50 catalog operations;
+7 are deliberately excluded. Catalog sample
 asset keys and the misplaced transfer-type enums on `fromSymbol`/`toSymbol` are
 normalized into native asset maps and symbol identities, as before.
 
@@ -143,8 +155,6 @@ normalized into native asset maps and symbol identities, as before.
 | [accountInfo](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#account-info) | GET | `/sapi/v1/account/info` | IP | 1 |
 | [accountStatus](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#account-status) | GET | `/sapi/v1/account/status` | IP | 1 |
 | [dailyAccountSnapshot](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#daily-account-snapshot) | GET | `/sapi/v1/accountSnapshot` | IP | 2400 |
-| [disableFastWithdrawSwitch](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#disable-fast-withdraw-switch) | POST | `/sapi/v1/account/disableFastWithdrawSwitch` | IP | 1 |
-| [enableFastWithdrawSwitch](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#enable-fast-withdraw-switch) | POST | `/sapi/v1/account/enableFastWithdrawSwitch` | IP | 1 |
 | [getApiKeyPermission](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#get-api-key-permission) | GET | `/sapi/v1/account/apiRestrictions` | IP | 1 |
 | [assetDetail](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#asset-detail) | GET | `/sapi/v1/asset/assetDetail` | IP | 1 |
 | [assetDividendRecord](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/asset#asset-dividend-record) | GET | `/sapi/v1/asset/assetDividend` | IP | 10 |
@@ -168,19 +178,15 @@ normalized into native asset maps and symbol identities, as before.
 | [depositAddress](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#deposit-address) | GET | `/sapi/v1/capital/deposit/address` | IP | 10 |
 | [depositHistory](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#deposit-history) | GET | `/sapi/v1/capital/deposit/hisrec` | IP | 1 |
 | [fetchDepositAddressListWithNetwork](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-deposit-address-list-with-network) | GET | `/sapi/v1/capital/deposit/address/list` | IP | 10 |
-| [fetchWithdrawAddressList](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-address-list) | GET | `/sapi/v1/capital/withdraw/address/list` | IP | 10 |
 | [fetchWithdrawQuota](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-quota) | GET | `/sapi/v1/capital/withdraw/quota` | IP | 10 |
 | [oneClickArrivalDepositApply](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#one-click-arrival-deposit-apply) | POST | `/sapi/v1/capital/deposit/credit-apply` | IP | 1 |
-| [withdraw](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw) | POST | `/sapi/v1/capital/withdraw/apply` | UID | 900 |
 | [withdrawHistory](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw-history) | GET | `/sapi/v1/capital/withdraw/history` | UID | 18000 |
 | [getSymbolsDelistScheduleForSpot](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/others#get-symbols-delist-schedule-for-spot) | GET | `/sapi/v1/spot/delist-schedule` | IP | 100 |
 | [systemStatus](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/others#system-status) | GET | `/sapi/v1/system/status` | IP | 1 |
-| [brokerWithdraw](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#broker-withdraw) | POST | `/sapi/v1/localentity/broker/withdraw/apply` | UID | 600 |
 | [checkQuestionnaireRequirements](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#check-questionnaire-requirements) | GET | `/sapi/v1/localentity/questionnaire-requirements` | IP | 1 |
 | [getCountryList](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#get-country-list) | GET | `/sapi/v1/localentity/country/list` | IP | 1 |
 | [depositHistoryTravelRule](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#deposit-history-travel-rule) | GET | `/sapi/v1/localentity/deposit/history` | IP | 1 |
 | [depositHistoryV2](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#deposit-history-v2) | GET | `/sapi/v2/localentity/deposit/history` | IP | 1 |
-| [fetchAddressVerificationList](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#fetch-address-verification-list) | GET | `/sapi/v1/addressVerify/list` | IP | 1 |
 | [getRegionList](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#get-region-list) | GET | `/sapi/v1/localentity/region/list` | IP | 1 |
 | [submitDepositQuestionnaire](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#submit-deposit-questionnaire) | PUT | `/sapi/v1/localentity/broker/deposit/provide-info` | UID | 600 |
 | [submitDepositQuestionnaireTravelRule](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#submit-deposit-questionnaire-travel-rule) | PUT | `/sapi/v1/localentity/deposit/provide-info` | UID | 600 |
@@ -188,4 +194,20 @@ normalized into native asset maps and symbol identities, as before.
 | [vaspList](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#vasp-list) | GET | `/sapi/v1/localentity/vasp` | IP | 1 |
 | [withdrawHistoryV1](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-history-v1) | GET | `/sapi/v1/localentity/withdraw/history` | IP | 1 |
 | [withdrawHistoryV2](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-history-v2) | GET | `/sapi/v2/localentity/withdraw/history` | IP | 1 |
-| [withdrawTravelRule](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-travel-rule) | POST | `/sapi/v1/localentity/withdraw/apply` | UID | 600 |
+
+## Excluded external-wallet withdrawal operations
+
+These catalog entries remain pinned for scope auditing and are absent from the
+public executable API. No feature flag or generic endpoint escape hatch restores
+them. `tests/ci/test_wallet_scope.py` checks the exclusions; compile-fail doctests
+check that the removed public request builders remain unavailable.
+
+| Operation | Method | Path |
+| --- | --- | --- |
+| `disableFastWithdrawSwitch` | POST | `/sapi/v1/account/disableFastWithdrawSwitch` |
+| `enableFastWithdrawSwitch` | POST | `/sapi/v1/account/enableFastWithdrawSwitch` |
+| `fetchWithdrawAddressList` | GET | `/sapi/v1/capital/withdraw/address/list` |
+| `fetchAddressVerificationList` | GET | `/sapi/v1/addressVerify/list` |
+| `withdraw` | POST | `/sapi/v1/capital/withdraw/apply` |
+| `brokerWithdraw` | POST | `/sapi/v1/localentity/broker/withdraw/apply` |
+| `withdrawTravelRule` | POST | `/sapi/v1/localentity/withdraw/apply` |

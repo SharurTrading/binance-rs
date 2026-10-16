@@ -1,0 +1,23 @@
+{
+  "source": "https://developers.binance.com/en/docs/catalog",
+  "checked": "2026-10-17",
+  "included": [
+    "portfolio-margin",
+    "portfolio-margin-pro",
+    "algo",
+    "copy-trading",
+    "alpha",
+    "stocks"
+  ],
+  "excluded": [
+    {
+      "product": "institutional-loan",
+      "reason": "Institutional lending is outside the retail trading scope."
+    },
+    {
+      "capability": "external-wallet-withdrawals",
+      "reason": "External withdrawal submissions and destination configuration are outside the crate scope. Read-only records and internal Binance transfers remain supported.",
+      "coverage": "wallet-coverage.json"
+    }
+  ]
+}

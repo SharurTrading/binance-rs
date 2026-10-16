@@ -1,0 +1,991 @@
+{
+  "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin/api/ws-streams/1.0.0/schema.yaml",
+  "sha256": "7118468a00acdd02d7cf9de326bd76b65c5fac725e7978cd1696da515d7043cf",
+  "checked": "2026-10-17",
+  "components": {
+    "schemas": {
+      "accountConfigUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "ACCOUNT_CONFIG_UPDATE"
+            ]
+          },
+          "fs": {
+            "type": "string"
+          },
+          "E": {
+            "type": "integer"
+          },
+          "T": {
+            "type": "integer"
+          },
+          "ac": {
+            "type": "object",
+            "properties": {
+              "s": {
+                "type": "string"
+              },
+              "l": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "l",
+              "s"
+            ]
+          }
+        },
+        "required": [
+          "E",
+          "T",
+          "ac",
+          "e",
+          "fs"
+        ]
+      },
+      "accountUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "ACCOUNT_UPDATE"
+            ]
+          },
+          "fs": {
+            "type": "string"
+          },
+          "E": {
+            "type": "integer"
+          },
+          "T": {
+            "type": "integer"
+          },
+          "i": {
+            "type": "string"
+          },
+          "a": {
+            "type": "object",
+            "properties": {
+              "m": {
+                "type": "string"
+              },
+              "B": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "a": {
+                      "type": "string",
+                      "x-rust-type": "crate::Asset"
+                    },
+                    "wb": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "cw": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "bc": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "required": [
+                    "a",
+                    "bc",
+                    "cw",
+                    "wb"
+                  ]
+                }
+              },
+              "P": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "s": {
+                      "type": "string"
+                    },
+                    "pa": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "ep": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "cr": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "up": {
+                      "type": "string",
+                      "x-decimal": true
+                    },
+                    "ps": {
+                      "type": "string"
+                    },
+                    "bep": {
+                      "type": "string",
+                      "x-decimal": true
+                    }
+                  },
+                  "required": [
+                    "cr",
+                    "ep",
+                    "pa",
+                    "ps",
+                    "s",
+                    "up"
+                  ]
+                }
+              },
+              "S": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "m"
+            ]
+          }
+        },
+        "required": [
+          "E",
+          "T",
+          "a",
+          "e",
+          "fs"
+        ]
+      },
+      "algoOrderUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "ALGO_UPDATE"
+            ]
+          },
+          "T": {
+            "type": "integer"
+          },
+          "E": {
+            "type": "integer"
+          },
+          "fs": {
+            "type": "string"
+          },
+          "ao": {
+            "type": "object",
+            "properties": {
+              "caid": {
+                "type": "string"
+              },
+              "aid": {
+                "type": "integer"
+              },
+              "at": {
+                "type": "string"
+              },
+              "o": {
+                "type": "string"
+              },
+              "s": {
+                "type": "string"
+              },
+              "S": {
+                "type": "string"
+              },
+              "ps": {
+                "type": "string"
+              },
+              "f": {
+                "type": "string"
+              },
+              "q": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "X": {
+                "type": "string"
+              },
+              "ai": {
+                "type": "string"
+              },
+              "ap": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "aq": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "act": {
+                "type": "string"
+              },
+              "tp": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "p": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "V": {
+                "type": "string"
+              },
+              "wt": {
+                "type": "string"
+              },
+              "pm": {
+                "type": "string"
+              },
+              "cp": {
+                "type": "boolean"
+              },
+              "pP": {
+                "type": "boolean"
+              },
+              "R": {
+                "type": "boolean"
+              },
+              "tt": {
+                "type": "integer"
+              },
+              "gtd": {
+                "type": "integer"
+              },
+              "rm": {
+                "type": "string"
+              },
+              "ia": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "S",
+              "X",
+              "o",
+              "p",
+              "q",
+              "s"
+            ]
+          }
+        },
+        "required": [
+          "E",
+          "T",
+          "ao",
+          "e",
+          "fs"
+        ]
+      },
+      "balanceUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "balanceUpdate"
+            ]
+          },
+          "E": {
+            "type": "integer"
+          },
+          "a": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          },
+          "d": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "U": {
+            "type": "integer"
+          },
+          "T": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "E",
+          "T",
+          "a",
+          "d",
+          "e"
+        ]
+      },
+      "conditionalOrderTradeUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "CONDITIONAL_ORDER_TRADE_UPDATE"
+            ]
+          },
+          "T": {
+            "type": "integer"
+          },
+          "E": {
+            "type": "integer"
+          },
+          "fs": {
+            "type": "string"
+          },
+          "so": {
+            "type": "object",
+            "properties": {
+              "s": {
+                "type": "string"
+              },
+              "c": {
+                "type": "string"
+              },
+              "si": {
+                "type": "integer"
+              },
+              "S": {
+                "type": "string"
+              },
+              "st": {
+                "type": "string"
+              },
+              "f": {
+                "type": "string"
+              },
+              "q": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "p": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "sp": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "os": {
+                "type": "string"
+              },
+              "T": {
+                "type": "integer"
+              },
+              "ut": {
+                "type": "integer"
+              },
+              "R": {
+                "type": "boolean"
+              },
+              "wt": {
+                "type": "string"
+              },
+              "ps": {
+                "type": "string"
+              },
+              "cp": {
+                "type": "boolean"
+              },
+              "AP": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "cr": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "i": {
+                "type": "integer"
+              },
+              "V": {
+                "type": "string"
+              },
+              "gtd": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "S",
+              "c",
+              "os",
+              "p",
+              "q",
+              "s",
+              "si",
+              "st"
+            ]
+          }
+        },
+        "required": [
+          "E",
+          "T",
+          "e",
+          "fs",
+          "so"
+        ]
+      },
+      "executionReport": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "executionReport"
+            ]
+          },
+          "E": {
+            "type": "integer"
+          },
+          "s": {
+            "type": "string"
+          },
+          "c": {
+            "type": "string"
+          },
+          "S": {
+            "type": "string"
+          },
+          "o": {
+            "type": "string"
+          },
+          "f": {
+            "type": "string"
+          },
+          "q": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "p": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "P": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "d": {
+            "type": "integer"
+          },
+          "F": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "g": {
+            "type": "integer"
+          },
+          "C": {
+            "type": "string"
+          },
+          "x": {
+            "type": "string"
+          },
+          "X": {
+            "type": "string"
+          },
+          "r": {
+            "type": "string"
+          },
+          "i": {
+            "type": "integer"
+          },
+          "l": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "z": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "L": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "n": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "N": {
+            "type": "string",
+            "x-rust-type": "crate::Asset",
+            "nullable": true
+          },
+          "T": {
+            "type": "integer"
+          },
+          "t": {
+            "type": "integer"
+          },
+          "v": {
+            "type": "integer"
+          },
+          "I": {
+            "type": "integer"
+          },
+          "w": {
+            "type": "boolean"
+          },
+          "m": {
+            "type": "boolean"
+          },
+          "O": {
+            "type": "integer"
+          },
+          "Z": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "Y": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "Q": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "D": {
+            "type": "integer"
+          },
+          "j": {
+            "type": "integer"
+          },
+          "J": {
+            "type": "integer"
+          },
+          "W": {
+            "type": "integer"
+          },
+          "V": {
+            "type": "string"
+          },
+          "u": {
+            "type": "integer"
+          },
+          "U": {
+            "type": "integer"
+          },
+          "A": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "B": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "Cs": {
+            "type": "string"
+          },
+          "pl": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "pL": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "pY": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "eR": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "C",
+          "E",
+          "F",
+          "I",
+          "L",
+          "O",
+          "P",
+          "Q",
+          "S",
+          "T",
+          "X",
+          "Y",
+          "Z",
+          "c",
+          "e",
+          "f",
+          "g",
+          "i",
+          "l",
+          "m",
+          "n",
+          "o",
+          "p",
+          "q",
+          "r",
+          "s",
+          "t",
+          "w",
+          "x",
+          "z"
+        ]
+      },
+      "liabilityChange": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "liabilityChange"
+            ]
+          },
+          "E": {
+            "type": "integer"
+          },
+          "a": {
+            "type": "string",
+            "x-rust-type": "crate::Asset"
+          },
+          "t": {
+            "type": "string"
+          },
+          "T": {
+            "type": "integer"
+          },
+          "p": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "i": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "l": {
+            "type": "string",
+            "x-decimal": true
+          }
+        },
+        "required": [
+          "E",
+          "a",
+          "e",
+          "i",
+          "l",
+          "p"
+        ]
+      },
+      "listenKeyExpired": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "listenKeyExpired"
+            ]
+          },
+          "E": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "E",
+          "e"
+        ]
+      },
+      "openOrderLoss": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "openOrderLoss"
+            ]
+          },
+          "E": {
+            "type": "integer"
+          },
+          "O": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string"
+                },
+                "o": {
+                  "type": "string",
+                  "x-decimal": true
+                }
+              },
+              "required": [
+                "a",
+                "o"
+              ]
+            }
+          }
+        },
+        "required": [
+          "E",
+          "O",
+          "e"
+        ]
+      },
+      "orderTradeUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "ORDER_TRADE_UPDATE"
+            ]
+          },
+          "fs": {
+            "type": "string"
+          },
+          "E": {
+            "type": "integer"
+          },
+          "T": {
+            "type": "integer"
+          },
+          "i": {
+            "type": "string"
+          },
+          "o": {
+            "type": "object",
+            "properties": {
+              "s": {
+                "type": "string"
+              },
+              "c": {
+                "type": "string"
+              },
+              "S": {
+                "type": "string"
+              },
+              "o": {
+                "type": "string"
+              },
+              "f": {
+                "type": "string"
+              },
+              "q": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "p": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "ap": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "sp": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "x": {
+                "type": "string"
+              },
+              "X": {
+                "type": "string"
+              },
+              "i": {
+                "type": "integer"
+              },
+              "M": {
+                "type": "string"
+              },
+              "l": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "z": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "L": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "N": {
+                "type": "string",
+                "x-rust-type": "crate::Asset",
+                "nullable": true
+              },
+              "n": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "T": {
+                "type": "integer"
+              },
+              "t": {
+                "type": "integer"
+              },
+              "b": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "a": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "m": {
+                "type": "boolean"
+              },
+              "R": {
+                "type": "boolean"
+              },
+              "ps": {
+                "type": "string"
+              },
+              "rp": {
+                "type": "string",
+                "x-decimal": true
+              },
+              "st": {
+                "type": "string"
+              },
+              "si": {
+                "type": "integer"
+              },
+              "V": {
+                "type": "string"
+              },
+              "gtd": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "L",
+              "R",
+              "S",
+              "T",
+              "X",
+              "a",
+              "ap",
+              "b",
+              "c",
+              "f",
+              "i",
+              "l",
+              "m",
+              "o",
+              "p",
+              "ps",
+              "q",
+              "rp",
+              "s",
+              "sp",
+              "t",
+              "x",
+              "z"
+            ]
+          }
+        },
+        "required": [
+          "E",
+          "T",
+          "e",
+          "fs",
+          "o"
+        ]
+      },
+      "outboundAccountPosition": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "outboundAccountPosition"
+            ]
+          },
+          "E": {
+            "type": "integer"
+          },
+          "u": {
+            "type": "integer"
+          },
+          "U": {
+            "type": "integer"
+          },
+          "B": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string",
+                  "x-rust-type": "crate::Asset"
+                },
+                "f": {
+                  "type": "string",
+                  "x-decimal": true
+                },
+                "l": {
+                  "type": "string",
+                  "x-decimal": true
+                }
+              },
+              "required": [
+                "a",
+                "f",
+                "l"
+              ]
+            }
+          }
+        },
+        "required": [
+          "B",
+          "E",
+          "e",
+          "u"
+        ]
+      },
+      "riskLevelChange": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "riskLevelChange"
+            ]
+          },
+          "E": {
+            "type": "integer"
+          },
+          "u": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "s": {
+            "type": "string"
+          },
+          "eq": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "ae": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "m": {
+            "type": "string",
+            "x-decimal": true
+          }
+        },
+        "required": [
+          "E",
+          "ae",
+          "e",
+          "eq",
+          "m",
+          "s",
+          "u"
+        ]
+      }
+    }
+  },
+  "operations": []
+}

@@ -113,6 +113,14 @@ pub struct VenueFailure {
     pub operation: &'static str,
     /// Venue error code, absent if the error envelope itself was malformed.
     pub code: Option<i64>,
+    /// Exact native string code, including leading zeros, when the product uses
+    /// a string envelope. Redacted because future values may contain sensitive text.
+    pub text_code: Option<super::SensitiveString>,
+    /// Native unsuccessful/unknown submission status, retained without inventing
+    /// acceptance from HTTP success. This is not an order lifecycle status.
+    pub service_status: Option<super::SensitiveString>,
+    /// Exact service success flag when the product supplies one.
+    pub service_success: Option<bool>,
     /// Exact venue explanation when `msg` or `message` is a string. Explicit access
     /// is required because the venue may echo sensitive request data in this field.
     pub message: Option<VenueMessage>,
@@ -129,7 +137,8 @@ pub struct VenueFailure {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct PartialOperation {
-    /// Both legs remain present, including not-attempted and unknown outcomes.
+    /// Every venue-reported leg remains, including unknown outcomes. Empty when
+    /// the product reports only an aggregate partial outcome without leg identities.
     pub legs: BTreeMap<String, OperationLeg>,
     /// Strongest documented overall execution evidence.
     pub outcome: Outcome,
@@ -423,6 +432,15 @@ fn failure_classified(
         status,
         operation,
         code,
+        text_code: value
+            .get("code")
+            .and_then(serde_json::Value::as_str)
+            .map(super::SensitiveString::new),
+        service_status: value
+            .get("status")
+            .and_then(serde_json::Value::as_str)
+            .map(super::SensitiveString::new),
+        service_success: value.get("success").and_then(serde_json::Value::as_bool),
         message,
         outcome,
         rates,

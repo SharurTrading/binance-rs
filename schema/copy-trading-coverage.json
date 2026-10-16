@@ -1,0 +1,16 @@
+{
+  "rest": [
+    {
+      "name": "getFuturesLeadTraderStatus",
+      "method": "GET",
+      "path": "/sapi/v1/copyTrading/futures/userStatus",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-copy-trading/api/rest-api/future-copy-trading#get-futures-lead-trader-status"
+    },
+    {
+      "name": "getFuturesLeadTradingSymbolWhitelist",
+      "method": "GET",
+      "path": "/sapi/v1/copyTrading/futures/leadSymbol",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-copy-trading/api/rest-api/future-copy-trading#get-futures-lead-trading-symbol-whitelist"
+    }
+  ]
+}

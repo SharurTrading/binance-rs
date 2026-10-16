@@ -19,17 +19,37 @@ SharurTrading. This project is not affiliated with or endorsed by Binance.
 > public probes do not establish live trading readiness. `publish = false` remains
 > in force.
 
+External-wallet withdrawals and withdrawal destination/configuration APIs are
+excluded from this crate. Internal Binance transfers and read-only withdrawal
+history/status remain available. A platform withdrawal shield also requires API
+credentials without withdrawal permission.
+
 Seven separate JSON product clients are available under `binance_client::core_trading`:
 
 | Product | REST | WebSocket API | Market streams | User event kinds |
 | --- | ---: | ---: | ---: | ---: |
 | USDⓈ-M | 95 | 18 + 3 session methods | 20 | 10 |
 | Spot (JSON catalog) | 48 | 52 + 3 session methods | 15 | 6 |
-| Wallet | 50 | — | — | — |
+| Wallet | 43 | — | — | — |
 | Convert | 9 | — | — | — |
-| COIN-M (initial coverage) | 63 | 10 + 3 session methods | 19 | 7 |
+| COIN-M (initial coverage) | 67 | 10 + 3 session methods | 19 | 7 |
 | Margin | 66 bindings | Listen-token subscription | Risk/execution streams | Native Margin events |
 | Options | 44 | — | 10 | 6 |
+
+Advanced Trading clients are available under `binance_client::advanced_trading`:
+
+| Product | REST | Market stream definitions | User event kinds |
+| --- | ---: | ---: | ---: |
+| Portfolio Margin | 102 | — | 12 |
+| Portfolio Margin Pro | 24 | — | 2 |
+| Algo Trading (Spot/Futures TWAP and VP) | 12 | — | — |
+| Copy Trading | 2 | — | — |
+| Alpha Trading | 6 | 13 | — |
+| Stocks Trading | 16 | 6 | 1 |
+
+[Advanced Trading coverage](docs/advanced-trading-coverage.md) records the native
+routes, protocol sources, quota rules and synthetic verification limits.
+Institutional Loan is outside the crate's retail trading scope.
 
 [USDⓈ-M coverage](docs/coverage.md) and
 [Spot/COIN-M coverage](docs/spot-coinm-coverage.md), and
@@ -61,7 +81,7 @@ src/
 ├── core/: shared identities, credentials, time, transport and rate budgets
 └── core_trading/
     ├── usdm/: linear Futures models, requests, streams
-    ├── wallet/: native balances, networks, withdrawals, SAPI endpoint scopes
+    ├── wallet/: native balances, networks, histories, internal transfers, SAPI scopes
     ├── convert/: native quote/limit amounts, expiry authority, SAPI endpoint scopes
     ├── margin/: cross/isolated balances, borrowing, orders, execution/risk events
     ├── options/: native option contracts, Greeks, orders, routed streams

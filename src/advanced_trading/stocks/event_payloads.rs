@@ -1,0 +1,84 @@
+// SPDX-FileCopyrightText: 2026 Kevin Monaghan
+// SPDX-License-Identifier: MIT-0
+
+//! Native stream dispatch with retained future-event evidence.
+pub use crate::core_trading::wallet::event_payloads::UnknownMessage;
+/// A native event, without cross-product account or instrument normalization.
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub enum Payload {
+    /// Native `priceStream` evidence.
+    PriceStream(Box<super::stream_models::PriceStreamEvent>),
+    /// Native `quoteStream` evidence.
+    QuoteStream(Box<super::stream_models::QuoteStreamEvent>),
+    /// Native `klineStream` evidence.
+    KlineStream(Box<super::stream_models::KlineStreamEvent>),
+    /// Native `calendarStream` evidence.
+    CalendarStream(Box<super::stream_models::CalendarStreamEvent>),
+    /// Native `tradabilityStream` evidence.
+    TradabilityStream(Box<super::stream_models::TradabilityStreamEvent>),
+    /// Native `tradingStatusStream` evidence.
+    TradingStatusStream(Box<super::stream_models::TradingStatusStreamEvent>),
+    /// Native `orderReportStream` evidence.
+    OrderReportStream(Box<super::stream_models::OrderReportStreamEvent>),
+    /// Future native event or stream shape, retained with redacted diagnostics.
+    Unknown(UnknownMessage),
+}
+/// Decode one named market stream, or a user event when `kind` is absent.
+///
+/// # Errors
+/// Returns a gap for malformed known evidence, including financial parse failures.
+pub fn decode(kind: Option<&str>, value: serde_json::Value) -> Result<Payload, crate::Error> {
+    let kind = kind.or_else(
+        || match value.get("e").and_then(serde_json::Value::as_str) {
+            Some("price") => Some("priceStream"),
+            Some("quote") => Some("quoteStream"),
+            Some("kline") => Some("klineStream"),
+            Some("calendar") => Some("calendarStream"),
+            Some("tradability") => Some("tradabilityStream"),
+            Some("tradingStatus") => Some("tradingStatusStream"),
+            Some("orderReport") => Some("orderReportStream"),
+            _ => None,
+        },
+    );
+    match kind {
+        Some("priceStream") => decode_market(value, Some("price"), Payload::PriceStream),
+        Some("quoteStream") => decode_market(value, Some("quote"), Payload::QuoteStream),
+        Some("klineStream") => decode_market(value, Some("kline"), Payload::KlineStream),
+        Some("calendarStream") => decode_market(value, Some("calendar"), Payload::CalendarStream),
+        Some("tradabilityStream") => {
+            decode_market(value, Some("tradability"), Payload::TradabilityStream)
+        }
+        Some("tradingStatusStream") => {
+            decode_market(value, Some("tradingStatus"), Payload::TradingStatusStream)
+        }
+        Some("orderReportStream") => {
+            decode_market(value, Some("orderReport"), Payload::OrderReportStream)
+        }
+        _ => Ok(Payload::Unknown(value.into())),
+    }
+}
+
+fn decode_value<T: serde::de::DeserializeOwned>(
+    value: serde_json::Value,
+    wrap: fn(Box<T>) -> Payload,
+) -> Result<Payload, crate::Error> {
+    serde_json::from_value(value)
+        .map(|value| wrap(Box::new(value)))
+        .map_err(|_| crate::Error::Gap("malformed native stream event"))
+}
+fn decode_market<T: serde::de::DeserializeOwned>(
+    value: serde_json::Value,
+    event: Option<&str>,
+    wrap: fn(Box<T>) -> Payload,
+) -> Result<Payload, crate::Error> {
+    if event.is_some_and(|expected| {
+        value
+            .get("e")
+            .and_then(serde_json::Value::as_str)
+            .is_some_and(|actual| actual != expected)
+    }) {
+        return Ok(Payload::Unknown(value.into()));
+    }
+    decode_value(value, wrap)
+}

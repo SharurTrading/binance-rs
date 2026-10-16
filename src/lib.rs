@@ -9,6 +9,7 @@
 //! credentials, order IDs, trading policy, and recovery of ambiguous mutations.
 //! Infrastructure is shared without conflating product account or contract models.
 
+pub mod advanced_trading;
 pub mod core_trading;
 pub use core_trading::{coinm, convert, margin, options, spot, usdm, wallet};
 /// Read-only demo metadata example; callers own the runtime.

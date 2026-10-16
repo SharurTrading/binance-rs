@@ -202,6 +202,7 @@ impl MarketStreams {
                 time_unit: TimeUnit::Microseconds,
                 binary_decoder: Some(super::market::decode_value),
                 api_key_header: true,
+                max_generation_age: Some(std::time::Duration::from_hours(24)),
             },
         )
         .await?;

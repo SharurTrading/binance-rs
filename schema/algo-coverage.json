@@ -1,0 +1,76 @@
+{
+  "rest": [
+    {
+      "name": "cancelAlgoOrderFutureAlgo",
+      "method": "DELETE",
+      "path": "/sapi/v1/algo/futures/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#cancel-algo-order-future-algo"
+    },
+    {
+      "name": "queryCurrentAlgoOpenOrdersFutureAlgo",
+      "method": "GET",
+      "path": "/sapi/v1/algo/futures/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-current-algo-open-orders-future-algo"
+    },
+    {
+      "name": "queryHistoricalAlgoOrdersFutureAlgo",
+      "method": "GET",
+      "path": "/sapi/v1/algo/futures/historicalOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-historical-algo-orders-future-algo"
+    },
+    {
+      "name": "querySubOrdersFutureAlgo",
+      "method": "GET",
+      "path": "/sapi/v1/algo/futures/subOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#query-sub-orders-future-algo"
+    },
+    {
+      "name": "timeWeightedAveragePriceFutureAlgo",
+      "method": "POST",
+      "path": "/sapi/v1/algo/futures/newOrderTwap",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#time-weighted-average-price-future-algo"
+    },
+    {
+      "name": "volumeParticipationFutureAlgo",
+      "method": "POST",
+      "path": "/sapi/v1/algo/futures/newOrderVp",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/future-algo#volume-participation-future-algo"
+    },
+    {
+      "name": "cancelAlgoOrderSpotAlgo",
+      "method": "DELETE",
+      "path": "/sapi/v1/algo/spot/order",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#cancel-algo-order-spot-algo"
+    },
+    {
+      "name": "queryCurrentAlgoOpenOrdersSpotAlgo",
+      "method": "GET",
+      "path": "/sapi/v1/algo/spot/openOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-current-algo-open-orders-spot-algo"
+    },
+    {
+      "name": "queryHistoricalAlgoOrdersSpotAlgo",
+      "method": "GET",
+      "path": "/sapi/v1/algo/spot/historicalOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-historical-algo-orders-spot-algo"
+    },
+    {
+      "name": "querySubOrdersSpotAlgo",
+      "method": "GET",
+      "path": "/sapi/v1/algo/spot/subOrders",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#query-sub-orders-spot-algo"
+    },
+    {
+      "name": "timeWeightedAveragePriceSpotAlgo",
+      "method": "POST",
+      "path": "/sapi/v1/algo/spot/newOrderTwap",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#time-weighted-average-price-spot-algo"
+    },
+    {
+      "name": "volumeParticipation",
+      "method": "POST",
+      "path": "/sapi/v1/algo/spot/newOrderVp",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-algo-trading/api/rest-api/spot-algo#volume-participation"
+    }
+  ]
+}

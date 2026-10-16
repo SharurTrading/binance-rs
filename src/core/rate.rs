@@ -77,6 +77,40 @@ impl BudgetLimits {
             shared_request_weight: true,
         }
     }
+    /// Portfolio Margin's independent PAPI budget: the explicit 6,000 IP weight
+    /// and 1,200 account orders per minute in current General Info. This normative
+    /// limit takes precedence over the older 2,400 common-definition example.
+    /// <https://developers.binance.com/en/docs/products/derivatives-trading-portfolio-margin/general-info>
+    /// <https://developers.binance.com/en/docs/products/derivatives-trading-portfolio-margin/common-definition>
+    #[must_use]
+    pub fn portfolio_margin() -> Self {
+        Self {
+            weight_per_minute: 6000,
+            ws_weight_per_minute: u64::MAX,
+            orders_per_ten_seconds: u64::MAX,
+            orders_per_minute: 1200,
+            orders_per_day: None,
+            raw_requests_per_five_minutes: None,
+            connections_per_five_minutes: None,
+            shared_request_weight: true,
+        }
+    }
+    /// Alpha's public BAPI documentation states no numeric weight/order ceiling.
+    /// No limit is invented; venue cooldowns still bind this independent pool.
+    /// <https://developers.binance.com/en/docs/products/alpha/general-info>
+    #[must_use]
+    pub fn alpha() -> Self {
+        Self {
+            weight_per_minute: u64::MAX,
+            ws_weight_per_minute: u64::MAX,
+            orders_per_ten_seconds: u64::MAX,
+            orders_per_minute: u64::MAX,
+            orders_per_day: None,
+            raw_requests_per_five_minutes: None,
+            connections_per_five_minutes: None,
+            shared_request_weight: true,
+        }
+    }
     /// Spot's documented baseline; replace account limits with exchange evidence.
     /// Sources: Spot WebSocket rate limits and the March 2026 `RAW_REQUESTS` update.
     /// The order figures are the documented examples (50 per ten seconds, 160,000 a
@@ -116,10 +150,13 @@ impl BudgetLimits {
 }
 
 pub(crate) mod reserve;
+mod rolling;
 pub use reserve::ExitReserve;
+pub(crate) use rolling::RollingLimit;
 
 #[derive(Clone, Copy, Default)]
 pub(crate) struct Cost {
+    pub rolling: Option<RollingLimit>,
     pub exit: reserve::ExitEligibility,
     /// Caller-retained venue authority, never serialized into the wire request.
     pub authority_expiry: Option<u64>,
@@ -152,6 +189,7 @@ impl Cost {
 
 #[derive(Default)]
 pub(super) struct State {
+    rolling_requests: BTreeMap<&'static str, VecDeque<u64>>,
     pub(super) exit_reserve: ExitReserve,
     // Each counter is re-derivable: release it at the end of its aligned venue interval.
     counts: BTreeMap<&'static str, (u64, u64)>,
@@ -316,6 +354,7 @@ impl Budgets {
             .lock()
             .map_err(|_| Error::Configuration("account budget poisoned"))?;
         ip.check_cooldown(now)?;
+        account.check_rolling(c.rolling, now)?;
         let ip_cost = self.ip_cost(&ip, c);
         let ws_cost = vec![(
             "weight",
@@ -396,6 +435,7 @@ impl Budgets {
                 .checked_add(1)
                 .ok_or(Error::Configuration("budget overflow"))?;
         }
+        account.charge_rolling(c.rolling, now);
         Ok(())
     }
     /// Count one FIX connection attempt against the IP window shared by every
@@ -709,42 +749,72 @@ impl Budgets {
     ) -> Result<(), Error> {
         let mut entries = Vec::new();
         for value in [envelope, account_query].into_iter().flatten() {
-            let array = value
-                .as_array()
-                .ok_or(Error::Gap("rate limits array required"))?;
-            for entry in array {
-                let statement = StatedLimit {
-                    kind: entry
-                        .get("rateLimitType")
-                        .and_then(serde_json::Value::as_str),
-                    interval: entry.get("interval").and_then(serde_json::Value::as_str),
-                    interval_num: entry.get("intervalNum").and_then(serde_json::Value::as_i64),
-                    limit: entry.get("limit").and_then(serde_json::Value::as_i64),
-                };
-                if statement.kind.is_none()
-                    || statement.interval.is_none()
-                    || statement.interval_num.is_none_or(|number| number <= 0)
-                {
-                    return Err(Error::Gap("rate limit window identity required"));
-                }
-                if entry
-                    .get("count")
-                    .and_then(serde_json::Value::as_u64)
-                    .is_none()
-                {
-                    return Err(Error::Gap("rate limit count required"));
-                }
-                entries.push(statement);
-            }
+            entries.extend(response_limit_statements(value, true)?);
         }
         self.adopt_stated_transport(entries, websocket, OrderLimitScope::Account)
     }
+    /// PAPI account rate-limit queries state limits without Spot's count field.
+    pub(crate) fn adopt_portfolio_order_limits(
+        &self,
+        value: &serde_json::Value,
+    ) -> Result<(), Error> {
+        let entries = response_limit_statements(value, false)?;
+        if entries.iter().any(|entry| {
+            entry.kind != Some("ORDERS")
+                || entry.interval != Some("MINUTE")
+                || entry.interval_num != Some(1)
+        }) {
+            return Err(Error::Gap("Portfolio Margin order-limit kind required"));
+        }
+        self.adopt_stated_transport(entries, false, OrderLimitScope::Account)
+    }
+}
+
+fn response_limit_statements(
+    value: &serde_json::Value,
+    counted: bool,
+) -> Result<Vec<StatedLimit<'_>>, Error> {
+    let array = value
+        .as_array()
+        .ok_or(Error::Gap("rate limits array required"))?;
+    array
+        .iter()
+        .map(|entry| {
+            let statement = StatedLimit {
+                kind: entry
+                    .get("rateLimitType")
+                    .and_then(serde_json::Value::as_str),
+                interval: entry.get("interval").and_then(serde_json::Value::as_str),
+                interval_num: entry.get("intervalNum").and_then(serde_json::Value::as_i64),
+                limit: entry.get("limit").and_then(serde_json::Value::as_i64),
+            };
+            if statement.kind.is_none()
+                || statement.interval.is_none()
+                || statement.interval_num.is_none_or(|number| number <= 0)
+            {
+                return Err(Error::Gap("rate limit window identity required"));
+            }
+            if counted
+                && entry
+                    .get("count")
+                    .and_then(serde_json::Value::as_u64)
+                    .is_none()
+            {
+                return Err(Error::Gap("rate limit count required"));
+            }
+            Ok(statement)
+        })
+        .collect()
 }
 
 /// The venue IP limit a client's requests count against.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[non_exhaustive]
 pub enum VenuePool {
+    /// Portfolio Margin's independent PAPI limits.
+    PortfolioMargin,
+    /// Alpha's public BAPI routes, independent of signed trading products.
+    Alpha,
     /// Spot's own IP limits, which Margin's WebSocket API also counts against
     /// (<https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#ip-limits>).
     Spot,
@@ -854,6 +924,8 @@ impl WeightPools {
                 VenuePool::Futures => Budgets::new(BudgetLimits::usdm())?,
                 VenuePool::Sapi => Budgets::sapi()?,
                 VenuePool::Options => Budgets::new(BudgetLimits::options())?,
+                VenuePool::PortfolioMargin => Budgets::new(BudgetLimits::portfolio_margin())?,
+                VenuePool::Alpha => Budgets::new(BudgetLimits::alpha())?,
             };
             root.key = Some(key);
             registry.ip.insert(key, root.clone());
@@ -950,7 +1022,8 @@ fn monthly_download(
         3 => "downloadIncome",
         4 => "downloadCMOrders",
         5 => "downloadCMTrades",
-        _ => "downloadCMIncome",
+        6 => "downloadCMIncome",
+        _ => return Err(Error::Configuration("download quota identity")),
     };
     let limit = match kind {
         1 => 10,
@@ -1363,6 +1436,44 @@ mod tests {
                 60_000,
             )
             .unwrap();
+    }
+
+    #[test]
+    fn portfolio_limit_adoption_is_atomic_and_keeps_existing_usage() {
+        let budgets = WeightPools::new()
+            .draw(
+                VenuePool::PortfolioMargin,
+                PoolEnvironment::Production,
+                None,
+            )
+            .unwrap();
+        let cost = Cost {
+            orders60: 1,
+            ..Cost::default()
+        };
+        budgets.admit(cost, 1_700_000_001_000).unwrap();
+        assert!(
+            budgets
+                .adopt_portfolio_order_limits(&serde_json::json!([
+                    {"rateLimitType":"ORDERS","interval":"MINUTE","intervalNum":1,"limit":1},
+                    {"rateLimitType":"ORDERS","interval":"DAY","intervalNum":1,"limit":0}
+                ]))
+                .is_err()
+        );
+        budgets.admit(cost, 1_700_000_001_000).unwrap();
+        budgets
+            .adopt_portfolio_order_limits(&serde_json::json!([
+                {"rateLimitType":"ORDERS","interval":"MINUTE","intervalNum":1,"limit":2}
+            ]))
+            .unwrap();
+        assert!(matches!(
+            budgets.admit(cost, 1_700_000_001_000),
+            Err(Error::Admission { .. })
+        ));
+        assert!(matches!(
+            monthly_download(&State::default(), 7, 1_700_000_001_000),
+            Err(Error::Configuration("download quota identity"))
+        ));
     }
 
     #[test]

@@ -1,0 +1,105 @@
+{
+  "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-derivatives-trading-portfolio-margin-pro/api/ws-streams/1.0.0/schema.yaml",
+  "sha256": "45713fac5f9a218bd210bf5704a61904d19f5c6b12f8dd22ed5e451f76da62f7",
+  "checked": "2026-10-17",
+  "components": {
+    "schemas": {
+      "pmProAccountUpdate": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "PM_PRO_ACCOUNT_UPDATE"
+            ]
+          },
+          "E": {
+            "type": "integer"
+          },
+          "u": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "eq": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "ae": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "im": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "mm": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "avb": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "vmw": {
+            "type": "string",
+            "x-decimal": true
+          }
+        },
+        "required": [
+          "E",
+          "ae",
+          "avb",
+          "e",
+          "eq",
+          "im",
+          "mm",
+          "u",
+          "vmw"
+        ]
+      },
+      "risklevelchange": {
+        "type": "object",
+        "properties": {
+          "e": {
+            "type": "string",
+            "enum": [
+              "riskLevelChange"
+            ]
+          },
+          "E": {
+            "type": "integer"
+          },
+          "u": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "s": {
+            "type": "string"
+          },
+          "eq": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "ae": {
+            "type": "string",
+            "x-decimal": true
+          },
+          "m": {
+            "type": "string",
+            "x-decimal": true
+          }
+        },
+        "required": [
+          "E",
+          "ae",
+          "e",
+          "eq",
+          "m",
+          "s",
+          "u"
+        ]
+      }
+    }
+  },
+  "operations": []
+}

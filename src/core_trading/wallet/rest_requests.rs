@@ -276,122 +276,6 @@ impl Request for DailyAccountSnapshot {
     }
 }
 
-/// Validated request builder for [`disableFastWithdrawSwitch`](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#disable-fast-withdraw-switch).
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct DisableFastWithdrawSwitch {
-    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
-    recv_window: Option<i64>,
-}
-impl DisableFastWithdrawSwitch {
-    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
-    #[must_use]
-    pub fn new() -> Self {
-        Self::default()
-    }
-    /// Set the provider `recvWindow` parameter.
-    #[must_use]
-    pub fn recv_window(mut self, value: i64) -> Self {
-        self.recv_window = Some(value);
-        self
-    }
-    /// Validate this request before dispatch.
-    ///
-    /// # Errors
-    /// Refuses missing, invalid, or contradictory provider parameters.
-    pub fn build(self) -> Result<Self, Error> {
-        self.validate()?;
-        Ok(self)
-    }
-}
-impl Request for DisableFastWithdrawSwitch {
-    type Response = super::rest_models::DisableFastWithdrawSwitchResponse;
-    const OP: Operation = Operation {
-        name: "disableFastWithdrawSwitch",
-        path: "/sapi/v1/account/disableFastWithdrawSwitch",
-        method: "POST",
-        security: Security::Signed,
-        mutation: true,
-        weight: 1,
-        requests_per_second: None,
-        requests_per_minute: None,
-        validate_time: super::validation::validate_time,
-        definitive: super::validation::definitive,
-        success_weight: None,
-        partial: None,
-    };
-    fn validate(&self) -> Result<(), Error> {
-        let p = parameters(self)?;
-        validate_parameters(
-            &p,
-            &[],
-            &[],
-            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
-        )?;
-        super::validation::validate("disableFastWithdrawSwitch", &p)
-    }
-    fn cost(&self) -> Result<crate::core::Cost, Error> {
-        super::rate::cost(Self::OP, &parameters(self)?)
-    }
-}
-
-/// Validated request builder for [`enableFastWithdrawSwitch`](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#enable-fast-withdraw-switch).
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct EnableFastWithdrawSwitch {
-    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
-    recv_window: Option<i64>,
-}
-impl EnableFastWithdrawSwitch {
-    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
-    #[must_use]
-    pub fn new() -> Self {
-        Self::default()
-    }
-    /// Set the provider `recvWindow` parameter.
-    #[must_use]
-    pub fn recv_window(mut self, value: i64) -> Self {
-        self.recv_window = Some(value);
-        self
-    }
-    /// Validate this request before dispatch.
-    ///
-    /// # Errors
-    /// Refuses missing, invalid, or contradictory provider parameters.
-    pub fn build(self) -> Result<Self, Error> {
-        self.validate()?;
-        Ok(self)
-    }
-}
-impl Request for EnableFastWithdrawSwitch {
-    type Response = super::rest_models::EnableFastWithdrawSwitchResponse;
-    const OP: Operation = Operation {
-        name: "enableFastWithdrawSwitch",
-        path: "/sapi/v1/account/enableFastWithdrawSwitch",
-        method: "POST",
-        security: Security::Signed,
-        mutation: true,
-        weight: 1,
-        requests_per_second: None,
-        requests_per_minute: None,
-        validate_time: super::validation::validate_time,
-        definitive: super::validation::definitive,
-        success_weight: None,
-        partial: None,
-    };
-    fn validate(&self) -> Result<(), Error> {
-        let p = parameters(self)?;
-        validate_parameters(
-            &p,
-            &[],
-            &[],
-            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
-        )?;
-        super::validation::validate("enableFastWithdrawSwitch", &p)
-    }
-    fn cost(&self) -> Result<crate::core::Cost, Error> {
-        super::rate::cost(Self::OP, &parameters(self)?)
-    }
-}
-
 /// Validated request builder for [`getApiKeyPermission`](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#get-api-key-permission).
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct GetApiKeyPermission {
@@ -2262,50 +2146,6 @@ impl Request for FetchDepositAddressListWithNetwork {
     }
 }
 
-/// Validated request builder for [`fetchWithdrawAddressList`](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-address-list).
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct FetchWithdrawAddressList {}
-impl FetchWithdrawAddressList {
-    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
-    #[must_use]
-    pub fn new() -> Self {
-        Self::default()
-    }
-    /// Validate this request before dispatch.
-    ///
-    /// # Errors
-    /// Refuses missing, invalid, or contradictory provider parameters.
-    pub fn build(self) -> Result<Self, Error> {
-        self.validate()?;
-        Ok(self)
-    }
-}
-impl Request for FetchWithdrawAddressList {
-    type Response = super::rest_models::FetchWithdrawAddressListResponse;
-    const OP: Operation = Operation {
-        name: "fetchWithdrawAddressList",
-        path: "/sapi/v1/capital/withdraw/address/list",
-        method: "GET",
-        security: Security::Signed,
-        mutation: false,
-        weight: 10,
-        requests_per_second: None,
-        requests_per_minute: None,
-        validate_time: super::validation::validate_time,
-        definitive: super::validation::definitive,
-        success_weight: None,
-        partial: None,
-    };
-    fn validate(&self) -> Result<(), Error> {
-        let p = parameters(self)?;
-        validate_parameters(&p, &[], &[], &[])?;
-        super::validation::validate("fetchWithdrawAddressList", &p)
-    }
-    fn cost(&self) -> Result<crate::core::Cost, Error> {
-        super::rate::cost(Self::OP, &parameters(self)?)
-    }
-}
-
 /// Validated request builder for [`fetchWithdrawQuota`](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-quota).
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct FetchWithdrawQuota {}
@@ -2421,136 +2261,6 @@ impl Request for OneClickArrivalDepositApply {
         let p = parameters(self)?;
         validate_parameters(&p, &[], &[], &[])?;
         super::validation::validate("oneClickArrivalDepositApply", &p)
-    }
-    fn cost(&self) -> Result<crate::core::Cost, Error> {
-        super::rate::cost(Self::OP, &parameters(self)?)
-    }
-}
-
-/// Validated request builder for [`withdraw`](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw).
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct Withdraw {
-    #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
-    coin: Option<crate::Asset>,
-    #[serde(rename = "withdrawOrderId", skip_serializing_if = "Option::is_none")]
-    caller_id: Option<super::WithdrawalId>,
-    #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<super::Network>,
-    #[serde(rename = "address", skip_serializing_if = "Option::is_none")]
-    address: Option<crate::SensitiveString>,
-    #[serde(rename = "addressTag", skip_serializing_if = "Option::is_none")]
-    address_tag: Option<crate::SensitiveString>,
-    #[serde(rename = "amount", skip_serializing_if = "Option::is_none")]
-    amount: Option<Decimal>,
-    #[serde(rename = "transactionFeeFlag", skip_serializing_if = "Option::is_none")]
-    transaction_fee_flag: Option<bool>,
-    #[serde(rename = "name", skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
-    #[serde(rename = "walletType", skip_serializing_if = "Option::is_none")]
-    wallet_type: Option<i64>,
-    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
-    recv_window: Option<i64>,
-}
-impl Withdraw {
-    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
-    #[must_use]
-    pub fn new() -> Self {
-        Self::default()
-    }
-    /// Set the provider `coin` parameter.
-    #[must_use]
-    pub fn coin(mut self, value: crate::Asset) -> Self {
-        self.coin = Some(value);
-        self
-    }
-    /// Set the provider `withdrawOrderId` parameter.
-    #[must_use]
-    pub fn withdraw_order_id(mut self, value: super::WithdrawalId) -> Self {
-        self.caller_id = Some(value);
-        self
-    }
-    /// Set the provider `network` parameter.
-    #[must_use]
-    pub fn network(mut self, value: super::Network) -> Self {
-        self.network = Some(value);
-        self
-    }
-    /// Set the provider `address` parameter.
-    #[must_use]
-    pub fn address(mut self, value: crate::SensitiveString) -> Self {
-        self.address = Some(value);
-        self
-    }
-    /// Set the provider `addressTag` parameter.
-    #[must_use]
-    pub fn address_tag(mut self, value: crate::SensitiveString) -> Self {
-        self.address_tag = Some(value);
-        self
-    }
-    /// Set the provider `amount` parameter.
-    #[must_use]
-    pub fn amount(mut self, value: Decimal) -> Self {
-        self.amount = Some(value);
-        self
-    }
-    /// Set the provider `transactionFeeFlag` parameter.
-    #[must_use]
-    pub fn transaction_fee_flag(mut self, value: bool) -> Self {
-        self.transaction_fee_flag = Some(value);
-        self
-    }
-    /// Set the provider `name` parameter.
-    #[must_use]
-    pub fn name(mut self, value: impl Into<String>) -> Self {
-        self.name = Some(value.into());
-        self
-    }
-    /// Set the provider `walletType` parameter.
-    #[must_use]
-    pub fn wallet_type(mut self, value: i64) -> Self {
-        self.wallet_type = Some(value);
-        self
-    }
-    /// Set the provider `recvWindow` parameter.
-    #[must_use]
-    pub fn recv_window(mut self, value: i64) -> Self {
-        self.recv_window = Some(value);
-        self
-    }
-    /// Validate this request before dispatch.
-    ///
-    /// # Errors
-    /// Refuses missing, invalid, or contradictory provider parameters.
-    pub fn build(self) -> Result<Self, Error> {
-        self.validate()?;
-        Ok(self)
-    }
-}
-impl Request for Withdraw {
-    type Response = super::rest_models::WithdrawResponse;
-    const OP: Operation = Operation {
-        name: "withdraw",
-        path: "/sapi/v1/capital/withdraw/apply",
-        method: "POST",
-        security: Security::Signed,
-        mutation: true,
-        weight: 900,
-        requests_per_second: None,
-        requests_per_minute: None,
-        validate_time: super::validation::validate_time,
-        definitive: super::validation::definitive,
-        success_weight: None,
-        partial: None,
-    };
-    fn validate(&self) -> Result<(), Error> {
-        let p = parameters(self)?;
-        validate_parameters(
-            &p,
-            &["address", "amount", "coin"],
-            &[],
-            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
-        )?;
-        super::validation::validate("withdraw", &p)
     }
     fn cost(&self) -> Result<crate::core::Cost, Error> {
         super::rate::cost(Self::OP, &parameters(self)?)
@@ -2778,151 +2488,6 @@ impl Request for SystemStatus {
         let p = parameters(self)?;
         validate_parameters(&p, &[], &[], &[])?;
         super::validation::validate("systemStatus", &p)
-    }
-    fn cost(&self) -> Result<crate::core::Cost, Error> {
-        super::rate::cost(Self::OP, &parameters(self)?)
-    }
-}
-
-/// Validated request builder for [`brokerWithdraw`](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#broker-withdraw).
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct BrokerWithdraw {
-    #[serde(rename = "address", skip_serializing_if = "Option::is_none")]
-    address: Option<crate::SensitiveString>,
-    #[serde(rename = "addressTag", skip_serializing_if = "Option::is_none")]
-    address_tag: Option<crate::SensitiveString>,
-    #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<super::Network>,
-    #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
-    coin: Option<crate::Asset>,
-    #[serde(rename = "addressName", skip_serializing_if = "Option::is_none")]
-    address_name: Option<crate::SensitiveString>,
-    #[serde(rename = "amount", skip_serializing_if = "Option::is_none")]
-    amount: Option<Decimal>,
-    #[serde(rename = "withdrawOrderId", skip_serializing_if = "Option::is_none")]
-    withdraw_order_id: Option<super::WithdrawalId>,
-    #[serde(rename = "transactionFeeFlag", skip_serializing_if = "Option::is_none")]
-    transaction_fee_flag: Option<bool>,
-    #[serde(rename = "walletType", skip_serializing_if = "Option::is_none")]
-    wallet_type: Option<i64>,
-    #[serde(rename = "questionnaire", skip_serializing_if = "Option::is_none")]
-    questionnaire: Option<crate::SensitiveString>,
-    #[serde(rename = "originatorPii", skip_serializing_if = "Option::is_none")]
-    originator_pii: Option<crate::SensitiveString>,
-}
-impl BrokerWithdraw {
-    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
-    #[must_use]
-    pub fn new() -> Self {
-        Self::default()
-    }
-    /// Set the provider `address` parameter.
-    #[must_use]
-    pub fn address(mut self, value: crate::SensitiveString) -> Self {
-        self.address = Some(value);
-        self
-    }
-    /// Set the provider `addressTag` parameter.
-    #[must_use]
-    pub fn address_tag(mut self, value: crate::SensitiveString) -> Self {
-        self.address_tag = Some(value);
-        self
-    }
-    /// Set the provider `network` parameter.
-    #[must_use]
-    pub fn network(mut self, value: super::Network) -> Self {
-        self.network = Some(value);
-        self
-    }
-    /// Set the provider `coin` parameter.
-    #[must_use]
-    pub fn coin(mut self, value: crate::Asset) -> Self {
-        self.coin = Some(value);
-        self
-    }
-    /// Set the provider `addressName` parameter.
-    #[must_use]
-    pub fn address_name(mut self, value: crate::SensitiveString) -> Self {
-        self.address_name = Some(value);
-        self
-    }
-    /// Set the provider `amount` parameter.
-    #[must_use]
-    pub fn amount(mut self, value: Decimal) -> Self {
-        self.amount = Some(value);
-        self
-    }
-    /// Set the provider `withdrawOrderId` parameter.
-    #[must_use]
-    pub fn withdraw_order_id(mut self, value: super::WithdrawalId) -> Self {
-        self.withdraw_order_id = Some(value);
-        self
-    }
-    /// Set the provider `transactionFeeFlag` parameter.
-    #[must_use]
-    pub fn transaction_fee_flag(mut self, value: bool) -> Self {
-        self.transaction_fee_flag = Some(value);
-        self
-    }
-    /// Set the provider `walletType` parameter.
-    #[must_use]
-    pub fn wallet_type(mut self, value: i64) -> Self {
-        self.wallet_type = Some(value);
-        self
-    }
-    /// Set the provider `questionnaire` parameter.
-    #[must_use]
-    pub fn questionnaire(mut self, value: crate::SensitiveString) -> Self {
-        self.questionnaire = Some(value);
-        self
-    }
-    /// Set the provider `originatorPii` parameter.
-    #[must_use]
-    pub fn originator_pii(mut self, value: crate::SensitiveString) -> Self {
-        self.originator_pii = Some(value);
-        self
-    }
-    /// Validate this request before dispatch.
-    ///
-    /// # Errors
-    /// Refuses missing, invalid, or contradictory provider parameters.
-    pub fn build(self) -> Result<Self, Error> {
-        self.validate()?;
-        Ok(self)
-    }
-}
-impl Request for BrokerWithdraw {
-    type Response = super::rest_models::BrokerWithdrawResponse;
-    const OP: Operation = Operation {
-        name: "brokerWithdraw",
-        path: "/sapi/v1/localentity/broker/withdraw/apply",
-        method: "POST",
-        security: Security::Signed,
-        mutation: true,
-        weight: 600,
-        requests_per_second: None,
-        requests_per_minute: None,
-        validate_time: super::validation::validate_time,
-        definitive: super::validation::definitive,
-        success_weight: None,
-        partial: None,
-    };
-    fn validate(&self) -> Result<(), Error> {
-        let p = parameters(self)?;
-        validate_parameters(
-            &p,
-            &[
-                "address",
-                "amount",
-                "coin",
-                "originatorPii",
-                "questionnaire",
-                "withdrawOrderId",
-            ],
-            &[],
-            &[],
-        )?;
-        super::validation::validate("brokerWithdraw", &p)
     }
     fn cost(&self) -> Result<crate::core::Cost, Error> {
         super::rate::cost(Self::OP, &parameters(self)?)
@@ -3311,64 +2876,6 @@ impl Request for DepositHistoryV2 {
             &[("limit", -9_223_372_036_854_775_808, 1_000)],
         )?;
         super::validation::validate("depositHistoryV2", &p)
-    }
-    fn cost(&self) -> Result<crate::core::Cost, Error> {
-        super::rate::cost(Self::OP, &parameters(self)?)
-    }
-}
-
-/// Validated request builder for [`fetchAddressVerificationList`](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#fetch-address-verification-list).
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct FetchAddressVerificationList {
-    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
-    recv_window: Option<i64>,
-}
-impl FetchAddressVerificationList {
-    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
-    #[must_use]
-    pub fn new() -> Self {
-        Self::default()
-    }
-    /// Set the provider `recvWindow` parameter.
-    #[must_use]
-    pub fn recv_window(mut self, value: i64) -> Self {
-        self.recv_window = Some(value);
-        self
-    }
-    /// Validate this request before dispatch.
-    ///
-    /// # Errors
-    /// Refuses missing, invalid, or contradictory provider parameters.
-    pub fn build(self) -> Result<Self, Error> {
-        self.validate()?;
-        Ok(self)
-    }
-}
-impl Request for FetchAddressVerificationList {
-    type Response = super::rest_models::FetchAddressVerificationListResponse;
-    const OP: Operation = Operation {
-        name: "fetchAddressVerificationList",
-        path: "/sapi/v1/addressVerify/list",
-        method: "GET",
-        security: Security::Signed,
-        mutation: false,
-        weight: 1,
-        requests_per_second: None,
-        requests_per_minute: None,
-        validate_time: super::validation::validate_time,
-        definitive: super::validation::definitive,
-        success_weight: None,
-        partial: None,
-    };
-    fn validate(&self) -> Result<(), Error> {
-        let p = parameters(self)?;
-        validate_parameters(
-            &p,
-            &[],
-            &[],
-            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
-        )?;
-        super::validation::validate("fetchAddressVerificationList", &p)
     }
     fn cost(&self) -> Result<crate::core::Cost, Error> {
         super::rate::cost(Self::OP, &parameters(self)?)
@@ -4030,144 +3537,6 @@ impl Request for WithdrawHistoryV2 {
     }
 }
 
-/// Validated request builder for [`withdrawTravelRule`](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-travel-rule).
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct WithdrawTravelRule {
-    #[serde(rename = "coin", skip_serializing_if = "Option::is_none")]
-    coin: Option<crate::Asset>,
-    #[serde(rename = "withdrawOrderId", skip_serializing_if = "Option::is_none")]
-    withdraw_order_id: Option<super::WithdrawalId>,
-    #[serde(rename = "network", skip_serializing_if = "Option::is_none")]
-    network: Option<super::Network>,
-    #[serde(rename = "address", skip_serializing_if = "Option::is_none")]
-    address: Option<crate::SensitiveString>,
-    #[serde(rename = "addressTag", skip_serializing_if = "Option::is_none")]
-    address_tag: Option<crate::SensitiveString>,
-    #[serde(rename = "amount", skip_serializing_if = "Option::is_none")]
-    amount: Option<Decimal>,
-    #[serde(rename = "transactionFeeFlag", skip_serializing_if = "Option::is_none")]
-    transaction_fee_flag: Option<bool>,
-    #[serde(rename = "name", skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
-    #[serde(rename = "walletType", skip_serializing_if = "Option::is_none")]
-    wallet_type: Option<i64>,
-    #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
-    recv_window: Option<i64>,
-    #[serde(rename = "questionnaire", skip_serializing_if = "Option::is_none")]
-    questionnaire: Option<crate::SensitiveString>,
-}
-impl WithdrawTravelRule {
-    /// Start a request builder. Required inputs are checked by `build` and by dispatch.
-    #[must_use]
-    pub fn new() -> Self {
-        Self::default()
-    }
-    /// Set the provider `coin` parameter.
-    #[must_use]
-    pub fn coin(mut self, value: crate::Asset) -> Self {
-        self.coin = Some(value);
-        self
-    }
-    /// Set the provider `withdrawOrderId` parameter.
-    #[must_use]
-    pub fn withdraw_order_id(mut self, value: super::WithdrawalId) -> Self {
-        self.withdraw_order_id = Some(value);
-        self
-    }
-    /// Set the provider `network` parameter.
-    #[must_use]
-    pub fn network(mut self, value: super::Network) -> Self {
-        self.network = Some(value);
-        self
-    }
-    /// Set the provider `address` parameter.
-    #[must_use]
-    pub fn address(mut self, value: crate::SensitiveString) -> Self {
-        self.address = Some(value);
-        self
-    }
-    /// Set the provider `addressTag` parameter.
-    #[must_use]
-    pub fn address_tag(mut self, value: crate::SensitiveString) -> Self {
-        self.address_tag = Some(value);
-        self
-    }
-    /// Set the provider `amount` parameter.
-    #[must_use]
-    pub fn amount(mut self, value: Decimal) -> Self {
-        self.amount = Some(value);
-        self
-    }
-    /// Set the provider `transactionFeeFlag` parameter.
-    #[must_use]
-    pub fn transaction_fee_flag(mut self, value: bool) -> Self {
-        self.transaction_fee_flag = Some(value);
-        self
-    }
-    /// Set the provider `name` parameter.
-    #[must_use]
-    pub fn name(mut self, value: impl Into<String>) -> Self {
-        self.name = Some(value.into());
-        self
-    }
-    /// Set the provider `walletType` parameter.
-    #[must_use]
-    pub fn wallet_type(mut self, value: i64) -> Self {
-        self.wallet_type = Some(value);
-        self
-    }
-    /// Set the provider `recvWindow` parameter.
-    #[must_use]
-    pub fn recv_window(mut self, value: i64) -> Self {
-        self.recv_window = Some(value);
-        self
-    }
-    /// Set the provider `questionnaire` parameter.
-    #[must_use]
-    pub fn questionnaire(mut self, value: crate::SensitiveString) -> Self {
-        self.questionnaire = Some(value);
-        self
-    }
-    /// Validate this request before dispatch.
-    ///
-    /// # Errors
-    /// Refuses missing, invalid, or contradictory provider parameters.
-    pub fn build(self) -> Result<Self, Error> {
-        self.validate()?;
-        Ok(self)
-    }
-}
-impl Request for WithdrawTravelRule {
-    type Response = super::rest_models::WithdrawTravelRuleResponse;
-    const OP: Operation = Operation {
-        name: "withdrawTravelRule",
-        path: "/sapi/v1/localentity/withdraw/apply",
-        method: "POST",
-        security: Security::Signed,
-        mutation: true,
-        weight: 600,
-        requests_per_second: None,
-        requests_per_minute: None,
-        validate_time: super::validation::validate_time,
-        definitive: super::validation::definitive,
-        success_weight: None,
-        partial: None,
-    };
-    fn validate(&self) -> Result<(), Error> {
-        let p = parameters(self)?;
-        validate_parameters(
-            &p,
-            &["address", "amount", "coin", "questionnaire"],
-            &[],
-            &[("recvWindow", -9_223_372_036_854_775_808, 60_000)],
-        )?;
-        super::validation::validate("withdrawTravelRule", &p)
-    }
-    fn cost(&self) -> Result<crate::core::Cost, Error> {
-        super::rate::cost(Self::OP, &parameters(self)?)
-    }
-}
-
 impl super::RestClient {
     /// [accountApiTradingStatus](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#account-api-trading-status).
     ///
@@ -4214,30 +3583,6 @@ impl super::RestClient {
         request: &DailyAccountSnapshot,
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::rest_models::DailyAccountSnapshotResponse>, Error> {
-        self.inner.execute(request, deadline).await
-    }
-
-    /// [disableFastWithdrawSwitch](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#disable-fast-withdraw-switch).
-    ///
-    /// # Errors
-    /// Returns input/admission errors before sending, or typed venue/transport evidence.
-    pub async fn disable_fast_withdraw_switch(
-        &self,
-        request: &DisableFastWithdrawSwitch,
-        deadline: tokio::time::Instant,
-    ) -> Result<crate::Response<super::rest_models::DisableFastWithdrawSwitchResponse>, Error> {
-        self.inner.execute(request, deadline).await
-    }
-
-    /// [enableFastWithdrawSwitch](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#enable-fast-withdraw-switch).
-    ///
-    /// # Errors
-    /// Returns input/admission errors before sending, or typed venue/transport evidence.
-    pub async fn enable_fast_withdraw_switch(
-        &self,
-        request: &EnableFastWithdrawSwitch,
-        deadline: tokio::time::Instant,
-    ) -> Result<crate::Response<super::rest_models::EnableFastWithdrawSwitchResponse>, Error> {
         self.inner.execute(request, deadline).await
     }
 
@@ -4564,18 +3909,6 @@ impl super::RestClient {
         self.inner.execute(request, deadline).await
     }
 
-    /// [fetchWithdrawAddressList](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-address-list).
-    ///
-    /// # Errors
-    /// Returns input/admission errors before sending, or typed venue/transport evidence.
-    pub async fn fetch_withdraw_address_list(
-        &self,
-        request: &FetchWithdrawAddressList,
-        deadline: tokio::time::Instant,
-    ) -> Result<crate::Response<super::rest_models::FetchWithdrawAddressListResponse>, Error> {
-        self.inner.execute(request, deadline).await
-    }
-
     /// [fetchWithdrawQuota](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-quota).
     ///
     /// # Errors
@@ -4598,18 +3931,6 @@ impl super::RestClient {
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::rest_models::OneClickArrivalDepositApplyResponse>, Error>
     {
-        self.inner.execute(request, deadline).await
-    }
-
-    /// [withdraw](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw).
-    ///
-    /// # Errors
-    /// Returns input/admission errors before sending, or typed venue/transport evidence.
-    pub async fn withdraw(
-        &self,
-        request: &Withdraw,
-        deadline: tokio::time::Instant,
-    ) -> Result<crate::Response<super::rest_models::WithdrawResponse>, Error> {
         self.inner.execute(request, deadline).await
     }
 
@@ -4647,18 +3968,6 @@ impl super::RestClient {
         request: &SystemStatus,
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::rest_models::SystemStatusResponse>, Error> {
-        self.inner.execute(request, deadline).await
-    }
-
-    /// [brokerWithdraw](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#broker-withdraw).
-    ///
-    /// # Errors
-    /// Returns input/admission errors before sending, or typed venue/transport evidence.
-    pub async fn broker_withdraw(
-        &self,
-        request: &BrokerWithdraw,
-        deadline: tokio::time::Instant,
-    ) -> Result<crate::Response<super::rest_models::BrokerWithdrawResponse>, Error> {
         self.inner.execute(request, deadline).await
     }
 
@@ -4708,19 +4017,6 @@ impl super::RestClient {
         request: &DepositHistoryV2,
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::rest_models::DepositHistoryV2Response>, Error> {
-        self.inner.execute(request, deadline).await
-    }
-
-    /// [fetchAddressVerificationList](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#fetch-address-verification-list).
-    ///
-    /// # Errors
-    /// Returns input/admission errors before sending, or typed venue/transport evidence.
-    pub async fn fetch_address_verification_list(
-        &self,
-        request: &FetchAddressVerificationList,
-        deadline: tokio::time::Instant,
-    ) -> Result<crate::Response<super::rest_models::FetchAddressVerificationListResponse>, Error>
-    {
         self.inner.execute(request, deadline).await
     }
 
@@ -4810,18 +4106,6 @@ impl super::RestClient {
         request: &WithdrawHistoryV2,
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::rest_models::WithdrawHistoryV2Response>, Error> {
-        self.inner.execute(request, deadline).await
-    }
-
-    /// [withdrawTravelRule](https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-travel-rule).
-    ///
-    /// # Errors
-    /// Returns input/admission errors before sending, or typed venue/transport evidence.
-    pub async fn withdraw_travel_rule(
-        &self,
-        request: &WithdrawTravelRule,
-        deadline: tokio::time::Instant,
-    ) -> Result<crate::Response<super::rest_models::WithdrawTravelRuleResponse>, Error> {
         self.inner.execute(request, deadline).await
     }
 }

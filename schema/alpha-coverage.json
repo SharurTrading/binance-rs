@@ -1,0 +1,121 @@
+{
+  "rest": [
+    {
+      "name": "aggregatedTrades",
+      "method": "GET",
+      "path": "/bapi/defi/v1/public/alpha-trade/agg-trades",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#aggregated-trades"
+    },
+    {
+      "name": "fullDepth",
+      "method": "GET",
+      "path": "/bapi/defi/v1/public/alpha-trade/fullDepth",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#full-depth"
+    },
+    {
+      "name": "getExchangeInfo",
+      "method": "GET",
+      "path": "/bapi/defi/v1/public/alpha-trade/get-exchange-info",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#get-exchange-info"
+    },
+    {
+      "name": "klines",
+      "method": "GET",
+      "path": "/bapi/defi/v1/public/alpha-trade/klines",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#klines"
+    },
+    {
+      "name": "ticker",
+      "method": "GET",
+      "path": "/bapi/defi/v1/public/alpha-trade/ticker",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#ticker"
+    },
+    {
+      "name": "tokenList",
+      "method": "GET",
+      "path": "/bapi/defi/v1/public/wallet-direct/buw/wallet/cex/alpha/all/token/list",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/rest-api/market-data#token-list"
+    }
+  ],
+  "streams": [
+    {
+      "name": "aggregateTradeStream",
+      "path": "/{symbol}@aggTrade",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#aggregate-trade-stream",
+      "private": false
+    },
+    {
+      "name": "allBookTickerStream",
+      "path": "/!bookTicker",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-book-ticker-stream",
+      "private": false
+    },
+    {
+      "name": "allMiniTickerStream",
+      "path": "/!miniTicker@arr",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-mini-ticker-stream",
+      "private": false
+    },
+    {
+      "name": "allTickerStream",
+      "path": "/!ticker@arr",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-ticker-stream",
+      "private": false
+    },
+    {
+      "name": "allTokens24hTickerStream",
+      "path": "/came@allTokens@ticker24",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-tokens24h-ticker-stream",
+      "private": false
+    },
+    {
+      "name": "bookTickerStream",
+      "path": "/{symbol}@bookTicker",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#book-ticker-stream",
+      "private": false
+    },
+    {
+      "name": "partialDepthStream",
+      "path": "/{symbol}@depth{levels}@{interval}",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#partial-depth-stream",
+      "private": false
+    },
+    {
+      "name": "fullDepthStream",
+      "path": "/{symbol}@fulldepth@{interval}",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#full-depth-stream",
+      "private": false
+    },
+    {
+      "name": "klineStream",
+      "path": "/{symbol}@kline_{interval}",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#kline-stream",
+      "private": false
+    },
+    {
+      "name": "contractKlineStream",
+      "path": "/came@{contractAddress}@{chainId}@kline_{interval}",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#contract-kline-stream",
+      "private": false
+    },
+    {
+      "name": "miniTickerStream",
+      "path": "/{symbol}@miniTicker",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#mini-ticker-stream",
+      "private": false
+    },
+    {
+      "name": "tickerStream",
+      "path": "/{symbol}@ticker",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#ticker-stream",
+      "private": false
+    },
+    {
+      "name": "tradeStream",
+      "path": "/{symbol}@trade",
+      "source": "https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#trade-stream",
+      "private": false
+    }
+  ],
+  "user_events": []
+}

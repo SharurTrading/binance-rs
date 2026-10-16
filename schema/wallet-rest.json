@@ -722,7 +722,8 @@
       "path": "/sapi/v1/account/disableFastWithdrawSwitch",
       "method": "POST",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#disable-fast-withdraw-switch",
-      "x-mutation": true
+      "x-mutation": true,
+      "x-excluded-reason": "External-wallet withdrawal configuration is outside the crate scope."
     },
     {
       "tags": [
@@ -772,7 +773,8 @@
       "path": "/sapi/v1/account/enableFastWithdrawSwitch",
       "method": "POST",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/account#enable-fast-withdraw-switch",
-      "x-mutation": true
+      "x-mutation": true,
+      "x-excluded-reason": "External-wallet withdrawal configuration is outside the crate scope."
     },
     {
       "tags": [
@@ -3500,7 +3502,8 @@
       "path": "/sapi/v1/capital/withdraw/address/list",
       "method": "GET",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#fetch-withdraw-address-list",
-      "x-mutation": false
+      "x-mutation": false,
+      "x-excluded-reason": "External-wallet withdrawal destination discovery is outside the crate scope."
     },
     {
       "tags": [
@@ -3740,7 +3743,8 @@
       "path": "/sapi/v1/capital/withdraw/apply",
       "method": "POST",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/capital#withdraw",
-      "x-mutation": true
+      "x-mutation": true,
+      "x-excluded-reason": "External-wallet withdrawal submission is outside the crate scope."
     },
     {
       "tags": [
@@ -4139,7 +4143,8 @@
       "path": "/sapi/v1/localentity/broker/withdraw/apply",
       "method": "POST",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#broker-withdraw",
-      "x-mutation": true
+      "x-mutation": true,
+      "x-excluded-reason": "External-wallet withdrawal submission is outside the crate scope."
     },
     {
       "tags": [
@@ -4774,7 +4779,8 @@
       "path": "/sapi/v1/addressVerify/list",
       "method": "GET",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#fetch-address-verification-list",
-      "x-mutation": false
+      "x-mutation": false,
+      "x-excluded-reason": "External-wallet withdrawal destination discovery is outside the crate scope."
     },
     {
       "tags": [
@@ -5748,7 +5754,8 @@
       "path": "/sapi/v1/localentity/withdraw/apply",
       "method": "POST",
       "source": "https://developers.binance.com/en/docs/catalog/core-trading-wallet/api/rest-api/travel-rule#withdraw-travel-rule",
-      "x-mutation": true
+      "x-mutation": true,
+      "x-excluded-reason": "External-wallet withdrawal submission is outside the crate scope."
     }
   ]
 }

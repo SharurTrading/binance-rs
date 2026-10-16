@@ -281,14 +281,7 @@ impl HttpClient {
                 };
                 transport_after_response(&meta, outcome, failure)
             })?;
-        let decoded = if R::EMPTY_RESPONSE && (200..300).contains(&status) && body.is_empty() {
-            // An explicitly documented no-data receipt, not recovery from a decode
-            // failure. Nonempty malformed bodies and every error still fail normally.
-            Ok(serde_json::json!({}))
-        } else {
-            self.decode_body(&body, status, binary_content)
-        };
-        let value = decoded.map_err(|failure| transport_after_response(&meta, outcome, failure))?;
+        let value = self.decode_received::<R>(&body, status, binary_content, &meta)?;
         if (200..300).contains(&status)
             && value
                 .get("code")
@@ -305,6 +298,41 @@ impl HttpClient {
         self.decode_response(op, status, value, meta, observed_at)
     }
 
+    /// Decode only documented empty bodies and product-local service envelopes.
+    fn decode_received<R: Request>(
+        &self,
+        body: &[u8],
+        status: u16,
+        binary_content: bool,
+        meta: &ResponseMeta,
+    ) -> Result<serde_json::Value, Error> {
+        let op = R::OP;
+        let outcome = if op.mutation {
+            Outcome::Unknown
+        } else {
+            Outcome::ReadFailed
+        };
+        let decoded = if R::EMPTY_RESPONSE && (200..300).contains(&status) && body.is_empty() {
+            // An explicitly documented no-data receipt, not recovery from a decode
+            // failure. Nonempty malformed bodies and every error still fail normally.
+            Ok(if R::EMPTY_RESPONSE_NULL {
+                serde_json::Value::Null
+            } else {
+                serde_json::json!({})
+            })
+        } else {
+            self.decode_body(body, status, binary_content)
+        };
+        let value = decoded.map_err(|failure| transport_after_response(meta, outcome, failure))?;
+        if R::response_failed(&value) {
+            return Err(
+                super::error::failure_for(op, status, &value, meta.rates.clone())
+                    .with_order_ids(meta.client_order_ids.clone()),
+            );
+        }
+        Ok(value)
+    }
+
     /// Account query evidence is validated before changing the owner's limits/counts.
     fn decode_response<T: DeserializeOwned>(
         &self,
@@ -314,6 +342,18 @@ impl HttpClient {
         meta: ResponseMeta,
         observed_at: u64,
     ) -> Result<Response<T>, Error> {
+        if op.path == "/papi/v1/rateLimit/order" && (200..300).contains(&status) {
+            let mut response: Response<T> = decode(op, status, value.clone(), meta)?;
+            if self.budgets.adopt_portfolio_order_limits(&value).is_err() {
+                response.meta.rates.stated_limits_unusable = true;
+                return Err(transport_after_response(
+                    &response.meta,
+                    Outcome::ReadFailed,
+                    TransportFailure::RateEvidenceFailed,
+                ));
+            }
+            return Ok(response);
+        }
         if op.path == "/api/v3/rateLimit/order" && (200..300).contains(&status) {
             let mut response: Response<T> = decode(op, status, value.clone(), meta)?;
             let mut query_rates = RateEvidence::default();

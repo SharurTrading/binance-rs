@@ -13,13 +13,10 @@ pub(crate) fn cost(op: Operation, _p: &BTreeMap<String, Value>) -> Result<Cost, 
         "dustConvert"
             | "dustTransfer"
             | "getCloudMiningPaymentAndRefundHistory"
-            | "brokerWithdraw"
             | "submitDepositQuestionnaire"
             | "submitDepositQuestionnaireTravelRule"
             | "submitDepositQuestionnaireV2"
-            | "withdrawTravelRule"
             | "userUniversalTransfer"
-            | "withdraw"
             | "withdrawHistory"
     );
     let weight = op.weight;

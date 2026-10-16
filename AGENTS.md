@@ -71,6 +71,13 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
   5xx response. Disable dependency retries. Distinguish unsent refusal, documented
   definitive rejection, accepted response, partial success, and ambiguous outcome.
   A timeout does not cancel an order. Consumers resolve uncertainty with venue reads.
+- **BN-WITHDRAW-01:** External-wallet withdrawal submission, destination discovery
+  or configuration, and withdrawal enable/disable switches are outside this crate's
+  scope. Do not add generic endpoint escape hatches or flags that restore these
+  capabilities. Read-only withdrawal history, quota/status and account evidence,
+  and transfers within Binance remain in scope. Removing client APIs does not
+  enforce account permissions: the consuming platform's withdrawal shield also
+  requires credentials without withdrawal permission.
 - **BN-ERROR-01:** Typed errors retain safe HTTP status, venue code, endpoint identity,
   retry timing, and partial-operation evidence. Preserve `Retry-After`, weight/order
   counters, and both legs of cancel/replace results. Unknown future codes do not

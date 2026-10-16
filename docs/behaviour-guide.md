@@ -96,6 +96,11 @@ things matter when you wrap it:
   for you.
 - A lapsed key arrives as a `listenKeyExpired` event. Treat everything after it as
   unknown until you have read the account again.
+- Closing a key ended the stream without `listenKeyExpired`. Seen once on USDⓈ-M
+  Demo, on 2026-10-15: after `DELETE /fapi/v1/listenKey` no `listenKeyExpired` event
+  arrived. The socket closed about 4 ms after the close reply, and a new stream had
+  to be opened. Treat the socket closing as the signal; do not wait
+  for `listenKeyExpired`.
 - Every socket has a 24-hour life. The client ends the generation with a gap when it
   is reached, so plan a reconnect before then.
 - Renewing a key is not continuity. Neither is a new socket: nothing is replayed, and
@@ -320,6 +325,8 @@ exact inputs, not from rounded statement fields.
 | `userTrades` (Futures) | Seven days at most per request, past three months only, 1,000 rows; send `fromId` or a time range, never both |
 | `myTrades` (Spot) | 24 hours at most per request, 1,000 rows; the client refuses `fromId` with a time range |
 | A full page | Proves only that the limit was reached, not that you have everything |
+| Time-range bounds | Send `startTime` and `endTime` as whole milliseconds. A page covers trades stamped up to its own `endTime`, not up to when the reply leaves the venue: seen once on USDⓈ-M Demo (2026-10-15), a page whose reply arrived after an exit fill still omitted that fill, because the fill was stamped after the page's `endTime` |
+| A position opened and closed between two reads | Position Information V3 never names it, because the symbol has no position at either read; only the trade pages and the user stream show it |
 
 Assume venue ids can repeat across accounts. Key orders, trades and positions by
 account as well as by id.

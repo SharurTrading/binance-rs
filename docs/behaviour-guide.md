@@ -325,6 +325,8 @@ exact inputs, not from rounded statement fields.
 | `userTrades` (Futures) | Seven days at most per request, past three months only, 1,000 rows; send `fromId` or a time range, never both |
 | `myTrades` (Spot) | 24 hours at most per request, 1,000 rows; the client refuses `fromId` with a time range |
 | A full page | Proves only that the limit was reached, not that you have everything |
+| Time-range bounds | Send `startTime` and `endTime` as whole milliseconds. A page covers trades stamped up to its own `endTime`, not up to when the reply leaves the venue: seen once on USDⓈ-M Demo (2026-10-15), a page whose reply arrived after an exit fill still omitted that fill, because the fill was stamped after the page's `endTime` |
+| A position opened and closed between two reads | Position Information V3 never names it, because the symbol has no position at either read; only the trade pages and the user stream show it |
 
 Assume venue ids can repeat across accounts. Key orders, trades and positions by
 account as well as by id.

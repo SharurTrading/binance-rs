@@ -16,9 +16,9 @@ and you want to know how Binance actually behaves before you rely on it. The
 does and what you must do about it.
 
 Most findings come from Binance's own pages, from this client's tests, and from a
-small number of USDⓈ-M Demo sessions recorded in October 2026. Where something was
-seen only on Demo, or only a few times, the text says so. Nothing here is a promise
-about production behaviour.
+small number of USDⓈ-M and Spot Demo sessions recorded in October 2026. Where
+something was seen only on Demo, or only a few times, the text says so. Nothing here
+is a promise about production behaviour.
 
 | Word | Meaning here |
 | --- | --- |
@@ -37,6 +37,7 @@ about production behaviour.
 | Error `-2015` covers a bad key, a wrong IP or a missing permission. It does not prove the secret is wrong | Show the operator all three possibilities |
 | A cheap signed read proves a key: Spot `GET /api/v3/account` (weight 20, add `omitZeroBalances=true`), USDⓈ-M `GET /fapi/v1/accountConfig` (5), COIN-M `GET /dapi/v1/balance` (1) | Prove the key once at connect, before you open any stream |
 | The Spot account reply carries the account `uid`. No signed Futures read we know of returns it | Futures callers must be told the UID; you cannot discover it |
+| The Spot `uid` need not match the number held for the same key's USDⓈ-M account: on Demo (2026-10-16) the two differed on one key | Identify a Spot account from its own signed `GET /api/v3/account` reply; do not reuse a Futures number for it |
 | Venue error text can echo URLs, IP addresses or tokens. The client keeps it behind `VenueMessage`, redacted in `Debug` and `Display` | Call `expose_sensitive_text()` only when you mean to, and never log or store the result automatically |
 
 ### Demo and production
@@ -68,6 +69,7 @@ for the whole process, so every client you build shares it. The details are in t
 | A `418` ban can last "from 2 minutes to 3 days" with no end signal | Without `Retry-After` the client refuses every send until you call `release_unknown_ban()` |
 | All clients on one pool must share one clock | Give every client of a registry the same `Arc<dyn Clock>`, or they charge different windows |
 | Futures order limits are per account, across keys and across USDⓈ-M and COIN-M | Give every config for one account the same `AccountKey`, or each gets its own count and you over-send |
+| A full USDⓈ-M account read (balances, position risk and open orders) cost about 95 weight on Demo (2026-10-16); a symbol-scoped read cost about 7. Polled each second, the full read exhausts the 2,400-weight minute | Poll the symbol, and take the full read only when you need it, such as at connect or after a gap. An open-order list is documented at 40 weight unscoped and 1 with a symbol |
 
 ### Keeping capacity for exits
 
@@ -254,9 +256,10 @@ last millisecond. Drop the newest millisecond from a full page and ask again fro
 
 | Topic | Behaviour |
 | --- | --- |
-| Client order ids | The client requires `newClientOrderId` on every new order. Keep your own and query by it later |
+| Client order ids | The client requires `newClientOrderId` on every new order and `clientAlgoId` on every new algo order, on USDⓈ-M, COIN-M and Spot, although the venue treats both as optional (documented). Keep your own and query by it later |
 | USDⓈ-M conditional orders | Stop, take-profit and trailing orders go to the algo endpoint (`/fapi/v1/algoOrder`) with `clientAlgoId`. Regular `newOrder` takes only `LIMIT` and `MARKET` |
 | Two namespaces | Regular and algo orders have separate ids, open-order lists and cancel-all calls. Check both lists before you call an account clear |
+| COIN-M conditional orders | The client has no COIN-M conditional cancel-all. Its COIN-M algo calls are `newAlgoOrder`, `cancelAlgoOrder` (one order) and `openAlgoOrders`, so cancel them one at a time |
 | Post-only | Futures `GTX`; Spot uses order type `LIMIT_MAKER` instead of a time in force |
 | GTD | Expiry must be more than 600 seconds after venue time; the client rechecks just before sending |
 | GTC lifetime | Futures GTC orders live one calendar year ([2024-04-09 change log](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log#2024-04-09)) |
@@ -276,6 +279,17 @@ last millisecond. Drop the newest millisecond from a full page and ask again fro
 Since the CM migration, USDⓈ-M and COIN-M share one position-mode setting: changing
 it on one flips both. Every fill we recorded was in one-way mode; hedge-mode closes
 follow Binance's pages and this client's tests, not a live recording.
+
+### Conditional orders and cancel-all
+
+Seen on Demo on 2026-10-16: USDⓈ-M in one-way mode on `BTCUSDT`, and Spot.
+
+| Fact | What to do |
+| --- | --- |
+| A resting reduce-only `STOP_MARKET` for the whole position was not cancelled when another order closed the position. It stayed working on the flat position for the 30 seconds we watched, until we cancelled it | After any close that did not go through the protective order, cancel the protection yourself, then read the algo open-order list |
+| `ALGO_UPDATE` arrives on the Futures user stream when a conditional order is placed and when it is cancelled, apart from `ORDER_TRADE_UPDATE`. We recorded no other transition | Handle it as its own event; the client decodes it as `UserPayload::AlgoUpdate` |
+| USDⓈ-M `DELETE /fapi/v1/allOpenOrders` and `DELETE /fapi/v1/algoOpenOrders` each answer `{"code":200,"msg":...}` with no order list. The cancellations show only on the user stream | Keep the stream open across the call and take the cancellations from it, then read both open-order lists |
+| Spot `DELETE /api/v3/openOrders` answers with the list of cancelled orders. Order-list entries in it carry no `orderId` | Do not expect an `orderId` on every entry. The client keeps an entry without one as `BatchResult::Unknown`, which is not a refusal; confirm it with venue reads |
 
 ### Event order: statements and fills
 

@@ -96,6 +96,11 @@ things matter when you wrap it:
   for you.
 - A lapsed key arrives as a `listenKeyExpired` event. Treat everything after it as
   unknown until you have read the account again.
+- Closing a key ended the stream without `listenKeyExpired`. Seen once on USDⓈ-M
+  Demo, on 2026-10-15: after `DELETE /fapi/v1/listenKey` no `listenKeyExpired` event
+  arrived. The socket closed about 4 ms after the close reply, and a new stream had
+  to be opened. Treat the socket closing as the signal; do not wait
+  for `listenKeyExpired`.
 - Every socket has a 24-hour life. The client ends the generation with a gap when it
   is reached, so plan a reconnect before then.
 - Renewing a key is not continuity. Neither is a new socket: nothing is replayed, and

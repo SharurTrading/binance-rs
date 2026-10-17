@@ -73,9 +73,9 @@ for the whole process, so every client you build shares it. The details are in t
 
 ### Keeping capacity for exits
 
-You can reserve part of each budget for cancellations and position-reducing orders
-with `set_exit_reserve`, described in the README's
-[Reserving capacity for exits](../README.md#reserving-capacity-for-exits). Three
+You can reserve part of each budget for cancellations, position-reducing orders and
+the reads an exit makes first with `set_exit_reserve`, described in the README's
+[Reserving capacity for exits](../README.md#reserving-capacity-for-exits). Four
 things matter when you wrap it:
 
 1. One owner per shared budget. Replacement is last-write-wins, so two profiles of one
@@ -85,6 +85,16 @@ things matter when you wrap it:
 3. On Futures, a sell is not an exit. Only an explicit `reduceOnly=true`,
    `closePosition=true`, a pure cancellation, or an exact hedge-mode close
    (`LONG`+`SELL`, `SHORT`+`BUY`) qualifies.
+4. A read is not an exit either. An exit that does not yet know what it holds, such
+   as one started before your own state was seeded, must read the open orders and
+   positions before it can name a cancel or a close. Call the read's `_for_exit`
+   method for those reads: USDⓈ-M and COIN-M open orders, open algo orders and
+   position risk, and Spot open orders. The ordinary method is never admitted from
+   the reserve, so a busy poller cannot spend it, and an exit that uses the ordinary
+   read is refused once the ordinary share is spent, before it can cancel anything.
+   These are REST methods. WebSocket API cancels are eligible, but its reads, such as
+   Spot `openOrders.status` and Futures `account.position`, have no exit variant, so
+   an exit over the WebSocket API reads over REST.
 
 ### User data streams
 
@@ -261,7 +271,7 @@ last millisecond. Drop the newest millisecond from a full page and ask again fro
 | Client order ids | The client requires `newClientOrderId` on every new order on USDⓈ-M, COIN-M and Spot, and `clientAlgoId` on every new algo order on USDⓈ-M and COIN-M (Spot has no algo orders), although the venue treats both as optional (documented). A Spot order list needs `listClientOrderId` and a client id for each leg. Keep your own and query by it later |
 | USDⓈ-M conditional orders | Stop, take-profit and trailing orders go to the algo endpoint (`/fapi/v1/algoOrder`) with `clientAlgoId`. Regular `newOrder` takes only `LIMIT` and `MARKET` |
 | Two namespaces | Regular and algo orders have separate ids and open-order lists, and on USDⓈ-M separate cancel-all calls (COIN-M has no conditional cancel-all, below). Check both lists before you call an account clear |
-| COIN-M conditional orders | Binance documents no COIN-M conditional cancel-all. The [UM/CM integration notice](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice), section C.5, names only `POST` and `DELETE /dapi/v1/algoOrder` and `GET /dapi/v1/openAlgoOrders`, where USDⓈ-M also has `DELETE /fapi/v1/algoOpenOrders`. The client offers `new_algo_order`, `cancel_algo_order` (one order) and `open_algo_orders`: list the open algo orders and cancel each one |
+| COIN-M conditional orders | Binance documents no COIN-M conditional cancel-all. The [UM/CM integration notice](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/Important-CM-UM-Integration-Notice), section C.5, names only `POST` and `DELETE /dapi/v1/algoOrder` and `GET /dapi/v1/openAlgoOrders`, where USDⓈ-M also has `DELETE /fapi/v1/algoOpenOrders`. The client offers `new_algo_order`, `cancel_algo_order` (one order) and `open_algo_orders`: list the open algo orders and cancel each one. For an exit, list them with `open_algo_orders_for_exit`; each `cancel_algo_order` is already admitted from the exit reserve |
 | Post-only | Futures `GTX`; Spot uses order type `LIMIT_MAKER` instead of a time in force |
 | GTD | Expiry must be more than 600 seconds after venue time; the client rechecks just before sending |
 | GTC lifetime | Futures GTC orders live one calendar year ([2024-04-09 change log](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log#2024-04-09)) |

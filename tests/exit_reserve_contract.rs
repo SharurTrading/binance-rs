@@ -343,3 +343,210 @@ async fn coinm_hedged_short_buy_spends_same_uid_futures_capacity_but_not_another
     assert!(third.starts_with("POST /fapi/v1/order"));
     fixture.finish().await;
 }
+
+/// Each path in order, as the fixture received it.
+#[cfg(test)]
+async fn received(fixture: &mut HttpFixture, paths: &[&str]) {
+    for path in paths {
+        let request = fixture.requests.recv().await.unwrap();
+        assert!(request.starts_with(path), "{path}: {request}");
+    }
+}
+
+#[tokio::test]
+async fn usdm_exit_reads_draw_on_the_reserve_that_refuses_the_same_ordinary_reads() {
+    let mut fixture = HttpFixture::new(200, "", "[]", None, false).await;
+    let budgets = Budgets::new(BudgetLimits::usdm().weight_per_minute(8)).unwrap();
+    budgets
+        .set_exit_reserve(ExitReserve::default().request_weight(7))
+        .unwrap();
+    let client =
+        usdm::RestClient::new(config().rest_url(&fixture.url).unwrap().budgets(budgets)).unwrap();
+    let symbol = || Symbol::new("BTCUSDT").unwrap();
+    let orders = usdm::rest_requests::CurrentAllOpenOrders::new().symbol(symbol());
+    let algo = usdm::rest_requests::CurrentAllAlgoOpenOrders::new().symbol(symbol());
+    let positions = usdm::rest_requests::PositionInformationV3::new().symbol(symbol());
+    // The ordinary share is the one weight unit above the reserve.
+    client
+        .current_all_open_orders(&orders, deadline())
+        .await
+        .unwrap();
+    refused(
+        &client
+            .current_all_open_orders(&orders, deadline())
+            .await
+            .unwrap_err(),
+    );
+    refused(
+        &client
+            .current_all_algo_open_orders(&algo, deadline())
+            .await
+            .unwrap_err(),
+    );
+    refused(
+        &client
+            .position_information_v3(&positions, deadline())
+            .await
+            .unwrap_err(),
+    );
+    client
+        .current_all_open_orders_for_exit(&orders, deadline())
+        .await
+        .unwrap();
+    client
+        .current_all_algo_open_orders_for_exit(&algo, deadline())
+        .await
+        .unwrap();
+    client
+        .position_information_v3_for_exit(&positions, deadline())
+        .await
+        .unwrap();
+    // Weights 1 + 1 + 1 + 5 spent the venue's whole 8; the reserve lends nothing beyond it.
+    refused(
+        &client
+            .current_all_open_orders_for_exit(&orders, deadline())
+            .await
+            .unwrap_err(),
+    );
+    assert_eq!(fixture.connections_accepted(), 4);
+    received(
+        &mut fixture,
+        &[
+            "GET /fapi/v1/openOrders?",
+            "GET /fapi/v1/openOrders?",
+            "GET /fapi/v1/openAlgoOrders?",
+            "GET /fapi/v3/positionRisk?",
+        ],
+    )
+    .await;
+    fixture.finish().await;
+}
+
+#[tokio::test]
+async fn coinm_exit_reads_draw_on_the_reserve_that_refuses_the_same_ordinary_reads() {
+    let mut fixture = HttpFixture::new(200, "", "[]", None, false).await;
+    let budgets = Budgets::new(BudgetLimits::coinm().weight_per_minute(4)).unwrap();
+    budgets
+        .set_exit_reserve(ExitReserve::default().request_weight(3))
+        .unwrap();
+    let client = coinm::RestClient::new(
+        coinm::Config::with_pools(coinm::Environment::Demo, &WeightPools::new())
+            .unwrap()
+            .rest_url(&fixture.url)
+            .unwrap()
+            .clock(Arc::new(FixedClock(1_700_000_001_000)))
+            .credentials(
+                binance_client::Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap(),
+            )
+            .budgets(budgets),
+    )
+    .unwrap();
+    let symbol = || Symbol::new("BTCUSD_PERP").unwrap();
+    let orders = coinm::rest_requests::CurrentAllOpenOrders::new().symbol(symbol());
+    let algo = coinm::rest_requests::OpenAlgoOrders::new().symbol(symbol());
+    let positions = coinm::rest_requests::PositionInformation::new();
+    client
+        .current_all_open_orders(&orders, deadline())
+        .await
+        .unwrap();
+    refused(
+        &client
+            .current_all_open_orders(&orders, deadline())
+            .await
+            .unwrap_err(),
+    );
+    refused(
+        &client
+            .open_algo_orders(&algo, deadline())
+            .await
+            .unwrap_err(),
+    );
+    refused(
+        &client
+            .position_information(&positions, deadline())
+            .await
+            .unwrap_err(),
+    );
+    client
+        .current_all_open_orders_for_exit(&orders, deadline())
+        .await
+        .unwrap();
+    client
+        .open_algo_orders_for_exit(&algo, deadline())
+        .await
+        .unwrap();
+    client
+        .position_information_for_exit(&positions, deadline())
+        .await
+        .unwrap();
+    // Weights 1 + 1 + 1 + 1 spent the venue's whole 4.
+    refused(
+        &client
+            .open_algo_orders_for_exit(&algo, deadline())
+            .await
+            .unwrap_err(),
+    );
+    assert_eq!(fixture.connections_accepted(), 4);
+    received(
+        &mut fixture,
+        &[
+            "GET /dapi/v1/openOrders?",
+            "GET /dapi/v1/openOrders?",
+            "GET /dapi/v1/openAlgoOrders?",
+            "GET /dapi/v1/positionRisk?",
+        ],
+    )
+    .await;
+    fixture.finish().await;
+}
+
+#[tokio::test]
+async fn spot_exit_open_orders_read_draws_on_the_reserve_that_refuses_the_ordinary_read() {
+    let mut fixture = HttpFixture::new(200, "", "[]", None, false).await;
+    let budgets = Budgets::new(BudgetLimits::spot().weight_per_minute(12)).unwrap();
+    budgets
+        .set_exit_reserve(ExitReserve::default().request_weight(6))
+        .unwrap();
+    let client = binance_client::spot::RestClient::new(
+        binance_client::spot::Config::with_pools(
+            binance_client::spot::Environment::Demo,
+            &WeightPools::new(),
+        )
+        .unwrap()
+        .rest_url(&fixture.url)
+        .unwrap()
+        .clock(Arc::new(FixedClock(1_700_000_001_000)))
+        .credentials(
+            binance_client::Credentials::hmac("synthetic-api-key", "synthetic-secret").unwrap(),
+        )
+        .budgets(budgets),
+    )
+    .unwrap();
+    let orders = binance_client::spot::rest_requests::GetOpenOrders::new()
+        .symbol(Symbol::new("BTCUSDT").unwrap());
+    // A symbol-scoped open-orders read weighs 6, the whole ordinary share.
+    client.get_open_orders(&orders, deadline()).await.unwrap();
+    refused(
+        &client
+            .get_open_orders(&orders, deadline())
+            .await
+            .unwrap_err(),
+    );
+    client
+        .get_open_orders_for_exit(&orders, deadline())
+        .await
+        .unwrap();
+    refused(
+        &client
+            .get_open_orders_for_exit(&orders, deadline())
+            .await
+            .unwrap_err(),
+    );
+    assert_eq!(fixture.connections_accepted(), 2);
+    received(
+        &mut fixture,
+        &["GET /api/v3/openOrders?", "GET /api/v3/openOrders?"],
+    )
+    .await;
+    fixture.finish().await;
+}

@@ -51,6 +51,13 @@ pub(crate) trait Request: Serialize + Send + Sync {
     fn cost(&self) -> Result<Cost, Error>;
 }
 
+/// A read an exit makes to learn what it must cancel or close.
+///
+/// Only a product's explicit `_for_exit` method sends one through
+/// [`super::HttpClient::execute_exit_read`], which admits it as cancellations
+/// and reducing orders are. The ordinary method for the same request never does.
+pub(crate) trait ExitRead: Request {}
+
 pub(crate) fn parameters<T: Serialize>(request: &T) -> Result<BTreeMap<String, Value>, Error> {
     let value = serde_json::to_value(request).map_err(|_| Error::Validation("request encoding"))?;
     let map = value

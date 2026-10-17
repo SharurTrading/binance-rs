@@ -570,7 +570,9 @@ applies immediately, even when it falls below the configured reserve: ordinary c
 traffic then refuses, and eligible traffic still cannot exceed `L`. Reported usage and
 limits remain the full venue figures, not an ordinary admission allowance.
 
-Eligibility follows provider request semantics, independent of consumer intent:
+Eligibility that follows from a request is set by provider request semantics,
+independent of consumer intent. The exit reads below are the one exception, which
+the caller chooses:
 
 | Product/transport | Requests eligible for reserved capacity |
 | --- | --- |
@@ -606,6 +608,44 @@ and [Spot FIX requests](https://github.com/binance/binance-spot-api-docs/blob/ma
 SAPI retains its endpoint IP/UID ownership: equal path text does not combine different
 scopes. For example, Margin new-order UID weight and cancellation IP weight remain
 independent. Additional endpoint IP request caps are checked independently of UID weight.
+
+A read is never eligible from its request alone. An exit that must first learn what
+to cancel or close chooses an exit read explicitly: the same request through a
+`_for_exit` method, admitted as eligible attempts are. The ordinary method for that
+request stays ordinary, so a caller polling the same endpoint never spends the reserve.
+The exit reads are REST methods only; WebSocket API reads, such as Spot
+`openOrders.status` and Futures `account.position`, have no exit variant and stay
+ordinary.
+
+| Product | Exit reads |
+| --- | --- |
+| USDⓈ-M REST | `current_all_open_orders_for_exit`, `current_all_algo_open_orders_for_exit`, `position_information_v3_for_exit` |
+| COIN-M REST | `current_all_open_orders_for_exit`, `open_algo_orders_for_exit`, `position_information_for_exit` |
+| Spot REST | `get_open_orders_for_exit` |
+
+An exit read is sent at most once and never waits for capacity. It is refused before
+sending, with nothing sent, in these cases:
+
+| Case | Error |
+| --- | --- |
+| The venue's whole limit, reserve included, is spent in the current window | `Error::Admission`, whose `retry_after` says when the window rolls |
+| A venue `Retry-After` cooldown is active | `Error::Admission`, whose `retry_after` says when it ends |
+| A `418` ban the venue gave no timing for stands | `Error::CooldownTimingUnknown`, until `release_unknown_ban()` |
+| The caller's deadline has passed | `Error::Expired` |
+
+Size the reserve for every read an exit makes as well as its cancels and closes:
+
+| Read | Weight without a symbol | Weight with one symbol |
+| --- | ---: | ---: |
+| USDⓈ-M or COIN-M open orders | 40 | 1 |
+| USDⓈ-M or COIN-M open algo orders | 40 | 1 |
+| USDⓈ-M position risk V3 | 5 | 5 |
+| COIN-M position risk | 1 | 1 |
+| Spot open orders, plus one raw request | 80 | 6 |
+
+Read without a symbol, an exit's full set of reads costs 85 weight on USDⓈ-M, 81 on
+COIN-M and 80 on Spot. Every account on one IP draws on that IP's single reserve, so an
+exit of several accounts pays its reads once per account.
 
 A FIX session starts with message capacity configured by
 `spot::fix::Config::with_exit_reserve(messages)`. Retain its `Session` handle and call

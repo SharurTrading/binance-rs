@@ -73,9 +73,9 @@ for the whole process, so every client you build shares it. The details are in t
 
 ### Keeping capacity for exits
 
-You can reserve part of each budget for cancellations and position-reducing orders
-with `set_exit_reserve`, described in the README's
-[Reserving capacity for exits](../README.md#reserving-capacity-for-exits). Three
+You can reserve part of each budget for cancellations, position-reducing orders and
+the reads an exit makes first with `set_exit_reserve`, described in the README's
+[Reserving capacity for exits](../README.md#reserving-capacity-for-exits). Four
 things matter when you wrap it:
 
 1. One owner per shared budget. Replacement is last-write-wins, so two profiles of one
@@ -92,6 +92,9 @@ things matter when you wrap it:
    position risk, and Spot open orders. The ordinary method is never admitted from
    the reserve, so a busy poller cannot spend it, and an exit that uses the ordinary
    read is refused once the ordinary share is spent, before it can cancel anything.
+   These are REST methods. WebSocket API cancels are eligible, but its reads, such as
+   Spot `openOrders.status` and Futures `account.position`, have no exit variant, so
+   an exit over the WebSocket API reads over REST.
 
 ### User data streams
 

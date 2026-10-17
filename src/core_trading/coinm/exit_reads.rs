@@ -32,8 +32,12 @@ impl super::RestClient {
     /// capacity.
     ///
     /// # Errors
-    /// As [`Self::current_all_open_orders`]. An [`Error::Admission`] here means the
-    /// venue's whole limit, reserve included, is spent; nothing was sent.
+    /// As [`Self::current_all_open_orders`].
+    /// Nothing is sent when the request is refused before sending: [`Error::Admission`]
+    /// when the venue's whole limit, reserve included, is spent in the current window
+    /// or a venue `Retry-After` cooldown is active, with `retry_after` saying when to
+    /// try again; [`Error::CooldownTimingUnknown`] while a ban the venue gave no
+    /// timing for stands; and [`Error::Expired`] once `deadline` has passed.
     pub async fn current_all_open_orders_for_exit(
         &self,
         request: &CurrentAllOpenOrders,
@@ -50,8 +54,12 @@ impl super::RestClient {
     /// waits for capacity.
     ///
     /// # Errors
-    /// As [`Self::open_algo_orders`]. An [`Error::Admission`] here means the venue's
-    /// whole limit, reserve included, is spent; nothing was sent.
+    /// As [`Self::open_algo_orders`].
+    /// Nothing is sent when the request is refused before sending: [`Error::Admission`]
+    /// when the venue's whole limit, reserve included, is spent in the current window
+    /// or a venue `Retry-After` cooldown is active, with `retry_after` saying when to
+    /// try again; [`Error::CooldownTimingUnknown`] while a ban the venue gave no
+    /// timing for stands; and [`Error::Expired`] once `deadline` has passed.
     pub async fn open_algo_orders_for_exit(
         &self,
         request: &OpenAlgoOrders,
@@ -67,8 +75,12 @@ impl super::RestClient {
     /// the positions it closes. It is sent at most once and never waits for capacity.
     ///
     /// # Errors
-    /// As [`Self::position_information`]. An [`Error::Admission`] here means the
-    /// venue's whole limit, reserve included, is spent; nothing was sent.
+    /// As [`Self::position_information`].
+    /// Nothing is sent when the request is refused before sending: [`Error::Admission`]
+    /// when the venue's whole limit, reserve included, is spent in the current window
+    /// or a venue `Retry-After` cooldown is active, with `retry_after` saying when to
+    /// try again; [`Error::CooldownTimingUnknown`] while a ban the venue gave no
+    /// timing for stands; and [`Error::Expired`] once `deadline` has passed.
     pub async fn position_information_for_exit(
         &self,
         request: &PositionInformation,

@@ -3,7 +3,8 @@
 
 use crate::{Budgets, Error};
 
-/// Caller-selected capacity kept for explicit venue cancellations and reducing orders.
+/// Caller-selected capacity kept for explicit venue cancellations, reducing orders and
+/// the `_for_exit` reads an exit makes to learn what to cancel or close.
 ///
 /// All values are native quota units per applicable window, not a count of exits.
 /// Zero disables a dimension. This policy never increases a venue limit: ordinary

@@ -292,12 +292,16 @@ Since the CM migration, USDⓈ-M and COIN-M share one position-mode setting: cha
 it on one flips both. Every fill we recorded was in one-way mode; hedge-mode closes
 follow Binance's pages and this client's tests, not a live recording.
 
-Futures have no close request, so a refused close is a refused `reduceOnly` order. We
-recorded none. The only reduce-only refusal in the client's copies of Binance's
-documented response samples is `-2022` with the text `ReduceOnly Order is rejected.`,
-which says the order was rejected and nothing about the position. Do not read it as
-"the position is already flat": read the position, from the stream's statement or
-Position Information, before you decide what the account holds.
+Futures have no close request. In one-way mode a close is a `reduceOnly` order, so a
+refused close there is a refused `reduceOnly` order. We recorded none. In the client's
+copies of Binance's documented USDⓈ-M and COIN-M REST response samples, the only
+reduce-only refusal is `-2022` `ReduceOnly Order is rejected.`, a failed member of a
+batch order (on Spot, the client's tests use `-2022` for a failed cancel-replace, which
+is not a reduce-only refusal). The client's copies of the USDⓈ-M user-data-stream samples
+also show a conditional order cancelled with `rm` `Reduce Only reject` in an
+`ALGO_UPDATE`. Neither says anything about the position. Do not read either as "the
+position is already flat": read the position, from the stream's statement or Position
+Information, before you decide what the account holds.
 
 ### Conditional orders and cancel-all
 
@@ -317,17 +321,17 @@ On the USDⓈ-M user stream, a fill produces a compact `TRADE_LITE`, a balance a
 position statement (`ACCOUNT_UPDATE`) and the full fill (`ORDER_TRADE_UPDATE`).
 
 > [!IMPORTANT]
-> In every USDⓈ-M Demo sample we recorded, the statement arrived before its full
-> fill, by about one to two milliseconds. This is a small Demo sample, not a
-> guarantee: do not depend on either order or on a bound for the gap.
+> In every USDⓈ-M Demo sample we recorded (2026-10-13 to 2026-10-16), the statement
+> arrived before its full fill, by under two milliseconds (0.4 to 1.7 ms as received,
+> over the 19 pairs counted below). This is a small Demo sample, not a guarantee: do
+> not depend on either order or on a bound for the gap.
 
 What held in every sample:
 
 - Across the 19 statement and fill pairs we recorded, the statement's transaction
   time `T` equalled its fill's in 15 and was one millisecond after the fill's in the
-  other four (the 13 and 14 October round-trip and held-gap runs). It was never
-  before the fill's. Their event time `E` matched in all 19, and the statement
-  arrived first in all 19.
+  other four (two on 2026-10-13, two on 2026-10-14). It was never before the fill's.
+  Their event time `E` matched in all 19.
 - A statement covered every fill stamped at or before its own `T`. Place statements
   by `T`, not by the order they arrive in.
 - One market order filled in two parts. Both parts had the same `E` and `T` but
@@ -345,7 +349,7 @@ that changed, so it never replaces your whole balance list.
 | --- | --- |
 | `n`, `N` | The fill's commission and its asset; the asset can differ from the pair's |
 | `rp` | Realised PnL the venue states for that fill |
-| `ep` | Entry price in the position statement. It is rounded to eight places (see [Entry price precision](#entry-price-precision)), so work out averages from the fills yourself |
+| `ep` | Entry price in the position statement. It was rounded to eight places in our samples (see [Entry price precision](#entry-price-precision)), so work out averages from the fills yourself |
 | `wb` | Wallet balance in the statement |
 
 In our USDT-margined samples the wallet moved by exactly the stated `rp` minus the
@@ -354,21 +358,23 @@ exact inputs, not from rounded statement fields.
 
 ### Entry price precision
 
-Binance states a position's average entry price at different precisions on different
-endpoints, and does not hold one spelling for one number. The same position, long
-0.0021 after the 14 October three-entry burst, was stated twice:
+Seen on USDⓈ-M Demo (`BTCUSDT`, 2026-10-13 to 2026-10-16): Binance stated a position's
+average entry price at different precisions on different endpoints, and did not keep
+one spelling for one number. After three market entries of 0.0007 on 2026-10-14, the
+same long 0.0021 was stated twice:
 
 | Source | Field | Value | Decimals |
 | --- | --- | --- | --- |
-| Private stream `ACCOUNT_UPDATE` (row 15, `pa` 0.0021) | `ep` | `81648.27142857` | 8 |
-| REST Position Information V3, read 2026-10-14T16:18:04Z | `entryPrice` | `81648.27142857143` | 11 |
+| Private stream `ACCOUNT_UPDATE` after the third entry (`pa` 0.0021) | `ep` | `81648.27142857` | 8 |
+| REST Position Information V3, read at 2026-10-14T16:18:04Z | `entryPrice` | `81648.27142857143` | 11 |
 
-The stream's third entry of that burst (row 11, `pa` 0.0014) states `81652.55714286`,
-also eight places. In the same stream rows `bep`, the break-even price, has ten or
-eleven (`81685.2181657143`, `81680.93073714289`), so one row does not hold one
-precision either. Trailing zeros are not kept consistently: the stream states `83387`
-(14 October held-gap run, row 4) where REST states `83387.0` for the same position,
-and both state `81351.1` (16 October divergence run), as the SDK decoded them.
+The statement after the second entry's second partial fill (`pa` 0.0014) states
+`81652.55714286`, also eight places. The stream's break-even price `bep` was stated at
+eleven places on 2026-10-13 (`83455.76896000002`), at ten on 2026-10-14
+(`81685.2181657143`) and at eleven on 2026-10-16 (`81399.88901333335`), so one row does
+not hold one precision either. Trailing zeros were not kept consistently: on 2026-10-14
+the stream stated `83387` where both REST reads of the same position stated `83387.0`,
+and on 2026-10-16 stream and REST both stated `81351.1`, as the SDK decoded them.
 
 So a consumer can neither assume one precision nor read it from the digits sent.
 Compare a stated average with one derived from the fills within a tolerance, never for
@@ -381,7 +387,7 @@ equality.
 | USDⓈ-M Position Information V3 | Returns only symbols with a position or an open order, so a flat account gives an empty list. Pair it with both open-order lists before you call the account flat |
 | COIN-M Position Information | Sent without `marginAsset` or `pair`, it returns only symbols in `TRADING` status, so a position on a contract that is delivering, settling or halted is left out ([endpoint page and connector](#sources)). Any contract can leave `TRADING` after your last exchange information read: a quarterly entering its delivery window, or a perpetual settling before a delisting or halted. So read once per margin asset (or pair) of every listed contract you may hold before you call the account flat. That such a read lists contracts outside `TRADING` is inferred from the note, not recorded live. In hedge mode the read also lists each symbol's `BOTH` row beside `LONG` and `SHORT`, as COIN-M Account Information does; treat a flat row of the side the mode does not use as no position |
 | USDⓈ-M Account V3 | Balances; its position rows have no entry price, so use position risk for that |
-| Position `updateTime` | A position row in USDⓈ-M Position Information V3 and Account V3 carries `updateTime`. In 13 of the 14 non-empty position reads we recorded it equalled the transaction time `T` of the latest `ACCOUNT_UPDATE` that stated that position, even where that `T` was one millisecond after the fill's. The fourteenth followed an outside fill that the cut stream did not carry, so there was no statement to compare. COIN-M Position Information and Account Information rows have the same field in the client's models, but no COIN-M row was recorded. The client models it as optional, so treat a row without it as unstamped |
+| Position `updateTime` | A position row in USDⓈ-M Position Information V3 and Account V3 carries `updateTime`. On USDⓈ-M Demo (2026-10-14 to 2026-10-16), 26 of the 28 non-empty position reads (14 of each endpoint) carried an `updateTime` equal to the transaction time `T` of the latest `ACCOUNT_UPDATE` that stated that position, even where that `T` was one millisecond after the fill's. The other two, one of each, followed a fill made after we closed the listen key, so no statement was recorded for it; their `updateTime` equalled that fill's trade time. COIN-M Position Information and Account Information rows have the same field in the client's models, but no COIN-M row was recorded. The client models it as optional, so treat a row without it as unstamped |
 | Separate reads | Account, positions, orders and trades are separate requests with no shared instant. A trade page read during a fill can end before that fill |
 | `userTrades` (Futures) | Seven days at most per request, past three months only, 1,000 rows; send `fromId` or a time range, never both |
 | `myTrades` (Spot) | 24 hours at most per request, 1,000 rows; the client refuses `fromId` with a time range |
@@ -439,11 +445,11 @@ What this client deliberately leaves to you:
 
 | Gap | Status |
 | --- | --- |
-| Statement-to-fill lag | Seen at one to two milliseconds on Demo only; no bound is known |
+| Statement-to-fill lag | Seen at 0.4 to 1.7 milliseconds on Demo only; no bound is known |
 | Fills during a lost connection | What the stream drops and what history then returns is not proven |
 | COIN-M and Spot fill order | No fill recorded on either |
 | Hedge-mode closes | Not recorded live |
-| Refused reduce-only close | Not recorded; the text of `-2022` does not say why the order was refused |
+| Refused reduce-only close | Not recorded; neither `-2022` `ReduceOnly Order is rejected.` nor an `ALGO_UPDATE` `rm` `Reduce Only reject` says why the order was refused |
 | COIN-M positions outside `TRADING` | That a `marginAsset` or `pair` position read lists a delivering, settling or halted contract is inferred from Binance's note, not recorded live |
 | Algo order events | Whether COIN-M pushes `ALGO_UPDATE` is not recorded, nor is any USDⓈ-M transition beyond placement and cancel, or whether an `ORDER_TRADE_UPDATE` accompanies them |
 | `closePosition=true` stop on a flat position | Not recorded; the stop seen on Demo used `reduceOnly=true` |

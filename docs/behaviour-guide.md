@@ -49,13 +49,14 @@ Pick the hosts with each product's `Environment`; production uses `api`, `fapi` 
 `dapi.binance.com`.
 
 The SAPI clients (Wallet, Convert, Margin) have no `Environment`: their configuration
-starts at production `api.binance.com`, so point one at Demo with `rest_url`. Seen once
-on Demo (2026-10-17): `POST /sapi/v1/asset/transfer` (`UMFUTURE_MAIN`, 1 USDT) sent to
+starts at production `api.binance.com`, so point one at Demo with `rest_url`. That
+changes only the host: a Demo-pointed SAPI client still shares the process's production
+SAPI IP and UID pools unless given its own `budgets`. Seen once on Demo (2026-10-17): `POST /sapi/v1/asset/transfer` (`UMFUTURE_MAIN`, 1 USDT) sent to
 `demo-api.binance.com` was answered HTTP 404 with a body that did not decode, which the
 client reports as an `Unknown` outcome. Nothing moved: the USDⓈ-M wallet afterwards
-equalled the stream's last statement. So own-wallet transfers, and their
-`ACCOUNT_UPDATE`, cannot be exercised on Demo; an `Unknown` transfer still needs a wallet
-read before you trust that.
+equalled the stream's last statement. On 2026-10-17 this own-wallet transfer and its
+`ACCOUNT_UPDATE` could not be exercised on Demo; an `Unknown` transfer still needs fresh
+wallet evidence before its outcome can be established.
 
 | Product | Demo REST | Demo streams | Demo WebSocket API |
 | --- | --- | --- | --- |
@@ -310,7 +311,7 @@ Seen once in hedge mode on USDⓈ-M Demo (`BTCUSDT`, 2026-10-17): LONG 0.0007 an
 | Fact | What to do |
 | --- | --- |
 | Each `ACCOUNT_UPDATE` carried one position row, for the side that order changed; the closed side was stated at `pa` 0 | Key a statement by symbol and `positionSide`; a push says nothing of the other side |
-| No `ACCOUNT_UPDATE` on the stream carried a `BOTH` row, flat or not, unlike the hedge-mode position reads (below) | Do not wait for a `BOTH` row on the stream in hedge mode |
+| No `ACCOUNT_UPDATE` on the stream carried a `BOTH` row, flat or not, unlike COIN-M's hedge-mode position and account reads ([Reading account state](#reading-account-state)) | Do not wait for a `BOTH` row on the stream in hedge mode |
 | The closes were sent without `reduceOnly`, which hedge mode forbids, and their `ORDER_TRADE_UPDATE` rows came back with `R` true | Read `R` as stated; do not infer from it that you sent `reduceOnly` |
 | Each statement's `T` equalled its fill's and arrived before it, as in one-way mode | Place statements by `T` ([Event order](#event-order-statements-and-fills)) |
 
@@ -409,15 +410,17 @@ and compute derived values from exact inputs, not from rounded statement fields.
 the exact figure from the fills: a USDⓈ-M SHORT 0.0007 closed from 81482.4 at 81487
 (exactly -0.00322) was stated `-0.00321999`, a partial close of 0.0001 (exactly -0.00072)
 `-0.00071999`, and a COIN-M inverse close of one 100 USD contract from 81384 at 81361.9
-(exactly -0.000000333758 BTC) `-0.00000033`. Compare a stated `rp` with your own within
-one unit of its eighth place, never for equality.
+(about -0.000000333758 BTC) `-0.00000033`. In these three recorded closes the stated
+figure was within one unit of its eighth place of the figure computed from the fills;
+an exact comparison reported all three as differences.
 
 Seen once on USDⓈ-M Demo (`BTCUSDT`, long 0.0007, cross margin, 2026-10-17): the 16:00
 UTC funding fee arrived as one `ACCOUNT_UPDATE` with `m` `FUNDING_FEE`, a single `USDT`
 balance row whose `bc` was the fee (`-0.00569254`), `a.S` naming the symbol, and an empty
 `P`: no position was restated. Its `T` was 511 ms after the funding time and its `E`
-205 ms after that. Binance documents that an isolated position's funding update also
-carries that position's row; that was not recorded.
+205 ms after that. Binance's [USDⓈ-M balance and position update documentation](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/user-data-streams#event-balance-and-position-update)
+says an isolated position's funding update also carries that position's row; that was
+not recorded.
 
 ### Entry price precision
 
@@ -508,11 +511,11 @@ What this client deliberately leaves to you:
 
 | Gap | Status |
 | --- | --- |
-| Statement-to-fill lag | Seen at 0.4 to 1.7 milliseconds on Demo only; no bound is known |
+| Statement-to-fill lag | Seen at 0.2 to 1.7 milliseconds on Demo only; no bound is known |
 | Fills during a lost connection | What the stream drops and what history then returns is not proven |
 | COIN-M and Spot fill order | One round trip recorded on each (2026-10-17); partial fills and bursts are not |
-| Transfer updates | `ASSET_TRANSFER` cannot be staged on Demo (the transfer endpoint answers 404), and no `MARGIN_TRANSFER` is recorded |
-| Hedge-mode closes | Not recorded live |
+| Transfer updates | An own-wallet transfer attempt answered 404 on Demo on 2026-10-17; no `ASSET_TRANSFER` or `MARGIN_TRANSFER` update is recorded |
+| Hedge-mode closes | Accepted hedge-mode `MARKET` closes recorded once (USDⓈ-M Demo, 2026-10-17); a refused hedge-mode close is not recorded |
 | Refused reduce-only close | Not recorded; neither `-2022` `ReduceOnly Order is rejected.` nor an `ALGO_UPDATE` `rm` `Reduce Only reject` says why the order was refused |
 | COIN-M positions outside `TRADING` | That a `marginAsset` or `pair` position read lists a delivering, settling or halted contract is inferred from Binance's note, not recorded live |
 | Algo order events | Whether COIN-M pushes `ALGO_UPDATE` is not recorded, nor is any USDⓈ-M transition beyond placement and cancel, or whether an `ORDER_TRADE_UPDATE` accompanies them |

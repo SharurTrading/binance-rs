@@ -284,7 +284,7 @@ last millisecond. Drop the newest millisecond from a full page and ask again fro
 
 | | One-way | Hedge |
 | --- | --- | --- |
-| `positionSide` | `BOTH` | `LONG` or `SHORT` |
+| `positionSide` | `BOTH` | `LONG` or `SHORT` on orders; COIN-M position and account reads also list a `BOTH` row per symbol ([Reading account state](#reading-account-state)) |
 | How to close | `reduceOnly=true` on the opposite side | `LONG`+`SELL` or `SHORT`+`BUY`; `reduceOnly` is forbidden and the client refuses it |
 | `closePosition=true` | Cannot be combined with `quantity` or `reduceOnly` | Same |
 
@@ -347,7 +347,7 @@ exact inputs, not from rounded statement fields.
 | Read | Behaviour |
 | --- | --- |
 | USDⓈ-M Position Information V3 | Returns only symbols with a position or an open order, so a flat account gives an empty list. Pair it with both open-order lists before you call the account flat |
-| COIN-M Position Information | Sent without `marginAsset` or `pair`, it returns only symbols in `TRADING` status, so a position on a contract that is delivering, settling or halted is left out ([connector docs](#sources)). A quarterly leaves `TRADING` for its delivery window, and the status your last exchange information read stated can be out of date, so read once per margin asset (or pair) of every dated contract you may hold before you call the account flat |
+| COIN-M Position Information | Sent without `marginAsset` or `pair`, it returns only symbols in `TRADING` status, so a position on a contract that is delivering, settling or halted is left out ([endpoint page and connector](#sources)). Any contract can leave `TRADING` after your last exchange information read: a quarterly entering its delivery window, or a perpetual settling before a delisting or halted. So read once per margin asset (or pair) of every listed contract you may hold before you call the account flat. That such a read lists contracts outside `TRADING` is inferred from the note, not recorded live. In hedge mode the read also lists each symbol's `BOTH` row beside `LONG` and `SHORT`, as COIN-M Account Information does; treat a flat row of the side the mode does not use as no position |
 | USDⓈ-M Account V3 | Balances; its position rows have no entry price, so use position risk for that |
 | Separate reads | Account, positions, orders and trades are separate requests with no shared instant. A trade page read during a fill can end before that fill |
 | `userTrades` (Futures) | Seven days at most per request, past three months only, 1,000 rows; send `fromId` or a time range, never both |
@@ -410,6 +410,7 @@ What this client deliberately leaves to you:
 | Fills during a lost connection | What the stream drops and what history then returns is not proven |
 | COIN-M and Spot fill order | No fill recorded on either |
 | Hedge-mode closes | Not recorded live |
+| COIN-M positions outside `TRADING` | That a `marginAsset` or `pair` position read lists a delivering, settling or halted contract is inferred from Binance's note, not recorded live |
 | Algo order events | Whether COIN-M pushes `ALGO_UPDATE` is not recorded, nor is any USDⓈ-M transition beyond placement and cancel, or whether an `ORDER_TRADE_UPDATE` accompanies them |
 | `closePosition=true` stop on a flat position | Not recorded; the stop seen on Demo used `reduceOnly=true` |
 | Futures roll notices | Unknown whether `!contractInfo` pushes a roll |
@@ -433,4 +434,9 @@ What this client deliberately leaves to you:
   [Spot REST API](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md),
   [Spot streams](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md),
   [UM/CM integration notice](https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice),
-  [COIN-M connector Position Information](https://github.com/binance/binance-connector-java/blob/4fb3c790b7450f7595515f414d9ee0052bb1413a/clients/derivatives-trading-coin-futures/src/main/java/com/binance/connector/client/derivatives_trading_coin_futures/rest/api/TradeApi.java#L3354-L3360)
+  [COIN-M Position Information](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#position-information)
+  and its note as fetched from Binance's
+  [COIN-M connector](https://github.com/binance/binance-connector-java/blob/4fb3c790b7450f7595515f414d9ee0052bb1413a/clients/derivatives-trading-coin-futures/src/main/java/com/binance/connector/client/derivatives_trading_coin_futures/rest/api/TradeApi.java#L3354-L3360),
+  [COIN-M Account Information](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/account#account-information)
+  and its
+  [connector note](https://github.com/binance/binance-connector-java/blob/4fb3c790b7450f7595515f414d9ee0052bb1413a/clients/derivatives-trading-coin-futures/src/main/java/com/binance/connector/client/derivatives_trading_coin_futures/rest/api/AccountApi.java#L201-L205)

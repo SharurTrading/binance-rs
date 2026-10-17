@@ -16,7 +16,7 @@ and you want to know how Binance actually behaves before you rely on it. The
 does and what you must do about it.
 
 Most findings come from Binance's own pages, from this client's tests, and from a
-small number of USDⓈ-M and Spot Demo sessions recorded in October 2026. Where
+small number of USDⓈ-M, COIN-M and Spot Demo sessions recorded in October 2026. Where
 something was seen only on Demo, or only a few times, the text says so. Nothing here
 is a promise about production behaviour.
 
@@ -47,6 +47,15 @@ lack features that production has, and its replies can differ: the USDⓈ-M Demo
 `testOrder` reply zeroes every field it does not echo (`orderId: 0`, empty symbol).
 Pick the hosts with each product's `Environment`; production uses `api`, `fapi` and
 `dapi.binance.com`.
+
+The SAPI clients (Wallet, Convert, Margin) have no `Environment`: their configuration
+starts at production `api.binance.com`, so point one at Demo with `rest_url`. Seen once
+on Demo (2026-10-17): `POST /sapi/v1/asset/transfer` (`UMFUTURE_MAIN`, 1 USDT) sent to
+`demo-api.binance.com` was answered HTTP 404 with a body that did not decode, which the
+client reports as an `Unknown` outcome. Nothing moved: the USDⓈ-M wallet afterwards
+equalled the stream's last statement. So own-wallet transfers, and their
+`ACCOUNT_UPDATE`, cannot be exercised on Demo; an `Unknown` transfer still needs a wallet
+read before you trust that.
 
 | Product | Demo REST | Demo streams | Demo WebSocket API |
 | --- | --- | --- | --- |
@@ -293,8 +302,17 @@ last millisecond. Drop the newest millisecond from a full page and ask again fro
 | `closePosition=true` | Cannot be combined with `quantity` or `reduceOnly` | Same |
 
 Since the CM migration, USDⓈ-M and COIN-M share one position-mode setting: changing
-it on one flips both. Every fill we recorded was in one-way mode; hedge-mode closes
-follow Binance's pages and this client's tests, not a live recording.
+it on one flips both.
+
+Seen once in hedge mode on USDⓈ-M Demo (`BTCUSDT`, 2026-10-17): LONG 0.0007 and SHORT
+0.0007 opened, SHORT closed, then LONG closed, with `MARKET` orders.
+
+| Fact | What to do |
+| --- | --- |
+| Each `ACCOUNT_UPDATE` carried one position row, for the side that order changed; the closed side was stated at `pa` 0 | Key a statement by symbol and `positionSide`; a push says nothing of the other side |
+| No `ACCOUNT_UPDATE` on the stream carried a `BOTH` row, flat or not, unlike the hedge-mode position reads (below) | Do not wait for a `BOTH` row on the stream in hedge mode |
+| The closes were sent without `reduceOnly`, which hedge mode forbids, and their `ORDER_TRADE_UPDATE` rows came back with `R` true | Read `R` as stated; do not infer from it that you sent `reduceOnly` |
+| Each statement's `T` equalled its fill's and arrived before it, as in one-way mode | Place statements by `T` ([Event order](#event-order-statements-and-fills)) |
 
 Futures have no close request. In one-way mode a close is a `reduceOnly` order, so a
 refused close there is a refused `reduceOnly` order. We recorded none. In the client's
@@ -325,17 +343,19 @@ On the USDⓈ-M user stream, a fill produces a compact `TRADE_LITE`, a balance a
 position statement (`ACCOUNT_UPDATE`) and the full fill (`ORDER_TRADE_UPDATE`).
 
 > [!IMPORTANT]
-> In every USDⓈ-M Demo sample we recorded (2026-10-13 to 2026-10-16), the statement
-> arrived before its full fill, by under two milliseconds (0.4 to 1.7 ms as received,
-> over the 19 pairs counted below). This is a small Demo sample, not a guarantee: do
+> In every USDⓈ-M and COIN-M Demo sample we recorded (2026-10-13 to 2026-10-17), the
+> statement arrived before its full fill, by under two milliseconds (0.2 to 1.7 ms as
+> received, over the 27 pairs counted below). This is a small Demo sample, not a guarantee: do
 > not depend on either order or on a bound for the gap.
 
 What held in every sample:
 
-- Across the 19 statement and fill pairs we recorded, the statement's transaction
-  time `T` equalled its fill's in 15 and was one millisecond after the fill's in the
-  other four (two on 2026-10-13, two on 2026-10-14). It was never before the fill's.
-  Their event time `E` matched in all 19.
+- Across the 25 USDⓈ-M statement and fill pairs we recorded, the statement's
+  transaction time `T` equalled its fill's in 21 and was one millisecond after the
+  fill's in the other four (two on 2026-10-13, two on 2026-10-14). It was never before
+  the fill's. Their event time `E` matched in all 25. The two COIN-M pairs
+  (`BTCUSD_PERP`, 2026-10-17) had the same shape: `T` one millisecond after the entry's
+  fill and equal to the exit's, `E` matching, the statement first by 0.38 and 0.31 ms.
 - A statement covered every fill stamped at or before its own `T`. Place statements
   by `T`, not by the order they arrive in.
 - One market order filled in two parts. Both parts had the same `E` and `T` but
@@ -343,9 +363,16 @@ What held in every sample:
 - `TRADE_LITE` arrived earlier still. It has no fee and no realised PnL, so book
   money only from `ORDER_TRADE_UPDATE`, and do not count the same trade twice.
 
-COIN-M has `ACCOUNT_UPDATE` and `ORDER_TRADE_UPDATE` but no `TRADE_LITE`. We have
-recorded no COIN-M fill, so its order is unknown. Spot has no positions: its `outboundAccountPosition` lists only the assets
-that changed, so it never replaces your whole balance list.
+COIN-M has `ACCOUNT_UPDATE` and `ORDER_TRADE_UPDATE` but no `TRADE_LITE`, and its user
+events name the account by its alias in a root `i` field, which USDⓈ-M's do not. One
+COIN-M round trip is recorded (2026-10-17), so partial fills and bursts are not.
+
+Spot has no positions. Seen once on Spot Demo (`BTCUSDT`, a market buy and sell,
+2026-10-17): each order's `executionReport` `NEW`, then its `TRADE`, arrived before one
+`outboundAccountPosition`, and within each leg the report's `E` and `T` and the push's
+`E` and `u` were the same millisecond. The push listed the leg's base and quote asset and
+BNB at zero, which had not changed, but not the rest of the wallet: it never replaces your
+whole balance list.
 
 ### Fees, PnL and balances
 
@@ -369,12 +396,28 @@ contract's margin asset. These USDⓈ-M payloads state that asset, and we record
 The client's Account V3 position row has no margin asset field. A fill that arrives
 with none of these at hand needs the listing before its money can be booked.
 
-The COIN-M client leaves `ma` in `extra` too. Our COIN-M `ACCOUNT_UPDATE` capture of
-2026-10-11 shows it on a position row (`BTC` on `BTCUSD_PERP`).
+The COIN-M client leaves `ma` in `extra` too. Our COIN-M `ACCOUNT_UPDATE` captures of
+2026-10-11 and 2026-10-17 show it on a position row (`BTC` on `BTCUSD_PERP`). COIN-M's
+`ORDER_TRADE_UPDATE` also carries `ma` on the order row (`BTC` on 2026-10-17), which the
+COIN-M client models; USDⓈ-M's does not.
 
-In our USDT-margined samples the wallet moved by exactly the stated `rp` minus the
-fee on every fill. Use the venue's figures as stated and compute derived values from
-exact inputs, not from rounded statement fields.
+In our USDT-margined samples, and in the BTC-margined COIN-M round trip, the wallet moved
+by exactly the stated `rp` minus the fee on every fill. Use the venue's figures as stated
+and compute derived values from exact inputs, not from rounded statement fields.
+
+`rp` is stated to eight places after the venue's own arithmetic, so it need not equal
+the exact figure from the fills: a USDⓈ-M SHORT 0.0007 closed from 81482.4 at 81487
+(exactly -0.00322) was stated `-0.00321999`, a partial close of 0.0001 (exactly -0.00072)
+`-0.00071999`, and a COIN-M inverse close of one 100 USD contract from 81384 at 81361.9
+(exactly -0.000000333758 BTC) `-0.00000033`. Compare a stated `rp` with your own within
+one unit of its eighth place, never for equality.
+
+Seen once on USDⓈ-M Demo (`BTCUSDT`, long 0.0007, cross margin, 2026-10-17): the 16:00
+UTC funding fee arrived as one `ACCOUNT_UPDATE` with `m` `FUNDING_FEE`, a single `USDT`
+balance row whose `bc` was the fee (`-0.00569254`), `a.S` naming the symbol, and an empty
+`P`: no position was restated. Its `T` was 511 ms after the funding time and its `E`
+205 ms after that. Binance documents that an isolated position's funding update also
+carries that position's row; that was not recorded.
 
 ### Entry price precision
 
@@ -467,7 +510,8 @@ What this client deliberately leaves to you:
 | --- | --- |
 | Statement-to-fill lag | Seen at 0.4 to 1.7 milliseconds on Demo only; no bound is known |
 | Fills during a lost connection | What the stream drops and what history then returns is not proven |
-| COIN-M and Spot fill order | No fill recorded on either |
+| COIN-M and Spot fill order | One round trip recorded on each (2026-10-17); partial fills and bursts are not |
+| Transfer updates | `ASSET_TRANSFER` cannot be staged on Demo (the transfer endpoint answers 404), and no `MARGIN_TRANSFER` is recorded |
 | Hedge-mode closes | Not recorded live |
 | Refused reduce-only close | Not recorded; neither `-2022` `ReduceOnly Order is rejected.` nor an `ALGO_UPDATE` `rm` `Reduce Only reject` says why the order was refused |
 | COIN-M positions outside `TRADING` | That a `marginAsset` or `pair` position read lists a delivering, settling or halted contract is inferred from Binance's note, not recorded live |

@@ -174,7 +174,7 @@ driver joined without error. REST needs no logout.
 | Margin rates | `requiredMarginPercent` and `maintMarginPercent` are percentages; divide by 100 |
 | Fees | No listing row states a commission; read the commission-rate endpoint |
 | Precision seen | USDⓈ-M Demo ticks went down to `0.00000001` (eight places) on 2026-10-13; all fit `Decimal` |
-| Pending contracts | The futures listing includes contracts in `PENDING_TRADING`, not yet tradable, with `PRICE_FILTER.tickSize` `"0"`: USDⓈ-M Demo's `ELSAUSDT`, inspected 2026-10-17. A zero tick is no tick: such a row cannot be priced, so read the listing again once it trades |
+| Pending contract | A futures listing can include a contract in `PENDING_TRADING`, not yet tradable, whose `PRICE_FILTER.tickSize` is `"0"`. We saw it once: USDⓈ-M Demo's `ELSAUSDT`, inspected on 2026-10-17. Whether other pending contracts, or a production listing, carry zero filters is not recorded. A zero tick is no tick: a row like that cannot be priced, so read the listing again once it trades |
 
 The minimum order quantity moves with the price, because the notional filter is in
 quote currency. Work it out from the current price and the filter immediately before
@@ -355,12 +355,22 @@ that changed, so it never replaces your whole balance list.
 | `rp` | Realised PnL the venue states for that fill |
 | `ep` | Entry price in the position statement. It was rounded to eight places in our samples (see [Entry price precision](#entry-price-precision)), so work out averages from the fills yourself |
 | `wb` | Wallet balance in the statement |
+| `ma` | Margin asset of a position row in the statement. It was `USDT` in all 19 USDⓈ-M Demo position rows we recorded (2026-10-13 to 2026-10-16). This is a gap in the client: `usdm::stream_models::AccountUpdateEventAUpperPItem` has no field for it, so it stays only in the row's `extra` |
 
 USDⓈ-M `ORDER_TRADE_UPDATE` carries no margin asset. `N` is the commission's asset,
 which can differ from the contract's, and `rp` names no currency: it is in the
-contract's margin asset, which only the listing row states (`marginAsset`). A fill on
-a symbol you hold no listing row for therefore needs the listing before its money can
-be booked.
+contract's margin asset. These USDⓈ-M payloads state that asset, and we recorded each:
+
+- the listing row (`marginAsset`);
+- each position row of an `ACCOUNT_UPDATE` (`ma`, see the table above);
+- each Position Information V3 row (`marginAsset`);
+- each `userTrades` row (`marginAsset`).
+
+The client's Account V3 position row has no margin asset field. A fill that arrives
+with none of these at hand needs the listing before its money can be booked.
+
+The COIN-M client leaves `ma` in `extra` too. Our COIN-M `ACCOUNT_UPDATE` capture of
+2026-10-11 shows it on a position row (`BTC` on `BTCUSD_PERP`).
 
 In our USDT-margined samples the wallet moved by exactly the stated `rp` minus the
 fee on every fill. Use the venue's figures as stated and compute derived values from

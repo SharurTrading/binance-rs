@@ -292,6 +292,13 @@ Since the CM migration, USDⓈ-M and COIN-M share one position-mode setting: cha
 it on one flips both. Every fill we recorded was in one-way mode; hedge-mode closes
 follow Binance's pages and this client's tests, not a live recording.
 
+Futures have no close request, so a refused close is a refused `reduceOnly` order. We
+recorded none. The only reduce-only refusal in the client's copies of Binance's
+documented response samples is `-2022` with the text `ReduceOnly Order is rejected.`,
+which says the order was rejected and nothing about the position. Do not read it as
+"the position is already flat": read the position, from the stream's statement or
+Position Information, before you decide what the account holds.
+
 ### Conditional orders and cancel-all
 
 Seen on Demo on 2026-10-16: USDⓈ-M in one-way mode on `BTCUSDT`, and Spot.
@@ -316,8 +323,11 @@ position statement (`ACCOUNT_UPDATE`) and the full fill (`ORDER_TRADE_UPDATE`).
 
 What held in every sample:
 
-- Both events of a pair carried the same transaction time `T`. Their event time `E`
-  matched too, except once, where `E` was one millisecond after `T`.
+- Across the 19 statement and fill pairs we recorded, the statement's transaction
+  time `T` equalled its fill's in 15 and was one millisecond after the fill's in the
+  other four (the 13 and 14 October round-trip and held-gap runs). It was never
+  before the fill's. Their event time `E` matched in all 19, and the statement
+  arrived first in all 19.
 - A statement covered every fill stamped at or before its own `T`. Place statements
   by `T`, not by the order they arrive in.
 - One market order filled in two parts. Both parts had the same `E` and `T` but
@@ -349,6 +359,7 @@ exact inputs, not from rounded statement fields.
 | USDⓈ-M Position Information V3 | Returns only symbols with a position or an open order, so a flat account gives an empty list. Pair it with both open-order lists before you call the account flat |
 | COIN-M Position Information | Sent without `marginAsset` or `pair`, it returns only symbols in `TRADING` status, so a position on a contract that is delivering, settling or halted is left out ([endpoint page and connector](#sources)). Any contract can leave `TRADING` after your last exchange information read: a quarterly entering its delivery window, or a perpetual settling before a delisting or halted. So read once per margin asset (or pair) of every listed contract you may hold before you call the account flat. That such a read lists contracts outside `TRADING` is inferred from the note, not recorded live. In hedge mode the read also lists each symbol's `BOTH` row beside `LONG` and `SHORT`, as COIN-M Account Information does; treat a flat row of the side the mode does not use as no position |
 | USDⓈ-M Account V3 | Balances; its position rows have no entry price, so use position risk for that |
+| Position `updateTime` | A position row in USDⓈ-M Position Information V3 and Account V3 carries `updateTime`. In 13 of the 14 non-empty position reads we recorded it equalled the transaction time `T` of the latest `ACCOUNT_UPDATE` that stated that position, even where that `T` was one millisecond after the fill's. The fourteenth followed an outside fill that the cut stream did not carry, so there was no statement to compare. COIN-M Position Information and Account Information rows have the same field in the client's models, but no COIN-M row was recorded. The client models it as optional, so treat a row without it as unstamped |
 | Separate reads | Account, positions, orders and trades are separate requests with no shared instant. A trade page read during a fill can end before that fill |
 | `userTrades` (Futures) | Seven days at most per request, past three months only, 1,000 rows; send `fromId` or a time range, never both |
 | `myTrades` (Spot) | 24 hours at most per request, 1,000 rows; the client refuses `fromId` with a time range |
@@ -410,6 +421,7 @@ What this client deliberately leaves to you:
 | Fills during a lost connection | What the stream drops and what history then returns is not proven |
 | COIN-M and Spot fill order | No fill recorded on either |
 | Hedge-mode closes | Not recorded live |
+| Refused reduce-only close | Not recorded; the text of `-2022` does not say why the order was refused |
 | COIN-M positions outside `TRADING` | That a `marginAsset` or `pair` position read lists a delivering, settling or halted contract is inferred from Binance's note, not recorded live |
 | Algo order events | Whether COIN-M pushes `ALGO_UPDATE` is not recorded, nor is any USDⓈ-M transition beyond placement and cancel, or whether an `ORDER_TRADE_UPDATE` accompanies them |
 | `closePosition=true` stop on a flat position | Not recorded; the stop seen on Demo used `reduceOnly=true` |

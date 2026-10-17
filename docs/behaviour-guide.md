@@ -355,7 +355,7 @@ that changed, so it never replaces your whole balance list.
 | `rp` | Realised PnL the venue states for that fill |
 | `ep` | Entry price in the position statement. It was rounded to eight places in our samples (see [Entry price precision](#entry-price-precision)), so work out averages from the fills yourself |
 | `wb` | Wallet balance in the statement |
-| `ma` | Margin asset of a position row in the statement. It was `USDT` in all 19 USDⓈ-M Demo position rows we recorded (2026-10-13 to 2026-10-16). This is a gap in the client: `usdm::stream_models::AccountUpdateEventAUpperPItem` has no field for it, so it stays only in the row's `extra` |
+| `ma` | Margin asset of a position row in the statement. It was `USDT` in all 19 USDⓈ-M Demo position rows we recorded (2026-10-13 to 2026-10-16). This is a gap in the client: `usdm::stream_models::AccountUpdateEventAUpperPItem` has no field for it, so it stays only in the row's `extra` (tracked in [#144](https://github.com/SharurTrading/binance-rs/issues/144)) |
 
 USDⓈ-M `ORDER_TRADE_UPDATE` carries no margin asset. `N` is the commission's asset,
 which can differ from the contract's, and `rp` names no currency: it is in the

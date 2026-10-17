@@ -174,6 +174,7 @@ driver joined without error. REST needs no logout.
 | Margin rates | `requiredMarginPercent` and `maintMarginPercent` are percentages; divide by 100 |
 | Fees | No listing row states a commission; read the commission-rate endpoint |
 | Precision seen | USDⓈ-M Demo ticks went down to `0.00000001` (eight places) on 2026-10-13; all fit `Decimal` |
+| Pending contracts | The futures listing includes contracts in `PENDING_TRADING`, not yet tradable, with `PRICE_FILTER.tickSize` `"0"`: USDⓈ-M Demo's `ELSAUSDT`, inspected 2026-10-17. A zero tick is no tick: such a row cannot be priced, so read the listing again once it trades |
 
 The minimum order quantity moves with the price, because the notional filter is in
 quote currency. Work it out from the current price and the filter immediately before
@@ -181,8 +182,11 @@ you send. A minimum we derived one day was too small the next.
 
 ### Symbols and contract types
 
-- Dated futures are named `<PAIR>_<YYMMDD>` after their UTC delivery date
-  (`BTCUSDT_261225`). Perpetuals keep plain names (`BTCUSDT`, `BTCUSD_PERP`).
+- Dated futures on USDⓈ-M and COIN-M are named `<PAIR>_<YYMMDD>` after their UTC
+  delivery date (`BTCUSDT_261225`, `BTCUSD_261225`). A USDⓈ-M perpetual keeps the
+  plain pair (`BTCUSDT`); a COIN-M perpetual is spelled `<PAIR>_PERP`
+  (`BTCUSD_PERP`). A name alone tells a perpetual from a dated contract, but not a
+  weekly from a monthly or a quarterly: only the listing row's `contractType` says.
 - Two weekly contracts can deliver in one month. Binance documents no delivery day
   for monthlies, so a monthly and a quarterly could share a month.
 - Listing rows contained `contractType` values no enum lists: `CURRENT_WEEK`,
@@ -351,6 +355,12 @@ that changed, so it never replaces your whole balance list.
 | `rp` | Realised PnL the venue states for that fill |
 | `ep` | Entry price in the position statement. It was rounded to eight places in our samples (see [Entry price precision](#entry-price-precision)), so work out averages from the fills yourself |
 | `wb` | Wallet balance in the statement |
+
+USDⓈ-M `ORDER_TRADE_UPDATE` carries no margin asset. `N` is the commission's asset,
+which can differ from the contract's, and `rp` names no currency: it is in the
+contract's margin asset, which only the listing row states (`marginAsset`). A fill on
+a symbol you hold no listing row for therefore needs the listing before its money can
+be booked.
 
 In our USDT-margined samples the wallet moved by exactly the stated `rp` minus the
 fee on every fill. Use the venue's figures as stated and compute derived values from

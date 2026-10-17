@@ -11,6 +11,7 @@
 mod config;
 pub mod enums;
 pub mod event_payloads;
+mod exit_reads;
 mod rate;
 pub mod rest_models;
 pub mod rest_requests;

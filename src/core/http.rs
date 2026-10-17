@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT-0
 
 use super::{
-    Budgets, Clock, Credentials, Error, Operation, Outcome, RateEvidence, Request, Response,
-    ResponseMeta, Security, TransportFailure, request,
+    Budgets, Clock, Cost, Credentials, Error, ExitRead, Operation, Outcome, RateEvidence, Request,
+    Response, ResponseMeta, Security, TransportFailure, request,
 };
 use serde::de::DeserializeOwned;
 use std::{sync::Arc, time::Duration};
@@ -202,12 +202,30 @@ impl HttpClient {
         request: &R,
         deadline: Instant,
     ) -> Result<Response<R::Response>, Error> {
+        self.send(request, deadline, Admission::Priced).await
+    }
+
+    /// Send an exit's read, admitted from the exit reserve.
+    pub async fn execute_exit_read<R: ExitRead>(
+        &self,
+        request: &R,
+        deadline: Instant,
+    ) -> Result<Response<R::Response>, Error> {
+        self.send(request, deadline, Admission::ExitRead).await
+    }
+
+    async fn send<R: Request>(
+        &self,
+        request: &R,
+        deadline: Instant,
+        admission: Admission,
+    ) -> Result<Response<R::Response>, Error> {
         request.validate()?;
         let client_order_ids = request::order_ids(&request::parameters(request)?);
         let op = R::OP;
         let wire = self.prepare(op, request, deadline)?;
         let now = self.clock.now_millis()?;
-        let cost = request.cost()?;
+        let cost = admission.applied(request.cost()?);
         self.budgets.admit(cost, now)?;
         let authority_time = self.clock.now_millis()?;
         (op.validate_time)(&request::parameters(request)?, authority_time)?;
@@ -394,6 +412,27 @@ impl HttpClient {
                     TransportFailure::RateEvidenceFailed,
                 )
             })
+    }
+}
+
+/// How one attempt is admitted against the exit reserve.
+#[derive(Clone, Copy)]
+enum Admission {
+    /// As the request's own cost classifies it.
+    Priced,
+    /// From the exit reserve: a read an exit makes, chosen by its caller.
+    ExitRead,
+}
+
+impl Admission {
+    fn applied(self, cost: Cost) -> Cost {
+        match self {
+            Self::Priced => cost,
+            Self::ExitRead => Cost {
+                exit: super::rate::reserve::ExitEligibility::Eligible,
+                ..cost
+            },
+        }
     }
 }
 

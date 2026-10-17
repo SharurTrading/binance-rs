@@ -593,6 +593,23 @@ eligibility does not establish a held position, venue acceptance, or exemption f
 normal order limits, IP budgets and cooldowns. Margin borrowing/repayment flags do
 not make an order eligible.
 
+A read is never eligible from its request alone. An exit that must first learn what
+to cancel or close chooses an exit read explicitly: the same request through a
+`_for_exit` method, admitted as eligible attempts are. The ordinary method for that
+request stays ordinary, so a caller polling the same endpoint never spends the reserve.
+An exit read is sent at most once, never waits for capacity, and is refused with
+`Error::Admission` before sending only when the venue's whole limit is spent.
+
+| Product | Exit reads |
+| --- | --- |
+| USDⓈ-M REST | `current_all_open_orders_for_exit`, `current_all_algo_open_orders_for_exit`, `position_information_v3_for_exit` |
+| COIN-M REST | `current_all_open_orders_for_exit`, `open_algo_orders_for_exit`, `position_information_for_exit` |
+| Spot REST | `get_open_orders_for_exit` |
+
+Size the reserve for every read an exit makes as well as its cancels and closes. An
+unscoped open-order list costs 40 weight on Futures and 80 on Spot; scoped to one
+symbol it costs 1 and 6.
+
 These classifications follow the official
 [USDⓈ-M trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade),
 [COIN-M trade endpoints](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade),

@@ -345,12 +345,34 @@ that changed, so it never replaces your whole balance list.
 | --- | --- |
 | `n`, `N` | The fill's commission and its asset; the asset can differ from the pair's |
 | `rp` | Realised PnL the venue states for that fill |
-| `ep` | Entry price in the position statement. It is rounded (to eight places in our sample), so work out averages from the fills yourself |
+| `ep` | Entry price in the position statement. It is rounded to eight places (see [Entry price precision](#entry-price-precision)), so work out averages from the fills yourself |
 | `wb` | Wallet balance in the statement |
 
 In our USDT-margined samples the wallet moved by exactly the stated `rp` minus the
 fee on every fill. Use the venue's figures as stated and compute derived values from
 exact inputs, not from rounded statement fields.
+
+### Entry price precision
+
+Binance states a position's average entry price at different precisions on different
+endpoints, and does not hold one spelling for one number. The same position, long
+0.0021 after the 14 October three-entry burst, was stated twice:
+
+| Source | Field | Value | Decimals |
+| --- | --- | --- | --- |
+| Private stream `ACCOUNT_UPDATE` (row 15, `pa` 0.0021) | `ep` | `81648.27142857` | 8 |
+| REST Position Information V3, read 2026-10-14T16:18:04Z | `entryPrice` | `81648.27142857143` | 11 |
+
+The stream's third entry of that burst (row 11, `pa` 0.0014) states `81652.55714286`,
+also eight places. In the same stream rows `bep`, the break-even price, has ten or
+eleven (`81685.2181657143`, `81680.93073714289`), so one row does not hold one
+precision either. Trailing zeros are not kept consistently: the stream states `83387`
+(14 October held-gap run, row 4) where REST states `83387.0` for the same position,
+and both state `81351.1` (16 October divergence run), as the SDK decoded them.
+
+So a consumer can neither assume one precision nor read it from the digits sent.
+Compare a stated average with one derived from the fills within a tolerance, never for
+equality.
 
 ### Reading account state
 

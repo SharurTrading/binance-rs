@@ -154,6 +154,17 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
   re-exports. Add a crate only for an actual directed dependency boundary.
 - Use Rust 2024 and the pinned toolchain. Deny Clippy pedantic warnings; any lint
   exception is narrow and includes a reason. Never weaken gates to make a change pass.
+- **BN-IDIOMS-01:** New and changed Rust code follows the
+  [Rust idioms and patterns review guide](docs/rust-idioms-and-patterns-review.md),
+  and review findings cite its check IDs. A reviewer names every pre-existing
+  anti-pattern or non-idiomatic idiom the change exposes — inline where it is in
+  the diff, in the review summary where it is outside it — so it is fixed or
+  opened as a tracked issue (BN-FOLLOWUP-01). Pre-existing code is never
+  grandfathered: an allowance or a tracked issue records the idiomatic outcome,
+  not permission to keep or repeat the pattern. Review verifies that new code is
+  idiomatic, not merely that it compiles. The guide is a pure Rust guide and must
+  not be edited or used as a place to store platform-specific rulings; those
+  belong in this file, and the guide points here.
 - New behavior gets a failing test first; bug fixes reproduce the actual failure.
   Public contract tests live in `tests/`; private unit tests cover parser invariants.
   Property/workload tests use recorded seeds and assert named invariants. Tests must

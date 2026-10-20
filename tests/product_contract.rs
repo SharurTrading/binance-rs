@@ -99,7 +99,7 @@ fn spot_depth_events_and_snapshots_keep_their_update_ids() {
         json!({"e":"depthUpdate","E":1,"s":"BTCUSDT","U":101,"u":102,"b":[["1.10","0"]],"a":[]}),
     )
     .unwrap();
-    assert_eq!((event.upper_u, event.u), (101, 102));
+    assert_eq!((event.first_update_id, event.final_update_id), (101, 102));
     assert_eq!(event.b[0].quantity, Decimal::ZERO);
 }
 
@@ -109,10 +109,17 @@ fn coinm_depth_events_and_snapshots_keep_their_update_ids() {
     let snapshot: OrderBookResponse =
         serde_json::from_value(json!({"lastUpdateId":100,"bids":[],"asks":[["2.5","7"]]})).unwrap();
     assert_eq!(snapshot.last_update_id, Some(100));
-    assert_eq!(snapshot.asks.unwrap()[0].quantity, Decimal::new(7, 0));
+    assert_eq!(snapshot.asks.unwrap()[0].quantity(), Decimal::new(7, 0));
     let event: DiffBookDepthStreamsEvent = serde_json::from_value(json!({"e":"depthUpdate","E":1,"T":1,"s":"BTCUSD_PERP","U":99,"u":101,"pu":98,"b":[],"a":[["2.5","3"]]})).unwrap();
-    assert_eq!((event.upper_u, event.u, event.pu), (99, 101, 98));
-    assert_eq!(event.a[0].price, Decimal::new(25, 1));
+    assert_eq!(
+        (
+            event.first_update_id,
+            event.final_update_id,
+            event.previous_final_update_id
+        ),
+        (99, 101, 98)
+    );
+    assert_eq!(event.a[0].price(), Decimal::new(25, 1));
 }
 
 #[test]

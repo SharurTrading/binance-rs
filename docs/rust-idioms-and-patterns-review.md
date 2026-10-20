@@ -21,16 +21,15 @@ are cited from there; this guide must never be edited to store them.
 
 The book's examples use `panic!`, `unwrap`, `unsafe` and `f64` freely because they
 illustrate a shape, not a production contract. Do not copy them without applying the
-repository's own rules and the checks below. This copy governs `binance-client`; its review
-obligation is carried by **BN-IDIOMS-01** in AGENTS.md.
+repository's own rules and the checks below.
 
 ## How to use this guide
 
 1. Review the lines the change adds or materially rewrites. A reviewer also names every
    pre-existing anti-pattern or non-idiomatic idiom the change exposes — inline where it
    is in the diff, in the review summary where it is outside it — so it is fixed or
-   opened as a tracked issue (BN-IDIOMS-01). Naming it never widens the PR. An existing
-   instance is not precedent: a tracked issue records the idiomatic fix, never
+   opened as a tracked issue under the repository review rule. Naming it never widens
+   the PR. An existing instance is not precedent: a tracked issue records the idiomatic fix, never
    permission to keep or repeat the pattern.
 2. Check the repository contract first. A non-negotiable violation is a BLOCKER and ends
    the idiom discussion; other rules keep the severity this guide or the repository
@@ -60,8 +59,6 @@ impl exposes an invariant.
 | BLOCKER | Breaks a repository non-negotiable, risks money or account state, creates undefined behaviour or unapproved unsafe code, or hides a required failure | Must be fixed before merge |
 | FINDING | Correct code that is non-idiomatic, over-abstracted, fails to use a safer idiom, or duplicates expense without need | Fix it, or resolve the thread with the recorded reason |
 | NIT | Naming, placement or readability with no behavioural consequence | Optional; resolve either way |
-
-This repository uses `[BLOCKER]`, `[MAJOR]` and `[MINOR]` review findings; read FINDING as MAJOR and NIT as MINOR.
 
 The shape of a finding (paths are illustrative):
 
@@ -827,7 +824,7 @@ is recorded as not applicable in the review summary.
 - [ ] The change is scoped to the request; every pre-existing anti-pattern or
   non-idiomatic idiom the change exposes is named inline or in the review summary and
   fixed or opened as a tracked issue, and a tracked issue states the idiomatic outcome;
-  no instance is grandfathered (BN-IDIOMS-01).
+  no instance is grandfathered (the repository review rule).
 - [ ] No repository non-negotiable is broken; findings cite the AGENTS.md rule ID and
   keep the severity the rule or this guide states.
 - [ ] Signatures take borrowed views where ownership is not needed; constructors and

@@ -198,3 +198,22 @@ impl<P: Product> Config<P> {
         )
     }
 }
+
+/// REST transport whose clones share product configuration and quota ownership.
+#[derive(Clone)]
+pub struct RestClient<P: Product> {
+    pub(crate) inner: HttpClient,
+    product: PhantomData<P>,
+}
+impl<P: Product> RestClient<P> {
+    /// Construct without network I/O or a hidden runtime.
+    ///
+    /// # Errors
+    /// Returns invalid HTTP transport configuration.
+    pub fn new(config: Config<P>) -> Result<Self, Error> {
+        Ok(Self {
+            inner: config.http()?,
+            product: PhantomData,
+        })
+    }
+}

@@ -1060,11 +1060,21 @@
                   },
                   "U": {
                     "type": "integer",
-                    "format": "int64"
+                    "format": "int64",
+                    "x-rust-name": "first_update_id",
+                    "description": "First update ID in this depth event.",
+                    "x-sources": [
+                      "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market"
+                    ]
                   },
                   "u": {
                     "type": "integer",
-                    "format": "int64"
+                    "format": "int64",
+                    "x-rust-name": "final_update_id",
+                    "description": "Final update ID in this depth event.",
+                    "x-sources": [
+                      "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market"
+                    ]
                   },
                   "b": {
                     "type": "array",
@@ -1165,11 +1175,21 @@
                       },
                       "U": {
                         "type": "integer",
-                        "format": "int64"
+                        "format": "int64",
+                        "x-rust-name": "first_update_id",
+                        "description": "First update ID in this depth event.",
+                        "x-sources": [
+                          "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market"
+                        ]
                       },
                       "u": {
                         "type": "integer",
-                        "format": "int64"
+                        "format": "int64",
+                        "x-rust-name": "final_update_id",
+                        "description": "Final update ID in this depth event.",
+                        "x-sources": [
+                          "https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-streams/market"
+                        ]
                       },
                       "b": {
                         "type": "array",

@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT-0
 > explains, in plain words, the venue behaviours an integrator must handle.
 
 An **unofficial**, independent Rust inner client for Binance APIs, maintained by
-SharurTrading. This project is not affiliated with or endorsed by Binance.
+[SharurTrading](https://github.com/SharurTrading). This project is not affiliated with or endorsed by Binance.
 
 > **Warning: unreleased and untested for live trading.** This crate is under active
 > development and is not ready for production use. Synthetic tests and read-only
@@ -110,7 +110,9 @@ with UM; distinct API modules do not imply independent account settings. No OMS 
 
 Create one client at application startup and reuse it for subsequent requests.
 The application owns the Tokio runtime. This example uses Tokio's `macros` and
-`rt` features with a current-thread runtime.
+`rt` features with a current-thread runtime. It is compiled with `no_run` because
+it contacts the external Binance Demo service; normal tests stay local and
+credential-free.
 
 ```rust,no_run
 use binance_client::Error;
@@ -396,10 +398,12 @@ replaces both scopes with an explicit owner.
 use binance_client::core_trading::{coinm, usdm};
 use binance_client::{AccountKey, Error};
 
-let account = AccountKey::new("main-account");
-let um = usdm::Config::new_for_account(usdm::Environment::Production, &account)?;
-let cm = coinm::Config::new_for_account(coinm::Environment::Production, &account)?;
-# Ok::<(), Error>(())
+fn main() -> Result<(), Error> {
+    let account = AccountKey::new("main-account");
+    let um = usdm::Config::new_for_account(usdm::Environment::Production, &account)?;
+    let cm = coinm::Config::new_for_account(coinm::Environment::Production, &account)?;
+    Ok(())
+}
 ```
 
 A Spot FIX session joins the same account through its `AccountBudgets`. A scope
@@ -415,10 +419,12 @@ for FIX and FIX SBE alike. `AccountBudgets::new` still takes an explicit owner.
 use binance_client::core_trading::spot::{self, fix::AccountBudgets};
 use binance_client::{AccountKey, Error};
 
-let account = AccountKey::new("main-account");
-let rest = spot::Config::new_for_account(spot::Environment::Production, &account)?;
-let fix = AccountBudgets::new_for_account(spot::Environment::Production, &account)?;
-# Ok::<(), Error>(())
+fn main() -> Result<(), Error> {
+    let account = AccountKey::new("main-account");
+    let rest = spot::Config::new_for_account(spot::Environment::Production, &account)?;
+    let fix = AccountBudgets::new_for_account(spot::Environment::Production, &account)?;
+    Ok(())
+}
 ```
 
 `Config::budgets` replaces the drawn pool with an explicit owner, isolating the
@@ -429,10 +435,12 @@ instead of the process's, so tests can share a pool without touching it:
 use binance_client::core_trading::{coinm, usdm};
 use binance_client::{Error, WeightPools};
 
-let pools = WeightPools::new();
-let um = usdm::Config::with_pools(usdm::Environment::Production, &pools)?;
-let cm = coinm::Config::with_pools(coinm::Environment::Production, &pools)?;
-# Ok::<(), Error>(())
+fn main() -> Result<(), Error> {
+    let pools = WeightPools::new();
+    let um = usdm::Config::with_pools(usdm::Environment::Production, &pools)?;
+    let cm = coinm::Config::with_pools(coinm::Environment::Production, &pools)?;
+    Ok(())
+}
 ```
 
 ### Naming a pool
@@ -460,12 +468,14 @@ built it already knows which clients share it.
 use binance_client::core_trading::{coinm, usdm};
 use binance_client::{Error, PoolEnvironment, PoolKey, VenuePool};
 
-let um = usdm::Config::new(usdm::Environment::Production)?;
-let cm = coinm::Config::new(coinm::Environment::Production)?;
-let futures = Some(PoolKey::new(VenuePool::Futures, PoolEnvironment::Production));
-assert_eq!(um.pool_key(), futures);
-assert_eq!(cm.pool_key(), futures);
-# Ok::<(), Error>(())
+fn main() -> Result<(), Error> {
+    let um = usdm::Config::new(usdm::Environment::Production)?;
+    let cm = coinm::Config::new(coinm::Environment::Production)?;
+    let futures = Some(PoolKey::new(VenuePool::Futures, PoolEnvironment::Production));
+    assert_eq!(um.pool_key(), futures);
+    assert_eq!(cm.pool_key(), futures);
+    Ok(())
+}
 ```
 
 ### Reading a pool and a request's weight
@@ -497,14 +507,16 @@ charged its reservation and released once it succeeds.
 use binance_client::core_trading::usdm::{self, rest_requests::KlineCandlestickData};
 use binance_client::{Error, Symbol};
 
-let config = usdm::Config::new(usdm::Environment::Production)?;
-let pool = config.pool_usage()?;
-let bars = KlineCandlestickData::new()
-    .symbol(Symbol::new("BTCUSDT")?)
-    .interval("1m")
-    .limit(1000);
-let fits = pool.request_weight.used + bars.weight()? <= pool.request_weight.limit;
-# Ok::<(), Error>(())
+fn main() -> Result<(), Error> {
+    let config = usdm::Config::new(usdm::Environment::Production)?;
+    let pool = config.pool_usage()?;
+    let bars = KlineCandlestickData::new()
+        .symbol(Symbol::new("BTCUSDT")?)
+        .interval("1m")
+        .limit(1000);
+    let fits = pool.request_weight.used + bars.weight()? <= pool.request_weight.limit;
+    Ok(())
+}
 ```
 
 Explicit `BudgetLimits` owners start from conservative documented values. USDⓈ-M
@@ -527,21 +539,23 @@ shared owner or configuration to change policy at runtime through
 ```rust
 use binance_client::{AccountKey, Error, ExitReserve, usdm};
 
-let account = AccountKey::new("main-account");
-let config = usdm::Config::new_for_account(usdm::Environment::Production, &account)?;
-let owner = config.clone();
-let client = usdm::RestClient::new(config)?;
-// The outer coordinator enables protection when its work needs capacity.
-owner.set_exit_reserve(
-    ExitReserve::default()
-        .request_weight(40)
-        .websocket_weight(20)
-        .orders(5),
-)?;
-// Release protection when that work is complete; accepted usage stays charged.
-owner.set_exit_reserve(ExitReserve::default())?;
-# drop(client);
-# Ok::<(), Error>(())
+fn main() -> Result<(), Error> {
+    let account = AccountKey::new("main-account");
+    let config = usdm::Config::new_for_account(usdm::Environment::Production, &account)?;
+    let owner = config.clone();
+    let client = usdm::RestClient::new(config)?;
+    // The outer coordinator enables protection when its work needs capacity.
+    owner.set_exit_reserve(
+        ExitReserve::default()
+            .request_weight(40)
+            .websocket_weight(20)
+            .orders(5),
+    )?;
+    // Release protection when that work is complete; accepted usage stays charged.
+    owner.set_exit_reserve(ExitReserve::default())?;
+    drop(client);
+    Ok(())
+}
 ```
 
 This setter replaces policy for every client sharing those IP, WebSocket and account
@@ -658,7 +672,7 @@ coordinator for each session's policy; replacements are not additive leases and 
 not reset or refund message usage or change accepted venue limits.
 Its ordinary applications stop below the session's message limit, while pure
 cancellations and required protocol controls use the full limit and charge the same
-counter. Required Logon, Heartbeat, TestRequest replies and Logout can consume protected
+counter. Required `Logon`, `Heartbeat`, `TestRequest` replies and `Logout` can consume protected
 capacity. FIX order placements also honor the shared Spot account order reserve; an
 account refusal does not spend session message capacity.
 
@@ -673,7 +687,7 @@ account refusal does not spend session message capacity.
 ### Releasing a ban without timing
 
 Binance documents a `418` ban as lasting
-["from 2 minutes to 3 days"](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#http-418)
+[from 2 minutes to 3 days](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#http-418)
 and gives no other signal that it has ended. When the reply carries no usable
 `Retry-After`, the pool has no expiry to wait for, so every send on it is refused as
 `Error::CooldownTimingUnknown` and no reply can clear that. The client invents no
@@ -693,10 +707,12 @@ and the pool refuses again.
 use binance_client::core_trading::spot;
 use binance_client::Error;
 
-let config = spot::Config::new(spot::Environment::Production)?;
-// The caller has decided the ban is over, for example after waiting out three days.
-config.release_unknown_ban()?;
-# Ok::<(), Error>(())
+fn main() -> Result<(), Error> {
+    let config = spot::Config::new(spot::Environment::Production)?;
+    // The caller has decided the ban is over, for example after waiting out three days.
+    config.release_unknown_ban()?;
+    Ok(())
+}
 ```
 
 ## Development and verification
@@ -733,4 +749,4 @@ execution readiness. There are no credentials or captured user data in the fixtu
 
 ## License
 
-[MIT No Attribution (MIT-0)](LICENSE).
+[MIT No Attribution (MIT-0)](https://github.com/SharurTrading/binance-rs/blob/main/LICENSE).

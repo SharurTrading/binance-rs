@@ -58,6 +58,17 @@ impl Schema {
                 messages.insert(id, n);
             }
         }
+        for name in [
+            "char", "int8", "uint8", "int16", "uint16", "int32", "uint32", "float", "int64",
+            "uint64",
+        ] {
+            types.entry(name.into()).or_insert_with(|| Node {
+                name: name.into(),
+                kind: "type".into(),
+                children: vec![],
+                attrs: BTreeMap::from([("primitiveType".into(), name.into())]),
+            });
+        }
         Ok(Self {
             id,
             version,
@@ -65,19 +76,10 @@ impl Schema {
             messages,
         })
     }
-    pub(crate) fn type_node(&self, name: &str) -> Result<Node, Error> {
-        if let Some(t) = self.types.get(name) {
-            return Ok(t.clone());
-        }
-        if primitive_size(name).is_some() {
-            return Ok(Node {
-                name: name.into(),
-                kind: "type".into(),
-                children: vec![],
-                attrs: BTreeMap::from([("primitiveType".into(), name.into())]),
-            });
-        }
-        Err(Error::Configuration("unresolved binary type"))
+    pub(crate) fn type_node(&self, name: &str) -> Result<&Node, Error> {
+        self.types
+            .get(name)
+            .ok_or(Error::Configuration("unresolved binary type"))
     }
     pub(crate) fn size(&self, name: &str) -> Result<usize, Error> {
         let n = self.type_node(name)?;
@@ -89,7 +91,7 @@ impl Schema {
                 )
                 .ok_or(Error::Configuration("primitive width"))?;
                 width
-                    .checked_mul(elements(&n)?)
+                    .checked_mul(elements(n)?)
                     .ok_or(Error::Configuration("primitive width"))
             }
             "enum" | "set" => self.size(
@@ -199,7 +201,7 @@ impl<'a> Reader<'a> {
             .copy_from_slice(input);
         Ok(i128::from_le_bytes(bytes))
     }
-    fn value(&mut self, node: &Node, scope: &BTreeMap<String, Value>) -> Result<Value, Error> {
+    fn value(&mut self, node: &Node, scope: &[(&str, Option<i8>)]) -> Result<Value, Error> {
         let name = node
             .attr("type")
             .ok_or(Error::Configuration("field type"))?;
@@ -276,14 +278,15 @@ impl<'a> Reader<'a> {
             return enum_value(name, v).ok_or_else(|| self.error("enum representation"));
         }
         if ty.kind == "set" {
-            return self.set_value(&ty, value);
+            return self.set_value(ty, value);
         }
         if let Some(exponent) = node.attr("exponent") {
             let exponent = scope
-                .get(exponent)
-                .and_then(Value::as_i64)
+                .iter()
+                .rev()
+                .find_map(|(name, value)| (*name == exponent).then_some(*value))
+                .flatten()
                 .ok_or_else(|| self.error("missing mantissa exponent"))?;
-            let exponent = i8::try_from(exponent).map_err(|_| self.error("exponent range"))?;
             return exact_decimal(value, exponent)
                 .map(|v| Value::String(v.to_string()))
                 .ok_or_else(|| self.error("decimal cannot be represented exactly"));
@@ -337,17 +340,28 @@ impl<'a> Reader<'a> {
     }
     fn body(
         &mut self,
-        nodes: &[Node],
+        nodes: &'a [Node],
         block: usize,
-        parent: &BTreeMap<String, Value>,
+        scope: &mut Vec<(&'a str, Option<i8>)>,
     ) -> Result<Value, Error> {
         let start = self.offset;
-        let mut scope = parent.clone();
+        let inherited = scope.len();
         let mut output = Value::Object(Map::new());
         for field in nodes.iter().filter(|n| n.kind == "field") {
-            let value = self.value(field, &scope)?;
-            scope.insert(field.name.clone(), value.clone());
-            if field.attr("type") != Some("exponent8") {
+            let value = self.value(field, scope)?;
+            if field.attr("type") == Some("exponent8") {
+                let exponent = if value.is_null() {
+                    None
+                } else {
+                    Some(
+                        value
+                            .as_i64()
+                            .and_then(|value| i8::try_from(value).ok())
+                            .ok_or_else(|| self.error("exponent range"))?,
+                    )
+                };
+                scope.push((&field.name, exponent));
+            } else {
                 insert(self.schema, &mut output, field, value)?;
             }
         }
@@ -356,27 +370,32 @@ impl<'a> Reader<'a> {
         }
         for field in nodes.iter().filter(|n| n.kind != "field") {
             let value = match field.kind.as_str() {
-                "group" => self.group(field, &scope)?,
+                "group" => self.group(field, scope)?,
                 "data" => self.data(field)?,
                 _ => return Err(self.error("unknown schema field kind")),
             };
             insert(self.schema, &mut output, field, value)?;
         }
+        scope.truncate(inherited);
         Ok(output)
     }
-    fn group(&mut self, field: &Node, scope: &BTreeMap<String, Value>) -> Result<Value, Error> {
+    fn group(
+        &mut self,
+        field: &'a Node,
+        scope: &mut Vec<(&'a str, Option<i8>)>,
+    ) -> Result<Value, Error> {
         let dimensions = self
             .schema
             // SBE's XSD declares groupSizeEncoding as the default dimensionType.
             // See docs/invariant-audit.md for the protocol and venue schema citations.
             .type_node(field.attr("dimensionType").unwrap_or("groupSizeEncoding"))?;
         let mut values = BTreeMap::new();
-        for d in dimensions.children {
+        for d in &dimensions.children {
             let primitive = d
                 .attr("primitiveType")
                 .ok_or(Error::Configuration("group dimension"))?;
             let width = primitive_size(primitive).ok_or(Error::Configuration("dimension width"))?;
-            values.insert(d.name.clone(), self.integer(primitive, width)?);
+            values.insert(d.name.as_str(), self.integer(primitive, width)?);
         }
         let block = values
             .get("blockLength")
@@ -597,7 +616,7 @@ fn decode_nested(
     } else {
         (None, None)
     };
-    let mut value = r.body(&node.children, block, &BTreeMap::new())?;
+    let mut value = r.body(&node.children, block, &mut Vec::new())?;
     if r.offset != bytes.len() {
         return Err(r.error("trailing binary bytes"));
     }
@@ -697,18 +716,15 @@ fn api_projection(name: &str, value: &mut Value) -> Result<(), Error> {
 // Template317 encodes order fields flat and an optional list-status group,
 // while both documented JSON APIs use amendedOrder and one listStatus object.
 fn project_amend(value: &mut Value) -> Result<(), Error> {
-    let mut fields = value
-        .take()
-        .as_object()
-        .cloned()
-        .ok_or(Error::Gap("SBE amend shape"))?;
+    let Value::Object(mut fields) = value.take() else {
+        return Err(Error::Gap("SBE amend shape"));
+    };
     let statuses = fields
         .remove("listStatus")
         .ok_or(Error::Gap("SBE amend list-status group"))?;
-    let mut statuses = statuses
-        .as_array()
-        .cloned()
-        .ok_or(Error::Gap("SBE amend list-status array"))?;
+    let Value::Array(mut statuses) = statuses else {
+        return Err(Error::Gap("SBE amend list-status array"));
+    };
     if statuses.len() > 1 {
         return Err(Error::Gap("SBE amend list-status cardinality"));
     }
@@ -761,6 +777,129 @@ pub fn decode_api<T: DeserializeOwned>(bytes: &[u8]) -> Result<T, Error> {
 #[allow(clippy::unwrap_used, reason = "synthetic parser invariant assertions")]
 mod tests {
     use super::*;
+
+    #[test]
+    fn nested_exponents_shadow_without_leaking_into_sibling_groups() {
+        let schema = Schema::load(
+            r#"{"schema":{"kind":"schema","id":"3","version":"4","children":[
+            {"kind":"types","children":[
+                {"kind":"type","name":"exponent8","primitiveType":"int8"},
+                {"kind":"type","name":"mantissa64","primitiveType":"int64"},
+                {"kind":"composite","name":"groupSizeEncoding","children":[
+                    {"kind":"type","name":"blockLength","primitiveType":"uint16"},
+                    {"kind":"type","name":"numInGroup","primitiveType":"uint16"}
+                ]}
+            ]},
+            {"kind":"message","name":"Scope","id":"1","children":[
+                {"kind":"field","name":"priceExponent","type":"exponent8"},
+                {"kind":"group","name":"children","children":[
+                    {"kind":"field","name":"priceExponent","type":"exponent8"},
+                    {"kind":"field","name":"price","type":"mantissa64","exponent":"priceExponent"}
+                ]},
+                {"kind":"group","name":"siblings","children":[
+                    {"kind":"field","name":"price","type":"mantissa64","exponent":"priceExponent"}
+                ]}
+            ]}
+        ]}}"#,
+        )
+        .unwrap();
+        let mut bytes = [1_u16, 1, 3, 4]
+            .into_iter()
+            .flat_map(u16::to_le_bytes)
+            .collect::<Vec<_>>();
+        bytes.push((-2_i8).cast_unsigned());
+        bytes.extend_from_slice(&9_u16.to_le_bytes());
+        bytes.extend_from_slice(&2_u16.to_le_bytes());
+        for exponent in [-3_i8, -1] {
+            bytes.push(exponent.cast_unsigned());
+            bytes.extend_from_slice(&1234_i64.to_le_bytes());
+        }
+        bytes.extend_from_slice(&8_u16.to_le_bytes());
+        bytes.extend_from_slice(&1_u16.to_le_bytes());
+        bytes.extend_from_slice(&1234_i64.to_le_bytes());
+        assert_eq!(
+            decode_value(&bytes, &schema, false).unwrap(),
+            serde_json::json!({
+                "children": [{"price":"1.234"}, {"price":"123.4"}],
+                "siblings": [{"price":"12.34"}]
+            })
+        );
+    }
+
+    #[test]
+    fn absent_optional_exponents_remain_absent_when_the_mantissa_is_null() {
+        let schema = Schema::load(r#"{"schema":{"kind":"schema","id":"3","version":"4","children":[
+            {"kind":"types","children":[
+                {"kind":"type","name":"exponent8","primitiveType":"int8"},
+                {"kind":"type","name":"mantissa64","primitiveType":"int64"}
+            ]},
+            {"kind":"message","name":"Optional","id":"1","children":[
+                {"kind":"field","name":"exponent","type":"exponent8","presence":"optional"},
+                {"kind":"field","name":"price","type":"mantissa64","exponent":"exponent","presence":"optional"}
+            ]}
+        ]}}"#).unwrap();
+        let mut bytes = [9_u16, 1, 3, 4]
+            .into_iter()
+            .flat_map(u16::to_le_bytes)
+            .collect::<Vec<_>>();
+        bytes.push(i8::MIN.cast_unsigned());
+        bytes.extend_from_slice(&i64::MIN.to_le_bytes());
+        assert_eq!(
+            decode_value(&bytes, &schema, false).unwrap(),
+            serde_json::json!({"price":null})
+        );
+        bytes[9..].copy_from_slice(&1_i64.to_le_bytes());
+        assert!(matches!(
+            decode_value(&bytes, &schema, false),
+            Err(Error::BinaryDecode {
+                reason: "missing mantissa exponent",
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn amend_projection_moves_the_owned_order_and_single_list_status() {
+        let mut value = serde_json::json!({
+            "transactTime": 123,
+            "executionId": 42,
+            "symbol": "BTCUSDT",
+            "listStatus": [{"listClientOrderId":"list-1"}],
+            "relatedOrders": [{"orderId":9}]
+        });
+        let symbol = value["symbol"].as_str().unwrap().as_ptr();
+        let list = value["listStatus"][0]["listClientOrderId"]
+            .as_str()
+            .unwrap()
+            .as_ptr();
+        project_amend(&mut value).unwrap();
+        assert_eq!(
+            value,
+            serde_json::json!({
+                "transactTime":123,
+                "executionId":42,
+                "amendedOrder":{"symbol":"BTCUSDT"},
+                "listStatus":{"listClientOrderId":"list-1"},
+                "relatedOrders":[{"orderId":9}]
+            })
+        );
+        assert_eq!(
+            value["amendedOrder"]["symbol"].as_str().unwrap().as_ptr(),
+            symbol
+        );
+        assert_eq!(
+            value["listStatus"]["listClientOrderId"]
+                .as_str()
+                .unwrap()
+                .as_ptr(),
+            list
+        );
+        let mut invalid = serde_json::json!({"listStatus":[{},{}]});
+        assert!(matches!(
+            project_amend(&mut invalid),
+            Err(Error::Gap("SBE amend list-status cardinality"))
+        ));
+    }
 
     #[test]
     fn schema_defaults_preserve_text_and_refuse_malformed_numbers() {

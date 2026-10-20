@@ -15,6 +15,27 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, time::Duration};
 
+// Margin listen-token subscriptions use the Spot API route and its two-weight
+// handshake; risk streams only consume one connection. Both use five incoming
+// messages per second and a 24-hour connection lifetime (verified 2026-10-10).
+// https://developers.binance.com/en/docs/products/margin-trading/listen-token-data-stream
+// https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/rate-limits
+// https://developers.binance.com/en/docs/products/margin-trading/risk-data-stream
+fn socket_policy(ws_weight: u64) -> SocketPolicy {
+    SocketPolicy {
+        handshake: Cost {
+            connections: 1,
+            ws_weight,
+            ..Cost::default()
+        },
+        incoming_limit: 5,
+        time_unit: crate::TimeUnit::Milliseconds,
+        binary_decoder: None,
+        api_key_header: false,
+        max_generation_age: Some(std::time::Duration::from_hours(24)),
+    }
+}
+
 /// Explicit production Margin socket endpoints and caller-owned connection budgets.
 /// The API weight/connection owner defaults to the process Spot production pool.
 /// SAPI REST has independent endpoint scopes; explicit `budgets` selects another owner.
@@ -239,18 +260,7 @@ impl WsClient {
             config.clock,
             config.budgets,
             config.timeout,
-            SocketPolicy {
-                handshake: Cost {
-                    connections: 1,
-                    ws_weight: 2,
-                    ..Cost::default()
-                },
-                incoming_limit: 5,
-                time_unit: crate::TimeUnit::Milliseconds,
-                binary_decoder: None,
-                api_key_header: false,
-                max_generation_age: Some(std::time::Duration::from_hours(24)),
-            },
+            socket_policy(2),
         )
         .await?;
         Ok((
@@ -420,15 +430,26 @@ impl ApiEvents {
                     }
                 }
             }
-            SocketEvent::Data { generation, value } => {
-                if let Some(event) = value.get("event") {
+            SocketEvent::NativeBinary { generation, .. } => {
+                self.inner.stop();
+                ApiEvent::Gap {
+                    generation,
+                    error: Error::Configuration("unexpected native binary socket payload"),
+                }
+            }
+            SocketEvent::Data {
+                generation,
+                mut value,
+            } => {
+                if value.get("event").is_some() {
                     let decoded = value
                         .get("subscriptionId")
                         .and_then(serde_json::Value::as_i64)
                         .filter(|n| *n >= 0)
                         .ok_or(Error::Gap("Margin subscription identity required"))
                         .and_then(|subscription_id| {
-                            user_payload(event.clone()).map(|payload| (subscription_id, payload))
+                            user_payload(value["event"].take())
+                                .map(|payload| (subscription_id, payload))
                         });
                     match decoded {
                         Ok((subscription_id, payload)) => ApiEvent::UserData {
@@ -482,17 +503,7 @@ impl RiskStream {
             config.clock,
             config.budgets,
             config.timeout,
-            SocketPolicy {
-                handshake: Cost {
-                    connections: 1,
-                    ..Cost::default()
-                },
-                incoming_limit: 5,
-                time_unit: crate::TimeUnit::Milliseconds,
-                binary_decoder: None,
-                api_key_header: false,
-                max_generation_age: Some(std::time::Duration::from_hours(24)),
-            },
+            socket_policy(0),
         )
         .await?;
         Ok((Self { socket, events }, ConnectionDriver { inner: driver }))
@@ -518,6 +529,13 @@ impl RiskStream {
             SocketEvent::Established(g) => RiskEvent::Established(g),
             SocketEvent::Retired(g) => RiskEvent::Retired(g),
             SocketEvent::Gap { generation, error } => RiskEvent::Gap { generation, error },
+            SocketEvent::NativeBinary { generation, .. } => {
+                self.events.stop();
+                RiskEvent::Gap {
+                    generation,
+                    error: Error::Configuration("unexpected native binary socket payload"),
+                }
+            }
             SocketEvent::Data { generation, value } => match user_payload(value) {
                 Ok(payload) => RiskEvent::Data {
                     generation,

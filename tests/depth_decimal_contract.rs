@@ -84,7 +84,7 @@ fn assert_zero_bid_and_negative_ask(
 fn spot_diff_depth_and_snapshots_keep_zero_and_negative_level_prices() {
     let event: spot::stream_models::DiffBookDepthEvent =
         serde_json::from_str(&spot_event()).unwrap();
-    assert_eq!((event.upper_u, event.u), (157, 160));
+    assert_eq!((event.first_update_id, event.final_update_id), (157, 160));
     assert_zero_bid_and_negative_ask(
         (event.b[0].price, event.b[0].quantity),
         (event.a[0].price, event.a[0].quantity),
@@ -110,13 +110,29 @@ fn usdm_diff_depth_and_snapshots_keep_zero_and_negative_level_prices() {
     let rpi: usdm::stream_models::RpiDiffBookDepthStreamsEvent =
         serde_json::from_str(&futures_event()).unwrap();
     for (ids, bids, asks) in [
-        ((event.upper_u, event.u, event.pu), event.b, event.a),
-        ((rpi.upper_u, rpi.u, rpi.pu), rpi.b, rpi.a),
+        (
+            (
+                event.first_update_id,
+                event.final_update_id,
+                event.previous_final_update_id,
+            ),
+            event.b,
+            event.a,
+        ),
+        (
+            (
+                rpi.first_update_id,
+                rpi.final_update_id,
+                rpi.previous_final_update_id,
+            ),
+            rpi.b,
+            rpi.a,
+        ),
     ] {
         assert_eq!(ids, (157, 160, 156));
         assert_zero_bid_and_negative_ask(
-            (bids[0].price, bids[0].quantity),
-            (asks[0].price, asks[0].quantity),
+            (bids[0].price(), bids[0].quantity()),
+            (asks[0].price(), asks[0].quantity()),
         );
     }
     let book: usdm::rest_models::OrderBookResponse = serde_json::from_str(&snapshot()).unwrap();
@@ -132,8 +148,8 @@ fn usdm_diff_depth_and_snapshots_keep_zero_and_negative_level_prices() {
     ] {
         assert_eq!(last_update_id, Some(160));
         assert_zero_bid_and_negative_ask(
-            (bids[0].price, bids[0].quantity),
-            (asks[0].price, asks[0].quantity),
+            (bids[0].price(), bids[0].quantity()),
+            (asks[0].price(), asks[0].quantity()),
         );
     }
 }
@@ -142,21 +158,28 @@ fn usdm_diff_depth_and_snapshots_keep_zero_and_negative_level_prices() {
 fn coinm_diff_depth_and_snapshot_keep_zero_and_negative_level_prices() {
     let event: coinm::stream_models::DiffBookDepthStreamsEvent =
         serde_json::from_str(&futures_event()).unwrap();
-    assert_eq!((event.upper_u, event.u, event.pu), (157, 160, 156));
+    assert_eq!(
+        (
+            event.first_update_id,
+            event.final_update_id,
+            event.previous_final_update_id
+        ),
+        (157, 160, 156)
+    );
     assert_zero_bid_and_negative_ask(
-        (event.b[0].price, event.b[0].quantity),
-        (event.a[0].price, event.a[0].quantity),
+        (event.b[0].price(), event.b[0].quantity()),
+        (event.a[0].price(), event.a[0].quantity()),
     );
     let book: coinm::rest_models::OrderBookResponse = serde_json::from_str(&snapshot()).unwrap();
     assert_eq!(book.last_update_id, Some(160));
     assert_zero_bid_and_negative_ask(
         (
-            book.bids.as_ref().unwrap()[0].price,
-            book.bids.as_ref().unwrap()[0].quantity,
+            book.bids.as_ref().unwrap()[0].price(),
+            book.bids.as_ref().unwrap()[0].quantity(),
         ),
         (
-            book.asks.as_ref().unwrap()[0].price,
-            book.asks.as_ref().unwrap()[0].quantity,
+            book.asks.as_ref().unwrap()[0].price(),
+            book.asks.as_ref().unwrap()[0].quantity(),
         ),
     );
 }

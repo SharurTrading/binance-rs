@@ -12,6 +12,20 @@ use crate::core::{Socket, SocketEvent};
 use crate::{Error, SensitiveString};
 use std::collections::BTreeMap;
 
+// Binance Options Market Streams, Connect (verified 2026-10-10): ten
+// incoming messages per second and a connection lifetime of 24 hours.
+// https://developers.binance.com/docs/derivatives/option/websocket-market-streams
+fn socket_policy() -> crate::core::socket::SocketPolicy {
+    crate::core::socket::SocketPolicy {
+        handshake: crate::core::Cost::default(),
+        incoming_limit: 10,
+        time_unit: crate::TimeUnit::Milliseconds,
+        binary_decoder: None,
+        api_key_header: false,
+        max_generation_age: Some(std::time::Duration::from_hours(24)),
+    }
+}
+
 /// Binance's distinct market-data and execution endpoint routes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
@@ -102,19 +116,7 @@ impl Streams {
             config.clock,
             config.budgets,
             config.timeout,
-            crate::core::socket::SocketPolicy {
-                handshake: crate::core::Cost::default(),
-                // The codec answers every received ping, so pong servicing must
-                // stay inside the raw-stream connection's documented budget:
-                // "WebSocket connections have a limit of 10 incoming messages
-                // per second" (Options WebSocket Market Streams, Connect;
-                // verified 2026-10-10).
-                incoming_limit: 10,
-                time_unit: crate::core::TimeUnit::Milliseconds,
-                binary_decoder: None,
-                api_key_header: false,
-                max_generation_age: Some(std::time::Duration::from_hours(24)),
-            },
+            socket_policy(),
         )
         .await?;
         Ok((
@@ -152,18 +154,7 @@ impl Streams {
             config.clock,
             config.budgets,
             config.timeout,
-            crate::core::socket::SocketPolicy {
-                handshake: crate::core::Cost::default(),
-                // Same documented raw-stream connection duty cycle as the
-                // market route: 10 venue-incoming messages per second bound the
-                // pong stream this driver emits (Options WebSocket Market
-                // Streams, Connect; verified 2026-10-10).
-                incoming_limit: 10,
-                time_unit: crate::core::TimeUnit::Milliseconds,
-                binary_decoder: None,
-                api_key_header: false,
-                max_generation_age: Some(std::time::Duration::from_hours(24)),
-            },
+            socket_policy(),
         )
         .await?;
         Ok((
@@ -183,24 +174,35 @@ impl Streams {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
-            SocketEvent::Data { generation, value } => {
+            SocketEvent::NativeBinary { generation, .. } => {
+                self.events.stop();
+                StreamEvent::Gap {
+                    generation,
+                    error: Error::Configuration("unexpected native binary socket payload"),
+                }
+            }
+            SocketEvent::Data {
+                generation,
+                mut value,
+            } => {
                 let decoded = if self.private {
                     user_payload(value).map(StreamPayload::User)
                 } else {
                     let name = value.get("stream").and_then(serde_json::Value::as_str);
                     let kind = name.and_then(|name| self.kinds.get(name)).copied();
-                    match (name, kind, value.get("data")) {
-                        (Some(name), Some(kind), Some(data)) => market_payload(kind, data.clone())
+                    let name = name.map(str::to_owned);
+                    match (name, kind, value.get_mut("data")) {
+                        (Some(name), Some(kind), Some(data)) => market_payload(kind, data.take())
                             .map(|payload| StreamPayload::Market {
-                                stream: name.to_owned(),
+                                stream: name,
                                 payload,
                             }),
                         // A stream name this build did not subscribe or model is
                         // retained evidence on a live socket, not a continuity
                         // break; only a malformed envelope of a known kind gaps.
                         (Some(name), None, Some(data)) => Ok(StreamPayload::Market {
-                            stream: name.to_owned(),
-                            payload: MarketPayload::Unknown(data.clone().into()),
+                            stream: name,
+                            payload: MarketPayload::Unknown(data.take().into()),
                         }),
                         _ => Err(Error::Gap("unexpected combined stream envelope")),
                     }

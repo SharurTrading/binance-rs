@@ -41,7 +41,7 @@ fn captured_usdm_cross_margin_update_decodes_exactly() {
             serde_json::from_value(raw.clone()).unwrap();
         assert_eq!(decoded.a.m, usdm::enums::AccountUpdateReason::Order);
         let raw_balance = &raw["a"]["B"][0];
-        let balances = decoded.a.upper_b.as_ref().unwrap();
+        let balances = decoded.a.balances.as_ref().unwrap();
         assert_eq!(balances[0].a, "USDT");
         for (field, decoded_balance) in [
             ("wb", balances[0].wb),
@@ -55,7 +55,7 @@ fn captured_usdm_cross_margin_update_decodes_exactly() {
             );
         }
         let raw_position = &raw["a"]["P"][0];
-        let position = &decoded.a.upper_p.as_ref().unwrap()[0];
+        let position = &decoded.a.positions.as_ref().unwrap()[0];
         assert_eq!(position.s, "BTCUSDT");
         assert_eq!(position.mt, "cross");
         assert_eq!(position.ps, usdm::enums::PositionSide::Both);
@@ -114,7 +114,7 @@ fn captured_coinm_cross_margin_update_decodes_exactly() {
         assert_eq!(decoded.i, None);
         assert_eq!(decoded.a.m, Some(coinm::enums::AccountUpdateReason::Order));
         let raw_balance = &raw["a"]["B"][0];
-        let balances = decoded.a.upper_b.as_ref().unwrap();
+        let balances = decoded.a.balances.as_ref().unwrap();
         assert_eq!(balances[0].a.as_str(), "BTC");
         for (field, decoded_balance) in [
             ("wb", balances[0].wb),
@@ -128,7 +128,7 @@ fn captured_coinm_cross_margin_update_decodes_exactly() {
             );
         }
         let raw_position = &raw["a"]["P"][0];
-        let position = &decoded.a.upper_p.as_ref().unwrap()[0];
+        let position = &decoded.a.positions.as_ref().unwrap()[0];
         assert_eq!(position.s.as_str(), "BTCUSD_PERP");
         assert_eq!(position.mt, "cross");
         assert_eq!(position.ps, coinm::enums::PositionSide::Both);
@@ -213,7 +213,7 @@ macro_rules! captured_wallet_socket {
                     panic!("captured cross-margin evidence became a socket gap");
                 };
                 assert_eq!(g, generation);
-                for position in update.a.upper_p.as_ref().unwrap() {
+                for position in update.a.positions.as_ref().unwrap() {
                     assert_eq!(position.mt, "cross");
                     assert_eq!(position.iw, Some(binance_client::Decimal::ZERO));
                     delivered_pas.push(position.pa.to_string());
@@ -322,7 +322,7 @@ macro_rules! conditional_wallet_socket {
                 panic!("optional wallet evidence became a socket gap");
             };
             assert_eq!(g, generation);
-            let positions = event.a.upper_p.unwrap();
+            let positions = event.a.positions.unwrap();
             assert_eq!(positions[0].iw, None);
             assert_eq!(positions[0].mt, "cross");
             assert_eq!(positions[0].pa, binance_client::Decimal::ONE);

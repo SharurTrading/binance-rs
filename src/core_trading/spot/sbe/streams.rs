@@ -70,7 +70,7 @@ impl MarketConfig {
 }
 /// One validated SBE market stream; symbols retain their provider spelling.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct MarketStream(String);
+pub struct MarketStream(crate::core_trading::spot::Stream);
 impl MarketStream {
     fn new(symbol: &Symbol, suffix: &str) -> Result<Self, Error> {
         if symbol.as_str().contains('@') {
@@ -78,11 +78,11 @@ impl MarketStream {
         }
         let name = format!("{}@{suffix}", symbol.as_str().to_lowercase());
         crate::core_trading::spot::Stream::new(
-            name.clone(),
+            name,
             crate::core_trading::spot::Route::Market,
             "sbe",
-        )?;
-        Ok(Self(name))
+        )
+        .map(Self)
     }
     /// Raw trades.
     ///
@@ -115,7 +115,7 @@ impl MarketStream {
     /// Exact provider subscription name.
     #[must_use]
     pub fn name(&self) -> &str {
-        &self.0
+        self.0.name()
     }
 }
 /// Source-ordered accepted ingress, with no fixed queue capacity.
@@ -200,7 +200,7 @@ impl MarketStreams {
                 // WebSocket Limits; verified 2026-10-03).
                 incoming_limit: 5,
                 time_unit: TimeUnit::Microseconds,
-                binary_decoder: Some(super::market::decode_value),
+                binary_decoder: Some(super::market::decode_payload),
                 api_key_header: true,
                 max_generation_age: Some(std::time::Duration::from_hours(24)),
             },
@@ -222,6 +222,19 @@ impl MarketStreams {
             SocketEvent::Late { generation, .. } => StreamEvent::Gap {
                 generation,
                 error: Error::Gap("unexpected SBE market reply"),
+            },
+            SocketEvent::NativeBinary {
+                generation,
+                payload,
+            } => match native_market_payload(payload) {
+                Ok(payload) => StreamEvent::Data {
+                    generation,
+                    payload,
+                },
+                Err(error) => {
+                    self.events.stop();
+                    StreamEvent::Gap { generation, error }
+                }
             },
             SocketEvent::Data { generation, value } => {
                 let data = value.get("data").unwrap_or(&value);
@@ -268,5 +281,27 @@ impl MarketStreams {
     /// Returns `Closed` if the owner already stopped.
     pub async fn close(&self) -> Result<(), Error> {
         self.socket.close().await
+    }
+}
+
+fn native_market_payload(payload: Box<dyn std::any::Any + Send>) -> Result<MarketEvent, Error> {
+    payload
+        .downcast::<MarketEvent>()
+        .map(|payload| *payload)
+        .map_err(|_| Error::Configuration("SBE native market payload type mismatch"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mismatched_native_payload_reports_an_invariant_failure() {
+        assert!(matches!(
+            native_market_payload(Box::new(())),
+            Err(Error::Configuration(
+                "SBE native market payload type mismatch"
+            ))
+        ));
     }
 }

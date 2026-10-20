@@ -8,7 +8,6 @@
 //! Fixtures are synthetic; no credential, network or venue access is involved.
 #![allow(
     clippy::unwrap_used,
-    clippy::expect_used,
     clippy::panic,
     reason = "synthetic contract assertions"
 )]

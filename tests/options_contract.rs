@@ -207,7 +207,14 @@ fn options_depth_events_retain_native_ids_and_signed_exact_levels() {
         "U":10,"u":11,"pu":9,"b":[["-1.25000001","0"]],"a":[["0","-2.75"]]});
     let event: options::stream_models::DiffBookDepthStreamsEvent =
         serde_json::from_value(value.clone()).unwrap();
-    assert_eq!((event.upper_u, event.u, event.pu), (10, 11, 9));
+    assert_eq!(
+        (
+            event.first_update_id,
+            event.final_update_id,
+            event.previous_final_update_id
+        ),
+        (10, 11, 9)
+    );
     assert_eq!(event.b[0].price, Decimal::new(-125_000_001, 8));
     assert_eq!(event.b[0].quantity, Decimal::ZERO);
     assert_eq!(event.a[0].price, Decimal::ZERO);
@@ -518,4 +525,32 @@ fn options_filters_dispatch_known_types_and_keep_unknown_future_semantics() {
             .is_err()
     );
     assert!(serde_json::from_value::<Filter>(json!({"minPrice":"1","maxPrice":"2","tickSize":"1","minQty":"1","maxQty":"2","stepSize":"1"})).is_err());
+}
+
+#[test]
+fn private_stream_envelopes_preserve_future_evidence_and_reject_missing_kinds() {
+    let body = json!({"e":"FUTURE_EVENT","account":{"assets":["USDT","BTC"]},"extra":null});
+    let payload = options::event_payloads::user_payload(json!({
+        "stream":"private-evidence",
+        "data":body
+    }))
+    .unwrap();
+    match payload {
+        options::event_payloads::UserPayload::Unknown(message) => {
+            assert_eq!(message.as_value(), &body);
+        }
+        other => panic!("unexpected event {other:?}"),
+    }
+    assert!(matches!(
+        options::event_payloads::user_payload(json!({"stream":"private-evidence"})),
+        Err(binance_client::Error::Gap(
+            "Options private stream envelope"
+        ))
+    ));
+    for data in [json!(null), json!([]), json!({"e":17})] {
+        assert!(matches!(
+            options::event_payloads::user_payload(json!({"stream":"private-evidence","data":data})),
+            Err(binance_client::Error::Gap("Options user event kind"))
+        ));
+    }
 }

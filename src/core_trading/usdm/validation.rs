@@ -5,19 +5,8 @@ use crate::Error;
 use serde_json::Value;
 use std::collections::BTreeMap;
 
-fn str_field<'a>(p: &'a BTreeMap<String, Value>, name: &str) -> Option<&'a str> {
-    p.get(name).and_then(Value::as_str)
-}
-fn truth(p: &BTreeMap<String, Value>, name: &str) -> bool {
-    p.get(name)
-        .is_some_and(|v| v == &Value::Bool(true) || v.as_str() == Some("true"))
-}
-fn required(p: &BTreeMap<String, Value>, names: &[&str]) -> Result<(), Error> {
-    if names.iter().any(|n| !p.contains_key(*n)) {
-        return Err(Error::Validation("conditional required parameter"));
-    }
-    Ok(())
-}
+use crate::core_trading::futures::validation::{required, str_field, truth};
+
 pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> {
     crate::core::validate_parameters(p, &[], &[], &[])?;
     if p.get("recvWindow").is_some_and(|v| {
@@ -61,10 +50,10 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
         }
     }
     if op == "modifyOrder" {
-        required(p, &["symbol", "side", "quantity"])?;
-        if !p.contains_key("price") && !p.contains_key("priceMatch") {
-            return Err(Error::Validation("modify price"));
-        }
+        // Native pinned REST/WS catalogs and the migrated COIN-M contract
+        // require an explicit price. priceMatch does not establish an exception;
+        // see docs/futures-modify-order-evidence.md.
+        required(p, &["symbol", "side", "quantity", "price"])?;
     }
     if matches!(
         op,

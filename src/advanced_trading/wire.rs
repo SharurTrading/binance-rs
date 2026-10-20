@@ -6,47 +6,10 @@ use crate::Decimal;
 use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
-pub(crate) fn parse_decimal(value: &Value) -> Result<Decimal, &'static str> {
-    let text = match value {
-        Value::String(value) => value.clone(),
-        Value::Number(value) => value.to_string(),
-        _ => return Err("decimal must be a string or exact JSON number"),
-    };
-    Decimal::from_str_exact(&text)
-        .or_else(|_| {
-            let (base, _) = text
-                .split_once(['e', 'E'])
-                .ok_or(rust_decimal::Error::ErrorString(
-                    "scientific exponent missing".into(),
-                ))?;
-            Decimal::from_str_exact(base)?;
-            Decimal::from_scientific(&text)
-        })
-        .map_err(|_| "invalid or unrepresentable decimal")
-}
-
-pub(crate) fn decimal<'de, D: Deserializer<'de>>(d: D) -> Result<Decimal, D::Error> {
-    parse_decimal(&Value::deserialize(d)?).map_err(serde::de::Error::custom)
-}
-
-pub(crate) fn decimal_option<'de, D: Deserializer<'de>>(d: D) -> Result<Option<Decimal>, D::Error> {
-    Option::<Value>::deserialize(d)?
-        .map(|v| parse_decimal(&v).map_err(serde::de::Error::custom))
-        .transpose()
-}
-
-pub(crate) fn decimal_empty_option<'de, D: Deserializer<'de>>(
-    d: D,
-) -> Result<Option<Decimal>, D::Error> {
-    let v = Option::<Value>::deserialize(d)?;
-    match v {
-        None => Ok(None),
-        Some(Value::String(s)) if s.is_empty() => Ok(None),
-        Some(v) => parse_decimal(&v)
-            .map(Some)
-            .map_err(serde::de::Error::custom),
-    }
-}
+pub(crate) use crate::core::wire::{
+    decimal, decimal_option, decimal_option_empty as decimal_empty_option,
+    decimal_option_null_string, parse_decimal,
+};
 
 /// An exact native depth price/quantity pair; zero quantity remains a deletion.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -155,18 +118,5 @@ impl<'de> Deserialize<'de> for Kline {
             taker_buy_quote_volume: decimal(&quote)?,
             reserved,
         })
-    }
-}
-
-pub(crate) fn decimal_option_null_string<'de, D: Deserializer<'de>>(
-    d: D,
-) -> Result<Option<Decimal>, D::Error> {
-    let value = Option::<Value>::deserialize(d)?;
-    match value {
-        None => Ok(None),
-        Some(Value::String(text)) if text == "null" => Ok(None),
-        Some(value) => parse_decimal(&value)
-            .map(Some)
-            .map_err(serde::de::Error::custom),
     }
 }

@@ -4,7 +4,7 @@
 use super::{Cost, Error};
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::Value;
-use std::collections::BTreeMap;
+use std::{borrow::Cow, collections::BTreeMap};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Security {
@@ -44,11 +44,22 @@ pub(crate) trait Request: Serialize + Send + Sync {
     fn response_failed(_value: &Value) -> bool {
         false
     }
-    fn validate(&self) -> Result<(), Error>;
+    /// Standalone builder validation; dispatch supplies its existing snapshot instead.
+    fn validate(&self) -> Result<(), Error> {
+        self.validate_with_parameters(&parameters(self)?)
+    }
+    fn validate_with_parameters(&self, params: &BTreeMap<String, Value>) -> Result<(), Error>;
     fn validate_authority(&self, _now: u64) -> Result<(), Error> {
         Ok(())
     }
-    fn cost(&self) -> Result<Cost, Error>;
+    fn validate_authority_with_parameters(
+        &self,
+        _params: &BTreeMap<String, Value>,
+        now: u64,
+    ) -> Result<(), Error> {
+        self.validate_authority(now)
+    }
+    fn cost_with_parameters(&self, params: &BTreeMap<String, Value>) -> Result<Cost, Error>;
 }
 
 /// A read an exit makes to learn what it must cancel or close.
@@ -58,16 +69,14 @@ pub(crate) trait Request: Serialize + Send + Sync {
 /// and reducing orders are. The ordinary method for the same request never does.
 pub(crate) trait ExitRead: Request {}
 
-pub(crate) fn parameters<T: Serialize>(request: &T) -> Result<BTreeMap<String, Value>, Error> {
+pub(crate) fn parameters<T: Serialize + ?Sized>(
+    request: &T,
+) -> Result<BTreeMap<String, Value>, Error> {
     let value = serde_json::to_value(request).map_err(|_| Error::Validation("request encoding"))?;
-    let map = value
-        .as_object()
-        .ok_or(Error::Validation("request must be an object"))?;
-    Ok(map
-        .iter()
-        .filter(|(_, v)| !v.is_null())
-        .map(|(k, v)| (k.clone(), v.clone()))
-        .collect())
+    let Value::Object(map) = value else {
+        return Err(Error::Validation("request must be an object"));
+    };
+    Ok(map.into_iter().filter(|(_, v)| !v.is_null()).collect())
 }
 
 pub(crate) fn order_ids(p: &BTreeMap<String, Value>) -> BTreeMap<String, String> {
@@ -126,10 +135,12 @@ pub(crate) fn order_ids(p: &BTreeMap<String, Value>) -> BTreeMap<String, String>
     ids
 }
 
-pub(crate) fn text(value: &Value) -> Result<String, Error> {
+pub(crate) fn text(value: &Value) -> Result<Cow<'_, str>, Error> {
     match value {
-        Value::String(s) => Ok(s.clone()),
-        _ => serde_json::to_string(value).map_err(|_| Error::Validation("parameter encoding")),
+        Value::String(s) => Ok(Cow::Borrowed(s)),
+        _ => serde_json::to_string(value)
+            .map(Cow::Owned)
+            .map_err(|_| Error::Validation("parameter encoding")),
     }
 }
 
@@ -142,19 +153,7 @@ pub(crate) fn encode(params: &BTreeMap<String, Value>) -> Result<String, Error> 
 }
 
 fn exact_decimal(value: &Value) -> Result<rust_decimal::Decimal, Error> {
-    let value = text(value)?;
-    if let Ok(decimal) = rust_decimal::Decimal::from_str_exact(&value) {
-        return Ok(decimal);
-    }
-    let (mantissa, _) = value
-        .split_once(['e', 'E'])
-        .ok_or(Error::Validation("decimal parameter"))?;
-    // Scientific parsing internally uses FromStr for the mantissa, which can
-    // round. Validate it exactly before applying the exponent.
-    rust_decimal::Decimal::from_str_exact(mantissa)
-        .map_err(|_| Error::Validation("decimal parameter"))?;
-    rust_decimal::Decimal::from_scientific(&value)
-        .map_err(|_| Error::Validation("decimal parameter"))
+    super::wire::parse_decimal(value).map_err(|_| Error::Validation("decimal parameter"))
 }
 
 pub(crate) fn validate_parameters(
@@ -171,7 +170,7 @@ pub(crate) fn validate_parameters(
     for (name, choices) in enums {
         if let Some(value) = p.get(*name) {
             let value = text(value)?;
-            if !choices.contains(&value.as_str()) {
+            if !choices.contains(&value.as_ref()) {
                 return Err(Error::Validation("request enum"));
             }
         }

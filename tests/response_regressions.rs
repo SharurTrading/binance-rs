@@ -101,7 +101,7 @@ fn hybrid_cancel_validates_root_order_and_nested_list_reports() {
     let receipt: spot::ws_models::OrderCancelResponse =
         serde_json::from_value(wire.clone()).unwrap();
     match receipt {
-        spot::ws_models::OrderCancelResponse::Variant2(list) => {
+        spot::ws_models::OrderCancelResponse::OrderList(list) => {
             assert_eq!(list.order_id, wire["orderId"].as_i64());
             assert_eq!(list.orders.len(), wire["orders"].as_array().unwrap().len());
             assert_eq!(
@@ -152,10 +152,10 @@ fn futures_book_levels_are_typed_and_invalid_prices_fail() {
     let book: usdm::ws_models::OrderBookResponse = serde_json::from_value(wire.clone()).unwrap();
     assert_eq!(book.last_update_id, 42);
     assert_eq!(
-        book.bids[0].price,
+        book.bids[0].price(),
         Decimal::from_str_exact("1.00000001").unwrap()
     );
-    assert_eq!(book.bids[0].quantity, Decimal::new(25, 1));
+    assert_eq!(book.bids[0].quantity(), Decimal::new(25, 1));
     assert!(!book.extra.contains_key("bids"));
     wire["bids"][0][0] = json!("1e-29");
     assert!(serde_json::from_value::<usdm::ws_models::OrderBookResponse>(wire).is_err());

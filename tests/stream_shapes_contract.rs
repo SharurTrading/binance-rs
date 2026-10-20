@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 //! Whole documented raw and combined event bodies for every supported family.
-#![allow(clippy::unwrap_used, clippy::panic, reason = "synthetic stream corpus")]
+#![allow(clippy::unwrap_used, reason = "synthetic stream corpus")]
 #[path = "support/stream_shape_dispatch.rs"]
 mod dispatch;
 

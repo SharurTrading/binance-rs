@@ -321,6 +321,34 @@ pub fn decode_market(bytes: &[u8]) -> Result<MarketEvent, Error> {
     Ok(payload)
 }
 
-pub(super) fn decode_value(bytes: &[u8]) -> Result<serde_json::Value, Error> {
-    serde_json::to_value(decode_market(bytes)?).map_err(|_| Error::Gap("SBE model serialization"))
+pub(super) fn decode_payload(bytes: &[u8]) -> Result<crate::core::socket::BinaryPayload, Error> {
+    decode_market(bytes)
+        .map(|payload| crate::core::socket::BinaryPayload::Native(Box::new(payload)))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn binary_market_callback_retains_the_native_model() {
+        let mut bytes = [50_u16, 10001, 1, 0]
+            .into_iter()
+            .flat_map(u16::to_le_bytes)
+            .collect::<Vec<_>>();
+        bytes.extend_from_slice(&123_i64.to_le_bytes());
+        bytes.extend_from_slice(&42_i64.to_le_bytes());
+        bytes.extend_from_slice(&[(-8_i8).cast_unsigned(), (-3_i8).cast_unsigned()]);
+        for mantissa in [100_000_001_i64, 2500, 100_000_002, 3250] {
+            bytes.extend_from_slice(&mantissa.to_le_bytes());
+        }
+        bytes.push(7);
+        bytes.extend_from_slice(b"BTCUSDT");
+        let crate::core::socket::BinaryPayload::Native(payload) = decode_payload(&bytes).unwrap()
+        else {
+            panic!("native binary payload")
+        };
+        let payload = payload.downcast::<MarketEvent>().unwrap();
+        assert_eq!(*payload, decode_market(&bytes).unwrap());
+    }
 }

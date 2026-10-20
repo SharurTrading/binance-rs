@@ -1807,15 +1807,30 @@
                   },
                   "U": {
                     "type": "integer",
-                    "format": "int64"
+                    "format": "int64",
+                    "x-rust-name": "first_update_id",
+                    "description": "First update ID in this depth event.",
+                    "x-sources": [
+                      "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#diff-book-depth-streams"
+                    ]
                   },
                   "u": {
                     "type": "integer",
-                    "format": "int64"
+                    "format": "int64",
+                    "x-rust-name": "final_update_id",
+                    "description": "Final update ID in this depth event.",
+                    "x-sources": [
+                      "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#diff-book-depth-streams"
+                    ]
                   },
                   "pu": {
                     "type": "integer",
-                    "format": "int64"
+                    "format": "int64",
+                    "x-rust-name": "previous_final_update_id",
+                    "description": "Final update ID in the previous depth event.",
+                    "x-sources": [
+                      "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#diff-book-depth-streams"
+                    ]
                   },
                   "b": {
                     "type": "array",
@@ -1932,15 +1947,30 @@
                       },
                       "U": {
                         "type": "integer",
-                        "format": "int64"
+                        "format": "int64",
+                        "x-rust-name": "first_update_id",
+                        "description": "First update ID in this depth event.",
+                        "x-sources": [
+                          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#diff-book-depth-streams"
+                        ]
                       },
                       "u": {
                         "type": "integer",
-                        "format": "int64"
+                        "format": "int64",
+                        "x-rust-name": "final_update_id",
+                        "description": "Final update ID in this depth event.",
+                        "x-sources": [
+                          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#diff-book-depth-streams"
+                        ]
                       },
                       "pu": {
                         "type": "integer",
-                        "format": "int64"
+                        "format": "int64",
+                        "x-rust-name": "previous_final_update_id",
+                        "description": "Final update ID in the previous depth event.",
+                        "x-sources": [
+                          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#diff-book-depth-streams"
+                        ]
                       },
                       "b": {
                         "type": "array",
@@ -4691,15 +4721,30 @@
                   },
                   "U": {
                     "type": "integer",
-                    "format": "int64"
+                    "format": "int64",
+                    "x-rust-name": "first_update_id",
+                    "description": "First update ID in this depth event.",
+                    "x-sources": [
+                      "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#partial-book-depth-streams"
+                    ]
                   },
                   "u": {
                     "type": "integer",
-                    "format": "int64"
+                    "format": "int64",
+                    "x-rust-name": "final_update_id",
+                    "description": "Final update ID in this depth event.",
+                    "x-sources": [
+                      "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#partial-book-depth-streams"
+                    ]
                   },
                   "pu": {
                     "type": "integer",
-                    "format": "int64"
+                    "format": "int64",
+                    "x-rust-name": "previous_final_update_id",
+                    "description": "Final update ID in the previous depth event.",
+                    "x-sources": [
+                      "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#partial-book-depth-streams"
+                    ]
                   },
                   "b": {
                     "type": "array",
@@ -4776,15 +4821,30 @@
                       },
                       "U": {
                         "type": "integer",
-                        "format": "int64"
+                        "format": "int64",
+                        "x-rust-name": "first_update_id",
+                        "description": "First update ID in this depth event.",
+                        "x-sources": [
+                          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#partial-book-depth-streams"
+                        ]
                       },
                       "u": {
                         "type": "integer",
-                        "format": "int64"
+                        "format": "int64",
+                        "x-rust-name": "final_update_id",
+                        "description": "Final update ID in this depth event.",
+                        "x-sources": [
+                          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#partial-book-depth-streams"
+                        ]
                       },
                       "pu": {
                         "type": "integer",
-                        "format": "int64"
+                        "format": "int64",
+                        "x-rust-name": "previous_final_update_id",
+                        "description": "Final update ID in the previous depth event.",
+                        "x-sources": [
+                          "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/market-data#partial-book-depth-streams"
+                        ]
                       },
                       "b": {
                         "type": "array",
@@ -4935,7 +4995,12 @@
                     "cw",
                     "bc"
                   ]
-                }
+                },
+                "x-rust-name": "balances",
+                "description": "Partial balance statements; this event does not replace the full account.",
+                "x-sources": [
+                  "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/1.0.0/schema.yaml"
+                ]
               },
               "P": {
                 "type": "array",
@@ -4993,7 +5058,12 @@
                     "mt",
                     "ps"
                   ]
-                }
+                },
+                "x-rust-name": "positions",
+                "description": "Partial position statements, retaining the native position mode.",
+                "x-sources": [
+                  "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-streams/1.0.0/schema.yaml"
+                ]
               },
               "S": {
                 "type": "string"

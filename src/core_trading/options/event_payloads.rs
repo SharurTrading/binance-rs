@@ -2,28 +2,8 @@
 // SPDX-License-Identifier: MIT-0
 
 //! Native Options stream dispatch and retained future fields.
+pub use crate::core::wire::UnknownMessage;
 use serde_json::Value;
-/// Unknown future payloads are retained, with redacted Debug output.
-#[derive(Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-#[serde(transparent)]
-pub struct UnknownMessage(Value);
-impl UnknownMessage {
-    /// Explicit provider payload access; do not log sensitive account data.
-    #[must_use]
-    pub fn as_value(&self) -> &Value {
-        &self.0
-    }
-}
-impl std::fmt::Debug for UnknownMessage {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("UnknownMessage([REDACTED])")
-    }
-}
-impl From<Value> for UnknownMessage {
-    fn from(v: Value) -> Self {
-        Self(v)
-    }
-}
 
 use crate::Error;
 
@@ -82,11 +62,11 @@ pub enum UserPayload {
 ///
 /// # Errors
 /// Returns a continuity gap for malformed known records or missing event kind.
-pub fn user_payload(value: Value) -> Result<UserPayload, Error> {
+pub fn user_payload(mut value: Value) -> Result<UserPayload, Error> {
     let value = if value.get("stream").is_some() {
         value
-            .get("data")
-            .cloned()
+            .get_mut("data")
+            .map(Value::take)
             .ok_or(Error::Gap("Options private stream envelope"))?
     } else {
         value

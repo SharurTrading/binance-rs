@@ -7,6 +7,8 @@
     clippy::panic,
     reason = "synthetic fixture assertions"
 )]
+#[allow(dead_code, reason = "shared synthetic fixture helpers")]
+mod support;
 use binance_client::{
     Credentials, Decimal, SensitiveString, WeightPools,
     advanced_trading::{
@@ -16,6 +18,7 @@ use binance_client::{
     },
 };
 use futures_util::{SinkExt, StreamExt};
+use support::deadline;
 use tokio::net::TcpListener;
 use tokio_websockets::{Message, ServerBuilder};
 
@@ -23,9 +26,6 @@ fn config<P: Product>() -> Config<P> {
     Config::with_pools(&WeightPools::new())
         .unwrap()
         .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())
-}
-fn deadline() -> tokio::time::Instant {
-    tokio::time::Instant::now() + std::time::Duration::from_secs(3)
 }
 
 macro_rules! user_stream {

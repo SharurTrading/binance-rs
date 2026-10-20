@@ -40,8 +40,8 @@ mod tests {
         let level: PriceLevel =
             serde_json::from_str("[100.00000000000000000001,\"0.0000000000000000000000000001\"]")
                 .unwrap();
-        assert_eq!(level.price, dec("100.00000000000000000001"));
-        assert_eq!(level.quantity, dec("0.0000000000000000000000000001"));
+        assert_eq!(level.price(), dec("100.00000000000000000001"));
+        assert_eq!(level.quantity(), dec("0.0000000000000000000000000001"));
         for bad in [
             "[\"1\",\"1e-29\"]",
             "[\"NaN\",\"1\"]",
@@ -95,23 +95,30 @@ mod tests {
     #[test]
     fn diff_depth_and_snapshot_keep_their_update_ids_and_exact_levels() {
         let event = update(99, 101, 98, "0");
-        assert_eq!((event.upper_u, event.u, event.pu), (99, 101, 98));
-        assert_eq!(event.b[0].price, dec("100.00000000000000000001"));
-        assert_eq!(event.b[0].quantity, Decimal::ZERO);
+        assert_eq!(
+            (
+                event.first_update_id,
+                event.final_update_id,
+                event.previous_final_update_id
+            ),
+            (99, 101, 98)
+        );
+        assert_eq!(event.b[0].price(), dec("100.00000000000000000001"));
+        assert_eq!(event.b[0].quantity(), Decimal::ZERO);
         let snapshot = snapshot();
         assert_eq!(snapshot.last_update_id, Some(100));
         assert_eq!(
-            snapshot.bids.unwrap()[0].price,
+            snapshot.bids.unwrap()[0].price(),
             dec("100.00000000000000000001")
         );
-        assert_eq!(snapshot.asks.unwrap()[0].quantity, dec("2"));
+        assert_eq!(snapshot.asks.unwrap()[0].quantity(), dec("2"));
     }
 
     #[test]
     fn crossed_funding_update_is_partial_and_does_not_fabricate_positions() {
         let event:binance_client::usdm::stream_models::AccountUpdateEvent=serde_json::from_value(json!({"e":"ACCOUNT_UPDATE","E":1,"T":1,"a":{"m":"FUNDING_FEE","B":[{"a":"USDT","wb":"10.1","cw":"10.1","bc":"-0.1"}]}})).unwrap();
-        assert!(event.a.upper_p.is_none());
-        assert_eq!(event.a.upper_b.unwrap()[0].bc, dec("-0.1"));
+        assert!(event.a.positions.is_none());
+        assert_eq!(event.a.balances.unwrap()[0].bc, dec("-0.1"));
     }
 
     #[test]

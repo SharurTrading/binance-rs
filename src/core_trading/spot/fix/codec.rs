@@ -220,11 +220,21 @@ impl Message {
 struct Snapshot {
     schema: Node,
 }
+/// Dictionary rules compiled once, including nested repeating-group boundaries.
+#[derive(Default)]
+pub(super) struct Rules {
+    pub entries: Vec<Rule>,
+    allowed: BTreeSet<u32>,
+}
+pub(super) struct Rule {
+    pub name: String,
+    pub required: bool,
+    pub group: Option<Rules>,
+}
 pub(super) struct Dictionary {
     pub fields: BTreeMap<String, Node>,
     pub by_tag: BTreeMap<u32, String>,
-    pub messages: BTreeMap<String, Node>,
-    components: BTreeMap<String, Node>,
+    pub messages: BTreeMap<String, Rules>,
 }
 impl Dictionary {
     fn load(raw: &str) -> Result<Self, Error> {
@@ -235,8 +245,9 @@ impl Dictionary {
             fields: BTreeMap::new(),
             by_tag: BTreeMap::new(),
             messages: BTreeMap::new(),
-            components: BTreeMap::new(),
         };
+        let mut components = BTreeMap::new();
+        let mut messages = BTreeMap::new();
         for n in root.children {
             for child in n.children {
                 match n.kind.as_str() {
@@ -245,38 +256,58 @@ impl Dictionary {
                         d.fields.insert(child.name.clone(), child);
                     }
                     "messages" => {
-                        d.messages.insert(
+                        messages.insert(
                             child
                                 .attr("msgtype")
                                 .ok_or(Error::Configuration("FIX kind"))?
-                                .into(),
+                                .to_owned(),
                             child,
                         );
                     }
                     "components" => {
-                        d.components.insert(child.name.clone(), child);
+                        components.insert(child.name.clone(), child);
                     }
                     _ => (),
                 }
             }
         }
+        for (kind, message) in messages {
+            let rules = d.compile(&message.children, &components, true)?;
+            d.messages.insert(kind, rules);
+        }
         Ok(d)
     }
-    pub(super) fn rules(&self, nodes: &[Node], required: bool) -> Result<Vec<Node>, Error> {
-        let mut result = Vec::new();
+    fn compile(
+        &self,
+        nodes: &[Node],
+        components: &BTreeMap<String, Node>,
+        required: bool,
+    ) -> Result<Rules, Error> {
+        let mut result = Rules::default();
         for node in nodes {
             let required = required && node.attr("required") == Some("Y");
             if node.kind == "component" {
-                let c = self
-                    .components
+                let component = components
                     .get(&node.name)
                     .ok_or(Error::Configuration("FIX component"))?;
-                result.extend(self.rules(&c.children, required)?);
+                let nested = self.compile(&component.children, components, required)?;
+                result.entries.extend(nested.entries);
+                result.allowed.extend(nested.allowed);
             } else {
-                let mut node = node.clone();
-                node.attrs
-                    .insert("required".into(), if required { "Y" } else { "N" }.into());
-                result.push(node);
+                let meta = self
+                    .fields
+                    .get(&node.name)
+                    .ok_or(Error::Configuration("FIX rule field"))?;
+                result.allowed.insert(tag(meta)?);
+                result.entries.push(Rule {
+                    name: node.name.clone(),
+                    required,
+                    group: if node.kind == "group" {
+                        Some(self.compile(&node.children, components, true)?)
+                    } else {
+                        None
+                    },
+                });
             }
         }
         Ok(result)
@@ -539,36 +570,28 @@ pub fn decode(role: Role, bytes: &[u8]) -> Result<Message, Error> {
         sending_time: Timestamp::parse(h(52)?)?,
     };
     let dict = dictionary(role)?;
-    let rules = dict
-        .messages
-        .get(kind.as_str())
-        .map(|m| dict.rules(&m.children, true))
-        .transpose()?
-        .unwrap_or_default();
+    let empty = Rules::default();
+    let rules = dict.messages.get(kind.as_str()).unwrap_or(&empty);
     let mut cursor = 0;
-    let body = parse_fields(role, dict, &rules, &body, &mut cursor, None)?;
-    validate_required(&rules, &body)?;
+    let body = parse_fields(role, dict, rules, &body, &mut cursor, None)?;
+    validate_required(rules, &body)?;
     Ok(Message { header, kind, body })
 }
 fn parse_fields(
     role: Role,
     dict: &Dictionary,
-    rules: &[Node],
+    rules: &Rules,
     tokens: &[Token<'_>],
     cursor: &mut usize,
     delimiter: Option<u32>,
 ) -> Result<Fields, Error> {
-    let allowed: BTreeSet<_> = rules
-        .iter()
-        .filter_map(|r| dict.fields.get(&r.name).and_then(|m| tag(m).ok()))
-        .collect();
     let mut fields = Fields::new(role);
     while let Some(t) = tokens.get(*cursor) {
         if !fields.values.is_empty()
             && (delimiter == Some(t.tag)
                 || (delimiter.is_some()
                     && dict.by_tag.contains_key(&t.tag)
-                    && !allowed.contains(&t.tag)))
+                    && !rules.allowed.contains(&t.tag)))
         {
             break;
         }
@@ -579,8 +602,10 @@ fn parse_fields(
         let name = dict.by_tag.get(&t.tag).cloned();
         let meta = name.as_ref().and_then(|n| dict.fields.get(n));
         let group = rules
+            .entries
             .iter()
-            .find(|r| r.kind == "group" && Some(&r.name) == name.as_ref());
+            .find(|r| Some(&r.name) == name.as_ref())
+            .and_then(|r| r.group.as_ref());
         let value = if let Some(group) = group {
             let count = t
                 .text
@@ -589,8 +614,8 @@ fn parse_fields(
             if count > tokens.len().saturating_sub(*cursor) {
                 return Err(failure(Some(t.tag), t.offset, "truncated FIX group"));
             }
-            let children = dict.rules(&group.children, true)?;
-            let first = children
+            let first = group
+                .entries
                 .first()
                 .and_then(|n| dict.fields.get(&n.name))
                 .map(tag)
@@ -605,8 +630,8 @@ fn parse_fields(
                         "missing FIX group delimiter",
                     ));
                 }
-                let entry = parse_fields(role, dict, &children, tokens, cursor, Some(first))?;
-                validate_required(&children, &entry)?;
+                let entry = parse_fields(role, dict, group, tokens, cursor, Some(first))?;
+                validate_required(group, &entry)?;
                 entries.push(entry);
             }
             Value::Group(entries)
@@ -623,9 +648,9 @@ fn parse_fields(
     }
     Ok(fields)
 }
-pub(super) fn validate_required(rules: &[Node], fields: &Fields) -> Result<(), Error> {
-    for r in rules {
-        if r.attr("required") == Some("Y") && fields.get(&r.name).is_none() {
+pub(super) fn validate_required(rules: &Rules, fields: &Fields) -> Result<(), Error> {
+    for r in &rules.entries {
+        if r.required && fields.get(&r.name).is_none() {
             return Err(failure(None, 0, "missing required FIX field"));
         }
     }
@@ -797,5 +822,61 @@ impl Drop for BinaryBuffer {
             }
         }
         clear(&mut self.0);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn compiled_component_requiredness_and_group_boundaries_preserve_native_fields() {
+        let dict = Dictionary::load(
+            r#"{"schema":{"kind":"fix","children":[
+            {"kind":"fields","children":[
+                {"kind":"field","name":"Entries","number":"100","type":"NUMINGROUP"},
+                {"kind":"field","name":"First","number":"101","type":"INT"},
+                {"kind":"field","name":"Optional","number":"102","type":"INT"},
+                {"kind":"field","name":"Tail","number":"103","type":"INT"}
+            ]},
+            {"kind":"components","children":[
+                {"kind":"component","name":"OptionalComponent","children":[
+                    {"kind":"field","name":"Optional","required":"Y"}
+                ]}
+            ]},
+            {"kind":"messages","children":[
+                {"kind":"message","name":"Test","msgtype":"T","children":[
+                    {"kind":"group","name":"Entries","required":"Y","children":[
+                        {"kind":"field","name":"First","required":"Y"},
+                        {"kind":"component","name":"OptionalComponent","required":"N"}
+                    ]},
+                    {"kind":"field","name":"Tail","required":"Y"}
+                ]}
+            ]}
+        ]}}"#,
+        )
+        .unwrap();
+        let rules = dict.messages.get("T").unwrap();
+        let input = tokens(b"100=2\x01101=11\x01102=12\x01101=21\x01103=99\x01").unwrap();
+        let mut cursor = 0;
+        let fields =
+            parse_fields(Role::OrderEntry, &dict, rules, &input, &mut cursor, None).unwrap();
+        validate_required(rules, &fields).unwrap();
+        assert_eq!(cursor, input.len());
+        assert_eq!(fields.get("Tail"), Some(&Value::Integer(99)));
+        let Some(Value::Group(entries)) = fields.get("Entries") else {
+            panic!("native group")
+        };
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0].get("Optional"), Some(&Value::Integer(12)));
+        assert_eq!(entries[1].get("First"), Some(&Value::Integer(21)));
+        assert_eq!(entries[1].get("Optional"), None);
+        let group = rules.entries[0].group.as_ref().unwrap();
+        assert!(validate_required(group, &Fields::new(Role::OrderEntry)).is_err());
+        let without_tail = Fields {
+            role: fields.role,
+            values: fields.values[..1].to_vec(),
+        };
+        assert!(validate_required(rules, &without_tail).is_err());
     }
 }

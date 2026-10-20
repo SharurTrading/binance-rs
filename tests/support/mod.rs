@@ -44,7 +44,10 @@ pub struct HttpFixture {
 }
 /// Transport race injected by [`HttpFixture::keep_alive`]. Exists for the
 /// HTTP contract binary only, but `support` compiles into every test binary.
-#[allow(dead_code)]
+#[allow(
+    dead_code,
+    reason = "shared fixture is compiled into other test binaries"
+)]
 #[derive(Clone, Copy)]
 pub enum KeepAliveFault {
     /// The n-th request is read in full, then the connection closes without
@@ -95,7 +98,10 @@ impl HttpFixture {
     /// observable as another accepted connection. This constructor exists
     /// for the HTTP contract binary only, but `support` compiles into every
     /// test binary.
-    #[allow(dead_code)]
+    #[allow(
+        dead_code,
+        reason = "shared fixture is compiled into other test binaries"
+    )]
     pub async fn keep_alive(
         status: u16,
         headers: &str,

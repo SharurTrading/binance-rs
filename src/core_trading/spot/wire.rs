@@ -7,34 +7,7 @@ use crate::{Decimal, Outcome, SensitiveString};
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::DeserializeOwned};
 use serde_json::Value;
 
-pub(crate) fn parse_decimal(value: &Value) -> Result<Decimal, &'static str> {
-    let text = match value {
-        Value::String(value) => value.clone(),
-        Value::Number(value) => value.to_string(),
-        _ => return Err("decimal must be a string or exact JSON number"),
-    };
-    Decimal::from_str_exact(&text)
-        .or_else(|_| {
-            let (base, _) = text
-                .split_once(['e', 'E'])
-                .ok_or(rust_decimal::Error::ErrorString(
-                    "scientific exponent missing".into(),
-                ))?;
-            Decimal::from_str_exact(base)?;
-            Decimal::from_scientific(&text)
-        })
-        .map_err(|_| "invalid or unrepresentable decimal")
-}
-
-pub(crate) fn decimal<'de, D: Deserializer<'de>>(d: D) -> Result<Decimal, D::Error> {
-    parse_decimal(&Value::deserialize(d)?).map_err(serde::de::Error::custom)
-}
-
-pub(crate) fn decimal_option<'de, D: Deserializer<'de>>(d: D) -> Result<Option<Decimal>, D::Error> {
-    Option::<Value>::deserialize(d)?
-        .map(|v| parse_decimal(&v).map_err(serde::de::Error::custom))
-        .transpose()
-}
+pub(crate) use crate::core::wire::{decimal, decimal_option, parse_decimal};
 
 /// An exact [price, quantity] pair, retaining zero quantities for deletion updates.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -176,12 +149,12 @@ impl<'de, T: DeserializeOwned> Deserialize<'de> for BatchResult<T> {
             .and_then(Value::as_i64)
             .is_some_and(|code| code < 0)
         {
-            return Ok(serde_json::from_value(value.clone())
+            return Ok(serde::Deserialize::deserialize(&value)
                 .map_or_else(|_| Self::Unknown(value.into()), Self::Failure));
         }
-        Ok(serde_json::from_value(value.clone())
+        Ok(serde::Deserialize::deserialize(&value)
             .map(Self::Success)
-            .or_else(|_| serde_json::from_value(value.clone()).map(Self::Failure))
+            .or_else(|_| serde::Deserialize::deserialize(&value).map(Self::Failure))
             .unwrap_or_else(|_| Self::Unknown(value.into())))
     }
 }

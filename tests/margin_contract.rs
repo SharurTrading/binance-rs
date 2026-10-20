@@ -14,12 +14,14 @@ use margin::ClientOrderId;
 use std::sync::Arc;
 use support::{FixedClock, HttpFixture, deadline};
 fn config() -> margin::Config {
-    margin::Config::with_pools(&binance_client::WeightPools::new())
+    let config = margin::Config::with_pools(&binance_client::WeightPools::new())
         .unwrap()
         .budgets(binance_client::Budgets::new(binance_client::BudgetLimits::spot()).unwrap())
         .clock(Arc::new(FixedClock(1000)))
-        .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap())
-        .order_limits(&serde_json::from_str(r#"[{"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":10000,"count":0}]"#).unwrap()).unwrap()
+        .credentials(Credentials::hmac("synthetic-key", "synthetic-secret").unwrap());
+    margin::RestClient::new(config.clone()).unwrap()
+        .observe_order_limits(&serde_json::from_str(r#"[{"rateLimitType":"ORDERS","interval":"SECOND","intervalNum":10,"limit":10000,"count":0}]"#).unwrap()).unwrap();
+    config
 }
 fn order() -> margin::rest_requests::MarginAccountNewOrder {
     margin::rest_requests::MarginAccountNewOrder::new()
@@ -950,11 +952,10 @@ async fn native_order_limits_share_account_owners_and_apply_remote_count_floors(
     let budgets = binance_client::Budgets::new(binance_client::BudgetLimits::spot()).unwrap();
     let configured = config()
         .budgets(budgets.clone())
-        .order_limits(&quota(2, 0))
-        .unwrap()
         .rest_url(&fixture.url)
         .unwrap();
     let first = margin::RestClient::new(configured.clone()).unwrap();
+    first.observe_order_limits(&quota(2, 0)).unwrap();
     let second = margin::RestClient::new(configured.clone()).unwrap();
     first
         .margin_account_new_order(&order().build().unwrap(), deadline())
@@ -995,14 +996,8 @@ async fn native_order_limits_share_account_owners_and_apply_remote_count_floors(
 #[tokio::test]
 async fn order_lists_reserve_all_documented_legs_before_any_send() {
     let fixture = HttpFixture::new(200, "", "{}", None, false).await;
-    let client = margin::RestClient::new(
-        config()
-            .order_limits(&quota(1, 0))
-            .unwrap()
-            .rest_url(&fixture.url)
-            .unwrap(),
-    )
-    .unwrap();
+    let client = margin::RestClient::new(config().rest_url(&fixture.url).unwrap()).unwrap();
+    client.observe_order_limits(&quota(1, 0)).unwrap();
     let request = oco()
         .list_client_order_id(id("list"))
         .limit_client_order_id(id("limit"))

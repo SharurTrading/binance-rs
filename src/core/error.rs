@@ -295,7 +295,15 @@ impl Error {
             | Self::FixDecode { .. }
             | Self::Task
             | Self::Closed => None,
-            _ => Some(Outcome::NotSent),
+            Self::Validation(_)
+            | Self::Configuration(_)
+            | Self::Signing
+            | Self::CredentialsRequired
+            | Self::Admission { .. }
+            | Self::CooldownTimingUnknown
+            | Self::Expired(_)
+            | Self::NotSent { .. }
+            | Self::DuplicateRequestId => Some(Outcome::NotSent),
         }
     }
 }

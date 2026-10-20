@@ -173,6 +173,10 @@
                       "totalWalletBalance"
                     ]
                   }
+                ],
+                "x-variant-names": [
+                  "Multiple",
+                  "Single"
                 ]
               }
             }

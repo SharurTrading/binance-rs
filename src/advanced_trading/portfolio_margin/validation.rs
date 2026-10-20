@@ -243,7 +243,10 @@ pub(crate) fn validate_time(p: &Parameters, now: u64) -> Result<(), Error> {
 
 // Product-local validation/authentication and documented server refusals.
 pub(crate) fn definitive(status: u16, value: &serde_json::Value) -> bool {
-    // Portfolio Margin General Info explicitly identifies these 503 variants as failures.
+    // Native refusal codes pinned in schema/portfolio-margin-error-codes.json.
+    // schema/portfolio-margin-error-codes.json deliberately omits -1131.
+    // Its pinned catalog does not identify that code as a definitive refusal.
+    // General Info explicitly identifies these 503 variants as failures.
     (status == 503
         && (matches!(
             value.get("msg").and_then(Value::as_str),
@@ -252,33 +255,14 @@ pub(crate) fn definitive(status: u16, value: &serde_json::Value) -> bool {
                     | "Internal error; unable to process your request. Please try again."
             )
         ) || value.get("code").and_then(Value::as_i64) == Some(-1008)))
-        || (status < 500
-            && value
-                .get("code")
-                .and_then(serde_json::Value::as_i64)
-                .is_some_and(|code| {
-                    matches!(
-                        code,
-                        -2015
-                            | -2014
-                            | -1130
-                            | -1128
-                            | -1127
-                            | -1121
-                            | -1111
-                            | -1106
-                            | -1105
-                            | -1104
-                            | -1103
-                            | -1102
-                            | -1101
-                            | -1100
-                            | -1022
-                            | -1021
-                            | -1020
-                            | -1002
-                    )
-                }))
+        || crate::advanced_trading::validation::definitive(
+            status,
+            value,
+            &[
+                -2015, -2014, -1130, -1128, -1127, -1121, -1111, -1106, -1105, -1104, -1103, -1102,
+                -1101, -1100, -1022, -1021, -1020, -1002,
+            ],
+        )
 }
 
 pub(crate) fn response_failed(_op: &str, value: &serde_json::Value) -> bool {

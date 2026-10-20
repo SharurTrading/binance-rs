@@ -209,7 +209,6 @@ impl Drop for Lease {
     }
 }
 
-#[derive(Clone)]
 pub(super) struct MessageBudget {
     count: VecDeque<Instant>,
     limit: usize,
@@ -256,12 +255,22 @@ impl MessageBudget {
     }
 
     pub(super) fn admit_reserved(&mut self, reserve: usize, exit: bool) -> Result<(), Error> {
+        self.check_reserved(reserve, exit)?.commit();
+        Ok(())
+    }
+
+    pub(super) fn check_reserved(
+        &mut self,
+        reserve: usize,
+        exit: bool,
+    ) -> Result<MessageAdmission<'_>, Error> {
         let limit = if exit {
             self.limit
         } else {
             self.limit.saturating_sub(reserve)
         };
         let now = Instant::now();
+        // Expiring evidence is idempotent even if the account budget later refuses.
         while self
             .count
             .front()
@@ -286,15 +295,36 @@ impl MessageBudget {
                 }),
             });
         }
-        if let Some((until, count)) = &mut self.observed
-            && *until > now
-        {
-            *count = count
-                .checked_add(1)
-                .ok_or(Error::Configuration("FIX message limit overflow"))?;
-        }
-        self.count.push_back(now);
-        Ok(())
+        // Check every fallible part before charging the shared account owner.
+        let observed = match self.observed {
+            Some((until, count)) if until > now => Some((
+                until,
+                count
+                    .checked_add(1)
+                    .ok_or(Error::Configuration("FIX message limit overflow"))?,
+            )),
+            observed => observed,
+        };
+        Ok(MessageAdmission {
+            budget: self,
+            at: now,
+            observed,
+        })
+    }
+}
+
+/// Holds the exclusive message owner until the other budget accepts or refuses.
+/// Dropping an uncommitted admission retains only idempotent expiration pruning.
+#[must_use = "commit only after every shared budget accepts"]
+pub(super) struct MessageAdmission<'a> {
+    budget: &'a mut MessageBudget,
+    at: Instant,
+    observed: Option<(Instant, usize)>,
+}
+impl MessageAdmission<'_> {
+    pub(super) fn commit(self) {
+        self.budget.observed = self.observed;
+        self.budget.count.push_back(self.at);
     }
 }
 
@@ -302,6 +332,21 @@ impl MessageBudget {
 mod tests {
     use super::*;
     use crate::{AccountKey, BudgetLimits, spot::Environment};
+    #[tokio::test(start_paused = true)]
+    async fn dropped_admission_prunes_expired_evidence_without_spending_capacity() {
+        let mut budget = MessageBudget::new(Role::OrderEntry);
+        budget.observe(Duration::from_secs(10), 0, 1).unwrap();
+        budget.admit().unwrap();
+        tokio::time::advance(Duration::from_secs(10)).await;
+        {
+            let _uncommitted = budget.check_reserved(0, false).unwrap();
+        }
+        assert!(budget.count.is_empty());
+        budget.check_reserved(0, false).unwrap().commit();
+        assert_eq!(budget.count.len(), 1);
+        assert!(matches!(budget.admit(), Err(Error::Admission { .. })));
+    }
+
     #[tokio::test(start_paused = true)]
     async fn reserve_keeps_messages_for_cancels_and_controls_without_increasing_total_limit() {
         let mut budget = MessageBudget::new(Role::OrderEntry);

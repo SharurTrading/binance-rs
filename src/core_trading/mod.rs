@@ -10,6 +10,8 @@
 
 pub mod coinm;
 pub mod convert;
+pub mod futures;
+pub(crate) mod futures_wire;
 pub mod margin;
 pub mod options;
 pub mod spot;

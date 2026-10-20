@@ -132,7 +132,17 @@ impl Streams {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
-            SocketEvent::Data { generation, value } => {
+            SocketEvent::NativeBinary { generation, .. } => {
+                self.events.stop();
+                StreamEvent::Gap {
+                    generation,
+                    error: Error::Configuration("unexpected native binary socket payload"),
+                }
+            }
+            SocketEvent::Data {
+                generation,
+                mut value,
+            } => {
                 let data = value.get("data").unwrap_or(&value);
                 if data.get("e").and_then(serde_json::Value::as_str) == Some("serverShutdown") {
                     return Some(
@@ -154,18 +164,19 @@ impl Streams {
                 let decoded = {
                     let name = value.get("stream").and_then(serde_json::Value::as_str);
                     let kind = name.and_then(|name| self.membership.kind(name));
-                    match (name, kind, value.get("data")) {
-                        (Some(name), Some(kind), Some(data)) => market_payload(kind, data.clone())
+                    let name = name.map(str::to_owned);
+                    match (name, kind, value.get_mut("data")) {
+                        (Some(name), Some(kind), Some(data)) => market_payload(kind, data.take())
                             .map(|payload| StreamPayload::Market {
-                                stream: name.to_owned(),
+                                stream: name,
                                 payload,
                             }),
                         // A stream name this build did not subscribe or model is
                         // retained evidence on a live socket, not a continuity
                         // break; only a malformed envelope of a known kind gaps.
                         (Some(name), None, Some(data)) => Ok(StreamPayload::Market {
-                            stream: name.to_owned(),
-                            payload: MarketPayload::Unknown(data.clone().into()),
+                            stream: name,
+                            payload: MarketPayload::Unknown(data.take().into()),
                         }),
                         _ => Err(Error::Gap("unexpected combined stream envelope")),
                     }

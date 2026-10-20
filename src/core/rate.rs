@@ -9,6 +9,12 @@ use std::{
 };
 use tokio::time::Instant;
 
+type WindowCharge = (&'static str, u64, u64, u64);
+
+#[cfg(test)]
+#[path = "admission_bench.rs"]
+mod admission_bench;
+
 /// Venue-sourced initial rate limits; validated exchange information, API response
 /// and account-query statements replace the fallback. The strictest subsequent
 /// statement of each counted window binds.
@@ -315,27 +321,23 @@ impl Budgets {
     pub(crate) fn pool_key(&self) -> Option<PoolKey> {
         self.key
     }
-    fn ip_cost(&self, ip: &State, c: Cost) -> Vec<(&'static str, u64, u64, u64)> {
+    fn ip_cost(&self, ip: &State, c: Cost) -> [Option<WindowCharge>; 5] {
         let weight = if self.ws_on_rest {
             c.request_weight()
         } else {
             c.weight
         };
         let (weight_limit, _) = self.weight_limit(ip);
-        let mut ip_cost = vec![("weight", 60_000, weight_limit, weight)];
-        if let Some((limit, _)) = self.raw_request_limit(ip) {
-            ip_cost.push(("raw", 300_000, limit, c.raw_requests));
-        }
-        if let Some(limit) = self.limits.connections_per_five_minutes {
-            ip_cost.push(("connections", 300_000, limit, c.connections));
-        }
-        if c.funding {
-            ip_cost.push(("funding", 300_000, 500, 1));
-        }
-        if c.history {
-            ip_cost.push(("history", 300_000, 1000, 1));
-        }
-        ip_cost
+        [
+            Some(("weight", 60_000, weight_limit, weight)),
+            self.raw_request_limit(ip)
+                .map(|(limit, _)| ("raw", 300_000, limit, c.raw_requests)),
+            self.limits
+                .connections_per_five_minutes
+                .map(|limit| ("connections", 300_000, limit, c.connections)),
+            c.funding.then_some(("funding", 300_000, 500, 1)),
+            c.history.then_some(("history", 300_000, 1000, 1)),
+        ]
     }
     pub(crate) fn admit(&self, c: Cost, now: u64) -> Result<(), Error> {
         if let Some(cost) = c.sapi {
@@ -356,7 +358,7 @@ impl Budgets {
         ip.check_cooldown(now)?;
         account.check_rolling(c.rolling, now)?;
         let ip_cost = self.ip_cost(&ip, c);
-        let ws_cost = vec![(
+        let ws_cost = [Some((
             "weight",
             60_000,
             self.ws_weight_limit(&ws_ip).0,
@@ -365,31 +367,31 @@ impl Budgets {
             } else {
                 c.ws_weight
             },
-        )];
+        ))];
         let [orders10, orders60, orders_day] = self.order_limits(&ip, &account);
         let placements = c.orders10.max(c.orders60).max(c.orders_day);
         // Count placements in every aligned window, including a window whose
         // ceiling the venue may state later. Product request costs identify the
         // placement count; they do not determine which stated windows apply.
-        let mut account_cost = vec![
-            ("orders10", 10_000, orders10.0, placements),
-            ("orders60", 60_000, orders60.0, placements),
-            ("ordersDay", 86_400_000, orders_day.0, placements),
+        let account_cost = [
+            Some(("orders10", 10_000, orders10.0, placements)),
+            Some(("orders60", 60_000, orders60.0, placements)),
+            Some(("ordersDay", 86_400_000, orders_day.0, placements)),
+            c.quote.then_some(("quoteHour", 3_600_000, 360, 1)),
+            c.quote.then_some(("quoteDay", 86_400_000, 500, 1)),
         ];
-        if c.quote {
-            account_cost.extend([
-                ("quoteHour", 3_600_000, 360, 1),
-                ("quoteDay", 86_400_000, 500, 1),
-            ]);
-        }
         order_windows(&mut account, placements, now, false, c.exit.is_eligible())?;
         let monthly = monthly_download(&account, c.download, now)?;
         for (state, costs, weight_reserve) in [
-            (&ip, &ip_cost, ip.exit_reserve.request_weight),
-            (&ws_ip, &ws_cost, ws_ip.exit_reserve.websocket_weight),
-            (&account, &account_cost, 0),
+            (&ip, ip_cost.as_slice(), ip.exit_reserve.request_weight),
+            (
+                &ws_ip,
+                ws_cost.as_slice(),
+                ws_ip.exit_reserve.websocket_weight,
+            ),
+            (&account, account_cost.as_slice(), 0),
         ] {
-            for &(name, window, limit, amount) in costs {
+            for &(name, window, limit, amount) in costs.iter().flatten() {
                 if amount == 0 {
                     continue;
                 }
@@ -409,11 +411,11 @@ impl Budgets {
             }
         }
         for (state, costs) in [
-            (&mut ip, &ip_cost),
-            (&mut ws_ip, &ws_cost),
-            (&mut account, &account_cost),
+            (&mut ip, ip_cost.as_slice()),
+            (&mut ws_ip, ws_cost.as_slice()),
+            (&mut account, account_cost.as_slice()),
         ] {
-            for &(name, window, _, amount) in costs {
+            for &(name, window, _, amount) in costs.iter().flatten() {
                 let counter = state.counts.entry(name).or_default();
                 if counter.0 != now / window {
                     *counter = (now / window, 0);

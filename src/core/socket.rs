@@ -9,6 +9,7 @@ use futures_util::{SinkExt, StreamExt};
 use serde_json::Value;
 use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
+    fmt::Write as _,
     sync::{
         Arc, Mutex,
         atomic::{AtomicU64, Ordering},
@@ -26,7 +27,12 @@ use tokio_websockets::{
 };
 
 static GENERATION: AtomicU64 = AtomicU64::new(1);
-pub(crate) type BinaryDecoder = fn(&[u8]) -> Result<Value, Error>;
+/// Product decoders may retain their native model without a JSON conversion.
+pub(crate) enum BinaryPayload {
+    Json(Value),
+    Native(Box<dyn std::any::Any + Send>),
+}
+pub(crate) type BinaryDecoder = fn(&[u8]) -> Result<BinaryPayload, Error>;
 
 /// Observable ingress lag; no capacity-driven dropping or disconnection.
 #[derive(Clone, Debug, Default)]
@@ -69,6 +75,10 @@ pub(crate) enum SocketEvent {
     Data {
         generation: u64,
         value: Value,
+    },
+    NativeBinary {
+        generation: u64,
+        payload: Box<dyn std::any::Any + Send>,
     },
     Late {
         generation: u64,
@@ -180,6 +190,36 @@ enum IncomingCharge {
     Pong,
     /// An outgoing stream control; refused before it can take that slot.
     Control,
+}
+
+/// A close handshake would flush an automatically queued pong, so it is forbidden
+/// once the venue's incoming-message budget cannot admit that pong.
+enum CloseHandshake {
+    Allowed,
+    IncomingRateExhausted,
+}
+
+/// WebSocket signatures sort parameters without HTTP form encoding.
+fn signing_payload(params: &BTreeMap<String, Value>) -> Result<String, Error> {
+    let mut payload = String::with_capacity(
+        params
+            .iter()
+            .map(|(name, value)| name.len() + 2 + value.as_str().map_or(0, str::len))
+            .sum(),
+    );
+    for (name, value) in params {
+        if !payload.is_empty() {
+            payload.push('&');
+        }
+        payload.push_str(name);
+        payload.push('=');
+        match value {
+            Value::String(text) => payload.push_str(text),
+            _ => write!(&mut payload, "{value}")
+                .map_err(|_| Error::Validation("parameter encoding"))?,
+        }
+    }
+    Ok(payload)
 }
 
 pub(crate) struct SocketDriver {
@@ -417,7 +457,13 @@ impl SocketDriver {
         let decode = self
             .binary_decoder
             .ok_or(Error::Gap("unexpected binary event on JSON connection"))?;
-        self.response(decode(bytes)?)
+        match decode(bytes)? {
+            BinaryPayload::Json(value) => self.response(value),
+            BinaryPayload::Native(payload) => self.emit(SocketEvent::NativeBinary {
+                generation: self.generation,
+                payload,
+            }),
+        }
     }
     fn emit(&mut self, event: SocketEvent) -> Result<(), Error> {
         let mut metrics = self
@@ -480,12 +526,7 @@ impl SocketDriver {
                                 "timestamp".into(),
                                 self.time_unit.timestamp(self.clock.as_ref())?.into(),
                             );
-                            // WS signing sorts params; unlike HTTP the payload is NOT percent encoded.
-                            let payload = params
-                                .iter()
-                                .map(|(k, v)| Ok(format!("{k}={}", super::request::text(v)?)))
-                                .collect::<Result<Vec<_>, Error>>()?
-                                .join("&");
+                            let payload = signing_payload(&params)?;
                             params.insert("signature".into(), credentials.sign(&payload)?.into());
                         }
                     }
@@ -661,7 +702,7 @@ impl SocketDriver {
             }
         }
     }
-    fn response(&mut self, value: Value) -> Result<(), Error> {
+    fn response(&mut self, mut value: Value) -> Result<(), Error> {
         if value.get("status").and_then(Value::as_u64) == Some(401)
             && value
                 .get("error")
@@ -677,17 +718,16 @@ impl SocketDriver {
         {
             return self.settle_control(id, &value);
         }
-        let id = value.get("id").and_then(Value::as_str).map(str::to_owned);
-        if let Some(id) = id
-            && let Some(mut p) = self.pending.remove(&id)
+        if let Some(id) = value.get("id").and_then(Value::as_str)
+            && let Some(p) = self.pending.remove(id)
         {
             // A correlated answer is accepted ingress. If its evidence cannot be
             // classified, the venue's frame is still delivered in source order before
             // the failure propagates, so no answer and no correlation id is lost.
-            if let Err(error) = self.settle(&mut p, &value) {
+            if let Err(error) = self.settle(p, &mut value) {
                 self.emit(SocketEvent::Data {
                     generation: self.generation,
-                    value: value.clone(),
+                    value,
                 })?;
                 return Err(error);
             }
@@ -748,7 +788,7 @@ impl SocketDriver {
         Ok((rates, adoption.err()))
     }
     /// Hand one correlated answer to its caller, or surface it as a late answer.
-    fn settle(&mut self, p: &mut Pending, value: &Value) -> Result<(), Error> {
+    fn settle(&mut self, mut p: Pending, value: &mut Value) -> Result<(), Error> {
         let status = value
             .get("status")
             .and_then(Value::as_u64)
@@ -758,15 +798,20 @@ impl SocketDriver {
             .clock
             .now_millis()
             .map_err(|_| Error::Gap("clock unavailable after response"))?;
-        let (rates, rate_gap) = self.response_rates(p, value, status, now)?;
+        let (rates, rate_gap) = self.response_rates(&p, value, status, now)?;
         let meta = ResponseMeta {
             time_unit: self.time_unit,
-            client_order_ids: p.client_order_ids.clone(),
+            client_order_ids: p.client_order_ids,
             status,
             operation: p.op.name,
             rates,
         };
-        let Some(payload) = value.get("result").or_else(|| value.get("error")).cloned() else {
+        let payload_key = if value.get("result").is_some() {
+            "result"
+        } else {
+            "error"
+        };
+        let Some(payload) = value.get_mut(payload_key) else {
             // Missing payload is a correlated failure with received evidence.
             // The original frame is retained by the caller before retirement.
             if let Some(reply) = p.reply.take() {
@@ -794,22 +839,22 @@ impl SocketDriver {
             self.budgets
                 .refund_weight(p.weight.saturating_sub(success), p.admitted_at, true)?;
         }
-        if let Some(reply) = p.reply.take() {
-            if let Err(result) = reply.send(Ok((payload.clone(), meta.clone())))
-                && result.is_ok()
-            {
-                self.emit(SocketEvent::Late {
-                    generation: self.generation,
-                    id: p.id.clone(),
-                    op: Box::new(p.op),
-                    value: payload,
-                    meta,
-                })?;
-            }
+        // Malformed rate evidence has two accepted destinations: the correlated
+        // answer and the full original frame before the gap. Only that path copies
+        // the payload; ordinary answers move it out of the consumed frame.
+        let payload = if rate_gap.is_some() {
+            payload.clone()
         } else {
+            payload.take()
+        };
+        let unanswered = match p.reply.take() {
+            Some(reply) => reply.send(Ok((payload, meta))).err().transpose()?,
+            None => Some((payload, meta)),
+        };
+        if let Some((payload, meta)) = unanswered {
             self.emit(SocketEvent::Late {
                 generation: self.generation,
-                id: p.id.clone(),
+                id: p.id,
                 op: Box::new(p.op),
                 value: payload,
                 meta,
@@ -829,6 +874,7 @@ impl SocketDriver {
         let lifetime = self.lifetime;
         let mut failure = None;
         let mut refusal = None;
+        let mut close = CloseHandshake::Allowed;
         loop {
             if self.stop.is_cancelled() {
                 break;
@@ -870,7 +916,10 @@ impl SocketDriver {
                     // messages, which are admitted one slot short of it so this
                     // reserved slot is free for the pong a ping demands.
                     Some(Ok(message)) if message.is_ping()=>{
-                        if self.charge_incoming(Instant::now(), IncomingCharge::Pong).is_err() {Err(Error::Gap("documented ping/pong rate exceeded"))} else {
+                        if self.charge_incoming(Instant::now(), IncomingCharge::Pong).is_err() {
+                            close = CloseHandshake::IncomingRateExhausted;
+                            Err(Error::Gap("documented ping/pong rate exceeded"))
+                        } else {
                             tokio::time::timeout(self.timeout,self.ws.flush()).await.map_err(|_|Error::Gap("pong timeout")).and_then(|v|v.map_err(|_|Error::Gap("pong failure")))
                         }
                     },
@@ -896,7 +945,7 @@ impl SocketDriver {
                 break;
             }
         }
-        self.retire(failure, refusal).await
+        self.retire(failure, refusal, close).await
     }
     /// Retire one generation after its accepted prefix drained: settle every sent
     /// request, refuse every unsent one, then expose the boundary exactly once.
@@ -904,6 +953,7 @@ impl SocketDriver {
         &mut self,
         failure: Option<Error>,
         refusal: Option<Error>,
+        close: CloseHandshake,
     ) -> Result<(), Error> {
         // Prefix was emitted in source order. Every sent pending request is now uncertain.
         for (_, mut p) in std::mem::take(&mut self.pending) {
@@ -926,10 +976,7 @@ impl SocketDriver {
                 let _ = reply.send(Err(control_lost(p.control)));
             }
         }
-        if !matches!(
-            failure,
-            Some(Error::Gap("documented ping/pong rate exceeded"))
-        ) {
+        if matches!(close, CloseHandshake::Allowed) {
             let _ = tokio::time::timeout(self.timeout, self.ws.close()).await;
         }
         // Commands admitted to the inbox but never sent get explicit unsent outcomes.
@@ -1087,6 +1134,10 @@ impl Drop for SocketEvents {
         self.stop.cancel();
     }
 }
+
+#[cfg(test)]
+#[path = "socket_tests.rs"]
+mod settlement_tests;
 
 #[cfg(test)]
 mod tests {

@@ -257,7 +257,7 @@ impl Writer<'_> {
             .schema
             .type_node(node.attr("dimensionType").unwrap_or("groupSizeEncoding"))?;
         let block = block_size(self.schema, &node.children)?;
-        for d in dimensions.children {
+        for d in &dimensions.children {
             let primitive = d
                 .attr("primitiveType")
                 .ok_or(Error::Configuration("SBE group dimension"))?;

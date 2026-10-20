@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 //! Every supported JSON method has independently sourced native response fixtures.
-#![allow(
-    clippy::unwrap_used,
-    clippy::panic,
-    reason = "synthetic protocol assertions"
-)]
+#![allow(clippy::unwrap_used, reason = "synthetic protocol assertions")]
 #[path = "support/response_shape_dispatch.rs"]
 mod dispatch;
 

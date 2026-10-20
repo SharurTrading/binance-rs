@@ -10,11 +10,7 @@
 //! (<https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice>,
 //! checked 2026-10-11). Each test builds its own registry.
 
-#![allow(
-    clippy::unwrap_used,
-    clippy::panic,
-    reason = "synthetic fixture assertions"
-)]
+#![allow(clippy::unwrap_used, reason = "synthetic fixture assertions")]
 
 #[allow(
     dead_code,
@@ -398,12 +394,11 @@ async fn margin_clients_of_one_key_share_its_native_order_windows() {
     let first = margin_client(
         margin::Config::with_pools_for_account(&pools, &key)
             .unwrap()
-            .clock(clock.clone())
-            .order_limits(&margin_quota(1))
-            .unwrap(),
+            .clock(clock.clone()),
         &venue,
         &clock,
     );
+    first.observe_order_limits(&margin_quota(1)).unwrap();
     let same_key = margin_client(
         margin::Config::with_pools_for_account(&pools, &key).unwrap(),
         &venue,
@@ -412,12 +407,11 @@ async fn margin_clients_of_one_key_share_its_native_order_windows() {
     let other_key = margin_client(
         margin::Config::with_pools_for_account(&pools, &AccountKey::new("account-two"))
             .unwrap()
-            .clock(clock.clone())
-            .order_limits(&margin_quota(1))
-            .unwrap(),
+            .clock(clock.clone()),
         &venue,
         &clock,
     );
+    other_key.observe_order_limits(&margin_quota(1)).unwrap();
     margin_place(&first).await.unwrap();
     assert_refused(
         &margin_place(&same_key).await.unwrap_err(),

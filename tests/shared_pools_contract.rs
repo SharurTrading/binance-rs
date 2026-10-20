@@ -11,11 +11,7 @@
 //! (<https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#rate-limiters-ratelimittype>).
 //! One test per independent venue pool draws on the process registry; others use explicit registries.
 
-#![allow(
-    clippy::unwrap_used,
-    clippy::panic,
-    reason = "synthetic fixture assertions"
-)]
+#![allow(clippy::unwrap_used, reason = "synthetic fixture assertions")]
 
 #[allow(
     dead_code,

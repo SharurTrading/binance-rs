@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 //! Own-wallet transfers retain native asset, symbol, history and outcome evidence.
-#![allow(
-    clippy::unwrap_used,
-    clippy::panic,
-    reason = "synthetic fixture assertions"
-)]
+#![allow(clippy::unwrap_used, reason = "synthetic fixture assertions")]
 #[allow(dead_code, reason = "shared fixture helpers")]
 mod support;
 

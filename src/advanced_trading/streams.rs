@@ -275,17 +275,27 @@ impl<P: StreamingProduct> Streams<P> {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
-            SocketEvent::Data { generation, value } => {
+            SocketEvent::NativeBinary { generation, .. } => {
+                self.events.stop();
+                StreamEvent::Gap {
+                    generation,
+                    error: Error::Configuration("unexpected native binary socket payload"),
+                }
+            }
+            SocketEvent::Data {
+                generation,
+                mut value,
+            } => {
                 let (stream, kind, data) = if self.private {
                     (None, P::PRIVATE_KIND, value)
-                } else if let (Some(stream), Some(data)) = (
+                } else if let (Some(stream), Some(_)) = (
                     value.get("stream").and_then(Value::as_str),
                     value.get("data"),
                 ) {
                     (
                         Some(SensitiveString::new(stream)),
                         self.kinds.get(stream).copied(),
-                        data.clone(),
+                        value["data"].take(),
                     )
                 } else if value.get("stream").is_some() {
                     self.events.stop();

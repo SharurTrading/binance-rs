@@ -3,9 +3,10 @@
 
 use crate::{
     Asset, Error, Outcome,
-    core::{Cost, Operation, Request, parameters, validate_parameters},
+    core::{Cost, Operation, Request, validate_parameters},
 };
 use serde::Serialize;
+use std::collections::BTreeMap;
 /// Native quote receipt with both caller-requested asset identities retained.
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
@@ -113,11 +114,17 @@ impl AcceptQuote {
 impl Request for AcceptQuote {
     type Response = super::rest_models::AcceptQuoteResponse;
     const OP: Operation = super::rest_requests::ACCEPT_QUOTE_OPERATION;
-    fn validate(&self) -> Result<(), Error> {
-        validate_parameters(&parameters(self)?, &["quoteId"], &[], &[])
+    fn validate_with_parameters(
+        &self,
+        params: &BTreeMap<String, serde_json::Value>,
+    ) -> Result<(), Error> {
+        validate_parameters(params, &["quoteId"], &[], &[])
     }
-    fn cost(&self) -> Result<Cost, Error> {
-        super::rate::cost(Self::OP, &parameters(self)?)
+    fn cost_with_parameters(
+        &self,
+        params: &BTreeMap<String, serde_json::Value>,
+    ) -> Result<Cost, Error> {
+        super::rate::cost(Self::OP, params)
     }
     fn validate_authority(&self, now: u64) -> Result<(), Error> {
         if now >= self.valid_until {

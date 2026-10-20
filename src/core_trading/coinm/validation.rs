@@ -5,19 +5,8 @@ use crate::Error;
 use serde_json::Value;
 use std::collections::BTreeMap;
 
-fn str_field<'a>(p: &'a BTreeMap<String, Value>, name: &str) -> Option<&'a str> {
-    p.get(name).and_then(Value::as_str)
-}
-fn truth(p: &BTreeMap<String, Value>, name: &str) -> bool {
-    p.get(name)
-        .is_some_and(|v| v == &Value::Bool(true) || v.as_str() == Some("true"))
-}
-fn required(p: &BTreeMap<String, Value>, names: &[&str]) -> Result<(), Error> {
-    if names.iter().any(|n| !p.contains_key(*n)) {
-        return Err(Error::Validation("conditional required parameter"));
-    }
-    Ok(())
-}
+use crate::core_trading::futures::validation::{required, str_field, truth};
+
 pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> {
     crate::core::validate_parameters(p, &[], &[], &[])?;
     if p.get("recvWindow").is_some_and(|v| {
@@ -30,13 +19,10 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
             "Futures recvWindow must be integer milliseconds",
         ));
     }
-    validate_order_enums(op, p)?;
+    validate_order_enums(p)?;
     validate_batch(op, p)?;
-    if matches!(op, "newOrder" | "testOrder") {
-        validate_standard_order(op, p)?;
-    }
-    if op == "rpiOrderBook" && p.get("limit").is_some_and(|v| v.as_i64() != Some(1000)) {
-        return Err(Error::Validation("RPI depth supports only 1000 levels"));
+    if op == "newOrder" {
+        validate_standard_order(p)?;
     }
     if op == "newAlgoOrder" {
         required(p, &["algoType", "symbol", "side", "type", "clientAlgoId"])?;
@@ -61,10 +47,10 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
         }
     }
     if op == "modifyOrder" {
+        // Native pinned REST/WS catalogs and the migrated COIN-M contract
+        // require an explicit price. priceMatch does not establish an exception;
+        // see docs/futures-modify-order-evidence.md.
         required(p, &["symbol", "side", "quantity", "price"])?;
-        if !p.contains_key("price") && !p.contains_key("priceMatch") {
-            return Err(Error::Validation("modify price"));
-        }
     }
     if matches!(
         op,
@@ -93,9 +79,6 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
     }
     if str_field(p, "timeInForce") == Some("GTD") {
         required(p, &["goodTillDate"])?;
-    }
-    if op == "sendQuoteRequest" && p.contains_key("fromAmount") == p.contains_key("toAmount") {
-        return Err(Error::Validation("exactly one conversion amount"));
     }
     if op == "cancelMultipleOrders"
         && !p.contains_key("orderIdList")
@@ -139,7 +122,7 @@ fn validate_batch(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> {
     Ok(())
 }
 
-fn validate_order_enums(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> {
+fn validate_order_enums(p: &BTreeMap<String, Value>) -> Result<(), Error> {
     crate::core::validate_parameters(
         p,
         &[],
@@ -170,21 +153,14 @@ fn validate_order_enums(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Err
     if let Some(value) = p.get("callbackRate") {
         let value =
             super::wire::parse_decimal(value).map_err(|_| Error::Validation("callbackRate"))?;
-        if value < crate::Decimal::new(1, 1)
-            || value
-                > if op == "testOrder" {
-                    crate::Decimal::new(5, 0)
-                } else {
-                    crate::Decimal::TEN
-                }
-        {
+        if value < crate::Decimal::new(1, 1) || value > crate::Decimal::TEN {
             return Err(Error::Validation("callbackRate must be between 0.1 and 10"));
         }
     }
     Ok(())
 }
 
-fn validate_standard_order(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> {
+fn validate_standard_order(p: &BTreeMap<String, Value>) -> Result<(), Error> {
     required(p, &["symbol", "side", "type", "newClientOrderId"])?;
     match str_field(p, "type") {
         Some("LIMIT") => {
@@ -194,21 +170,6 @@ fn validate_standard_order(op: &str, p: &BTreeMap<String, Value>) -> Result<(), 
             }
         }
         Some("MARKET") => required(p, &["quantity"])?,
-        Some("STOP" | "TAKE_PROFIT") if op == "testOrder" => {
-            required(p, &["quantity", "stopPrice"])?;
-            if !p.contains_key("price") && !p.contains_key("priceMatch") {
-                return Err(Error::Validation("conditional test price"));
-            }
-        }
-        Some("STOP_MARKET" | "TAKE_PROFIT_MARKET") if op == "testOrder" => {
-            required(p, &["stopPrice"])?;
-            if !truth(p, "closePosition") {
-                required(p, &["quantity"])?;
-            }
-        }
-        Some("TRAILING_STOP_MARKET") if op == "testOrder" => {
-            required(p, &["quantity", "callbackRate"])?;
-        }
         _ => {
             return Err(Error::Validation(
                 "conditional execution uses the algo endpoint",

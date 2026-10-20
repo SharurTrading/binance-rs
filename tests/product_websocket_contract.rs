@@ -21,6 +21,7 @@ use tokio::{
 };
 #[allow(dead_code, reason = "shared synthetic fixture helpers")]
 mod support;
+use support::deadline;
 use tokio_websockets::{Limits, Message, ServerBuilder, WebSocketStream};
 
 async fn listener() -> (TcpListener, String) {
@@ -44,9 +45,6 @@ async fn finish(mut peer: WebSocketStream<TcpStream>) {
             break;
         }
     }
-}
-fn deadline() -> Instant {
-    Instant::now() + Duration::from_secs(3)
 }
 
 #[tokio::test]

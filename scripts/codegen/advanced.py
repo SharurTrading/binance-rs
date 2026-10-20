@@ -62,7 +62,7 @@ def generate(g):
         if re.search(r'\b'+typ+r'\b',model_text):imports.append(f'use super::wire::{typ};')
     g.write(g.product_root(product)/'stream_models.rs',g.HEADER+'//! Generated native stream DTOs.\n\n'+'\n'.join(imports)+'\n\n'+model_text+'\n')
     event_text='''//! Native stream dispatch with retained future-event evidence.
-pub use crate::core_trading::wallet::event_payloads::UnknownMessage;
+pub use crate::core::wire::UnknownMessage;
 /// A native event, without cross-product account or instrument normalization.
 #[derive(Clone,Debug,PartialEq)]
 #[non_exhaustive]
@@ -124,5 +124,8 @@ fn decode_market<T:serde::de::DeserializeOwned>(value:serde_json::Value,event:Op
 }
 '''
     g.write(g.product_root(product)/'event_payloads.rs',g.HEADER+event_text)
-    g.write(g.product_root(product)/'stream_names.rs',g.HEADER+'//! Generated native market stream names.\n\nimpl crate::advanced_trading::streams::Stream<super::Protocol>{\n'+'\n\n'.join(constructors)+'\n}\n')
+    if not constructors:
+        (g.product_root(product)/'stream_names.rs').unlink(missing_ok=True)
+    else:
+        g.write(g.product_root(product)/'stream_names.rs',g.HEADER+'//! Generated native market stream names.\n\nimpl crate::advanced_trading::streams::Stream<super::Protocol>{\n'+'\n\n'.join(constructors)+'\n}\n')
     return coverage

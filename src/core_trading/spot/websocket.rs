@@ -44,7 +44,14 @@ impl WsClient {
     ) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
         config.time_unit = crate::TimeUnit::Microseconds;
         super::config::apply_response_format(&mut config.websocket, true);
-        Self::connect_format(config, Some(super::sbe::schema::decode_api_value)).await
+        Self::connect_format(
+            config,
+            Some(|bytes| {
+                super::sbe::schema::decode_api_value(bytes)
+                    .map(crate::core::socket::BinaryPayload::Json)
+            }),
+        )
+        .await
     }
     /// Connect the API socket without spawning a task.
     ///
@@ -100,17 +107,10 @@ impl WsClient {
         id: RequestId,
         deadline: Instant,
     ) -> Result<Response<R::Response>, Error> {
-        request.validate()?;
-        let (value, meta) = self
-            .socket
-            .call(
-                R::OP,
-                crate::core::parameters(request)?,
-                request.cost()?,
-                id,
-                deadline,
-            )
-            .await?;
+        let params = crate::core::parameters(request)?;
+        request.validate_with_parameters(&params)?;
+        let cost = request.cost_with_parameters(&params)?;
+        let (value, meta) = self.socket.call(R::OP, params, cost, id, deadline).await?;
         let response: Response<R::Response> =
             crate::core::http::decode(R::OP, meta.status, value, meta)?;
         if R::OP.path == "/account.rateLimits.orders" && response.meta.rates.stated_limits_unusable
@@ -313,53 +313,20 @@ impl ApiEvents {
                 generation,
                 error: Error::Gap("unexpected stream control answer"),
             },
-            SocketEvent::Data { generation, value } => {
-                let notice = value.get("event").unwrap_or(&value);
-                if notice.get("e").and_then(serde_json::Value::as_str) == Some("serverShutdown") {
-                    if notice
-                        .get("E")
-                        .and_then(serde_json::Value::as_i64)
-                        .is_none()
-                    {
-                        self.inner.stop();
-                        ApiEvent::Gap {
-                            generation,
-                            error: Error::Gap("malformed shutdown notice"),
-                        }
-                    } else {
-                        ApiEvent::ServerShutdown {
-                            generation,
-                            payload: value.into(),
-                        }
-                    }
-                } else if let Some(event) = value.get("event") {
-                    let decoded = value
-                        .get("subscriptionId")
-                        .and_then(serde_json::Value::as_i64)
-                        .filter(|id| *id >= 0)
-                        .ok_or(Error::Gap("Spot subscription identity"))
-                        .and_then(|id| {
-                            super::event_payloads::user_payload(event.clone())
-                                .map(|payload| (id, payload))
-                        });
-                    match decoded {
-                        Ok((subscription_id, payload)) => ApiEvent::UserData {
-                            generation,
-                            subscription_id,
-                            payload,
-                        },
-                        Err(error) => {
-                            self.inner.stop();
-                            ApiEvent::Gap { generation, error }
-                        }
-                    }
-                } else {
-                    ApiEvent::Unknown {
-                        generation,
-                        payload: value.into(),
-                    }
+            SocketEvent::NativeBinary { generation, .. } => {
+                self.inner.stop();
+                ApiEvent::Gap {
+                    generation,
+                    error: Error::Configuration("unexpected native binary socket payload"),
                 }
             }
+            SocketEvent::Data { generation, value } => match decode_data(generation, value) {
+                Ok(event) => event,
+                Err(error) => {
+                    self.inner.stop();
+                    ApiEvent::Gap { generation, error }
+                }
+            },
             SocketEvent::Late {
                 generation,
                 id,
@@ -401,6 +368,43 @@ impl ApiEvents {
                     result,
                 }
             }
+        })
+    }
+}
+
+// Decode uncorrelated ingress separately from lifecycle and late-answer mapping.
+// Subscription identity is resolved before the owned event leaves its envelope.
+fn decode_data(generation: u64, mut value: serde_json::Value) -> Result<ApiEvent, Error> {
+    let notice = value.get("event").unwrap_or(&value);
+    if notice.get("e").and_then(serde_json::Value::as_str) == Some("serverShutdown") {
+        if notice
+            .get("E")
+            .and_then(serde_json::Value::as_i64)
+            .is_none()
+        {
+            return Err(Error::Gap("malformed shutdown notice"));
+        }
+        return Ok(ApiEvent::ServerShutdown {
+            generation,
+            payload: value.into(),
+        });
+    }
+    if value.get("event").is_some() {
+        let subscription_id = value
+            .get("subscriptionId")
+            .and_then(serde_json::Value::as_i64)
+            .filter(|id| *id >= 0)
+            .ok_or(Error::Gap("Spot subscription identity"))?;
+        let payload = super::event_payloads::user_payload(value["event"].take())?;
+        Ok(ApiEvent::UserData {
+            generation,
+            subscription_id,
+            payload,
+        })
+    } else {
+        Ok(ApiEvent::Unknown {
+            generation,
+            payload: value.into(),
         })
     }
 }

@@ -47,15 +47,14 @@ text_id!(
 #[serde(transparent)]
 pub struct OrderId(i64);
 impl OrderId {
-    /// Validate a positive venue order identity.
+    /// Retain a native signed 64-bit venue order identity without narrowing it.
     ///
-    /// # Errors
-    /// Refuses non-positive identities.
-    pub fn new(value: i64) -> Result<Self, Error> {
-        if value <= 0 {
-            return Err(Error::Validation("Convert order identity"));
-        }
-        Ok(Self(value))
+    /// The [Convert order catalog](https://developers.binance.com/en/docs/catalog/core-trading-convert/api/rest-api/trade#order-status)
+    /// specifies `int64` and pins no positive minimum. Identity sign does not
+    /// establish acceptance, rejection, or execution success.
+    #[must_use]
+    pub fn new(value: i64) -> Self {
+        Self(value)
     }
     /// Exact provider integer identity.
     #[must_use]
@@ -65,14 +64,14 @@ impl OrderId {
 }
 impl<'de> Deserialize<'de> for OrderId {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        Self::new(i64::deserialize(d)?).map_err(serde::de::Error::custom)
+        i64::deserialize(d).map(Self::new)
     }
 }
 
 impl From<OrderId> for AcceptanceOrderId {
     /// Explicitly render an integer order identity for the native string status query.
     fn from(value: OrderId) -> Self {
-        // Validated positive i64 IDs render as nonempty ASCII digits, satisfying the text identity invariant.
+        // Every i64 renders as nonempty control-free text, including its sign.
         Self(value.value().to_string())
     }
 }

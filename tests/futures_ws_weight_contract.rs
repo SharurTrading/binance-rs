@@ -14,11 +14,7 @@
 //! - <https://developers.binance.info/docs/derivatives/coin-margined-futures/Important-CM-UM-Integration-Notice>,
 //!   A.3: USDⓈ-M and COIN-M REST share one `X-MBX-USED-WEIGHT-1M` counter.
 
-#![allow(
-    clippy::unwrap_used,
-    clippy::panic,
-    reason = "synthetic fixture assertions"
-)]
+#![allow(clippy::unwrap_used, reason = "synthetic fixture assertions")]
 
 #[allow(dead_code, reason = "shared synthetic fixture helpers")]
 mod support;

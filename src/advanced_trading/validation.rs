@@ -68,3 +68,90 @@ pub(crate) fn common(p: &Parameters) -> Result<(), Error> {
     }
     range(p, u64::MAX, false)
 }
+
+pub(crate) fn validate(_op: &str, p: &Parameters) -> Result<(), Error> {
+    common(p)
+}
+
+pub(crate) fn string_response_failed(value: &Value, success_code: &str) -> bool {
+    value.get("success") == Some(&Value::Bool(false))
+        || value
+            .get("code")
+            .and_then(Value::as_str)
+            .is_some_and(|code| code != success_code)
+}
+
+/// Classification accepts the native catalog explicitly; unknown codes and 5xx
+/// responses never inherit another product's refusal semantics.
+pub(crate) fn definitive(status: u16, value: &Value, codes: &[i64]) -> bool {
+    status < 500
+        && value
+            .get("code")
+            .and_then(Value::as_i64)
+            .is_some_and(|code| codes.contains(&code))
+}
+pub(crate) fn validate_time(p: &Parameters, _now: u64) -> Result<(), Error> {
+    crate::core::validate_parameters(p, &[], &[], &[])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::advanced_trading::{
+        algo, alpha, copy_trading, portfolio_margin, portfolio_margin_pro, stocks,
+    };
+
+    #[test]
+    fn classification_uses_each_pinned_native_catalog() -> Result<(), serde_json::Error> {
+        type Classifier = fn(u16, &Value) -> bool;
+        let products: &[(&str, Classifier)] = &[
+            (
+                include_str!("../../schema/algo-error-codes.json"),
+                algo::validation::definitive,
+            ),
+            (
+                include_str!("../../schema/alpha-error-codes.json"),
+                alpha::validation::definitive,
+            ),
+            (
+                include_str!("../../schema/copy-trading-error-codes.json"),
+                copy_trading::validation::definitive,
+            ),
+            (
+                include_str!("../../schema/portfolio-margin-error-codes.json"),
+                portfolio_margin::validation::definitive,
+            ),
+            (
+                include_str!("../../schema/portfolio-margin-pro-error-codes.json"),
+                portfolio_margin_pro::validation::definitive,
+            ),
+            (
+                include_str!("../../schema/stocks-error-codes.json"),
+                stocks::validation::definitive,
+            ),
+        ];
+        for (catalog, classify) in products {
+            let catalog: Value = serde_json::from_str(catalog)?;
+            let codes: Vec<i64> = serde_json::from_value(catalog["definitive"].clone())?;
+            for code in &codes {
+                assert!(classify(400, &serde_json::json!({"code": code})));
+                assert!(!classify(500, &serde_json::json!({"code": code})));
+            }
+            assert_eq!(
+                classify(400, &serde_json::json!({"code": -1131})),
+                codes.contains(&-1131)
+            );
+            assert!(!classify(400, &serde_json::json!({"code": -999_999})));
+            assert!(!classify(400, &serde_json::json!({"code": "-1131"})));
+        }
+        // Only Portfolio Margin pins these definitive server messages.
+        let reply = serde_json::json!({"msg":"Service Unavailable."});
+        assert!(portfolio_margin::validation::definitive(503, &reply));
+        assert!(!algo::validation::definitive(503, &reply));
+        assert!(!portfolio_margin::validation::definitive(
+            503,
+            &serde_json::json!({"msg":"unknown"})
+        ));
+        Ok(())
+    }
+}

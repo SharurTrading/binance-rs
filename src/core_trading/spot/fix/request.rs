@@ -3,9 +3,8 @@
 
 use super::{
     Fields, Header, Role, Value,
-    codec::{Dictionary, dictionary, validate_required, validate_value, wire_value},
+    codec::{Dictionary, Rules, dictionary, validate_required, validate_value, wire_value},
 };
-use crate::core_trading::spot::sbe::schema::Node;
 use crate::{Decimal, Error};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -123,7 +122,12 @@ impl Request {
                 }
                 _ => Err(Error::Validation("FIX list orders")),
             },
-            _ => Ok(0),
+            RequestKind::CancelOrder
+            | RequestKind::CancelAll
+            | RequestKind::AmendKeepPriority
+            | RequestKind::Limits
+            | RequestKind::Instruments
+            | RequestKind::MarketData => Ok(0),
         }
     }
     /// Caller identities by native field path, retained for outcome attribution.
@@ -160,12 +164,11 @@ impl RequestBuilder {
             return Err(Error::Validation("FIX market role required"));
         }
         let dict = dictionary(self.fields.role)?;
-        let node = dict
+        let rules = dict
             .messages
             .get(self.kind.code())
             .ok_or(Error::Validation("FIX request unavailable for role"))?;
-        let rules = dict.rules(&node.children, true)?;
-        validate_fields(dict, &rules, &self.fields)?;
+        validate_fields(dict, rules, &self.fields)?;
         validate_contract(self.kind, &self.fields)?;
         let ids = identities(&self.fields);
         let unique: BTreeSet<_> = ids.values().collect();
@@ -182,7 +185,7 @@ impl RequestBuilder {
 }
 pub(super) fn validate_fields(
     dict: &Dictionary,
-    rules: &[Node],
+    rules: &Rules,
     fields: &Fields,
 ) -> Result<(), Error> {
     validate_required(rules, fields)?;
@@ -192,6 +195,7 @@ pub(super) fn validate_fields(
             .as_deref()
             .ok_or(Error::Validation("unknown outbound FIX tag"))?;
         let rule = rules
+            .entries
             .iter()
             .find(|r| r.name == name)
             .ok_or(Error::Validation("field does not belong to FIX request"))?;
@@ -201,12 +205,12 @@ pub(super) fn validate_fields(
             .ok_or(Error::Configuration("FIX field definition"))?;
         validate_value(meta, &field.value, true)?;
         if let Value::Group(entries) = &field.value {
-            if rule.kind != "group" {
-                return Err(Error::Validation("unexpected FIX group"));
-            }
-            let children = dict.rules(&rule.children, true)?;
+            let children = rule
+                .group
+                .as_ref()
+                .ok_or(Error::Validation("unexpected FIX group"))?;
             for entry in entries {
-                validate_fields(dict, &children, entry)?;
+                validate_fields(dict, children, entry)?;
             }
         }
     }
@@ -313,12 +317,13 @@ fn validate_contract(kind: RequestKind, f: &Fields) -> Result<(), Error> {
                 ));
             }
         }
-        RequestKind::CancelOrder
+        RequestKind::CancelOrder => {
             if ["OrderID", "OrigClOrdID", "ListID", "OrigClListID"]
                 .iter()
-                .all(|n| f.get(n).is_none()) =>
-        {
-            return Err(Error::Validation("FIX cancel original identity required"));
+                .all(|n| f.get(n).is_none())
+            {
+                return Err(Error::Validation("FIX cancel original identity required"));
+            }
         }
         RequestKind::AmendKeepPriority => {
             positive(f, "OrderQty")?;
@@ -352,7 +357,7 @@ fn validate_contract(kind: RequestKind, f: &Fields) -> Result<(), Error> {
                 }
             }
         }
-        _ => (),
+        RequestKind::CancelAll | RequestKind::Limits | RequestKind::Instruments => (),
     }
     Ok(())
 }
@@ -400,11 +405,11 @@ pub(super) fn identities(fields: &Fields) -> BTreeMap<String, String> {
 }
 fn fields_wire(
     dict: &Dictionary,
-    rules: &[Node],
+    rules: &Rules,
     fields: &Fields,
     output: &mut Zeroizing<String>,
 ) -> Result<(), Error> {
-    for rule in rules {
+    for rule in &rules.entries {
         let Some(value) = fields.get(&rule.name) else {
             continue;
         };
@@ -419,9 +424,12 @@ fn fields_wire(
         output.push_str(&text);
         output.push('\x01');
         if let Value::Group(entries) = value {
-            let nested = dict.rules(&rule.children, true)?;
+            let nested = rule
+                .group
+                .as_ref()
+                .ok_or(Error::Configuration("FIX compiled group rule"))?;
             for e in entries {
-                fields_wire(dict, &nested, e, output)?;
+                fields_wire(dict, nested, e, output)?;
             }
         }
     }
@@ -446,12 +454,11 @@ pub(super) fn encode(
         return Err(Error::Validation("FIX target must be SPOT"));
     }
     let dict = dictionary(role)?;
-    let node = dict
+    let rules = dict
         .messages
         .get(kind)
         .ok_or(Error::Validation("unsupported outbound FIX message"))?;
-    let rules = dict.rules(&node.children, true)?;
-    validate_fields(dict, &rules, fields)?;
+    validate_fields(dict, rules, fields)?;
     let mut body = Zeroizing::new(format!(
         "35={kind}\x0134={}\x0149={}\x0152={}\x0156={}\x01",
         header.sequence,
@@ -463,7 +470,7 @@ pub(super) fn encode(
         write!(body, "25000={window}\x01")
             .map_err(|_| Error::Validation("FIX receive window encoding"))?;
     }
-    fields_wire(dict, &rules, fields, &mut body)?;
+    fields_wire(dict, rules, fields, &mut body)?;
     let mut output = Zeroizing::new(format!("8=FIX.4.4\x019={}\x01", body.len()).into_bytes());
     output.extend_from_slice(body.as_bytes());
     let checksum = output.iter().fold(0_u8, |sum, b| sum.wrapping_add(*b));

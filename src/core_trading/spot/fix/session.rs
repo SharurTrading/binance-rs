@@ -63,6 +63,10 @@ pub struct SendFailure {
     /// Typed admission, cancellation or transport cause.
     #[source]
     pub error: Error,
+    /// The exact consumed request when this attempt provably never reached a write.
+    /// Absent for an uncertain write or interrupted attribution; absence never
+    /// authorizes replay. Callers decide whether to submit a returned request again.
+    pub request: Option<Request>,
 }
 /// Native records and explicit boundaries from one FIX session.
 #[derive(Debug)]
@@ -283,26 +287,34 @@ impl Session {
     /// Retains IDs and `NotSent` versus `Unknown`/`ReadFailed` evidence in `SendFailure`.
     pub async fn send(&self, id: RequestId, request: Request) -> Result<Attempt, SendFailure> {
         let refused = attempt(self.generation, &id, &request, None, Outcome::NotSent);
-        let deadline = Instant::now()
-            .checked_add(self.timeout)
-            .ok_or_else(|| SendFailure {
-                attempt: refused.clone(),
-                error: Error::Validation("FIX deadline range"),
-            })?;
-        let (tx, rx) = oneshot::channel();
-        if self
-            .tx
-            .send(Command::Send {
-                id,
-                request,
-                deadline,
-                reply: tx,
-            })
-            .is_err()
-        {
+        let Some(deadline) = Instant::now().checked_add(self.timeout) else {
             return Err(SendFailure {
                 attempt: refused,
-                error: Error::Gap("FIX driver unavailable"),
+                error: Error::Validation("FIX deadline range"),
+                request: Some(request),
+            });
+        };
+        let (tx, rx) = oneshot::channel();
+        if let Err(failure) = self.tx.send(Command::Send {
+            id,
+            request,
+            deadline,
+            reply: tx,
+        }) {
+            return Err(match failure.0 {
+                Command::Send { request, .. } => SendFailure {
+                    attempt: refused,
+                    error: Error::Gap("FIX driver unavailable"),
+                    request: Some(request),
+                },
+                Command::SetExitReserve { .. } => SendFailure {
+                    attempt: Attempt {
+                        outcome: Outcome::Unknown,
+                        ..refused
+                    },
+                    error: Error::Configuration("FIX failed send command mismatch"),
+                    request: None,
+                },
             });
         }
         rx.await.map_err(|_| SendFailure {
@@ -311,6 +323,7 @@ impl Session {
                 ..refused
             },
             error: Error::Gap("FIX driver interrupted send attribution"),
+            request: None,
         })?
     }
     /// Replace this session's message reserve without sending a wire message.
@@ -733,6 +746,7 @@ impl SessionDriver {
                 let _ = reply.send(Err(SendFailure {
                     attempt: evidence,
                     error,
+                    request: Some(request),
                 }));
                 return Ok(());
             }
@@ -741,6 +755,15 @@ impl SessionDriver {
             let _ = reply.send(Err(SendFailure {
                 attempt: evidence,
                 error: Error::Gap("FIX queued request canceled or expired"),
+                request: Some(request),
+            }));
+            return Ok(());
+        }
+        if let Err(error) = self.reserve_subscription(&request) {
+            let _ = reply.send(Err(SendFailure {
+                attempt: evidence,
+                error,
+                request: Some(request),
             }));
             return Ok(());
         }
@@ -750,7 +773,6 @@ impl SessionDriver {
         } else {
             Outcome::ReadFailed
         };
-        self.reserve_subscription(&request)?;
         self.used.insert(id.as_str().into());
         self.attempts.insert(id.as_str().into(), evidence.clone());
         match self.write(&bytes, true).await {
@@ -763,6 +785,7 @@ impl SessionDriver {
                 let _ = reply.send(Err(SendFailure {
                     attempt: evidence,
                     error,
+                    request: None,
                 }));
                 Err(Error::Gap("FIX generation lost during a write"))
             }
@@ -791,8 +814,7 @@ impl SessionDriver {
         let header = self.header()?;
         let bytes = self.encode(request.kind.code(), &request.fields, &header)?;
         let count = request.order_count()?;
-        let mut messages = self.messages.clone();
-        messages.admit_reserved(
+        let message = self.messages.check_reserved(
             self.config.exit_reserve,
             matches!(
                 request.kind,
@@ -808,7 +830,7 @@ impl SessionDriver {
             },
             self.config.clock.now_millis()?,
         )?;
-        self.messages = messages;
+        message.commit();
         Ok((header, bytes))
     }
     fn subscription_admission(&self, request: &Request) -> Result<(), Error> {
@@ -992,6 +1014,7 @@ impl SessionDriver {
                     let _ = reply.send(Err(SendFailure {
                         attempt: attempt(self.generation, &id, &request, None, Outcome::NotSent),
                         error: Error::Gap("FIX generation retired before send"),
+                        request: Some(request),
                     }));
                 }
             }
@@ -1154,6 +1177,96 @@ mod tests {
             .unwrap()
             .build()
             .unwrap()
+    }
+
+    fn assert_recovered(failure: SendFailure, fields: *const super::super::Field) {
+        assert_eq!(failure.attempt.outcome, Outcome::NotSent);
+        assert_eq!(failure.attempt.sequence, None);
+        let request = failure.request.unwrap();
+        assert_eq!(request.fields().fields().as_ptr(), fields);
+        assert_eq!(request.identities(), failure.attempt.identities);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn unsent_refusals_return_the_owned_request_without_reconstruction() {
+        let (mut session, _events, mut driver, _peer) = setup();
+        let request = limits_request("unauthenticated");
+        let fields = request.fields().fields().as_ptr();
+        let mut send = Box::pin(session.send(RequestId::new("unauthenticated").unwrap(), request));
+        assert!(futures_util::poll!(send.as_mut()).is_pending());
+        let command = driver.commands.recv().await.unwrap();
+        driver.command(command).await.unwrap();
+        assert_recovered(send.await.unwrap_err(), fields);
+
+        driver.authenticated = true;
+        let request = limits_request("expired");
+        let fields = request.fields().fields().as_ptr();
+        let mut send = Box::pin(session.send(RequestId::new("expired").unwrap(), request));
+        assert!(futures_util::poll!(send.as_mut()).is_pending());
+        let mut command = driver.commands.recv().await.unwrap();
+        if let Command::Send { deadline, .. } = &mut command {
+            *deadline = Instant::now();
+        }
+        driver.command(command).await.unwrap();
+        assert_recovered(send.await.unwrap_err(), fields);
+
+        session.timeout = Duration::MAX;
+        let request = limits_request("deadline");
+        let fields = request.fields().fields().as_ptr();
+        assert_recovered(
+            session
+                .send(RequestId::new("deadline").unwrap(), request)
+                .await
+                .unwrap_err(),
+            fields,
+        );
+        session.timeout = Duration::from_secs(1);
+        drop(driver);
+        let request = limits_request("closed");
+        let fields = request.fields().fields().as_ptr();
+        assert_recovered(
+            session
+                .send(RequestId::new("closed").unwrap(), request)
+                .await
+                .unwrap_err(),
+            fields,
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn interrupted_attribution_and_failed_writes_never_return_a_retryable_request() {
+        let (session, _events, mut driver, peer) = setup();
+        let mut send =
+            Box::pin(session.send(RequestId::new("lost").unwrap(), limits_request("lost")));
+        assert!(futures_util::poll!(send.as_mut()).is_pending());
+        drop(driver.commands.recv().await.unwrap());
+        let failure = send.await.unwrap_err();
+        assert_eq!(failure.attempt.outcome, Outcome::Unknown);
+        assert!(failure.request.is_none());
+
+        driver.authenticated = true;
+        drop(peer);
+        let mut send =
+            Box::pin(session.send(RequestId::new("write").unwrap(), limits_request("write")));
+        assert!(futures_util::poll!(send.as_mut()).is_pending());
+        let command = driver.commands.recv().await.unwrap();
+        assert!(driver.command(command).await.is_err());
+        let failure = send.await.unwrap_err();
+        assert_eq!(failure.attempt.outcome, Outcome::ReadFailed);
+        assert_eq!(failure.attempt.sequence, Some(1));
+        assert!(failure.request.is_none());
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn retirement_returns_each_unwritten_request() {
+        let (session, _events, driver, _peer) = setup();
+        let request = limits_request("retired");
+        let fields = request.fields().fields().as_ptr();
+        let mut send = Box::pin(session.send(RequestId::new("retired").unwrap(), request));
+        assert!(futures_util::poll!(send.as_mut()).is_pending());
+        session.shutdown();
+        driver.run().await.unwrap();
+        assert_recovered(send.await.unwrap_err(), fields);
     }
 
     #[tokio::test(start_paused = true)]

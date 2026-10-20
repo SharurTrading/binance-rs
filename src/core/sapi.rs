@@ -413,14 +413,14 @@ impl Budgets {
                 retry_after: Duration::from_millis(until - now),
             });
         }
-        let mut windows = vec![(60_000, if cost.uid { 180_000 } else { 12_000 }, cost.weight)];
         // The bucket width is derived from the pinned unit of the provider's
         // annotation: `x-requests-per-second` is documented per second, so the
         // interval window is one 1000 ms bucket charging one request.
-        if let Some(limit) = cost.requests_per_second {
-            windows.push((1000, limit, 1));
-        }
-        for &(window, limit, amount) in &windows {
+        let windows = [
+            Some((60_000, if cost.uid { 180_000 } else { 12_000 }, cost.weight)),
+            cost.requests_per_second.map(|limit| (1000, limit, 1)),
+        ];
+        for &(window, limit, amount) in windows.iter().flatten() {
             let (bucket, count) = state
                 .endpoints
                 .get(&(cost.endpoint, window))
@@ -440,7 +440,7 @@ impl Budgets {
                 });
             }
         }
-        for (window, _, amount) in windows {
+        for (window, _, amount) in windows.into_iter().flatten() {
             let current = state.endpoints.entry((cost.endpoint, window)).or_default();
             if current.0 != now / window {
                 *current = (now / window, 0);

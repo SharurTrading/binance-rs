@@ -7,9 +7,10 @@ use super::{
     Config, ConnectionDriver,
     event_payloads::{MarketPayload, UserPayload, market_payload, user_payload},
 };
-use crate::core::control::{self, Membership};
-use crate::core::socket::{QueueStats, SocketEvents};
-use crate::core::{Socket, SocketEvent};
+use crate::core::SocketEvent;
+use crate::core::control::Membership;
+use crate::core::socket::QueueStats;
+use crate::core_trading::futures::streams::StreamSocket;
 use crate::{Error, SensitiveString};
 use tokio::time::Instant;
 
@@ -73,11 +74,8 @@ fn names(streams: &[Stream]) -> Vec<&str> {
 
 /// Lossless, single-consumer ingress for one routed socket generation.
 pub struct Streams {
-    socket: Socket,
-    events: SocketEvents,
-    membership: Membership,
+    inner: StreamSocket,
     route: Route,
-    private: bool,
 }
 impl Streams {
     /// Connect one routed market socket without spawning a task.
@@ -109,36 +107,8 @@ impl Streams {
             url.query_pairs_mut()
                 .append_pair("streams", &names(streams).join("/"));
         }
-        let (socket, events, driver) = Socket::connect_with_policy(
-            url,
-            None,
-            config.clock,
-            config.budgets,
-            config.timeout,
-            crate::core::socket::SocketPolicy {
-                handshake: crate::core::Cost::default(),
-                // Pongs and stream control messages share the connection's
-                // documented budget: "WebSocket connections have a limit of 10
-                // incoming messages per second" (USDⓈ-M WebSocket Market
-                // Streams, Connect; verified 2026-10-10).
-                incoming_limit: 10,
-                time_unit: crate::core::TimeUnit::Milliseconds,
-                binary_decoder: None,
-                api_key_header: false,
-                max_generation_age: Some(std::time::Duration::from_hours(24)),
-            },
-        )
-        .await?;
-        Ok((
-            Self {
-                socket,
-                events,
-                membership,
-                route,
-                private: false,
-            },
-            ConnectionDriver { inner: driver },
-        ))
+        let (inner, driver) = StreamSocket::connect(config, url, Some(membership)).await?;
+        Ok((Self { inner, route }, ConnectionDriver { inner: driver }))
     }
     /// Connect one user-data listen key through the private route.
     /// The caller renews the listen key through the documented REST/WS operation;
@@ -159,33 +129,11 @@ impl Streams {
             .map_err(|()| Error::Configuration("private stream URL"))?
             .pop_if_empty()
             .push(listen_key.as_str());
-        let (socket, events, driver) = Socket::connect_with_policy(
-            url,
-            None,
-            config.clock,
-            config.budgets,
-            config.timeout,
-            crate::core::socket::SocketPolicy {
-                handshake: crate::core::Cost::default(),
-                // Same documented raw-stream connection duty cycle as the
-                // market route: 10 venue-incoming messages per second bound the
-                // pong stream this driver emits (USDⓈ-M WebSocket Market
-                // Streams, Connect; verified 2026-10-03).
-                incoming_limit: 10,
-                time_unit: crate::core::TimeUnit::Milliseconds,
-                binary_decoder: None,
-                api_key_header: false,
-                max_generation_age: Some(std::time::Duration::from_hours(24)),
-            },
-        )
-        .await?;
+        let (inner, driver) = StreamSocket::connect(config, url, None).await?;
         Ok((
             Self {
-                socket,
-                events,
-                membership: Membership::default(),
+                inner,
                 route: Route::Private,
-                private: true,
             },
             ConnectionDriver { inner: driver },
         ))
@@ -193,28 +141,39 @@ impl Streams {
     /// Next source-ordered data/lifecycle event. Backlog never discards a fact.
     /// Malformed known execution data emits a gap and retires the transport.
     pub async fn recv(&mut self) -> Option<StreamEvent> {
-        Some(match self.events.recv().await? {
+        Some(match self.inner.events.recv().await? {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
-            SocketEvent::Data { generation, value } => {
-                let decoded = if self.private {
+            SocketEvent::NativeBinary { generation, .. } => {
+                self.inner.events.stop();
+                StreamEvent::Gap {
+                    generation,
+                    error: Error::Configuration("unexpected native binary socket payload"),
+                }
+            }
+            SocketEvent::Data {
+                generation,
+                mut value,
+            } => {
+                let decoded = if self.inner.private {
                     user_payload(value).map(StreamPayload::User)
                 } else {
                     let name = value.get("stream").and_then(serde_json::Value::as_str);
-                    let kind = name.and_then(|name| self.membership.kind(name));
-                    match (name, kind, value.get("data")) {
-                        (Some(name), Some(kind), Some(data)) => market_payload(kind, data.clone())
+                    let kind = name.and_then(|name| self.inner.membership.kind(name));
+                    let name = name.map(str::to_owned);
+                    match (name, kind, value.get_mut("data")) {
+                        (Some(name), Some(kind), Some(data)) => market_payload(kind, data.take())
                             .map(|payload| StreamPayload::Market {
-                                stream: name.to_owned(),
+                                stream: name,
                                 payload,
                             }),
                         // A stream name this build did not subscribe or model is
                         // retained evidence on a live socket, not a continuity
                         // break; only a malformed envelope of a known kind gaps.
                         (Some(name), None, Some(data)) => Ok(StreamPayload::Market {
-                            stream: name.to_owned(),
-                            payload: MarketPayload::Unknown(data.clone().into()),
+                            stream: name,
+                            payload: MarketPayload::Unknown(data.take().into()),
                         }),
                         _ => Err(Error::Gap("unexpected combined stream envelope")),
                     }
@@ -225,7 +184,7 @@ impl Streams {
                         payload,
                     },
                     Err(error) => {
-                        self.events.stop();
+                        self.inner.events.stop();
                         StreamEvent::Gap { generation, error }
                     }
                 }
@@ -264,17 +223,11 @@ impl Streams {
     /// [`Error::ControlRefused`] carries the venue's code when it refuses. A lost
     /// answer is [`crate::Outcome::Unknown`]; ask [`Streams::list_subscriptions`].
     pub async fn subscribe(&mut self, streams: &[Stream], deadline: Instant) -> Result<(), Error> {
-        self.market_socket()?;
+        self.inner.market_socket()?;
         if streams.iter().any(|s| s.route != self.route) {
             return Err(Error::Validation("stream belongs to another route"));
         }
-        control::subscribe(
-            &self.socket,
-            &mut self.membership,
-            &pairs(streams),
-            deadline,
-        )
-        .await
+        self.inner.subscribe(&pairs(streams), deadline).await
     }
 
     /// Remove `streams` from this open socket with one `UNSUBSCRIBE` control message.
@@ -294,14 +247,7 @@ impl Streams {
         streams: &[Stream],
         deadline: Instant,
     ) -> Result<(), Error> {
-        self.market_socket()?;
-        control::unsubscribe(
-            &self.socket,
-            &mut self.membership,
-            &names(streams),
-            deadline,
-        )
-        .await
+        self.inner.unsubscribe(&names(streams), deadline).await
     }
 
     /// The venue's own list of this socket's subscriptions, from `LIST_SUBSCRIPTIONS`.
@@ -313,8 +259,7 @@ impl Streams {
     /// [`Error::ControlRefused`] carries the venue's code when it refuses; a lost
     /// answer is [`crate::Outcome::ReadFailed`].
     pub async fn list_subscriptions(&self, deadline: Instant) -> Result<Vec<String>, Error> {
-        self.market_socket()?;
-        control::list(&self.socket, deadline).await
+        self.inner.list(deadline).await
     }
 
     /// Request retirement, drain through `Retired`, and join the caller-owned driver.
@@ -322,28 +267,20 @@ impl Streams {
     /// # Errors
     /// Returns `Closed` if the driver already retired.
     pub async fn close(&self) -> Result<(), Error> {
-        self.socket.close().await
-    }
-    fn market_socket(&self) -> Result<(), Error> {
-        if self.private {
-            return Err(Error::Validation(
-                "user-data socket has no stream membership",
-            ));
-        }
-        Ok(())
+        self.inner.socket.close().await
     }
 
     /// Immutable source generation.
     #[must_use]
     pub fn generation(&self) -> u64 {
-        self.socket.generation()
+        self.inner.socket.generation()
     }
     /// Ingress backlog diagnostics.
     ///
     /// # Errors
     /// Returns a synchronization error if the metrics owner failed.
     pub fn queue_stats(&self) -> Result<QueueStats, Error> {
-        self.socket.stats()
+        self.inner.socket.stats()
     }
 }
 

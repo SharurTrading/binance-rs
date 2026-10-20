@@ -355,7 +355,7 @@ async fn uncertain_limit_cancellation_retains_native_order_identity() {
         .unwrap();
     let client = convert::RestClient::new(owner).unwrap();
     let request = convert::rest_requests::CancelLimitOrder::new()
-        .order_id(convert::OrderId::new(123).unwrap())
+        .order_id(convert::OrderId::new(123))
         .build()
         .unwrap();
     let error = client
@@ -386,7 +386,7 @@ async fn cancel_limit_order_uses_reserved_uid_weight_without_exceeding_venue_lim
     let owner = config().rest_url(&fixture.url).unwrap();
     let client = convert::RestClient::new(owner.clone()).unwrap();
     let cancel = convert::rest_requests::CancelLimitOrder::new()
-        .order_id(convert::OrderId::new(123).unwrap())
+        .order_id(convert::OrderId::new(123))
         .build()
         .unwrap();
 
@@ -445,7 +445,7 @@ async fn reserved_cancel_obeys_provider_cooldown_without_retry() {
         .unwrap();
     let client = convert::RestClient::new(owner).unwrap();
     let cancel = convert::rest_requests::CancelLimitOrder::new()
-        .order_id(convert::OrderId::new(123).unwrap())
+        .order_id(convert::OrderId::new(123))
         .build()
         .unwrap();
 

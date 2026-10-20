@@ -9,11 +9,7 @@
 //! checked 2026-10-11). The release is the caller's decision; a known `Retry-After`
 //! cooldown is the venue's and still holds.
 
-#![allow(
-    clippy::unwrap_used,
-    clippy::panic,
-    reason = "synthetic fixture assertions"
-)]
+#![allow(clippy::unwrap_used, reason = "synthetic fixture assertions")]
 
 #[allow(
     dead_code,

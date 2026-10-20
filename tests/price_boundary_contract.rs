@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 //! Caller prices retain their signs; venue filters own admission of price values.
-#![allow(
-    clippy::unwrap_used,
-    clippy::panic,
-    reason = "synthetic protocol assertions"
-)]
+#![allow(clippy::unwrap_used, reason = "synthetic protocol assertions")]
 use binance_client::{ClientOrderId, Decimal, Symbol, coinm, margin, options, spot, usdm};
 use serde::Serialize;
 

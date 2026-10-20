@@ -71,44 +71,20 @@ pub(crate) fn validate(op: &str, p: &Parameters) -> Result<(), Error> {
     }
     Ok(())
 }
-pub(crate) fn validate_time(p: &Parameters, _now: u64) -> Result<(), Error> {
-    crate::core::validate_parameters(p, &[], &[], &[])
-}
+pub(crate) use crate::advanced_trading::validation::validate_time;
 
 // Product-local validation/authentication refusals; unknown and 5xx remain ambiguous.
 pub(crate) fn definitive(status: u16, value: &serde_json::Value) -> bool {
-    status < 500
-        && (value.get("status").and_then(serde_json::Value::as_str) == Some("F")
-            || value
-                .get("code")
-                .and_then(serde_json::Value::as_i64)
-                .is_some_and(|code| {
-                    matches!(
-                        code,
-                        -26004
-                            | 486_405
-                            | 486_410
-                            | -2015
-                            | -2014
-                            | -1131
-                            | -1130
-                            | -1128
-                            | -1127
-                            | -1121
-                            | -1111
-                            | -1106
-                            | -1105
-                            | -1104
-                            | -1103
-                            | -1102
-                            | -1101
-                            | -1100
-                            | -1022
-                            | -1021
-                            | -1020
-                            | -1002
-                    )
-                }))
+    // Native refusal codes pinned in schema/stocks-error-codes.json.
+    (status < 500 && value.get("status").and_then(serde_json::Value::as_str) == Some("F"))
+        || crate::advanced_trading::validation::definitive(
+            status,
+            value,
+            &[
+                -2015, -2014, -1131, -1130, -1128, -1127, -1121, -1111, -1106, -1105, -1104, -1103,
+                -1102, -1101, -1100, -1022, -1021, -1020, -1002, -26004, 486_405, 486_410,
+            ],
+        )
 }
 
 pub(crate) fn response_failed(op: &str, value: &serde_json::Value) -> bool {

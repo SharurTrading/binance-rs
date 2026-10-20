@@ -6,6 +6,8 @@
 //! attempt; cancellation or timeout does not prove venue cancellation. Resolve
 //! uncertain orders and transactions through the corresponding venue reads.
 //! Clients share explicit IP/account budgets and never start a runtime or task.
+//! Wallet, Convert and Margin use the same SAPI [`Config`]. Before placing orders,
+//! install native account quota evidence through [`RestClient::observe_order_limits`].
 mod identity;
 pub use identity::{
     ClientOrderId, OrderId, OrderListId, OrderListKind, OrderListKindError, PreventedMatchId,
@@ -36,7 +38,6 @@ impl RestClient {
     /// # Errors
     /// Returns typed transport configuration errors.
     pub fn new(config: Config) -> Result<Self, crate::Error> {
-        let config = config.inner;
         Ok(Self {
             budgets: config.budgets.clone(),
             clock: config.clock.clone(),

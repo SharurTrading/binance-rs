@@ -5,16 +5,13 @@
 //! Source (checked 2026-10-11):
 //! <https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general>.
 
-#![allow(
-    clippy::unwrap_used,
-    clippy::panic,
-    reason = "synthetic fixture assertions"
-)]
+#![allow(clippy::unwrap_used, reason = "synthetic fixture assertions")]
 
 #[allow(dead_code, reason = "shared synthetic fixture helpers")]
 mod support;
+use support::FixedClock;
 
-use binance_client::{Clock, Error, LimitSource, Outcome, RequestId, WeightPools, spot};
+use binance_client::{Error, LimitSource, Outcome, RequestId, WeightPools, spot};
 use futures_util::{SinkExt, StreamExt};
 use serde_json::{Value, json};
 use std::{sync::Arc, time::Duration};
@@ -22,13 +19,6 @@ use tokio::{net::TcpListener, task::JoinHandle};
 use tokio_websockets::{Limits, Message, ServerBuilder};
 
 const START: u64 = 1_700_000_100_000;
-
-struct FixedClock;
-impl Clock for FixedClock {
-    fn now_millis(&self) -> Result<u64, Error> {
-        Ok(START)
-    }
-}
 
 async fn exchange_server(results: Vec<Value>) -> (String, JoinHandle<usize>) {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -69,7 +59,7 @@ async fn exchange_server(results: Vec<Value>) -> (String, JoinHandle<usize>) {
 fn config(pools: &WeightPools) -> spot::Config {
     spot::Config::with_pools(spot::Environment::Demo, pools)
         .unwrap()
-        .clock(Arc::new(FixedClock))
+        .clock(Arc::new(FixedClock(START)))
 }
 
 #[tokio::test]

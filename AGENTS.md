@@ -154,7 +154,8 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
   re-exports. Add a crate only for an actual directed dependency boundary.
 - Use Rust 2024 and the pinned toolchain. Deny Clippy pedantic warnings; any lint
   exception is narrow and includes a reason. Never weaken gates to make a change pass.
-- **BN-IDIOMS-01:** New and changed Rust code follows the
+- **BN-IDIOMS-01:** This copy of the guide governs `binance-client`; its review
+  obligation is carried by this rule. New and changed Rust code follows the
   [Rust idioms and patterns review guide](docs/rust-idioms-and-patterns-review.md),
   and review findings cite its check IDs. A reviewer names every pre-existing
   anti-pattern or non-idiomatic idiom the change exposes — inline where it is in
@@ -173,6 +174,9 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
   and the license text are exceptions. Never copy proprietary platform material.
 
 ## Contribution and review procedure
+
+This repository uses `[BLOCKER]`, `[MAJOR]` and `[MINOR]` review findings; read
+FINDING in the Rust idioms guide as MAJOR and NIT as MINOR.
 
 - **BN-REVIEW-01:** After the initial repository bootstrap, all changes land through
   pull requests into `main`. No force pushes to protected branches. The operator

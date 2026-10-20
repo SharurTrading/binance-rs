@@ -5866,7 +5866,11 @@
                         ]
                       }
                     ],
-                    "x-order-list-discriminator": true
+                    "x-order-list-discriminator": true,
+                    "x-variant-names": [
+                      "Order",
+                      "OrderList"
+                    ]
                   },
                   "rateLimits": {
                     "type": "array",

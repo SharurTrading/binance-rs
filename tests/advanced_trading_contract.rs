@@ -124,7 +124,7 @@ async fn copy_trading_read_uses_its_native_signed_sapi_route() {
 #[test]
 fn portfolio_balances_keep_native_asset_and_product_components() {
     let data: portfolio_margin::rest_models::AccountBalanceResponse = serde_json::from_str(r#"[{"asset":"BTC","totalWalletBalance":"0.123456789123456789","crossMarginAsset":"0.1","crossMarginBorrowed":"0","crossMarginFree":"0.1","crossMarginInterest":"0","crossMarginLocked":"0","umWalletBalance":"0","umUnrealizedPNL":"0","cmWalletBalance":"0.023456789123456789","cmUnrealizedPNL":"","negativeBalance":"0"}]"#).unwrap();
-    let portfolio_margin::rest_models::AccountBalanceResponse::Variant1(data) = data else {
+    let portfolio_margin::rest_models::AccountBalanceResponse::Multiple(data) = data else {
         panic!("native balance array")
     };
     assert_eq!(data[0].asset.as_str(), "BTC");

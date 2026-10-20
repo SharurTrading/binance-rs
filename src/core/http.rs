@@ -6,7 +6,7 @@ use super::{
     Response, ResponseMeta, Security, TransportFailure, request,
 };
 use serde::de::DeserializeOwned;
-use std::{sync::Arc, time::Duration};
+use std::{borrow::Borrow, collections::BTreeMap, sync::Arc, time::Duration};
 use tokio::time::Instant;
 type BinaryDecoder = fn(&[u8]) -> Result<serde_json::Value, Error>;
 
@@ -125,12 +125,12 @@ impl HttpClient {
         &self,
         op: Operation,
         request: &R,
+        params: &mut BTreeMap<String, serde_json::Value>,
         deadline: Instant,
     ) -> Result<reqwest::Request, Error> {
-        let mut params = request::parameters(request)?;
         let timestamp = self.clock.now_millis()?;
-        (op.validate_time)(&params, timestamp)?;
-        request.validate_authority(timestamp)?;
+        (op.validate_time)(params, timestamp)?;
+        request.validate_authority_with_parameters(params, timestamp)?;
         if Instant::now() >= deadline {
             return Err(Error::Expired(op.name));
         }
@@ -148,24 +148,18 @@ impl HttpClient {
                 "timestamp".into(),
                 self.time_unit.timestamp(self.clock.as_ref())?.into(),
             );
-            let payload = request::encode(&params)?;
-            let signature = credentials
-                .ok_or(Error::CredentialsRequired)?
-                .sign(&payload)?;
-            params.insert("signature".into(), signature.into());
         }
         let mut url = self.base.clone();
         url.set_path(op.path);
-        let query = request::encode(&params)?;
-        // Signature is required last, regardless of alphabetical parameter ordering.
-        let query = if let Some(signature) = params.get("signature").cloned() {
-            params.remove("signature");
-            let mut query = request::encode(&params)?;
-            let mut form = url::form_urlencoded::Serializer::new(String::new());
-            form.append_pair("signature", signature.as_str().ok_or(Error::Signing)?);
-            query.push('&');
-            query.push_str(&form.finish());
-            query
+        let query = request::encode(params)?;
+        // Append to the exact buffer the signer saw; signature must be last.
+        let query = if op.security == Security::Signed {
+            let signature = credentials
+                .ok_or(Error::CredentialsRequired)?
+                .sign(&query)?;
+            let mut form = url::form_urlencoded::Serializer::new(query);
+            form.append_pair("signature", &signature);
+            form.finish()
         } else {
             query
         };
@@ -220,16 +214,17 @@ impl HttpClient {
         deadline: Instant,
         admission: Admission,
     ) -> Result<Response<R::Response>, Error> {
-        request.validate()?;
-        let client_order_ids = request::order_ids(&request::parameters(request)?);
+        let mut params = request::parameters(request)?;
+        request.validate_with_parameters(&params)?;
+        let client_order_ids = request::order_ids(&params);
         let op = R::OP;
-        let wire = self.prepare(op, request, deadline)?;
+        let wire = self.prepare(op, request, &mut params, deadline)?;
         let now = self.clock.now_millis()?;
-        let cost = admission.applied(request.cost()?);
+        let cost = admission.applied(request.cost_with_parameters(&params)?);
         self.budgets.admit(cost, now)?;
         let authority_time = self.clock.now_millis()?;
-        (op.validate_time)(&request::parameters(request)?, authority_time)?;
-        request.validate_authority(authority_time)?;
+        (op.validate_time)(&params, authority_time)?;
+        request.validate_authority_with_parameters(&params, authority_time)?;
         if Instant::now() >= deadline {
             return Err(Error::Expired(op.name));
         }
@@ -361,7 +356,7 @@ impl HttpClient {
         observed_at: u64,
     ) -> Result<Response<T>, Error> {
         if op.path == "/papi/v1/rateLimit/order" && (200..300).contains(&status) {
-            let mut response: Response<T> = decode(op, status, value.clone(), meta)?;
+            let mut response: Response<T> = decode(op, status, &value, meta)?;
             if self.budgets.adopt_portfolio_order_limits(&value).is_err() {
                 response.meta.rates.stated_limits_unusable = true;
                 return Err(transport_after_response(
@@ -373,7 +368,7 @@ impl HttpClient {
             return Ok(response);
         }
         if op.path == "/api/v3/rateLimit/order" && (200..300).contains(&status) {
-            let mut response: Response<T> = decode(op, status, value.clone(), meta)?;
+            let mut response: Response<T> = decode(op, status, &value, meta)?;
             let mut query_rates = RateEvidence::default();
             let adoption =
                 super::socket::order_query_rates(&value, &mut query_rates).and_then(|()| {
@@ -450,22 +445,25 @@ fn transport_after_response(
     }
 }
 
-pub(crate) fn decode<T: DeserializeOwned>(
+pub(crate) fn decode<'de, T: DeserializeOwned>(
     op: Operation,
     status: u16,
-    value: serde_json::Value,
+    value: impl Borrow<serde_json::Value> + serde::Deserializer<'de, Error = serde_json::Error>,
     meta: ResponseMeta,
 ) -> Result<Response<T>, Error> {
     if !(200..300).contains(&status)
         || value
+            .borrow()
             .get("code")
             .and_then(serde_json::Value::as_i64)
             .is_some_and(|v| v < 0)
     {
-        return Err(super::error::failure_for(op, status, &value, meta.rates)
-            .with_order_ids(meta.client_order_ids));
+        return Err(
+            super::error::failure_for(op, status, value.borrow(), meta.rates)
+                .with_order_ids(meta.client_order_ids),
+        );
     }
-    let data = serde_json::from_value(value).map_err(|_| {
+    let data = T::deserialize(value).map_err(|_| {
         let outcome = if op.mutation {
             Outcome::Unknown
         } else {
@@ -504,3 +502,7 @@ fn header_rates(headers: &reqwest::header::HeaderMap) -> RateEvidence {
     }
     evidence
 }
+
+#[cfg(test)]
+#[path = "http_tests.rs"]
+mod tests;

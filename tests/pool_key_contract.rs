@@ -23,13 +23,9 @@ use binance_client::{
 };
 use std::{collections::BTreeMap, sync::Arc};
 
-struct FixedClock;
-
-impl Clock for FixedClock {
-    fn now_millis(&self) -> Result<u64, Error> {
-        Ok(1_700_000_040_000)
-    }
-}
+#[allow(dead_code, reason = "shared synthetic fixture helpers")]
+mod support;
+use support::FixedClock;
 
 fn key(pool: VenuePool, environment: PoolEnvironment) -> PoolKey {
     PoolKey::new(pool, environment)
@@ -233,7 +229,7 @@ fn an_explicit_budget_owner_reports_no_pool() {
 #[test]
 fn pool_usage_names_the_same_pool_as_its_configuration_and_client() {
     let pools = WeightPools::new();
-    let clock: Arc<dyn Clock> = Arc::new(FixedClock);
+    let clock: Arc<dyn Clock> = Arc::new(FixedClock(1_700_000_040_000));
     let spot = spot::Config::with_pools(spot::Environment::Demo, &pools)
         .unwrap()
         .clock(clock.clone());

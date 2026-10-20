@@ -70,8 +70,9 @@ admission evidence and never become wire parameters. Symbol queries charge 10
 and require no count authority. Leverage adjustment
 also enforces its independent **one request/minute/IP** cap. Placements require
 explicit native account order authority from `query_current_margin_order_count_usage`.
-Apply the complete response with `Config::order_limits` or
-`RestClient::observe_order_limits`; reads remain available before configuration.
+Apply the complete response with `RestClient::observe_order_limits`; reads remain
+available before installing evidence. Margin uses the shared SAPI `Config` shape
+alongside Wallet and Convert; native order evidence stays on the Margin client.
 Every attempt reserves 1/2/2/3 orders for single/OCO/OTO/OTOCO placements. Unknown
 quota types/intervals fail before changing accepted authority. Order windows and
 reported count floors are shared by the account owner, independently of SAPI

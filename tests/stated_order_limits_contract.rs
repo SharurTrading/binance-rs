@@ -12,11 +12,7 @@
 //! 50 per ten seconds, and live production stated 100 on 2026-10-11. Each test
 //! builds its own registry.
 
-#![allow(
-    clippy::unwrap_used,
-    clippy::panic,
-    reason = "synthetic fixture assertions"
-)]
+#![allow(clippy::unwrap_used, reason = "synthetic fixture assertions")]
 
 #[allow(
     dead_code,

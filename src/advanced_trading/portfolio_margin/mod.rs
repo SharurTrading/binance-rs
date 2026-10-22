@@ -13,6 +13,6 @@ pub mod stream_models;
 pub(super) mod validation;
 mod wire;
 
-pub use client::{Config, Protocol, RestClient, Stream, Streams};
 /// Caller-provided current exchange symbol-count authority for all-symbol reads.
 pub use crate::core_trading::margin::TradingSymbolCount;
+pub use client::{Config, Protocol, RestClient, Stream, Streams};

@@ -47,7 +47,7 @@ pub mod rest_requests;
 mod validation;
 mod wire;
 
+pub use crate::core::sapi::Config;
 pub use balance::{ConvertibleDust, DustConversion, QuotedWalletBalance};
 pub use client::RestClient;
-pub use crate::core::sapi::Config;
 pub use identity::{DepositIds, DustAssets, Network, WithdrawalId};

@@ -28,8 +28,8 @@ pub mod wire;
 pub mod ws_models;
 pub mod ws_requests;
 
+pub use crate::core::socket::QueueStats;
 pub use client::RestClient;
 pub use config::{Config, Environment, Protocol};
-pub use crate::core::socket::QueueStats;
 pub use streams::{Route, Stream, StreamEvent, Streams};
 pub use websocket::{ApiEvent, ApiEvents, ConnectionDriver, WsClient};

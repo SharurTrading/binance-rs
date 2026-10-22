@@ -14,6 +14,6 @@ mod stream_names;
 pub(super) mod validation;
 mod wire;
 
-pub use client::{Config, Protocol, RestClient, Stream, Streams};
 /// Exact native depth levels and Alpha's twelve-column klines.
 pub use super::wire::{Kline, PriceLevel};
+pub use client::{Config, Protocol, RestClient, Stream, Streams};

@@ -22,9 +22,9 @@ pub mod streams;
 mod validation;
 pub mod wire;
 
+pub use crate::core::socket::QueueStats;
 pub use client::RestClient;
 pub use config::{Config, Environment};
-pub use crate::core::socket::QueueStats;
 pub use identity::{
     BlockOrderMatchingKey, BlockTradeSettlementKey, ClientOrderId, OrderId, RecordId, Symbol,
     TradeId,

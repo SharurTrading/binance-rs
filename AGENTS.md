@@ -141,6 +141,13 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
 
 ## Rust coding standards
 
+- **STYLE-MOD-DECLS** — `mod.rs` contains only the copyright header, module
+  documentation and attributes, out-of-line module declarations, and re-exports.
+  Type definitions, functions, `impl` blocks, constants, statics, macro definitions
+  and test bodies belong in focused sibling files. Enforce this for new modules
+  and `mod.rs` files changed by the task; do not launch an unrelated repository-wide
+  cleanup. If you touch a mod that has not enforced this yet, it is your duty to
+  enforce it at the time of implementation.
 - Document public APIs, error conditions, cancellation, ordering, ownership, and
   partial-response semantics. Use typed `thiserror` errors at library boundaries.
 - Validate provider identities in newtypes with private fields. Public enums and

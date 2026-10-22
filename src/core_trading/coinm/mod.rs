@@ -11,6 +11,7 @@
 //! the process's IP weight pool for that environment. WebSocket drivers run on
 //! caller-owned tasks.
 
+mod client;
 mod config;
 pub mod enums;
 pub mod event_payloads;
@@ -27,10 +28,8 @@ pub mod wire;
 pub mod ws_models;
 pub mod ws_requests;
 
-pub use crate::core::socket::QueueStats;
+pub use client::RestClient;
 pub use config::{Config, Environment, Protocol};
+pub use crate::core::socket::QueueStats;
 pub use streams::{Route, Stream, StreamEvent, Streams};
 pub use websocket::{ApiEvent, ApiEvents, ConnectionDriver, WsClient};
-
-/// Cloneable REST client sharing native transport pools and venue budgets.
-pub type RestClient = super::futures::RestClient<Protocol>;

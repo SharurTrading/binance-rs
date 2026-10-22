@@ -65,6 +65,13 @@ Spot and COIN-M are later products; never claim coverage from scaffold CI alone.
 - **BN-RUNTIME-01:** The caller owns the async runtime. No hidden runtime, blocking
   executor work, or synchronization guard across `.await`. Every task has a named
   owner, cancellation, and joined teardown. Dropping a task handle is not shutdown.
+- **STYLE-MOD-DECLS:** `mod.rs` contains only the copyright header, module
+  documentation and attributes, out-of-line module declarations, and re-exports.
+  Type definitions, functions, `impl` blocks, constants, statics, macro definitions
+  and test bodies belong in focused sibling files. Enforce this for new modules
+  and `mod.rs` files changed by the task; do not launch an unrelated repository-wide
+  cleanup. If you touch a mod that has not enforced this yet, it is your duty to
+  enforce it at the time of implementation.
 - **BN-ORDER-01:** Callers supply client order IDs; preserve them across acknowledgments,
   queries, errors, and late replies. Never auto-retry a money-moving mutation,
   including after response-body failure, timeout, disconnect, decode failure, or a

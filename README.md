@@ -160,7 +160,9 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
 ## Execution and ownership
 
 - Every operation requires a caller deadline. Validation, credentials, budget, and
-  unsent expiration failures return `Outcome::NotSent`.
+  unsent expiration failures return `Outcome::NotSent`. REST response headers and
+  body share the earlier of that absolute deadline and the configured per-attempt
+  transport timeout; receiving headers never renews the response budget.
 - Mutations are attempted once. Timeout, disconnect, malformed/truncated replies,
   and unknown future errors remain `Outcome::Unknown` unless documented evidence
   proves rejection. Query venue truth; a timeout does not cancel an order.

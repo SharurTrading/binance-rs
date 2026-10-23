@@ -3,7 +3,8 @@
 
 use super::{
     Budgets, Clock, Cost, Credentials, Error, ExitRead, Operation, Outcome, RateEvidence,
-    RecoveryRead, Request, Response, ResponseMeta, Security, TransportFailure, request,
+    ReadStreamControl, RecoveryRead, Request, Response, ResponseMeta, Security, TransportFailure,
+    request,
 };
 use serde::de::DeserializeOwned;
 use std::{borrow::Borrow, collections::BTreeMap, sync::Arc, time::Duration};
@@ -220,6 +221,16 @@ impl HttpClient {
         self.send(request, deadline, Admission::RecoveryRead).await
     }
 
+    /// Send an explicitly selected account-event stream lifecycle control.
+    pub async fn execute_read_stream_control<R: ReadStreamControl>(
+        &self,
+        request: &R,
+        deadline: Instant,
+    ) -> Result<Response<R::Response>, Error> {
+        self.send(request, deadline, Admission::ReadStreamControl)
+            .await
+    }
+
     async fn send<R: Request>(
         &self,
         request: &R,
@@ -283,16 +294,13 @@ impl HttpClient {
             operation: op.name,
             rates,
         };
-        // A clock failure after complete response headers must not cost the venue's
-        // answer, so the earlier reading of this same attempt is reused. It is a real
-        // local reading, never an invented epoch, and it only ever ages a counter
-        // bucket by the elapsed request time.
-        let observed_at = self.clock.now_millis().unwrap_or(now);
-        self.budgets
-            .observe_cost(cost, &meta.rates, observed_at, status)
-            .map_err(|_| {
-                transport_after_response(&meta, outcome, TransportFailure::RateEvidenceFailed)
-            })?;
+        let observed_at = crate::core::response_rates::observe(
+            &self.budgets,
+            self.clock.as_ref(),
+            &meta,
+            outcome,
+            crate::core::response_rates::Transport::Http(cost),
+        )?;
         let body = tokio::time::timeout_at(attempt_deadline, response.bytes())
             .await
             .map_err(|_| {
@@ -431,13 +439,15 @@ enum Admission {
     ExitRead,
     /// From reserved capacity: an explicitly selected account-recovery read.
     RecoveryRead,
+    /// From reserved capacity: a sealed nonfinancial stream lifecycle control.
+    ReadStreamControl,
 }
 
 impl Admission {
     fn applied(self, cost: Cost) -> Cost {
         match self {
             Self::Priced => cost,
-            Self::ExitRead | Self::RecoveryRead => Cost {
+            Self::ExitRead | Self::RecoveryRead | Self::ReadStreamControl => Cost {
                 exit: super::rate::reserve::ExitEligibility::Eligible,
                 ..cost
             },
@@ -445,7 +455,23 @@ impl Admission {
     }
 }
 
-fn transport_after_response(
+/// Preserve received response evidence when a decoded limit statement is unusable.
+pub(crate) fn with_stated_limit_evidence<T>(
+    mut response: Response<T>,
+    adoption: Result<(), Error>,
+) -> Result<Response<T>, Error> {
+    adoption.map_err(|_| {
+        response.meta.rates.stated_limits_unusable = true;
+        transport_after_response(
+            &response.meta,
+            Outcome::ReadFailed,
+            TransportFailure::RateEvidenceFailed,
+        )
+    })?;
+    Ok(response)
+}
+
+pub(crate) fn transport_after_response(
     meta: &ResponseMeta,
     outcome: Outcome,
     failure: TransportFailure,

@@ -8,8 +8,10 @@ pub(crate) mod http;
 mod identity;
 pub(crate) mod rate;
 pub(crate) mod request;
+mod response_rates;
 pub(crate) mod sapi;
 pub(crate) mod socket;
+mod socket_handshake;
 mod time;
 mod venue_message;
 pub(crate) mod wire;
@@ -27,7 +29,7 @@ pub use rate::{
     PoolKey, PoolUsage, VenuePool, WeightPools, WindowUsage,
 };
 pub(crate) use rate::{Cost, StatedLimit};
-pub(crate) use request::{ExitRead, Operation, RecoveryRead, Request, Security};
+pub(crate) use request::{ExitRead, Operation, ReadStreamControl, RecoveryRead, Request, Security};
 pub(crate) use request::{parameters, validate_parameters};
 pub(crate) use socket::{Socket, SocketEvent};
 pub(crate) use time::validate_url;

@@ -194,7 +194,8 @@ async fn a_stated_limit_applies_to_keyed_and_fresh_owners_drawn_before_or_after_
 }
 
 #[tokio::test]
-async fn a_stated_order_limit_without_a_positive_limit_is_a_gap_and_keeps_the_previous_limit() {
+async fn a_stated_order_limit_without_a_positive_limit_fails_with_evidence_and_keeps_the_previous_limit()
+ {
     for invalid in [json!(0), json!(-1), Value::Null] {
         let pools = WeightPools::new();
         let clock = clock();
@@ -222,7 +223,12 @@ async fn a_stated_order_limit_without_a_positive_limit_is_a_gap_and_keeps_the_pr
         assert!(
             matches!(
                 error,
-                Error::Gap("stated rate limit without a positive limit")
+                Error::Transport {
+                    outcome: Outcome::ReadFailed,
+                    failure: Some(TransportFailure::RateEvidenceFailed),
+                    meta: Some(_),
+                    ..
+                }
             ),
             "{invalid}: {error:?}"
         );

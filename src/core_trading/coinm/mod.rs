@@ -18,6 +18,7 @@ pub mod event_payloads;
 mod exit_reads;
 mod rate;
 mod recovery_reads;
+mod recovery_streams;
 pub mod rest_models;
 pub mod rest_requests;
 pub mod stream_models;

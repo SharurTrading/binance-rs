@@ -40,6 +40,10 @@ pub enum TransportFailure {
     ResponseBodyTimeout,
     /// Complete response headers arrived, but the body could not be read.
     ResponseBodyFailed,
+    /// The WebSocket HTTP upgrade returned a status other than 101.
+    WebSocketHandshakeRejected,
+    /// A received 101 response failed the native WebSocket upgrade validation.
+    WebSocketHandshakeInvalid,
     /// The response body was not valid JSON.
     JsonDecodeFailed,
     /// The response body could not be decoded as the negotiated binary format.
@@ -64,7 +68,7 @@ pub struct RateEvidence {
     /// A counted rate-limit statement was malformed. No limit from that
     /// statement was adopted. A WebSocket response still retains its venue
     /// outcome and counter evidence; its driver also emits a continuity gap.
-    /// Account order queries fail with retained response metadata.
+    /// Account order queries and exchange metadata fail with retained response metadata.
     pub stated_limits_unusable: bool,
     /// HTTP Retry-After seconds, or WebSocket retry deadline converted to a duration.
     pub retry_after: Option<Duration>,
@@ -205,12 +209,12 @@ pub enum Error {
         /// Earliest estimated delay for a new attempt; no automatic retry is performed.
         retry_after: Duration,
     },
-    /// Venue retry timing was unusable, or an IP ban supplied no timing. No expiry is invented;
-    /// all clients sharing this owner refuse sends until the caller decides the ban
-    /// has ended and calls `release_unknown_ban` on a configuration or client of the
+    /// Venue timing was unusable, an IP ban supplied none, or the receipt clock failed.
+    /// No expiry is invented: shared owners refuse sends until the caller resolves
+    /// the timing uncertainty and calls `release_unknown_ban` on a configuration or client of the
     /// pool ([`crate::Budgets::release_unknown_ban`] for an explicit owner). The release
     /// clears only this refusal; a cooldown with a known `Retry-After` still holds.
-    #[error("venue IP cooldown timing is unknown")]
+    #[error("shared IP rate timing is unknown")]
     CooldownTimingUnknown,
     /// An unsent command expired.
     #[error("deadline expired before sending {0}")]
@@ -238,9 +242,9 @@ pub enum Error {
         operation: &'static str,
         /// The strongest outcome supported by the evidence.
         outcome: Outcome,
-        /// Safe HTTP failure category, if this error came from an HTTP attempt.
-        /// WebSocket transport errors carry `None`; the shared response decoder
-        /// can also report `ResponseDecodeFailed` for a WebSocket reply.
+        /// Safe HTTP, upgrade or decoding failure category, when known.
+        /// WebSocket frame transport failures carry `None`; upgrade failures
+        /// retain their HTTP evidence and a typed handshake category.
         failure: Option<TransportFailure>,
         /// Metadata received before failure, including header counters.
         meta: Option<Box<ResponseMeta>>,

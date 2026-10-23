@@ -190,6 +190,19 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
   Run its future alongside calls, request close, drain through `Retired`, and join
   the task you own. The client starts no runtime or socket task. Do not abort the
   driver as normal shutdown. [Example](examples/demo_ws.rs).
+  One timeout covers DNS, TCP, TLS and the upgrade; no connection is retried.
+  Rejected upgrades retain their HTTP status and safe rate headers in `ResponseMeta`.
+  A `429` cooldown or untimed `418` ban governs later connection attempts sharing
+  the pool, including recovery connections. `WebSocketHandshakeRejected` identifies
+  a non-101 response; `WebSocketHandshakeInvalid` identifies a received 101 that
+  failed native upgrade validation. A sent upgrade fails as `ReadFailed`; an attempt
+  that sent no upgrade request bytes is `NotSent`. Raw headers, URLs and server text
+  are not exposed.
+  A failed receipt-clock observation returns `RateEvidenceFailed` with received
+  metadata and holds the shared IP pool with `CooldownTimingUnknown`. Counters and
+  relative retry timing are never dated at send time. Restore valid time, resolve
+  the received quota evidence, then explicitly call `release_unknown_ban()`;
+  waiting for a quota window or changing the reserve does not clear that hold.
 - Ingress is unbounded and source ordered. Queue depth, oldest age, and counts
   distinguish lag from actual loss. Generations, gaps, and retirement are explicit.
 - Market and execution connections are separate. Mixed market routes are refused.
@@ -645,9 +658,33 @@ mutation is eligible through these methods.
 
 | Product | Recovery reads (all names have the `_for_recovery` suffix) |
 | --- | --- |
-| USDⓈ-M REST | `futures_account_balance_v3`, `get_current_position_mode`, `account_information_v3`, `position_information_v3`, `current_all_open_orders`, `current_all_algo_open_orders`, `account_trade_list`, `check_server_time` |
-| COIN-M REST | `futures_account_balance`, `get_current_position_mode`, `account_information`, `current_all_open_orders`, `open_algo_orders`, `account_trade_list`, `check_server_time` |
-| Spot REST | `get_account`, `get_open_orders`, `my_trades`, `time` |
+| USDⓈ-M REST | `futures_account_balance_v3`, `get_current_position_mode`, `account_information_v3`, `position_information_v3`, `current_all_open_orders`, `current_all_algo_open_orders`, `account_trade_list`, `check_server_time`, `exchange_information` |
+| COIN-M REST | `futures_account_balance`, `get_current_position_mode`, `account_information`, `current_all_open_orders`, `open_algo_orders`, `account_trade_list`, `check_server_time`, `exchange_information` |
+| Spot REST | `get_account`, `get_open_orders`, `my_trades`, `time`, `exchange_info` |
+
+Ordinary and recovery metadata reads validate the whole stated limit set before
+adoption. Invalid statements leave all prior limits unchanged and return `ReadFailed`
+with `TransportFailure::RateEvidenceFailed`, the received `ResponseMeta` and its
+`stated_limits_unusable` marker. Header counters remain evidence and are charged;
+raw response bodies are not exposed by the error. Regular catalog refresh continues
+to use ordinary admission.
+
+Account-event streams have a separate closed set of nonfinancial lifecycle methods
+that may use the same reserve. These preserve the native mutation flags: an
+uncertain subscription/listen-key change stays uncertain rather than becoming a
+failed read. They cannot place, change or cancel orders, or change balances.
+
+| Product | Recovery stream lifecycle APIs |
+| --- | --- |
+| USDⓈ-M and COIN-M REST | `start_user_data_stream_for_recovery`, `keepalive_user_data_stream_for_recovery`, `close_user_data_stream_for_recovery` |
+| Spot WebSocket API | `WsClient::connect_for_recovery`, `user_data_stream_subscribe_signature_for_recovery`, `user_data_stream_unsubscribe_for_recovery` |
+
+The Spot handshake still costs two shared-IP weight units and a connection attempt;
+signed subscription and unsubscribe each cost two weight units. Futures listen-key
+controls each cost one weight unit. Native connection and incoming-message limits
+still bind. Authentication and financial requests keep their native admission.
+Run and join each returned driver, drain its accepted events after close, and own
+listen-key renewal and cleanup; no task, reconnect or replay is hidden here.
 
 The caller decides when recovery is needed, bounds its work and owns the shared
 reserve policy. These methods do not schedule recovery, infer snapshot completeness
@@ -656,14 +693,15 @@ native costs as its ordinary counterpart, up to the whole native window. Droppin
 a future does not refund charged costs or undo a sent request. A trade-history
 read retains the native endpoint's paging and retention limits.
 
-An exit or recovery read is sent at most once and never waits for capacity. It is refused before
-sending, with nothing sent, in these cases:
+An exit/recovery read or recovery stream control is sent at most once and never
+waits for capacity. It is refused before sending, with nothing sent, in these cases:
 
 | Case | Error |
 | --- | --- |
 | The venue's whole limit, reserve included, is spent in the current window | `Error::Admission`, whose `retry_after` says when the window rolls |
 | A venue `Retry-After` cooldown is active | `Error::Admission`, whose `retry_after` says when it ends |
 | A `418` ban the venue gave no timing for stands | `Error::CooldownTimingUnknown`, until `release_unknown_ban()` |
+| Receipt-time rate evidence remains unresolved after a clock failure | `Error::CooldownTimingUnknown`, until time/evidence is resolved and `release_unknown_ban()` is called |
 | The caller's deadline has passed | `Error::Expired` |
 
 Size the reserve for every read an exit makes as well as its cancels and closes:

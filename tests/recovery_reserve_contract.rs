@@ -535,3 +535,72 @@ async fn untimed_venue_ban_refuses_recovery_before_a_second_send() {
     assert_eq!(fixture.connections_accepted(), 1);
     fixture.finish().await;
 }
+
+macro_rules! recovery_metadata {
+    ($name:ident, $product:ident, $operation:literal, $request:ident, $ordinary:ident, $recovery:ident, $weight:literal, $native_limit:literal) => {
+        #[tokio::test]
+        async fn $name() {
+            for valid in [true, false] {
+                let mut native = response_fixture(stringify!($product), $operation);
+                native["rateLimits"] = serde_json::json!([
+                    {"rateLimitType":"REQUEST_WEIGHT", "interval":"MINUTE", "intervalNum":1, "limit":if valid {100} else {0}}
+                ]);
+                let fixture = HttpFixture::new(200, "", &native.to_string(), None, false).await;
+                let owner = $product::Config::with_pools($product::Environment::Demo, &WeightPools::new())
+                    .unwrap()
+                    .rest_url(&fixture.url).unwrap()
+                    .clock(Arc::new(FixedClock(1_700_000_001_000)));
+                owner.set_exit_reserve(ExitReserve::default().request_weight(10_000)).unwrap();
+                let observer = owner.clone();
+                let client = $product::RestClient::new(owner).unwrap();
+                let request = $product::rest_requests::$request::new();
+                refused(&client.$ordinary(&request, deadline()).await.unwrap_err());
+                let response = client.$recovery(&request, deadline()).await;
+                let usage = observer.pool_usage().unwrap().request_weight;
+                assert_eq!(usage.used, $weight);
+                if valid {
+                    assert!(response.is_ok(), "{response:?}");
+                    assert_eq!(usage.limit, 100);
+                    assert_eq!(usage.source, binance_client::LimitSource::Stated);
+                } else {
+                    assert!(matches!(response, Err(Error::Transport { outcome: Outcome::ReadFailed, failure: Some(binance_client::TransportFailure::RateEvidenceFailed), meta: Some(_), .. })), "{response:?}");
+                    assert_eq!(usage.limit, $native_limit);
+                    assert_eq!(usage.source, binance_client::LimitSource::Documented);
+                }
+                assert_eq!(fixture.connections_accepted(), 1);
+                fixture.finish().await;
+            }
+        }
+    };
+}
+
+recovery_metadata!(
+    spot_recovery_metadata_adopts_only_valid_stated_limits,
+    spot,
+    "exchangeInfo",
+    ExchangeInfo,
+    exchange_info,
+    exchange_info_for_recovery,
+    20,
+    6000
+);
+recovery_metadata!(
+    usdm_recovery_metadata_adopts_only_valid_stated_limits,
+    usdm,
+    "exchangeInformation",
+    ExchangeInformation,
+    exchange_information,
+    exchange_information_for_recovery,
+    1,
+    2400
+);
+recovery_metadata!(
+    coinm_recovery_metadata_adopts_only_valid_stated_limits,
+    coinm,
+    "exchangeInformation",
+    ExchangeInformation,
+    exchange_information,
+    exchange_information_for_recovery,
+    1,
+    2400
+);

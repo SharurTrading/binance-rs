@@ -4,7 +4,9 @@
 use crate::{Budgets, Error};
 
 /// Caller-selected capacity kept for explicit venue cancellations, reducing orders and
-/// the `_for_exit` reads an exit makes to learn what to cancel or close.
+/// the `_for_exit` reads an exit makes to learn what to cancel or close. Explicit
+/// bounded recovery reads and nonfinancial account-stream lifecycle controls may
+/// also use this capacity; the caller coordinates their finite workloads.
 ///
 /// All values are native quota units per applicable window, not a count of exits.
 /// Zero disables a dimension. This policy never increases a venue limit: ordinary

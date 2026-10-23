@@ -536,15 +536,17 @@ impl Budgets {
         }
         Ok(())
     }
-    /// Clear an IP cooldown whose timing the venue never gave, for every owner of this
-    /// IP pool.
+    /// Clear an unknown rate-timing hold for every owner of this IP pool.
     ///
     /// A `418` ban without a usable `Retry-After`, or retry timing this client cannot
     /// read, leaves the pool refusing every send with [`Error::CooldownTimingUnknown`]:
     /// Binance documents such a ban as lasting from two minutes to three days and offers
     /// no signal that one has ended, so no reply can clear it. The caller decides when
     /// the ban has ended and calls this; sends are admitted again, and the venue answers
-    /// afresh. A cooldown with a known `Retry-After` is the venue's own timing and holds
+    /// afresh. A failed receipt-time clock observation also holds the pool: native
+    /// counters and relative retry timing cannot safely be assigned to a window.
+    /// Restore valid time and resolve that received evidence before releasing it.
+    /// A cooldown with a known `Retry-After` is the venue's own timing and holds
     /// until it expires. Releasing a pool with nothing to clear changes nothing, and
     /// releasing one too early makes the venue answer with a ban again.
     ///
@@ -557,14 +559,20 @@ impl Budgets {
             .cooldown_timing_unknown = false;
         Ok(())
     }
+
+    pub(crate) fn hold_unknown_rate_timing(&self) -> Result<(), Error> {
+        self.ip
+            .lock()
+            .map_err(|_| Error::Configuration("IP budget poisoned"))?
+            .cooldown_timing_unknown = true;
+        Ok(())
+    }
+
     pub(crate) fn observe_ban(&self, status: u16, evidence: &RateEvidence) -> Result<(), Error> {
         // A ban, or any venue retry timing this client cannot use, leaves the owner
         // without an expiry. Refuse every send rather than invent one.
         if evidence.retry_after.is_none() && (status == 418 || evidence.retry_after_unusable) {
-            self.ip
-                .lock()
-                .map_err(|_| Error::Configuration("IP budget poisoned"))?
-                .cooldown_timing_unknown = true;
+            self.hold_unknown_rate_timing()?;
         }
         Ok(())
     }

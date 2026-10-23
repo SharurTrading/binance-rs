@@ -17,14 +17,11 @@ use std::{
     time::Duration,
 };
 use tokio::{
-    net::TcpStream,
     sync::{mpsc, oneshot},
     time::Instant,
 };
 use tokio_util::sync::CancellationToken;
-use tokio_websockets::{
-    ClientBuilder, Connector, Limits, MaybeTlsStream, Message, WebSocketStream,
-};
+use tokio_websockets::Message;
 
 static GENERATION: AtomicU64 = AtomicU64::new(1);
 /// Product decoders may retain their native model without a JSON conversion.
@@ -223,7 +220,7 @@ fn signing_payload(params: &BTreeMap<String, Value>) -> Result<String, Error> {
 }
 
 pub(crate) struct SocketDriver {
-    ws: WebSocketStream<MaybeTlsStream<TcpStream>>,
+    ws: crate::core::socket_handshake::SocketStream,
     commands: mpsc::UnboundedReceiver<Command>,
     events: mpsc::UnboundedSender<SocketEvent>,
     credentials: Option<Credentials>,
@@ -290,45 +287,24 @@ impl Socket {
         let generation = GENERATION
             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .map_err(|_| Error::Configuration("socket generation overflow"))?;
-        let connector =
-            Connector::Rustls(tokio_rustls::TlsConnector::from(Arc::new(tls_config()?)));
-        // No library frame/queue ceiling: real socket loss becomes an explicit generation gap.
-        let mut builder = ClientBuilder::new()
-            .uri(url.as_str())
-            .map_err(|_| Error::Configuration("WebSocket URI"))?
-            .connector(&connector)
-            .limits(Limits::unlimited());
-        if policy.api_key_header {
+        let api_key = if policy.api_key_header {
             let credentials = credentials.as_ref().ok_or(Error::CredentialsRequired)?;
             if !credentials.is_ed25519() {
                 return Err(Error::Validation("SBE streams require Ed25519 credentials"));
             }
-            builder = builder
-                .add_header(
-                    "X-MBX-APIKEY"
-                        .parse()
-                        .map_err(|_| Error::Configuration("API key header name"))?,
-                    credentials.header()?,
-                )
-                .map_err(|_| Error::Configuration("API key handshake header"))?;
-        }
-        budgets.admit(policy.handshake, clock.now_millis()?)?;
-        let (ws, _) = tokio::time::timeout(timeout, builder.connect())
-            .await
-            .map_err(|_| Error::Transport {
-                client_order_ids: BTreeMap::new(),
-                operation: "connect",
-                outcome: Outcome::NotSent,
-                failure: None,
-                meta: None,
-            })?
-            .map_err(|_| Error::Transport {
-                client_order_ids: BTreeMap::new(),
-                operation: "connect",
-                outcome: Outcome::NotSent,
-                failure: None,
-                meta: None,
-            })?;
+            Some(credentials.header()?)
+        } else {
+            None
+        };
+        let ws = crate::core::socket_handshake::connect(
+            &url,
+            api_key,
+            clock.as_ref(),
+            &budgets,
+            timeout,
+            &policy,
+        )
+        .await?;
         let (tx, commands) = mpsc::unbounded_channel();
         let (events, rx) = mpsc::unbounded_channel();
         let stop = CancellationToken::new();

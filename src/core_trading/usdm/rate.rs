@@ -154,9 +154,11 @@ fn weight(
 /// Hands an exchange information reply's `rateLimits` to the client's IP pool.
 pub(crate) fn adopt_stated_limits(
     client: &crate::core::HttpClient,
-    reply: &super::rest_models::ExchangeInformationResponse,
-) -> Result<(), Error> {
-    client.adopt_stated_limits(reply.rate_limits.iter().flatten().map(stated))
+    response: crate::Response<super::rest_models::ExchangeInformationResponse>,
+) -> Result<crate::Response<super::rest_models::ExchangeInformationResponse>, Error> {
+    let adoption =
+        client.adopt_stated_limits(response.data.rate_limits.iter().flatten().map(stated));
+    crate::core::http::with_stated_limit_evidence(response, adoption)
 }
 
 fn stated(

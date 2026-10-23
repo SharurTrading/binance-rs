@@ -1,22 +1,24 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-//! Explicit account-recovery reads admitted from reserved capacity.
+//! Explicit account-recovery and startup-metadata reads using reserved capacity.
 //!
 //! Native request costs, deadlines and venue cooldowns still apply. Ordinary
 //! methods retain ordinary admission; no mutation is eligible through this API.
 
 use super::rest_models::{
     AccountInformationResponse, AccountTradeListResponse, CheckServerTimeResponse,
-    CurrentAllOpenOrdersResponse, FuturesAccountBalanceResponse, GetCurrentPositionModeResponse,
-    OpenAlgoOrdersResponse,
+    CurrentAllOpenOrdersResponse, ExchangeInformationResponse, FuturesAccountBalanceResponse,
+    GetCurrentPositionModeResponse, OpenAlgoOrdersResponse,
 };
 use super::rest_requests::{
     AccountInformation, AccountTradeList, CheckServerTime, CurrentAllOpenOrders,
-    FuturesAccountBalance, GetCurrentPositionMode, OpenAlgoOrders,
+    ExchangeInformation, FuturesAccountBalance, GetCurrentPositionMode, OpenAlgoOrders,
 };
 use crate::{Error, Response};
 use tokio::time::Instant;
+
+impl crate::core::RecoveryRead for ExchangeInformation {}
 
 impl crate::core::RecoveryRead for FuturesAccountBalance {}
 
@@ -33,6 +35,24 @@ impl crate::core::RecoveryRead for AccountTradeList {}
 impl crate::core::RecoveryRead for CheckServerTime {}
 
 impl super::RestClient {
+    /// The native metadata read for bounded account recovery, using reserved capacity.
+    /// Adopts stated venue limits exactly as [`Self::exchange_information`] does.
+    ///
+    /// Sent at most once with native costs and cooldowns. The caller owns the
+    /// recovery schedule; ordinary catalog refresh keeps ordinary admission.
+    ///
+    /// # Errors
+    /// As [`Self::exchange_information`], including invalid stated limits, plus native
+    /// capacity/cooldown refusal or an expired deadline before sending.
+    pub async fn exchange_information_for_recovery(
+        &self,
+        request: &ExchangeInformation,
+        deadline: Instant,
+    ) -> Result<Response<ExchangeInformationResponse>, Error> {
+        let response = self.inner.execute_recovery_read(request, deadline).await?;
+        super::rate::adopt_stated_limits(&self.inner, response)
+    }
+
     /// The same native read as [`Self::futures_account_balance`], admitted from reserved capacity
     /// for bounded account recovery.
     ///

@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-//! Explicit account-recovery reads admitted from reserved capacity.
+//! Explicit account-recovery and startup-metadata reads using reserved capacity.
 //!
 //! Native request costs, deadlines and venue cooldowns still apply. Ordinary
 //! methods retain ordinary admission; no mutation is eligible through this API.
 
 use super::rest_models::{
-    GetAccountResponse, GetOpenOrdersResponse, MyTradesResponse, TimeResponse,
+    ExchangeInfoResponse, GetAccountResponse, GetOpenOrdersResponse, MyTradesResponse, TimeResponse,
 };
-use super::rest_requests::{GetAccount, GetOpenOrders, MyTrades, Time};
+use super::rest_requests::{ExchangeInfo, GetAccount, GetOpenOrders, MyTrades, Time};
 use crate::{Error, Response};
 use tokio::time::Instant;
+
+impl crate::core::RecoveryRead for ExchangeInfo {}
 
 impl crate::core::RecoveryRead for GetAccount {}
 
@@ -22,6 +24,24 @@ impl crate::core::RecoveryRead for MyTrades {}
 impl crate::core::RecoveryRead for Time {}
 
 impl super::RestClient {
+    /// The native metadata read for bounded account recovery, using reserved capacity.
+    /// Adopts stated venue limits exactly as [`Self::exchange_info`] does.
+    ///
+    /// Sent at most once with native costs and cooldowns. The caller owns the
+    /// recovery schedule; ordinary catalog refresh keeps ordinary admission.
+    ///
+    /// # Errors
+    /// As [`Self::exchange_info`], including invalid stated limits, plus native
+    /// capacity/cooldown refusal or an expired deadline before sending.
+    pub async fn exchange_info_for_recovery(
+        &self,
+        request: &ExchangeInfo,
+        deadline: Instant,
+    ) -> Result<Response<ExchangeInfoResponse>, Error> {
+        let response = self.inner.execute_recovery_read(request, deadline).await?;
+        super::rate::adopt_stated_limits(&self.inner, response)
+    }
+
     /// The same native read as [`Self::get_account`], admitted from reserved capacity
     /// for bounded account recovery.
     ///

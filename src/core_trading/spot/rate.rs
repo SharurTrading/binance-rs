@@ -112,9 +112,11 @@ pub(crate) fn cost(op: Operation, p: &BTreeMap<String, Value>) -> Result<Cost, E
 /// Hands an exchange information reply's `rateLimits` to the client's IP pool.
 pub(crate) fn adopt_stated_limits(
     client: &crate::core::HttpClient,
-    reply: &super::rest_models::ExchangeInfoResponse,
-) -> Result<(), Error> {
-    client.adopt_stated_limits(reply.rate_limits.iter().flatten().map(stated))
+    response: crate::Response<super::rest_models::ExchangeInfoResponse>,
+) -> Result<crate::Response<super::rest_models::ExchangeInfoResponse>, Error> {
+    let adoption =
+        client.adopt_stated_limits(response.data.rate_limits.iter().flatten().map(stated));
+    crate::core::http::with_stated_limit_evidence(response, adoption)
 }
 
 fn stated(
@@ -138,11 +140,11 @@ fn stated(
 /// Validates the entire statement before changing either limit.
 pub(crate) fn adopt_stated_ws_limits(
     client: &super::WsClient,
-    reply: &super::ws_models::ExchangeInfoResponse,
-) -> Result<(), Error> {
-    client
+    response: crate::Response<super::ws_models::ExchangeInfoResponse>,
+) -> Result<crate::Response<super::ws_models::ExchangeInfoResponse>, Error> {
+    let adoption = client
         .budgets
-        .adopt_stated(reply.rate_limits.iter().flatten().map(|item| {
+        .adopt_stated(response.data.rate_limits.iter().flatten().map(|item| {
             crate::core::StatedLimit {
                 kind: item
                     .rate_limit_type
@@ -155,7 +157,8 @@ pub(crate) fn adopt_stated_ws_limits(
                 interval_num: item.interval_num,
                 limit: item.limit,
             }
-        }))
+        }));
+    crate::core::http::with_stated_limit_evidence(response, adoption)
 }
 
 #[cfg(test)]

@@ -10,12 +10,12 @@ use super::rest_models::{
     AccountInformationV3Response, AccountTradeListResponse, CheckServerTimeResponse,
     CurrentAllAlgoOpenOrdersResponse, CurrentAllOpenOrdersResponse, ExchangeInformationResponse,
     FuturesAccountBalanceV3Response, FuturesAccountConfigurationResponse,
-    GetCurrentPositionModeResponse, PositionInformationV3Response,
+    GetCurrentPositionModeResponse, PositionInformationV3Response, QueryOrderResponse,
 };
 use super::rest_requests::{
     AccountInformationV3, AccountTradeList, CheckServerTime, CurrentAllAlgoOpenOrders,
     CurrentAllOpenOrders, ExchangeInformation, FuturesAccountBalanceV3,
-    FuturesAccountConfiguration, GetCurrentPositionMode, PositionInformationV3,
+    FuturesAccountConfiguration, GetCurrentPositionMode, PositionInformationV3, QueryOrder,
 };
 use crate::{Error, Response};
 use tokio::time::Instant;
@@ -38,9 +38,31 @@ impl crate::core::RecoveryRead for CurrentAllAlgoOpenOrders {}
 
 impl crate::core::RecoveryRead for AccountTradeList {}
 
+impl crate::core::RecoveryRead for QueryOrder {}
+
 impl crate::core::RecoveryRead for CheckServerTime {}
 
 impl super::RestClient {
+    /// Read one native order's status for bounded recovery, using reserved capacity.
+    ///
+    /// The same native request and response as [`Self::query_order`], sent at most
+    /// once without waiting for capacity or retrying. The caller owns the recovery
+    /// schedule, shared reserve policy and original absolute deadline. Dropping the
+    /// future does not roll back a sent read or refund its native cost.
+    ///
+    /// # Errors
+    /// As [`Self::query_order`], including native validation and transport failures.
+    /// Before sending: [`Error::Admission`] when the whole native window is spent
+    /// or a timed venue cooldown is active; [`Error::CooldownTimingUnknown`] for a
+    /// ban with no timing; [`Error::Expired`] when `deadline` has passed.
+    pub async fn query_order_for_recovery(
+        &self,
+        request: &QueryOrder,
+        deadline: Instant,
+    ) -> Result<Response<QueryOrderResponse>, Error> {
+        self.inner.execute_recovery_read(request, deadline).await
+    }
+
     /// The native metadata read for bounded account recovery, using reserved capacity.
     /// Adopts stated venue limits exactly as [`Self::exchange_information`] does.
     ///

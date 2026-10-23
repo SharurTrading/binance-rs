@@ -163,6 +163,53 @@ recovery_read!(
     usdm::rest_requests::CheckServerTime::new()
 );
 
+#[tokio::test]
+async fn usdm_account_configuration_uses_five_native_units_with_the_full_window_reserved() {
+    let body = r#"{"feeTier":0,"canTrade":true,"canDeposit":false,"canWithdraw":false,"dualSidePosition":false,"updateTime":0,"multiAssetsMargin":false,"tradeGroupId":0}"#;
+    let mut fixture = HttpFixture::new(200, "", body, None, false).await;
+    let owner = config().rest_url(&fixture.url).unwrap();
+    owner
+        .set_exit_reserve(ExitReserve::default().request_weight(10_000))
+        .unwrap();
+    let observer = owner.clone();
+    let client = usdm::RestClient::new(owner).unwrap();
+    let request = usdm::rest_requests::FuturesAccountConfiguration::new();
+    refused(
+        &client
+            .futures_account_configuration(&request, deadline())
+            .await
+            .unwrap_err(),
+    );
+    let response = client
+        .futures_account_configuration_for_recovery(&request, deadline())
+        .await
+        .unwrap();
+    assert_eq!(response.data.can_trade, Some(true));
+    assert_eq!(response.data.can_withdraw, Some(false));
+    assert_eq!(response.data.dual_side_position, Some(false));
+    assert_eq!(response.meta.operation, "futuresAccountConfiguration");
+    assert_eq!(response.meta.status, 200);
+    let usage = observer.pool_usage().unwrap();
+    assert_eq!(usage.request_weight.limit, 2_400);
+    assert_eq!(usage.request_weight.used, 5);
+    refused(
+        &client
+            .check_server_time(&usdm::rest_requests::CheckServerTime::new(), deadline())
+            .await
+            .unwrap_err(),
+    );
+    assert_eq!(fixture.connections_accepted(), 1);
+    assert!(
+        fixture
+            .requests
+            .recv()
+            .await
+            .unwrap()
+            .starts_with("GET /fapi/v1/accountConfig?")
+    );
+    fixture.finish().await;
+}
+
 recovery_read!(
     usdm_get_current_position_mode_uses_only_its_native_weight,
     usdm,

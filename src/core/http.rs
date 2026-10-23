@@ -246,6 +246,17 @@ impl HttpClient {
         deadline: Instant,
         admission: Admission,
     ) -> Result<Response<R::Response>, Error> {
+        self.send_with_clock(request, deadline, admission, Instant::now)
+            .await
+    }
+
+    async fn send_with_clock<R: Request>(
+        &self,
+        request: &R,
+        deadline: Instant,
+        admission: Admission,
+        mut monotonic_now: impl FnMut() -> Instant,
+    ) -> Result<Response<R::Response>, Error> {
         let mut params = request::parameters(request)?;
         request.validate_with_parameters(&params)?;
         let client_order_ids = request::order_ids(&params);
@@ -265,10 +276,11 @@ impl HttpClient {
         } else {
             Outcome::ReadFailed
         };
-        let timeout = self
-            .timeout
-            .min(deadline.saturating_duration_since(Instant::now()));
-        let attempt_deadline = Instant::now() + timeout;
+        let attempt_deadline = monotonic_now()
+            .checked_add(self.timeout)
+            .map_or(deadline, |transport_deadline| {
+                transport_deadline.min(deadline)
+            });
         let response = tokio::time::timeout_at(attempt_deadline, self.client.execute(wire))
             .await
             .map_err(|_| Error::Transport {

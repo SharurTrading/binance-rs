@@ -9,12 +9,13 @@
 use super::rest_models::{
     AccountInformationV3Response, AccountTradeListResponse, CheckServerTimeResponse,
     CurrentAllAlgoOpenOrdersResponse, CurrentAllOpenOrdersResponse, ExchangeInformationResponse,
-    FuturesAccountBalanceV3Response, GetCurrentPositionModeResponse, PositionInformationV3Response,
+    FuturesAccountBalanceV3Response, FuturesAccountConfigurationResponse,
+    GetCurrentPositionModeResponse, PositionInformationV3Response,
 };
 use super::rest_requests::{
     AccountInformationV3, AccountTradeList, CheckServerTime, CurrentAllAlgoOpenOrders,
-    CurrentAllOpenOrders, ExchangeInformation, FuturesAccountBalanceV3, GetCurrentPositionMode,
-    PositionInformationV3,
+    CurrentAllOpenOrders, ExchangeInformation, FuturesAccountBalanceV3,
+    FuturesAccountConfiguration, GetCurrentPositionMode, PositionInformationV3,
 };
 use crate::{Error, Response};
 use tokio::time::Instant;
@@ -22,6 +23,8 @@ use tokio::time::Instant;
 impl crate::core::RecoveryRead for ExchangeInformation {}
 
 impl crate::core::RecoveryRead for FuturesAccountBalanceV3 {}
+
+impl crate::core::RecoveryRead for FuturesAccountConfiguration {}
 
 impl crate::core::RecoveryRead for GetCurrentPositionMode {}
 
@@ -73,6 +76,22 @@ impl super::RestClient {
         request: &FuturesAccountBalanceV3,
         deadline: Instant,
     ) -> Result<Response<FuturesAccountBalanceV3Response>, Error> {
+        self.inner.execute_recovery_read(request, deadline).await
+    }
+
+    /// Read native account configuration for bounded recovery, using reserved capacity.
+    ///
+    /// Sent at most once with native costs and cooldowns. The caller owns the
+    /// recovery schedule and shared reserve policy; ordinary requests remain ordinary.
+    ///
+    /// # Errors
+    /// As [`Self::futures_account_configuration`], including native validation and
+    /// transport failures, native capacity or cooldown refusal, and an expired deadline.
+    pub async fn futures_account_configuration_for_recovery(
+        &self,
+        request: &FuturesAccountConfiguration,
+        deadline: Instant,
+    ) -> Result<Response<FuturesAccountConfigurationResponse>, Error> {
         self.inner.execute_recovery_read(request, deadline).await
     }
 

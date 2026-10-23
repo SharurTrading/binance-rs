@@ -9,11 +9,12 @@
 use super::rest_models::{
     AccountInformationResponse, AccountTradeListResponse, CheckServerTimeResponse,
     CurrentAllOpenOrdersResponse, ExchangeInformationResponse, FuturesAccountBalanceResponse,
-    GetCurrentPositionModeResponse, OpenAlgoOrdersResponse,
+    GetCurrentPositionModeResponse, OpenAlgoOrdersResponse, PositionInformationResponse,
 };
 use super::rest_requests::{
     AccountInformation, AccountTradeList, CheckServerTime, CurrentAllOpenOrders,
     ExchangeInformation, FuturesAccountBalance, GetCurrentPositionMode, OpenAlgoOrders,
+    PositionInformation,
 };
 use crate::{Error, Response};
 use tokio::time::Instant;
@@ -30,11 +31,30 @@ impl crate::core::RecoveryRead for CurrentAllOpenOrders {}
 
 impl crate::core::RecoveryRead for OpenAlgoOrders {}
 
+impl crate::core::RecoveryRead for PositionInformation {}
+
 impl crate::core::RecoveryRead for AccountTradeList {}
 
 impl crate::core::RecoveryRead for CheckServerTime {}
 
 impl super::RestClient {
+    /// Read native COIN-M positions for bounded recovery, using reserved capacity.
+    ///
+    /// Uses the signed [`Self::position_information`] endpoint and its native cost.
+    /// The caller owns the recovery schedule, shared reserve policy and deadline.
+    /// Sends at most once without waiting for capacity or retrying.
+    ///
+    /// # Errors
+    /// As [`Self::position_information`], including validation and transport failures,
+    /// native capacity or cooldown refusal, and expiry before sending.
+    pub async fn position_information_for_recovery(
+        &self,
+        request: &PositionInformation,
+        deadline: Instant,
+    ) -> Result<Response<PositionInformationResponse>, Error> {
+        self.inner.execute_recovery_read(request, deadline).await
+    }
+
     /// The native metadata read for bounded account recovery, using reserved capacity.
     /// Adopts stated venue limits exactly as [`Self::exchange_information`] does.
     ///

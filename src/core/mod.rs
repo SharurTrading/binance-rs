@@ -29,7 +29,9 @@ pub use rate::{
     PoolKey, PoolUsage, VenuePool, WeightPools, WindowUsage,
 };
 pub(crate) use rate::{Cost, StatedLimit};
-pub(crate) use request::{ExitRead, Operation, ReadStreamControl, RecoveryRead, Request, Security};
+pub(crate) use request::{
+    ExitRead, Operation, PositionModeControl, ReadStreamControl, RecoveryRead, Request, Security,
+};
 pub(crate) use request::{parameters, validate_parameters};
 pub(crate) use socket::{Socket, SocketEvent};
 pub(crate) use time::validate_url;

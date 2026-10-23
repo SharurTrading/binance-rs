@@ -10,6 +10,12 @@ use crate::core::{Request, Socket, SocketEvent};
 use crate::{Error, RequestId, Response};
 use tokio::time::Instant;
 
+#[derive(Clone, Copy)]
+enum RequestAdmission {
+    Native,
+    RecoveryStream,
+}
+
 /// Caller-owned socket driver. This library creates no hidden tasks or runtime.
 ///
 /// Run `run()` alongside the handle's requests/events, and join it after closing.
@@ -46,6 +52,7 @@ impl WsClient {
         super::config::apply_response_format(&mut config.websocket, true);
         Self::connect_format(
             config,
+            crate::core::rate::reserve::ExitEligibility::Ordinary,
             Some(|bytes| {
                 super::sbe::schema::decode_api_value(bytes)
                     .map(crate::core::socket::BinaryPayload::Json)
@@ -59,10 +66,37 @@ impl WsClient {
     /// Refuses invalid transport configuration or failed handshake/rate admission.
     pub async fn connect(mut config: Config) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
         super::config::apply_response_format(&mut config.websocket, false);
-        Self::connect_format(config, None).await
+        Self::connect_format(
+            config,
+            crate::core::rate::reserve::ExitEligibility::Ordinary,
+            None,
+        )
+        .await
     }
+    /// Connect an account-event API socket using reserved native capacity.
+    ///
+    /// The handshake still costs two shared-IP weight units and one connection
+    /// attempt. Requests retain ordinary admission unless an explicit recovery
+    /// method selects a sealed nonfinancial stream control. Run and join the
+    /// returned driver; this method never spawns a task or reconnects.
+    ///
+    /// # Errors
+    /// As [`Self::connect`], including full native capacity and venue cooldowns.
+    pub async fn connect_for_recovery(
+        mut config: Config,
+    ) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
+        super::config::apply_response_format(&mut config.websocket, false);
+        Self::connect_format(
+            config,
+            crate::core::rate::reserve::ExitEligibility::Eligible,
+            None,
+        )
+        .await
+    }
+
     async fn connect_format(
         mut config: Config,
+        handshake_eligibility: crate::core::rate::reserve::ExitEligibility,
         binary_decoder: Option<crate::core::socket::BinaryDecoder>,
     ) -> Result<(Self, ApiEvents, ConnectionDriver), Error> {
         super::config::apply_time_unit(&mut config.websocket, config.time_unit);
@@ -77,6 +111,7 @@ impl WsClient {
                 handshake: crate::core::Cost {
                     ws_weight: 2,
                     connections: 1,
+                    exit: handshake_eligibility,
                     ..Default::default()
                 },
                 // Spot WebSocket API sockets share the documented API-socket
@@ -107,9 +142,37 @@ impl WsClient {
         id: RequestId,
         deadline: Instant,
     ) -> Result<Response<R::Response>, Error> {
+        self.execute_with_admission(request, id, deadline, RequestAdmission::Native)
+            .await
+    }
+
+    pub(crate) async fn execute_read_stream_control<R: crate::core::ReadStreamControl>(
+        &self,
+        request: &R,
+        id: RequestId,
+        deadline: Instant,
+    ) -> Result<Response<R::Response>, Error> {
+        self.execute_with_admission(request, id, deadline, RequestAdmission::RecoveryStream)
+            .await
+    }
+
+    async fn execute_with_admission<R: Request>(
+        &self,
+        request: &R,
+        id: RequestId,
+        deadline: Instant,
+        admission: RequestAdmission,
+    ) -> Result<Response<R::Response>, Error> {
         let params = crate::core::parameters(request)?;
         request.validate_with_parameters(&params)?;
         let cost = request.cost_with_parameters(&params)?;
+        let cost = match admission {
+            RequestAdmission::Native => cost,
+            RequestAdmission::RecoveryStream => crate::core::Cost {
+                exit: crate::core::rate::reserve::ExitEligibility::Eligible,
+                ..cost
+            },
+        };
         let (value, meta) = self.socket.call(R::OP, params, cost, id, deadline).await?;
         let response: Response<R::Response> =
             crate::core::http::decode(R::OP, meta.status, value, meta)?;

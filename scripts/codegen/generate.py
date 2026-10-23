@@ -530,9 +530,9 @@ def generate(kind):
         return_type = f'super::{kind}_models::{response_type}'
         # Exchange information states the venue's own IP limits; its pool adopts them.
         if kind == 'rest' and (PRODUCT, op['operationId']) in [('spot', 'exchangeInfo'), ('usdm', 'exchangeInformation'), ('coinm', 'exchangeInformation'), ('options', 'exchangeInformation')]:
-            call='let response=self.inner.execute(request,deadline).await?;super::rate::adopt_stated_limits(&self.inner,&response.data)?;Ok(response)'
+            call='let response=self.inner.execute(request,deadline).await?;super::rate::adopt_stated_limits(&self.inner,response)'
         if kind == 'ws' and (PRODUCT, op['operationId']) == ('spot', 'exchangeInfo'):
-            call='let response=self.execute(request,id,deadline).await?;super::rate::adopt_stated_ws_limits(self,&response.data)?;Ok(response)'
+            call='let response=self.execute(request,id,deadline).await?;super::rate::adopt_stated_ws_limits(self,response)'
         if PRODUCT == 'wallet' and op['operationId'] in ['queryUserWalletBalance','dustConvert','dustConvertibleAssets']:
             context,field,wrapper = {'queryUserWalletBalance':('quote_asset','wallets','QuotedWalletBalance'), 'dustConvert':('target_asset','receipt','DustConversion'), 'dustConvertibleAssets':('target_asset','assets','ConvertibleDust')}[op['operationId']]
             return_type='super::'+wrapper

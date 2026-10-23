@@ -106,6 +106,36 @@ things matter when you wrap it:
    Spot `openOrders.status` and Futures `account.position`, have no exit variant, so
    an exit over the WebSocket API reads over REST.
 
+For bounded startup or recovery work, use an explicitly named `_for_recovery`
+REST method from the README's [recovery-read list](../README.md#reserving-capacity-for-exits).
+This admits only the listed account-evidence and startup metadata reads from the
+same reserved capacity; metadata still validates and adopts stated venue limits.
+A malformed statement changes no limit and returns `ReadFailed` with typed rate
+failure and received response metadata, including safe header counters.
+Every native weight, deadline and cooldown still applies, with no wait or retry.
+The caller controls the finite recovery workload: a recovery read can consume
+capacity an exit would otherwise use. Ordinary polling keeps ordinary admission.
+
+The same section lists a separate closed set of account-stream lifecycle APIs.
+Futures start, keepalive and close listen-key controls and Spot's recovery socket
+handshake, signed subscribe and unsubscribe may spend reserved capacity. They
+retain native mutation uncertainty, costs and cooldowns, and never mutate orders
+or balances. Other requests on a recovery socket retain ordinary admission. The
+caller still owns stream renewal, driver tasks and joined teardown.
+
+WebSocket connection attempts retain rejected HTTP upgrade status and safe rate
+headers. A received `429` cooldown or untimed `418` ban refuses the next attempt
+locally, whether ordinary or recovery. A single owned deadline covers name lookup,
+TCP, TLS and native upgrade validation; no reconnect or retry is hidden. Setup
+rechecks the original admission before writing upgrade bytes. An elapsed charged
+quota window or backward clock returns `NotSent` without sending the
+upgrade, refunding the original attempt or moving its charge into another window.
+When the receipt clock fails, HTTP and upgrade responses retain their safe metadata
+and report `RateEvidenceFailed` with the original mutation/read outcome. The shared
+IP pool refuses later attempts with `CooldownTimingUnknown`; it does not date
+counters or relative retry timing at the earlier send time. Restore valid time and
+resolve the received evidence before explicitly releasing the unknown timing hold.
+
 ### User data streams
 
 | Product | How you receive account events |

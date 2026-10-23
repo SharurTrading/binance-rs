@@ -174,7 +174,7 @@ async fn malformed_websocket_counted_limits_leave_prior_limits_and_charges_intac
         assert!(
             matches!(
                 error,
-                Error::Gap("stated rate limit without a positive limit")
+                Error::Transport { outcome: Outcome::ReadFailed, failure: Some(binance_client::TransportFailure::RateEvidenceFailed), meta: Some(ref meta), .. } if meta.status == 200 && meta.operation == "exchangeInfo" && meta.rates.stated_limits_unusable
             ),
             "{error:?}"
         );

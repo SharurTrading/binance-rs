@@ -4,8 +4,8 @@
 use super::super::Request;
 use super::*;
 use serde_json::json;
-use tokio::net::TcpListener;
-use tokio_websockets::ServerBuilder;
+use tokio::net::{TcpListener, TcpStream};
+use tokio_websockets::{ServerBuilder, WebSocketStream};
 
 type ResponseReceiver = oneshot::Receiver<Result<(Value, ResponseMeta), Error>>;
 

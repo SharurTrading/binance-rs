@@ -20,6 +20,8 @@ mod exit_reads;
 pub mod fix;
 mod identity;
 mod rate;
+mod recovery_reads;
+mod recovery_streams;
 pub mod rest_models;
 pub mod rest_requests;
 pub mod sbe;

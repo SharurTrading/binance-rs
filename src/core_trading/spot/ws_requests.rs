@@ -6962,8 +6962,7 @@ impl super::WsClient {
         deadline: tokio::time::Instant,
     ) -> Result<crate::Response<super::ws_models::ExchangeInfoResponse>, Error> {
         let response = self.execute(request, id, deadline).await?;
-        super::rate::adopt_stated_ws_limits(self, &response.data)?;
-        Ok(response)
+        super::rate::adopt_stated_ws_limits(self, response)
     }
 
     /// [executionRules](https://developers.binance.com/en/docs/catalog/core-trading-spot-trading/api/ws-api/general).

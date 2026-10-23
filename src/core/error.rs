@@ -407,7 +407,16 @@ pub(crate) fn failure_for(
         status,
         value,
         rates,
-        (op.definitive)(status, value),
+        (op.definitive)(status, value)
+            || (status < 500
+                && matches!(
+                    op.path,
+                    "/fapi/v1/positionSide/dual" | "/dapi/v1/positionSide/dual"
+                )
+                && matches!(
+                    value.get("code").and_then(serde_json::Value::as_i64),
+                    Some(-4067 | -4068)
+                )),
     );
     if let Some(parse) = op.partial
         && let Some(partial) = parse(status, value)

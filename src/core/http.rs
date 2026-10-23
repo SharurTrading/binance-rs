@@ -9,12 +9,17 @@ use super::{
 use serde::de::DeserializeOwned;
 use std::{borrow::Borrow, collections::BTreeMap, sync::Arc, time::Duration};
 use tokio::time::Instant;
+#[path = "http_mode.rs"]
+mod mode;
+
 type BinaryDecoder = fn(&[u8]) -> Result<serde_json::Value, Error>;
 
 #[derive(Clone)]
 pub(crate) struct HttpClient {
     time_unit: super::TimeUnit,
     client: reqwest::Client,
+    tls: Arc<rustls::ClientConfig>,
+    explicit_proxy: bool,
     base: url::Url,
     credentials: Option<Credentials>,
     clock: Arc<dyn Clock>,
@@ -31,8 +36,10 @@ impl HttpClient {
         timeout: Duration,
         proxy: Option<reqwest::Proxy>,
     ) -> Result<Self, Error> {
+        let tls = super::socket::tls_config()?;
+        let explicit_proxy = proxy.is_some();
         let mut builder = reqwest::Client::builder()
-            .tls_backend_preconfigured(super::socket::tls_config()?)
+            .tls_backend_preconfigured(tls.clone())
             .no_proxy()
             .redirect(reqwest::redirect::Policy::none())
             .retry(reqwest::retry::never())
@@ -65,6 +72,8 @@ impl HttpClient {
         Ok(Self {
             time_unit: super::TimeUnit::Milliseconds,
             client,
+            tls: Arc::new(tls),
+            explicit_proxy,
             base,
             credentials,
             clock,

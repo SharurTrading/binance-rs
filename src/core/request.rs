@@ -81,6 +81,9 @@ pub(crate) trait RecoveryRead: Request {}
 /// Their native mutation evidence and request costs remain unchanged.
 pub(crate) trait ReadStreamControl: Request {}
 
+/// A closed set of native position-mode changes explicitly admitted from reserve.
+pub(crate) trait PositionModeControl: Request {}
+
 pub(crate) fn parameters<T: Serialize + ?Sized>(
     request: &T,
 ) -> Result<BTreeMap<String, Value>, Error> {

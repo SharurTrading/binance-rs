@@ -691,6 +691,23 @@ still bind. Authentication and financial requests keep their native admission.
 Run and join each returned driver, drain its accepted events after close, and own
 listen-key renewal and cleanup; no task, reconnect or replay is hidden here.
 
+USDⓈ-M also exposes `change_position_mode_for_recovery` as a separate, sealed
+position-mode control. It uses the native signed mutation and one request-weight
+unit for either a change or a restoration. Binance shares this setting across
+USDⓈ-M and COIN-M. The caller supplies authorization and fresh native evidence
+covering both markets under its own exclusive account ownership. Its absolute
+`Instant` deadline must include that authority's validity. Other mutations and
+ordinary market reads keep their ordinary admission.
+
+This mode control owns one HTTP connection in the calling future. It uses the same
+TLS roots and hostname verification as the normal client, without pooling or
+retries. Before the first positive application write it checks the original quota
+charge, its native windows, shared cooldown and deadline again; it never charges
+the attempt twice. Pending and zero-byte writes retain the check. Once a positive
+write or an inner write error occurs, later transport failure is execution-unknown.
+Dropping the future closes the owned connection. Explicit proxies are refused with
+`Error::Configuration` before admission because this transport cannot honor them.
+
 The caller decides when recovery is needed, bounds its work and owns the shared
 reserve policy. These methods do not schedule recovery, infer snapshot completeness
 or guarantee capacity remains for a later exit. Every attempt consumes the same

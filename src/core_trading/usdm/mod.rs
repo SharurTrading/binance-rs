@@ -14,6 +14,7 @@ pub mod enums;
 pub mod event_payloads;
 mod exit_reads;
 mod rate;
+mod recovery_modes;
 mod recovery_reads;
 mod recovery_streams;
 pub mod rest_models;

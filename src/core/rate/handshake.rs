@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Kevin Monaghan
 // SPDX-License-Identifier: MIT-0
 
-//! A precharged upgrade remains valid only in its original native quota windows.
+//! A precharged transport attempt remains valid only in its original native quota windows.
 
 use crate::Error;
 use crate::core::rate::{Budgets, Cost, State, WindowCharge, reserve};
@@ -16,13 +16,14 @@ struct ChargedWindow {
 
 pub(crate) struct HandshakeCharge {
     cost: Cost,
+    operation: &'static str,
     admitted_at: u64,
     ip: Vec<ChargedWindow>,
     websocket: Vec<ChargedWindow>,
 }
 
 impl HandshakeCharge {
-    fn new(cost: Cost, admitted_at: u64) -> Result<Self, Error> {
+    fn new(cost: Cost, admitted_at: u64, operation: &'static str) -> Result<Self, Error> {
         let Cost {
             rolling: None,
             authority_expiry: None,
@@ -45,6 +46,7 @@ impl HandshakeCharge {
         };
         Ok(Self {
             cost,
+            operation,
             admitted_at,
             ip: Vec::new(),
             websocket: Vec::new(),
@@ -78,7 +80,16 @@ fn charged(costs: &[Option<WindowCharge>], admitted_at: u64) -> Vec<ChargedWindo
 
 impl Budgets {
     pub(crate) fn admit_handshake(&self, cost: Cost, now: u64) -> Result<HandshakeCharge, Error> {
-        let mut charge = HandshakeCharge::new(cost, now)?;
+        self.admit_precharged(cost, now, "connect")
+    }
+
+    pub(crate) fn admit_precharged(
+        &self,
+        cost: Cost,
+        now: u64,
+        operation: &'static str,
+    ) -> Result<HandshakeCharge, Error> {
+        let mut charge = HandshakeCharge::new(cost, now, operation)?;
         self.admit_native(cost, now, Some(&mut charge))?;
         Ok(charge)
     }
@@ -89,7 +100,7 @@ impl Budgets {
         now: u64,
     ) -> Result<(), Error> {
         if now < charge.admitted_at {
-            return Err(invalid_charge());
+            return Err(invalid_charge(charge.operation));
         }
         let ip = self
             .ip
@@ -101,6 +112,7 @@ impl Budgets {
             .map_err(|_| Error::Configuration("WS IP budget poisoned"))?;
         ip.check_cooldown(now)?;
         validate(
+            charge.operation,
             &charge.ip,
             &self.ip_cost(&ip, charge.cost),
             &ip,
@@ -109,6 +121,7 @@ impl Budgets {
             now,
         )?;
         validate(
+            charge.operation,
             &charge.websocket,
             &self.ws_cost(&websocket, charge.cost),
             &websocket,
@@ -120,6 +133,7 @@ impl Budgets {
 }
 
 fn validate(
+    operation: &'static str,
     charged: &[ChargedWindow],
     current: &[Option<WindowCharge>],
     state: &State,
@@ -137,7 +151,7 @@ fn validate(
                     name == charge.name && interval == charge.interval && amount == charge.amount
                 })
         {
-            return Err(invalid_charge());
+            return Err(invalid_charge(operation));
         }
     }
     for &(name, interval, limit, amount) in current.iter().flatten() {
@@ -147,13 +161,13 @@ fn validate(
         let charge = charged
             .iter()
             .find(|charge| charge.name == name && charge.interval == interval)
-            .ok_or_else(invalid_charge)?;
+            .ok_or_else(|| invalid_charge(operation))?;
         if now / interval != charge.bucket {
-            return Err(invalid_charge());
+            return Err(invalid_charge(operation));
         }
         let count = state.current(name, interval, now);
         if count < charge.amount {
-            return Err(invalid_charge());
+            return Err(invalid_charge(operation));
         }
         let retained = match name {
             "weight" => weight_reserve,
@@ -170,10 +184,14 @@ fn validate(
     Ok(())
 }
 
-fn invalid_charge() -> Error {
+fn invalid_charge(operation: &'static str) -> Error {
     Error::NotSent {
         client_order_ids: BTreeMap::new(),
-        operation: "connect",
-        reason: "handshake quota admission is no longer valid",
+        operation,
+        reason: if operation == "connect" {
+            "handshake quota admission is no longer valid"
+        } else {
+            "native quota admission is no longer valid"
+        },
     }
 }

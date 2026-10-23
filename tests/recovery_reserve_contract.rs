@@ -651,3 +651,17 @@ recovery_metadata!(
     1,
     2400
 );
+
+recovery_read!(
+    coinm_position_information_uses_one_native_unit,
+    coinm,
+    coinm::rest_models::PositionInformationResponse,
+    "positionInformation",
+    position_information,
+    position_information_for_recovery,
+    coinm::rest_requests::PositionInformation::new(),
+    1,
+    "/dapi/v1/positionRisk",
+    check_server_time_for_recovery,
+    coinm::rest_requests::CheckServerTime::new()
+);

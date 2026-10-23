@@ -664,7 +664,7 @@ mutation is eligible through these methods.
 | Product | Recovery reads (all names have the `_for_recovery` suffix) |
 | --- | --- |
 | USDⓈ-M REST | `futures_account_balance_v3`, `futures_account_configuration`, `get_current_position_mode`, `account_information_v3`, `position_information_v3`, `current_all_open_orders`, `current_all_algo_open_orders`, `account_trade_list`, `check_server_time`, `exchange_information` |
-| COIN-M REST | `futures_account_balance`, `get_current_position_mode`, `account_information`, `current_all_open_orders`, `open_algo_orders`, `account_trade_list`, `check_server_time`, `exchange_information` |
+| COIN-M REST | `futures_account_balance`, `get_current_position_mode`, `account_information`, `position_information`, `current_all_open_orders`, `open_algo_orders`, `account_trade_list`, `check_server_time`, `exchange_information` |
 | Spot REST | `get_account`, `get_open_orders`, `my_trades`, `time`, `exchange_info` |
 
 Ordinary and recovery metadata reads validate the whole stated limit set before

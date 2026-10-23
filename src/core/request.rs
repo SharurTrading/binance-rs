@@ -69,6 +69,12 @@ pub(crate) trait Request: Serialize + Send + Sync {
 /// and reducing orders are. The ordinary method for the same request never does.
 pub(crate) trait ExitRead: Request {}
 
+/// A native account-evidence read selected by an explicit recovery method.
+///
+/// Implementations form a closed, product-authored set. The ordinary method
+/// for the same request retains its ordinary admission class.
+pub(crate) trait RecoveryRead: Request {}
+
 pub(crate) fn parameters<T: Serialize + ?Sized>(
     request: &T,
 ) -> Result<BTreeMap<String, Value>, Error> {

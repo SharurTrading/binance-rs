@@ -637,7 +637,26 @@ ordinary.
 | COIN-M REST | `current_all_open_orders_for_exit`, `open_algo_orders_for_exit`, `position_information_for_exit` |
 | Spot REST | `get_open_orders_for_exit` |
 
-An exit read is sent at most once and never waits for capacity. It is refused before
+Account recovery can explicitly use reserved capacity through the following REST
+methods. Each name below takes the same native request and returns the same response
+as its ordinary counterpart. Ordinary traffic, including the ordinary counterpart,
+keeps its existing admission. There is no generic eligibility switch and no
+mutation is eligible through these methods.
+
+| Product | Recovery reads (all names have the `_for_recovery` suffix) |
+| --- | --- |
+| USDⓈ-M REST | `futures_account_balance_v3`, `get_current_position_mode`, `account_information_v3`, `position_information_v3`, `current_all_open_orders`, `current_all_algo_open_orders`, `account_trade_list`, `check_server_time` |
+| COIN-M REST | `futures_account_balance`, `get_current_position_mode`, `account_information`, `current_all_open_orders`, `open_algo_orders`, `account_trade_list`, `check_server_time` |
+| Spot REST | `get_account`, `get_open_orders`, `my_trades`, `time` |
+
+The caller decides when recovery is needed, bounds its work and owns the shared
+reserve policy. These methods do not schedule recovery, infer snapshot completeness
+or guarantee capacity remains for a later exit. Every attempt consumes the same
+native costs as its ordinary counterpart, up to the whole native window. Dropping
+a future does not refund charged costs or undo a sent request. A trade-history
+read retains the native endpoint's paging and retention limits.
+
+An exit or recovery read is sent at most once and never waits for capacity. It is refused before
 sending, with nothing sent, in these cases:
 
 | Case | Error |

@@ -106,6 +106,13 @@ things matter when you wrap it:
    Spot `openOrders.status` and Futures `account.position`, have no exit variant, so
    an exit over the WebSocket API reads over REST.
 
+For bounded startup or recovery work, use an explicitly named `_for_recovery`
+REST method from the README's [recovery-read list](../README.md#reserving-capacity-for-exits).
+This admits only those account-evidence reads from the same reserved capacity.
+Every native weight, deadline and cooldown still applies, with no wait or retry.
+The caller controls the finite recovery workload: a recovery read can consume
+capacity an exit would otherwise use. Ordinary polling keeps ordinary admission.
+
 ### User data streams
 
 | Product | How you receive account events |

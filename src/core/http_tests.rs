@@ -137,3 +137,35 @@ async fn one_parameter_snapshot_survives_signing_and_the_authority_recheck() -> 
     }));
     Ok(())
 }
+
+impl RecoveryRead for Attempt {}
+
+#[tokio::test]
+async fn recovery_dispatch_refuses_a_mutation_before_encoding_or_sending() -> Result<(), Error> {
+    let attempt = Attempt {
+        serializations: AtomicUsize::new(0),
+        authority_checks: AtomicUsize::new(0),
+        validated_id: Mutex::new(None),
+    };
+    let client = HttpClient::new(
+        super::super::validate_url("http://127.0.0.1:9", false)?,
+        None,
+        Arc::new(super::super::SystemClock),
+        Budgets::new(super::super::BudgetLimits::usdm())?,
+        Duration::from_secs(1),
+        None,
+    )?;
+    let result = client
+        .execute_recovery_read(&attempt, Instant::now() + Duration::from_secs(1))
+        .await;
+    assert!(
+        matches!(
+            result,
+            Err(Error::Configuration("recovery request must be read-only"))
+        ),
+        "{result:?}"
+    );
+    assert_eq!(attempt.serializations.load(Ordering::SeqCst), 0);
+    assert_eq!(attempt.authority_checks.load(Ordering::SeqCst), 0);
+    Ok(())
+}

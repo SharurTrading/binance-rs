@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT-0
 
 use super::{
-    Budgets, Clock, Cost, Credentials, Error, ExitRead, Operation, Outcome, RateEvidence, Request,
-    Response, ResponseMeta, Security, TransportFailure, request,
+    Budgets, Clock, Cost, Credentials, Error, ExitRead, Operation, Outcome, RateEvidence,
+    RecoveryRead, Request, Response, ResponseMeta, Security, TransportFailure, request,
 };
 use serde::de::DeserializeOwned;
 use std::{borrow::Borrow, collections::BTreeMap, sync::Arc, time::Duration};
@@ -206,6 +206,18 @@ impl HttpClient {
         deadline: Instant,
     ) -> Result<Response<R::Response>, Error> {
         self.send(request, deadline, Admission::ExitRead).await
+    }
+
+    /// Send a bounded account-recovery read, admitted from reserved capacity.
+    pub async fn execute_recovery_read<R: RecoveryRead>(
+        &self,
+        request: &R,
+        deadline: Instant,
+    ) -> Result<Response<R::Response>, Error> {
+        if R::OP.mutation {
+            return Err(Error::Configuration("recovery request must be read-only"));
+        }
+        self.send(request, deadline, Admission::RecoveryRead).await
     }
 
     async fn send<R: Request>(
@@ -417,13 +429,15 @@ enum Admission {
     Priced,
     /// From the exit reserve: a read an exit makes, chosen by its caller.
     ExitRead,
+    /// From reserved capacity: an explicitly selected account-recovery read.
+    RecoveryRead,
 }
 
 impl Admission {
     fn applied(self, cost: Cost) -> Cost {
         match self {
             Self::Priced => cost,
-            Self::ExitRead => Cost {
+            Self::ExitRead | Self::RecoveryRead => Cost {
                 exit: super::rate::reserve::ExitEligibility::Eligible,
                 ..cost
             },

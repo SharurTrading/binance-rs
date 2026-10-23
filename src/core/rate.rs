@@ -155,8 +155,10 @@ impl BudgetLimits {
     }
 }
 
+mod handshake;
 pub(crate) mod reserve;
 mod rolling;
+pub(crate) use handshake::HandshakeCharge;
 pub use reserve::ExitReserve;
 pub(crate) use rolling::RollingLimit;
 
@@ -339,7 +341,27 @@ impl Budgets {
             c.history.then_some(("history", 300_000, 1000, 1)),
         ]
     }
+    fn ws_cost(&self, ws: &State, c: Cost) -> [Option<WindowCharge>; 1] {
+        [Some((
+            "weight",
+            60_000,
+            self.ws_weight_limit(ws).0,
+            if self.limits.shared_request_weight {
+                0
+            } else {
+                c.ws_weight
+            },
+        ))]
+    }
     pub(crate) fn admit(&self, c: Cost, now: u64) -> Result<(), Error> {
+        self.admit_native(c, now, None)
+    }
+    fn admit_native(
+        &self,
+        c: Cost,
+        now: u64,
+        handshake: Option<&mut HandshakeCharge>,
+    ) -> Result<(), Error> {
         if let Some(cost) = c.sapi {
             return self.admit_sapi(cost, c, now);
         }
@@ -358,16 +380,7 @@ impl Budgets {
         ip.check_cooldown(now)?;
         account.check_rolling(c.rolling, now)?;
         let ip_cost = self.ip_cost(&ip, c);
-        let ws_cost = [Some((
-            "weight",
-            60_000,
-            self.ws_weight_limit(&ws_ip).0,
-            if self.limits.shared_request_weight {
-                0
-            } else {
-                c.ws_weight
-            },
-        ))];
+        let ws_cost = self.ws_cost(&ws_ip, c);
         let [orders10, orders60, orders_day] = self.order_limits(&ip, &account);
         let placements = c.orders10.max(c.orders60).max(c.orders_day);
         // Count placements in every aligned window, including a window whose
@@ -438,6 +451,9 @@ impl Budgets {
                 .ok_or(Error::Configuration("budget overflow"))?;
         }
         account.charge_rolling(c.rolling, now);
+        if let Some(handshake) = handshake {
+            handshake.record(&ip_cost, &ws_cost);
+        }
         Ok(())
     }
     /// Count one FIX connection attempt against the IP window shared by every

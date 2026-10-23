@@ -299,7 +299,7 @@ impl Socket {
         let ws = crate::core::socket_handshake::connect(
             &url,
             api_key,
-            clock.as_ref(),
+            Arc::clone(&clock),
             &budgets,
             timeout,
             &policy,

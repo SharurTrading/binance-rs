@@ -126,7 +126,10 @@ caller still owns stream renewal, driver tasks and joined teardown.
 WebSocket connection attempts retain rejected HTTP upgrade status and safe rate
 headers. A received `429` cooldown or untimed `418` ban refuses the next attempt
 locally, whether ordinary or recovery. A single owned deadline covers name lookup,
-TCP, TLS and native upgrade validation; no reconnect or retry is hidden.
+TCP, TLS and native upgrade validation; no reconnect or retry is hidden. Setup
+rechecks the original admission before writing upgrade bytes. An elapsed charged
+quota window or backward clock returns `NotSent` without sending the
+upgrade, refunding the original attempt or moving its charge into another window.
 When the receipt clock fails, HTTP and upgrade responses retain their safe metadata
 and report `RateEvidenceFailed` with the original mutation/read outcome. The shared
 IP pool refuses later attempts with `CooldownTimingUnknown`; it does not date

@@ -220,7 +220,7 @@ pub enum Error {
     #[error("deadline expired before sending {0}")]
     Expired(&'static str),
     /// An unsent command was refused before any byte reached the socket. The
-    /// reason is the caller's own lifecycle, not a venue deadline or verdict.
+    /// reason is a local lifecycle or admission refusal, not a venue verdict.
     #[error("{operation} was not sent: {reason}")]
     NotSent {
         /// Caller-supplied reconciliation identities of the refused command.

@@ -196,7 +196,12 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
   the pool, including recovery connections. `WebSocketHandshakeRejected` identifies
   a non-101 response; `WebSocketHandshakeInvalid` identifies a received 101 that
   failed native upgrade validation. A sent upgrade fails as `ReadFailed`; an attempt
-  that sent no upgrade request bytes is `NotSent`. Raw headers, URLs and server text
+  that sent no upgrade request bytes is `NotSent`. Immediately before the first
+  upgrade bytes, the original charge is checked against current shared cooldowns,
+  limits and reserves. Setup that outlives any charged native quota window or moves
+  the clock backwards is refused as `NotSent`; an elapsed deadline is refused as
+  `Expired("connect")` at this check. The attempt remains charged in its original
+  window; no refund, repricing or retry occurs. Raw headers, URLs and server text
   are not exposed.
   A failed receipt-clock observation returns `RateEvidenceFailed` with received
   metadata and holds the shared IP pool with `CooldownTimingUnknown`. Counters and

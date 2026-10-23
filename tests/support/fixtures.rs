@@ -79,6 +79,14 @@ impl HttpFixture {
         Self::spawn(Vec::new(), Policy::NoHeaders).await
     }
 
+    #[allow(
+        dead_code,
+        reason = "raw wire responses are used only by the handshake contract binary"
+    )]
+    pub async fn raw_response(bytes: &[u8]) -> Self {
+        Self::spawn(bytes.to_vec(), Policy::Close { hold: false }).await
+    }
+
     pub async fn new(
         status: u16,
         headers: &str,

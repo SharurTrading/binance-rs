@@ -55,8 +55,10 @@ impl Head {
             let content = content.strip_suffix(b"\r").unwrap_or(content);
             match self.phase {
                 Phase::Status => {
-                    self.status = status(content);
-                    self.phase = Phase::Headers;
+                    if !content.is_empty() {
+                        self.status = status(content);
+                        self.phase = Phase::Headers;
+                    }
                 }
                 Phase::Headers => {
                     if content.is_empty() {
@@ -96,11 +98,7 @@ fn status(line: &[u8]) -> Option<u16> {
     if code.len() != 3 || !code.iter().all(u8::is_ascii_digit) {
         return None;
     }
-    std::str::from_utf8(code)
-        .ok()?
-        .parse()
-        .ok()
-        .filter(|code| (100..=999).contains(code))
+    std::str::from_utf8(code).ok()?.parse().ok()
 }
 
 fn capture_header(rates: &mut RateEvidence, line: &[u8]) {
@@ -337,13 +335,30 @@ mod tests {
     }
 
     #[test]
-    fn unregistered_status_preserves_safe_response_evidence() {
+    fn fragmented_leading_empty_lines_preserve_received_status_and_rates() {
         let mut head = Head::default();
-        head.receive(b"HTTP/1.1 799 synthetic-secret\r\nRetry-After: 2\r\n\r\n");
+        let wire = b"\r\n\n\r\nHTTP/1.1 429 synthetic-secret\r\nRetry-After: 2\r\n\r\n";
+        for byte in wire {
+            head.receive(std::slice::from_ref(byte));
+        }
         let meta = head.metadata(crate::TimeUnit::Milliseconds).unwrap();
-        assert_eq!(meta.status, 799);
+        assert_eq!(meta.status, 429);
         assert_eq!(meta.rates.retry_after, Some(Duration::from_secs(2)));
+        assert!(head.line.is_empty());
         assert!(!format!("{meta:?}").contains("synthetic-secret"));
+    }
+
+    #[test]
+    fn unregistered_status_preserves_safe_response_evidence() {
+        for (code, expected) in [("000", 0), ("099", 99), ("799", 799), ("999", 999)] {
+            let mut head = Head::default();
+            let wire = format!("HTTP/1.1 {code} synthetic-secret\r\nRetry-After: 2\r\n\r\n");
+            head.receive(wire.as_bytes());
+            let meta = head.metadata(crate::TimeUnit::Milliseconds).unwrap();
+            assert_eq!(meta.status, expected);
+            assert_eq!(meta.rates.retry_after, Some(Duration::from_secs(2)));
+            assert!(!format!("{meta:?}").contains("synthetic-secret"));
+        }
     }
 
     #[test]

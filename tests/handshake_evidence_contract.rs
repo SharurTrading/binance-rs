@@ -117,6 +117,30 @@ rejected_handshake!(
     ""
 );
 
+macro_rules! leading_empty_lines {
+    ($name:ident, $recovery:literal) => {
+        #[tokio::test]
+        async fn $name() {
+            for prefix in ["\r\n", "\r\n\r\n", "\n", "\n\n"] {
+                let wire = format!("{prefix}HTTP/1.1 429 synthetic-secret\r\nRetry-After: 2\r\nX-MBX-USED-WEIGHT-1M: 17\r\nX-MBX-USED-WEIGHT-9M: 9\r\n\r\n");
+                let fixture = HttpFixture::raw_response(wire.as_bytes()).await;
+                let url = fixture.url.replacen("http://", "ws://", 1);
+                let config = config(&url, $recovery);
+                let error = connect(config.clone(), $recovery).await.err().unwrap();
+                let second = connect(config, $recovery).await.err().unwrap();
+                assert_eq!(fixture.connections_accepted(), 1, "prefix {prefix:?}");
+                received(&error, 429, TransportFailure::WebSocketHandshakeRejected);
+                assert!(matches!(second, Error::Admission { retry_after } if retry_after == Duration::from_secs(2)), "{second:?}");
+                assert_eq!(second.outcome(), Some(Outcome::NotSent));
+                fixture.finish().await;
+            }
+        }
+    };
+}
+
+leading_empty_lines!(ordinary_leading_empty_lines_preserve_cooldown, false);
+leading_empty_lines!(recovery_leading_empty_lines_preserve_cooldown, true);
+
 #[tokio::test]
 async fn ordinary_and_recovery_invalid_accept_retain_native_validation_and_received_headers() {
     for recovery in [false, true] {

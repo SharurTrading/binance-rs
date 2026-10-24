@@ -216,7 +216,7 @@ impl Session {
             .budgets
             .connect(config.role, &config.component, config.heartbeat)?;
         let generation = GENERATION
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| v.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |v| v.checked_add(1))
             .map_err(|_| Error::Configuration("FIX generation overflow"))?;
         let stream = tokio::time::timeout(config.timeout, connect_transport(&config))
             .await
@@ -285,6 +285,8 @@ impl Session {
     ///
     /// # Errors
     /// Retains IDs and `NotSent` versus `Unknown`/`ReadFailed` evidence in `SendFailure`.
+    // The failure returns the caller's owned request with its full attempt evidence.
+    #[allow(clippy::result_large_err)]
     pub async fn send(&self, id: RequestId, request: Request) -> Result<Attempt, SendFailure> {
         let refused = attempt(self.generation, &id, &request, None, Outcome::NotSent);
         let Some(deadline) = Instant::now().checked_add(self.timeout) else {

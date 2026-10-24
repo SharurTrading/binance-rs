@@ -285,7 +285,7 @@ impl Socket {
         policy: SocketPolicy,
     ) -> Result<(Self, SocketEvents, SocketDriver), Error> {
         let generation = GENERATION
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .map_err(|_| Error::Configuration("socket generation overflow"))?;
         let api_key = if policy.api_key_header {
             let credentials = credentials.as_ref().ok_or(Error::CredentialsRequired)?;

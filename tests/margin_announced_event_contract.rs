@@ -83,7 +83,7 @@ fn liability_array_preserves_empty_evidence_and_refuses_invalid_assets() {
     let UserPayload::LiabilityChange(event) = user_payload(value).unwrap() else {
         panic!("native liability event required")
     };
-    assert!(event.upper_l.is_empty());
+    assert_eq!(event.upper_l, []);
     for asset in ["", "US\nDT"] {
         let mut value = liability_change();
         value["L"][1]["a"] = json!(asset);

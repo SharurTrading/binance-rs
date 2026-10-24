@@ -43,7 +43,7 @@ async fn single_id_setter_keeps_its_exact_signed_query_value() {
         .deposit_history_v2(&request, deadline())
         .await
         .unwrap();
-    assert!(response.data.is_empty());
+    assert_eq!(response.data, []);
     let wire = fixture.requests.recv().await.unwrap();
     assert!(wire.starts_with("GET /sapi/v2/localentity/deposit/history?"));
     assert!(
@@ -73,7 +73,7 @@ async fn multiple_exact_ids_use_one_query_parameter_without_a_record_cap() {
         .deposit_history_v2(&request, deadline())
         .await
         .unwrap();
-    assert!(response.data.is_empty());
+    assert_eq!(response.data, []);
     let wire = fixture.requests.recv().await.unwrap();
     assert_eq!(
         deposit_id_values(&wire),

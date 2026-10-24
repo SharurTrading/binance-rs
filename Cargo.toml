@@ -5,7 +5,7 @@
 name = "binance-client"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.95"
+rust-version = "1.99"
 description = "An unofficial async, provider-native Rust client for Binance APIs"
 repository = "https://github.com/SharurTrading/binance-rs"
 homepage = "https://github.com/SharurTrading/binance-rs"
@@ -29,7 +29,7 @@ rust_decimal = { version = "1.43.0", features = ["serde-with-arbitrary-precision
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.151", features = ["arbitrary_precision"] }
 thiserror = "2.0.21"
-tokio = { version = "1.53.1", features = ["rt", "macros", "net", "sync", "time", "io-util"] }
+tokio = { version = "1.54.1", features = ["rt", "macros", "net", "sync", "time", "io-util"] }
 tokio-websockets = { version = "0.13.3", features = ["client", "aws_lc_rs", "getrandom", "rustls-bring-your-own-connector"] }
 rustls = { version = "0.23.45", default-features = false, features = ["aws_lc_rs", "std", "tls12"] }
 tokio-rustls = { version = "0.26.5", default-features = false }
@@ -41,7 +41,7 @@ zeroize = { version = "1.9.0", features = ["derive"] }
 
 [dev-dependencies]
 tokio-websockets = { version = "0.13.3", features = ["server"] }
-tokio = { version = "1.53.1", features = ["rt-multi-thread", "test-util", "io-util"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "test-util", "io-util"] }
 
 [lints.rust]
 missing_docs = "deny"

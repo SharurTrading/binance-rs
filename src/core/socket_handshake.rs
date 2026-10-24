@@ -410,7 +410,7 @@ mod tests {
         assert_eq!(meta.rates.counters["x-mbx-used-weight-1m"], 17);
         assert_eq!(meta.rates.counters.len(), 1);
         assert!(head.line.is_empty());
-        assert!(head.phase == Phase::Done);
+        assert_eq!(head.phase, Phase::Done);
         assert!(!format!("{meta:?}").contains("synthetic-secret"));
     }
 
@@ -448,7 +448,7 @@ mod tests {
         assert_eq!(head.status, Some(418));
         assert_eq!(head.rates.counters["x-mbx-used-weight-1m"], 17);
         assert_eq!(head.rates.retry_after, None);
-        assert!(head.phase == Phase::Done);
+        assert_eq!(head.phase, Phase::Done);
         assert!(head.line.is_empty());
     }
 
@@ -460,7 +460,7 @@ mod tests {
             head.receive(b"x-ignored: synthetic-secret\r\n");
         }
         head.receive(b"Retry-After: 9999\r\nX-MBX-USED-WEIGHT-1M: 9999\r\n\r\n");
-        assert!(head.phase == Phase::Done);
+        assert_eq!(head.phase, Phase::Done);
         assert_eq!(head.headers, 25);
         assert!(head.line.is_empty());
         assert_eq!(head.rates.retry_after, Some(Duration::from_secs(2)));
@@ -858,7 +858,7 @@ mod tests {
                 .unwrap();
             let result = builder.connect_on(stream).await;
             drop(result);
-            assert!(server.await.unwrap().is_empty());
+            assert_eq!(server.await.unwrap(), [] as [u8; 0]);
             let head = evidence.lock().unwrap();
             let error = head.refusal.as_ref().unwrap();
             assert!(matches!(error, Error::Expired("connect")));
@@ -973,7 +973,7 @@ mod tests {
                 Poll::Ready(Err(_))
             ));
             assert_eq!(stream.inner.polls, 2);
-            assert!(stream.inner.sent.is_empty());
+            assert_eq!(stream.inner.sent, [] as [u8; 0]);
             let head = evidence.lock().unwrap();
             assert!(matches!(head.refusal, Some(Error::CooldownTimingUnknown)));
             assert!(!head.sent);
@@ -996,7 +996,7 @@ mod tests {
                 Poll::Ready(Err(_))
             ));
             assert_eq!(stream.inner.polls, 1);
-            assert!(stream.inner.sent.is_empty());
+            assert_eq!(stream.inner.sent, [] as [u8; 0]);
             assert!(matches!(
                 evidence.lock().unwrap().refusal,
                 Some(Error::CooldownTimingUnknown)

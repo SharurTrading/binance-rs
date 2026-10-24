@@ -320,7 +320,7 @@ fn pending_and_zero_keep_first_write_authority_until_a_positive_vectored_write()
         Poll::Ready(Err(_))
     ));
     assert_eq!(stream.inner.polls, 2);
-    assert!(stream.inner.bytes.is_empty());
+    assert_eq!(stream.inner.bytes, [] as [u8; 0]);
     assert!(!evidence.lock().unwrap().attempted);
     assert!(matches!(
         evidence.lock().unwrap().refusal,
@@ -414,7 +414,7 @@ fn an_expired_guard_refuses_before_invoking_the_plaintext_writer() {
         Poll::Ready(Err(_))
     ));
     assert_eq!(stream.inner.polls, 0);
-    assert!(stream.inner.bytes.is_empty());
+    assert_eq!(stream.inner.bytes, [] as [u8; 0]);
     assert!(!evidence.lock().unwrap().attempted);
     assert!(matches!(
         evidence.lock().unwrap().refusal,

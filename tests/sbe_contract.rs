@@ -35,7 +35,7 @@ fn api_filters_decode_zero_fixed_blocks_with_variable_entries() {
     b.extend_from_slice(&0_u32.to_le_bytes()); // asset filters
     let filters: binance_client::spot::rest_models::MyFiltersResponse =
         binance_client::spot::sbe::decode_api(&b).unwrap();
-    assert!(filters.exchange_filters.unwrap().is_empty());
+    assert_eq!(filters.exchange_filters.unwrap(), []);
     assert!(matches!(&filters.symbol_filters.unwrap()[0],
         binance_client::spot::rest_models::MyFiltersResponseSymbolFiltersItem::MaxPosition(f)
         if f.max_position == "1.234".parse::<Decimal>().unwrap()));

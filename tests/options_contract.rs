@@ -235,7 +235,7 @@ fn options_depth_snapshots_retain_finite_venue_evidence_and_refuse_bad_decimals(
     assert_eq!(snapshot.last_update_id, 12);
     assert_eq!(snapshot.bids[0].price, Decimal::new(-125, 2));
     assert_eq!(snapshot.bids[0].quantity, Decimal::new(275_000_001, 8));
-    assert!(snapshot.asks.is_empty());
+    assert_eq!(snapshot.asks, []);
     let mut missing = value.clone();
     missing.as_object_mut().unwrap().remove("lastUpdateId");
     assert!(serde_json::from_value::<options::rest_models::OrderBookResponse>(missing).is_err());

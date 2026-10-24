@@ -660,7 +660,7 @@ fn dated_public_exchange_information_facts_decode_in_their_own_market() {
         for market in ["usdm", "coinm"] {
             assert_eq!(evidence[market]["evidence"]["httpStatus"], 200);
             let symbols = evidence[market]["evidence"]["symbols"].as_array().unwrap();
-            assert!(!symbols.is_empty());
+            assert_ne!(symbols.as_slice(), [] as [serde_json::Value; 0]);
             for symbol in symbols {
                 binance_client::Symbol::new(symbol["symbol"].as_str().unwrap()).unwrap();
                 let contract = symbol["contractType"].clone();

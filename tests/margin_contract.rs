@@ -858,13 +858,13 @@ async fn upcoming_open_order_list_endpoint_refuses_before_effective_utc_date() {
             .unwrap(),
     )
     .unwrap();
-    assert!(
+    assert_eq!(
         eligible
             .query_margin_accounts_open_otootoco_order_lists(&request, deadline())
             .await
             .unwrap()
-            .data
-            .is_empty()
+            .data,
+        []
     );
     assert_eq!(fixture.connections_accepted(), 1);
     fixture.finish().await;
@@ -1218,13 +1218,13 @@ async fn all_symbol_open_orders_charge_full_native_count_on_shared_ip_owner() {
         .trading_symbol_count(margin::TradingSymbolCount::new(50, 2000).unwrap())
         .build()
         .unwrap();
-    assert!(
+    assert_eq!(
         first
             .query_margin_accounts_open_orders(&request, deadline())
             .await
             .unwrap()
-            .data
-            .is_empty()
+            .data,
+        []
     );
     let wire = fixture.requests.recv().await.unwrap();
     assert!(!wire.contains("trading_symbol_count"));
@@ -1242,13 +1242,13 @@ async fn all_symbol_open_orders_charge_full_native_count_on_shared_ip_owner() {
         .symbol(Symbol::new("BTCUSDT").unwrap())
         .build()
         .unwrap();
-    assert!(
+    assert_eq!(
         second
             .query_margin_accounts_open_orders(&symbol, deadline())
             .await
             .unwrap()
-            .data
-            .is_empty()
+            .data,
+        []
     );
     let wire = fixture.requests.recv().await.unwrap();
     assert!(wire.contains("symbol=BTCUSDT"));

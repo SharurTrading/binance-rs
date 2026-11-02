@@ -48,6 +48,48 @@ async fn finish(mut peer: WebSocketStream<TcpStream>) {
 }
 
 #[tokio::test]
+async fn spot_private_record_loss_keeps_queued_and_new_balance_evidence() {
+    let (l, url) = listener().await;
+    let (continue_tx, continue_rx) = oneshot::channel();
+    let server = tokio::spawn(async move {
+        let mut peer = accept(l).await;
+        let good = json!({"subscriptionId":7,"event":{"e":"outboundAccountPosition","E":1,"u":1,"B":[{"a":"BTC","f":"1.25","l":"2"}]}});
+        let bad = json!({"subscriptionId":7,"event":{"e":"outboundAccountPosition","E":1,"u":1,"B":[{"a":"BTC","f":"bad","l":"2"}]}});
+        for event in [&good, &bad, &good] {
+            peer.send(Message::text(event.to_string())).await.unwrap();
+        }
+        continue_rx.await.unwrap();
+        peer.send(Message::text(good.to_string())).await.unwrap();
+        finish(peer).await;
+    });
+    let config = spot::Config::with_pools(spot::Environment::Demo, &WeightPools::new())
+        .unwrap()
+        .websocket_url(&url)
+        .unwrap();
+    let (client, mut events, driver) = spot::WsClient::connect(config).await.unwrap();
+    let driver = tokio::spawn(driver.run());
+    let generation = client.generation();
+    assert!(matches!(events.recv().await, Some(spot::ApiEvent::Established(g)) if g == generation));
+    assert!(
+        matches!(events.recv().await, Some(spot::ApiEvent::UserData { generation: g, subscription_id: 7, payload: spot::event_payloads::UserPayload::OutboundAccountPosition(ref value) }) if g == generation && value.upper_b[0].f == Decimal::new(125, 2))
+    );
+    assert!(
+        matches!(events.recv().await, Some(spot::ApiEvent::RecordLoss { generation: g, error: Error::Gap(_) }) if g == generation)
+    );
+    assert!(
+        matches!(events.recv().await, Some(spot::ApiEvent::UserData { generation: g, subscription_id: 7, payload: spot::event_payloads::UserPayload::OutboundAccountPosition(ref value) }) if g == generation && value.upper_b[0].f == Decimal::new(125, 2))
+    );
+    continue_tx.send(()).unwrap();
+    assert!(
+        matches!(events.recv().await, Some(spot::ApiEvent::UserData { generation: g, subscription_id: 7, payload: spot::event_payloads::UserPayload::OutboundAccountPosition(ref value) }) if g == generation && value.upper_b[0].f == Decimal::new(125, 2))
+    );
+    client.close().await.unwrap();
+    assert!(matches!(events.recv().await, Some(spot::ApiEvent::Retired(g)) if g == generation));
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+
+#[tokio::test]
 async fn spot_api_signature_subscription_delivers_partial_balances_and_shutdown_in_order() {
     let (l, url) = listener().await;
     let server = tokio::spawn(async move {
@@ -724,6 +766,39 @@ macro_rules! membership_contract {
                 events.close().await.unwrap();
                 assert!(matches!(events.recv().await, Some(StreamEvent::Retired(g)) if g == generation));
                 driver.await.unwrap().unwrap();
+            }
+
+            #[tokio::test]
+            async fn malformed_records_keep_the_suffix_and_new_input_on_the_same_generation() {
+                let (l, url) = listener().await;
+                let stream = stream($symbol_a);
+                let name = stream.name().to_owned();
+                let wire = name.clone();
+                let (continue_tx, continue_rx) = oneshot::channel();
+                let server = tokio::spawn(async move {
+                    let mut peer = accept(l).await;
+                    peer.send(agg_trade_frame(&wire, $symbol_a)).await.unwrap();
+                    peer.send(Message::text("{malformed")).await.unwrap();
+                    peer.send(agg_trade_frame(&wire, $symbol_a)).await.unwrap();
+                    let bad = json!({"stream":wire,"data":{"e":"aggTrade","E":1,"a":5,"s":$symbol_a,"p":"bad","q":"2","f":100,"l":101,"T":1,"m":true,"M":true}});
+                    peer.send(Message::text(bad.to_string())).await.unwrap();
+                    peer.send(agg_trade_frame(&wire, $symbol_a)).await.unwrap();
+                    continue_rx.await.unwrap();
+                    peer.send(agg_trade_frame(&wire, $symbol_a)).await.unwrap();
+                    finish(peer).await;
+                });
+                let (mut events, driver) = $connect(&url, &[stream]).await;
+                let driver = tokio::spawn(driver.run());
+                let generation = established(&mut events).await;
+                expect_trade(&mut events, generation, &name).await;
+                assert!(matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation: g, error: Error::Gap("malformed JSON event") }) if g == generation));
+                expect_trade(&mut events, generation, &name).await;
+                assert!(matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation: g, error: Error::Gap(_) }) if g == generation));
+                expect_trade(&mut events, generation, &name).await;
+                continue_tx.send(()).unwrap();
+                expect_trade(&mut events, generation, &name).await;
+                retire(&mut events, driver, generation).await;
+                server.await.unwrap();
             }
 
             #[tokio::test]

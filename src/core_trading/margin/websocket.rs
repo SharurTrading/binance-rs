@@ -350,7 +350,16 @@ pub enum ApiEvent {
         /// Exact provider payload, redacted in diagnostics.
         payload: UnknownMessage,
     },
-    /// Actual transport loss or malformed known event.
+    /// One complete message could not be decoded; the generation remains open.
+    ///
+    /// Later data is delivered in source order without consumer acknowledgement.
+    RecordLoss {
+        /// Source socket generation.
+        generation: u64,
+        /// Safe typed cause, without raw message contents.
+        error: Error,
+    },
+    /// Terminal transport, session or control failure; retirement follows.
     Gap {
         /// Source socket generation.
         generation: u64,
@@ -409,6 +418,9 @@ impl ApiEvents {
             }
             SocketEvent::Established(g) => ApiEvent::Established(g),
             SocketEvent::Retired(g) => ApiEvent::Retired(g),
+            SocketEvent::RecordLoss { generation, error } => {
+                ApiEvent::RecordLoss { generation, error }
+            }
             SocketEvent::Gap { generation, error } => ApiEvent::Gap { generation, error },
             SocketEvent::Late {
                 generation,
@@ -424,6 +436,7 @@ impl ApiEvents {
                         result: decode_subscription(value, meta),
                     }
                 } else {
+                    self.inner.stop();
                     ApiEvent::Gap {
                         generation,
                         error: Error::Gap("unknown Margin pending operation"),
@@ -457,10 +470,7 @@ impl ApiEvents {
                             subscription_id,
                             payload,
                         },
-                        Err(error) => {
-                            self.inner.stop();
-                            ApiEvent::Gap { generation, error }
-                        }
+                        Err(error) => ApiEvent::RecordLoss { generation, error },
                     }
                 } else {
                     ApiEvent::Unknown {
@@ -528,6 +538,9 @@ impl RiskStream {
             }
             SocketEvent::Established(g) => RiskEvent::Established(g),
             SocketEvent::Retired(g) => RiskEvent::Retired(g),
+            SocketEvent::RecordLoss { generation, error } => {
+                RiskEvent::RecordLoss { generation, error }
+            }
             SocketEvent::Gap { generation, error } => RiskEvent::Gap { generation, error },
             SocketEvent::NativeBinary { generation, .. } => {
                 self.events.stop();
@@ -541,10 +554,7 @@ impl RiskStream {
                     generation,
                     payload,
                 },
-                Err(error) => {
-                    self.events.stop();
-                    RiskEvent::Gap { generation, error }
-                }
+                Err(error) => RiskEvent::RecordLoss { generation, error },
             },
             SocketEvent::Late { generation, .. } => {
                 self.events.stop();
@@ -590,7 +600,16 @@ pub enum RiskEvent {
         /// Native Margin risk payload.
         payload: UserPayload,
     },
-    /// Malformed known record or actual transport loss.
+    /// One complete message could not be decoded; the generation remains open.
+    ///
+    /// Later data is delivered in source order without consumer acknowledgement.
+    RecordLoss {
+        /// Source socket generation.
+        generation: u64,
+        /// Safe typed cause, without raw message contents.
+        error: Error,
+    },
+    /// Terminal transport, session or control failure; retirement follows.
     Gap {
         /// Source generation.
         generation: u64,

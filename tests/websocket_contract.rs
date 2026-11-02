@@ -82,6 +82,49 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn malformed_unsolicited_json_preserves_pending_replies_and_later_requests() {
+        let (listener, url) = listener().await;
+        let server = tokio::spawn(async move {
+            let mut ws = accept(listener).await;
+            let first = next_json(&mut ws).await;
+            let second = next_json(&mut ws).await;
+            assert_eq!(first["id"], "depth-before");
+            assert_eq!(second["id"], "depth-after");
+            ws.send(Message::text(json!({"id":first["id"],"status":200,"result":{"lastUpdateId":41,"bids":[],"asks":[]}}).to_string())).await.unwrap();
+            ws.send(Message::text("{malformed")).await.unwrap();
+            ws.send(Message::text(json!({"id":second["id"],"status":200,"result":{"lastUpdateId":42,"bids":[],"asks":[]}}).to_string())).await.unwrap();
+            let later = next_json(&mut ws).await;
+            assert_eq!(later["id"], "depth-later");
+            ws.send(Message::text(json!({"id":later["id"],"status":200,"result":{"lastUpdateId":43,"bids":[],"asks":[]}}).to_string())).await.unwrap();
+            finish_server(ws).await;
+        });
+        let (client, mut events, driver) = WsClient::connect(config().websocket_url(&url).unwrap())
+            .await
+            .unwrap();
+        let driver = tokio::spawn(driver.run());
+        let generation = client.generation();
+        assert!(matches!(events.recv().await, Some(ApiEvent::Established(g)) if g == generation));
+        let depth = binance_client::usdm::ws_requests::OrderBook::new()
+            .symbol(Symbol::new("BTCUSDT").unwrap())
+            .limit(5);
+        let before = client.order_book(&depth, RequestId::new("depth-before").unwrap(), deadline());
+        let after = client.order_book(&depth, RequestId::new("depth-after").unwrap(), deadline());
+        let (before, after) = tokio::join!(before, after);
+        assert_eq!(before.unwrap().data.last_update_id, 41);
+        assert_eq!(after.unwrap().data.last_update_id, 42);
+        assert!(
+            matches!(events.recv().await, Some(ApiEvent::RecordLoss { generation: g, error: Error::Gap("malformed JSON event") }) if g == generation)
+        );
+        let later = client
+            .order_book(&depth, RequestId::new("depth-later").unwrap(), deadline())
+            .await
+            .unwrap();
+        assert_eq!(later.data.last_update_id, 43);
+        retire(&client, &mut events, driver).await;
+        server.await.unwrap();
+    }
+
+    #[tokio::test]
     async fn websocket_api_failure_preserves_exact_message_without_logging_it() {
         let (listener, url) = listener().await;
         let message =
@@ -872,8 +915,9 @@ mod tests {
         streams.recv().await.unwrap();
         assert!(matches!(
             streams.recv().await,
-            Some(StreamEvent::Gap { .. })
+            Some(StreamEvent::RecordLoss { .. })
         ));
+        streams.close().await.unwrap();
         assert!(matches!(
             streams.recv().await,
             Some(StreamEvent::Retired(_))

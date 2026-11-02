@@ -246,11 +246,12 @@ fn options_depth_snapshots_retain_finite_venue_evidence_and_refuse_bad_decimals(
 }
 
 #[tokio::test]
-async fn options_socket_retains_prefix_then_malformed_gap_and_joins_retirement() {
+async fn options_socket_preserves_new_input_after_a_malformed_record() {
     use futures_util::{SinkExt, StreamExt};
     use tokio_websockets::{Limits, Message, ServerBuilder};
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let url = format!("ws://{}", listener.local_addr().unwrap());
+    let (continue_tx, continue_rx) = tokio::sync::oneshot::channel();
     let server = tokio::spawn(async move {
         let (tcp, _) = listener.accept().await.unwrap();
         let (request, mut peer) = ServerBuilder::new()
@@ -269,6 +270,8 @@ async fn options_socket_retains_prefix_then_malformed_gap_and_joins_retirement()
         ] {
             peer.send(Message::text(event.to_string())).await.unwrap();
         }
+        continue_rx.await.unwrap();
+        peer.send(Message::text(json!({"e":"BALANCE_POSITION_UPDATE","E":4,"T":4,"m":"ORDER","B":[{"a":"USDT","b":"3","bc":"1"}],"P":[]}).to_string())).await.unwrap();
         while let Some(message) = peer.next().await {
             if message.unwrap().is_close() {
                 peer.flush().await.unwrap();
@@ -300,8 +303,13 @@ async fn options_socket_retains_prefix_then_malformed_gap_and_joins_retirement()
         })
     ));
     assert!(
-        matches!(streams.recv().await,Some(options::StreamEvent::Gap{generation:g,..}) if g==generation)
+        matches!(streams.recv().await,Some(options::StreamEvent::RecordLoss{generation:g,..}) if g==generation)
     );
+    continue_tx.send(()).unwrap();
+    assert!(
+        matches!(streams.recv().await,Some(options::StreamEvent::Data { generation:g,payload:options::streams::StreamPayload::User(options::event_payloads::UserPayload::BalancePositionUpdate(value)) }) if g==generation && value.upper_e == 4)
+    );
+    streams.close().await.unwrap();
     assert!(matches!(streams.recv().await,Some(options::StreamEvent::Retired(g)) if g==generation));
     assert!(streams.recv().await.is_none());
     driver.await.unwrap().unwrap();

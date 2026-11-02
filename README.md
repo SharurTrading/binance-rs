@@ -211,7 +211,10 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
   the received quota evidence, then explicitly call `release_unknown_ban()`;
   waiting for a quota window or changing the reserve does not clear that hold.
 - Ingress is unbounded and source ordered. Queue depth, oldest age, and counts
-  distinguish lag from actual loss. Generations, gaps, and retirement are explicit.
+  distinguish lag from actual loss. `RecordLoss { generation, error }` reports one
+  malformed complete WebSocket message without closing the generation. Later
+  messages remain deliverable in source order without acknowledgement. Terminal
+  transport/session/control faults still report `Gap` followed by `Retired`.
 - Market and execution connections are separate. Mixed market routes are refused.
   Spot execution events arrive through WebSocket API subscriptions; Futures use
   listen keys. Renewal and reconnect are explicit caller operations; no automatic

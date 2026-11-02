@@ -47,6 +47,10 @@ macro_rules! user_stream {
                 );
                 let (_, mut ws) = ServerBuilder::new().accept(tcp).await.unwrap();
                 ws.send(Message::text($frame)).await.unwrap();
+                let mut malformed: serde_json::Value = serde_json::from_str($frame).unwrap();
+                malformed["E"] = serde_json::json!("invalid timestamp");
+                ws.send(Message::text(malformed.to_string())).await.unwrap();
+                ws.send(Message::text($frame)).await.unwrap();
                 ws.send(Message::text(
                     r#"{"e":"futureNativeEvent","E":1700000001001,"future":"native"}"#,
                 ))
@@ -80,6 +84,8 @@ macro_rules! user_stream {
                     ..
                 })
             ));
+            assert!(matches!(stream.recv().await, Some(StreamEvent::RecordLoss { error: binance_client::Error::Gap(_), .. })));
+            assert!(matches!(stream.recv().await, Some(StreamEvent::Data { payload: $product::event_payloads::Payload::$variant(_), .. })));
             assert!(matches!(
                 stream.recv().await,
                 Some(StreamEvent::Data {

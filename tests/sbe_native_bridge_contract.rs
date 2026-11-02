@@ -38,6 +38,7 @@ fn quote() -> Vec<u8> {
 async fn native_binary_and_json_shutdown_keep_one_generation_and_source_order() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let endpoint = format!("ws://{}", listener.local_addr().unwrap());
+    let (continue_tx, continue_rx) = tokio::sync::oneshot::channel();
     let server = tokio::spawn(async move {
         let (stream, _) = listener.accept().await.unwrap();
         let (_, mut socket) = ServerBuilder::new()
@@ -52,6 +53,9 @@ async fn native_binary_and_json_shutdown_keep_one_generation_and_source_order() 
             .unwrap();
         socket.send(Message::binary(quote())).await.unwrap();
         socket.send(Message::binary(vec![0])).await.unwrap();
+        socket.send(Message::binary(quote())).await.unwrap();
+        continue_rx.await.unwrap();
+        socket.send(Message::binary(quote())).await.unwrap();
         while let Some(frame) = socket.next().await {
             if frame.unwrap().is_close() {
                 break;
@@ -94,8 +98,16 @@ async fn native_binary_and_json_shutdown_keep_one_generation_and_source_order() 
         }
     }
     assert!(
-        matches!(events.recv().await, Some(StreamEvent::Gap { generation:g, error:Error::BinaryDecode { .. } }) if g == generation)
+        matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation:g, error:Error::BinaryDecode { .. } }) if g == generation)
     );
+    assert!(
+        matches!(events.recv().await, Some(StreamEvent::Data { generation: g, payload: MarketEvent::BestBidAsk(q) }) if g == generation && q.book_update_id == 42)
+    );
+    continue_tx.send(()).unwrap();
+    assert!(
+        matches!(events.recv().await, Some(StreamEvent::Data { generation: g, payload: MarketEvent::BestBidAsk(q) }) if g == generation && q.book_update_id == 42)
+    );
+    events.close().await.unwrap();
     assert!(matches!(events.recv().await, Some(StreamEvent::Retired(g)) if g == generation));
     assert_eq!(events.queue_stats().unwrap().depth, 0);
     tokio::time::timeout(Duration::from_secs(3), owner)

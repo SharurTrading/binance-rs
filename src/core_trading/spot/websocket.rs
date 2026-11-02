@@ -342,7 +342,16 @@ pub enum ApiEvent {
         /// Redacted provider payload.
         payload: UnknownMessage,
     },
-    /// A real transport or malformed-data gap.
+    /// One complete message could not be decoded; the generation remains open.
+    ///
+    /// Later data is delivered in source order without consumer acknowledgement.
+    RecordLoss {
+        /// Source socket generation.
+        generation: u64,
+        /// Safe typed cause, without raw message contents.
+        error: Error,
+    },
+    /// Terminal transport, session or control failure; retirement follows.
     Gap {
         /// Socket generation.
         generation: u64,
@@ -370,12 +379,18 @@ impl ApiEvents {
         Some(match self.inner.recv().await? {
             SocketEvent::Established(g) => ApiEvent::Established(g),
             SocketEvent::Retired(g) => ApiEvent::Retired(g),
+            SocketEvent::RecordLoss { generation, error } => {
+                ApiEvent::RecordLoss { generation, error }
+            }
             SocketEvent::Gap { generation, error } => ApiEvent::Gap { generation, error },
             // This connection never sends stream control messages.
-            SocketEvent::ControlLate { generation, .. } => ApiEvent::Gap {
-                generation,
-                error: Error::Gap("unexpected stream control answer"),
-            },
+            SocketEvent::ControlLate { generation, .. } => {
+                self.inner.stop();
+                ApiEvent::Gap {
+                    generation,
+                    error: Error::Gap("unexpected stream control answer"),
+                }
+            }
             SocketEvent::NativeBinary { generation, .. } => {
                 self.inner.stop();
                 ApiEvent::Gap {
@@ -385,10 +400,7 @@ impl ApiEvents {
             }
             SocketEvent::Data { generation, value } => match decode_data(generation, value) {
                 Ok(event) => event,
-                Err(error) => {
-                    self.inner.stop();
-                    ApiEvent::Gap { generation, error }
-                }
+                Err(error) => ApiEvent::RecordLoss { generation, error },
             },
             SocketEvent::Late {
                 generation,

@@ -126,11 +126,14 @@ impl Streams {
         ))
     }
     /// Next source-ordered data/lifecycle event. Backlog never discards a fact.
-    /// Malformed known execution data emits a gap and retires the transport.
+    /// A malformed complete record reports loss and keeps later ingress on this generation.
     pub async fn recv(&mut self) -> Option<StreamEvent> {
         Some(match self.events.recv().await? {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
+            SocketEvent::RecordLoss { generation, error } => {
+                StreamEvent::RecordLoss { generation, error }
+            }
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
             SocketEvent::NativeBinary { generation, .. } => {
                 self.events.stop();
@@ -153,8 +156,7 @@ impl Streams {
                                 event_time,
                             }
                         } else {
-                            self.events.stop();
-                            StreamEvent::Gap {
+                            StreamEvent::RecordLoss {
                                 generation,
                                 error: Error::Gap("malformed shutdown notice"),
                             }
@@ -186,16 +188,16 @@ impl Streams {
                         generation,
                         payload,
                     },
-                    Err(error) => {
-                        self.events.stop();
-                        StreamEvent::Gap { generation, error }
-                    }
+                    Err(error) => StreamEvent::RecordLoss { generation, error },
                 }
             }
-            SocketEvent::Late { generation, .. } => StreamEvent::Gap {
-                generation,
-                error: Error::Gap("unexpected market request response"),
-            },
+            SocketEvent::Late { generation, .. } => {
+                self.events.stop();
+                StreamEvent::Gap {
+                    generation,
+                    error: Error::Gap("unexpected market request response"),
+                }
+            }
             SocketEvent::ControlLate {
                 generation,
                 control,
@@ -320,7 +322,16 @@ pub enum StreamEvent {
         /// Typed provider payload.
         payload: StreamPayload,
     },
-    /// Actual transport or malformed-data gap, distinct from ordinary lag.
+    /// One complete message could not be decoded; the generation remains open.
+    ///
+    /// Later data is delivered in source order without consumer acknowledgement.
+    RecordLoss {
+        /// Source socket generation.
+        generation: u64,
+        /// Safe typed cause, without raw message contents.
+        error: Error,
+    },
+    /// Terminal transport, session or control failure; retirement follows.
     Gap {
         /// Original socket generation.
         generation: u64,

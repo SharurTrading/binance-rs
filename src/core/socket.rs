@@ -86,6 +86,10 @@ pub(crate) enum SocketEvent {
         value: Value,
         meta: ResponseMeta,
     },
+    RecordLoss {
+        generation: u64,
+        error: Error,
+    },
     Gap {
         generation: u64,
         error: Error,
@@ -433,12 +437,17 @@ impl SocketDriver {
         let decode = self
             .binary_decoder
             .ok_or(Error::Gap("unexpected binary event on JSON connection"))?;
-        match decode(bytes)? {
-            BinaryPayload::Json(value) => self.response(value),
-            BinaryPayload::Native(payload) => self.emit(SocketEvent::NativeBinary {
+        match decode(bytes) {
+            Ok(BinaryPayload::Json(value)) => self.response(value),
+            Ok(BinaryPayload::Native(payload)) => self.emit(SocketEvent::NativeBinary {
                 generation: self.generation,
                 payload,
             }),
+            Err(error @ Error::BinaryDecode { .. }) => self.emit(SocketEvent::RecordLoss {
+                generation: self.generation,
+                error,
+            }),
+            Err(error) => Err(error),
         }
     }
     fn emit(&mut self, event: SocketEvent) -> Result<(), Error> {
@@ -884,7 +893,7 @@ impl SocketDriver {
                         match serde_json::from_slice::<Value>(message.as_payload()) {
                             Ok(value) if self.require_binary_success && value.get("status").and_then(Value::as_u64).is_none_or(|status|status<400)=>Err(Error::Gap("SBE API successful JSON fallback")),
                             Ok(value)=>self.response(value),
-                            Err(_)=>Err(Error::Gap("malformed JSON event")),
+                            Err(_)=>self.emit(SocketEvent::RecordLoss { generation:self.generation, error:Error::Gap("malformed JSON event") }),
                         }
                     }
                     // The codec automatically sends the exact ping payload as a pong.
@@ -907,10 +916,8 @@ impl SocketDriver {
                 },
             };
             if let Err(error) = step {
-                // Only a proven continuity failure is reported as a gap: a sequence gap,
-                // a malformed record, or transport loss. An owner-requested stop is not
-                // lost continuity, and a local failure is returned to the caller
-                // instead of being relabelled as one.
+                // Complete malformed messages are reported at their source boundary.
+                // Session and transport failures retire; owner stops do not claim loss.
                 match error {
                     Error::Gap(_) | Error::BinaryDecode { .. } | Error::FixDecode { .. } => {
                         failure = Some(error);

@@ -66,7 +66,9 @@ Initial subscriptions are explicit and checked against the venue's 1024-stream
 limit. Shared Spot budgets count the documented IP connection attempts. Pongs echo
 ping payloads and count against five control messages per second. The caller runs
 and joins the returned driver, drains accepted ingress in source order and observes
-24-hour/transport/decode retirement. Consumer lag never drops data or causes renewal.
+24-hour/transport retirement. A malformed complete binary message reports
+`RecordLoss` and later messages keep the same generation without acknowledgement.
+Consumer lag never drops data or causes renewal.
 Venue best-price auto-culling is distinct from client loss; skipped best-price IDs
 alone do not establish a gap. This module exposes depth evidence and does not claim
 an automatically bootstrapped or complete order book.

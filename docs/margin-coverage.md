@@ -147,7 +147,9 @@ values fail explicitly when malformed; partial liability arrays never replace an
 account. Decoder coverage does not establish the announced v2 stream's transport,
 lifecycle or cross/isolated account scope.
 Unknown events retain original evidence; malformed known events produce an
-explicit gap. Every event and late reply retains its socket generation;
+explicit nonterminal `RecordLoss`; later messages keep the open generation without
+acknowledgement. Actual transport or session failures still end with `Gap` and
+`Retired`. Every event and late reply retains its socket generation;
 late subscription replies retain caller correlation and quota metadata. Unexpected
 raw stream-control answers retain control kind, caller streams and the complete
 result alongside an explicit typed failure; Margin exposes no raw control API.

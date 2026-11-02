@@ -162,16 +162,27 @@ resolve the received evidence before explicitly releasing the unknown timing hol
 
 ### Socket lifecycle and failure causes
 
-Each socket generation reports `Established`, then data, then `Retired`. Anything
-that breaks continuity becomes one `Gap` with a reason.
+Each socket generation reports `Established`, then source-ordered data and loss
+notices, then `Retired`. `RecordLoss { generation, error }` reports a malformed
+complete WebSocket message or known event. The same generation keeps accepting
+and delivering later messages; there is no acknowledgement or data-discard gate.
+A JSON array or native SBE payload is decoded atomically as one message, so a
+malformed member does not produce a partially decoded success.
 
-| Gap reason | What happened |
-| --- | --- |
-| `venue closed socket`, `WebSocket EOF`, `WebSocket transport loss` | The connection ended or broke |
-| `documented 24-hour generation lifetime` | The socket reached its 24-hour limit |
-| `pong timeout`, `documented ping/pong rate exceeded` | The connection could not answer the venue's pings in time |
-| `malformed JSON event`, `malformed execution/account event` | A known event did not match its documented shape |
-| `account event has no balance/position evidence` | An `ACCOUNT_UPDATE` carried neither `B` nor `P` |
+| Event | What happened | What follows |
+| --- | --- | --- |
+| `RecordLoss` with malformed JSON, binary or known-event evidence | One complete message could not be decoded | Queued and later messages on the same open generation |
+| `Gap` with socket close, EOF or transport loss | The connection ended or broke | `Retired`; the caller owns replacement |
+| `Gap` with the documented 24-hour lifetime | The socket reached its lifetime | `Retired` |
+| `Gap` with pong or incoming-message-budget failure | The connection could not fulfil its control duties | `Retired` |
+| `Gap` with authentication, control-answer or correlated-response lifecycle failure | Session or request authority could not be maintained | `Retired`; request ambiguity and rate evidence stay explicit |
+
+A record-loss notice does not prove account or depth completeness. Consumers
+retain the valid suffix while deciding which authoritative reads they need.
+An unreadable unsolicited message cannot identify a pending request; that request
+retains its own deadline and ambiguity rather than receiving an invented answer.
+FIX framing, checksum, header, sequence and session failures remain terminal:
+there is no speculative byte resynchronization or sequence advancement.
 
 A new event kind the client does not model is not a gap: it arrives as
 `UserPayload::Unknown` and the socket keeps going. Do the same in your layer. We once

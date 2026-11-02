@@ -712,14 +712,22 @@ mod sockets {
         server.await.unwrap();
     }
     #[tokio::test]
-    async fn risk_socket_drains_accepted_prefix_before_malformed_gap_and_retirement() {
+    async fn risk_socket_preserves_liabilities_after_a_malformed_record() {
         let (listener, url) = listener().await;
+        let (continue_tx, continue_rx) = oneshot::channel();
         let server = tokio::spawn(async move {
             let mut ws = accept(listener).await;
             for (event_time, principal) in [(123, "1"), (124, "2")] {
                 ws.send(Message::text(json!({"e":"USER_LIABILITY_CHANGE","E":event_time,"a":"ETH","t":"BORROW","p":principal,"i":"0"}).to_string())).await.unwrap();
             }
             ws.send(Message::text(json!({"e":"USER_LIABILITY_CHANGE","E":125,"a":"ETH","t":"BORROW","p":"NaN","i":"0"}).to_string())).await.unwrap();
+            continue_rx.await.unwrap();
+            ws.send(Message::text(
+                json!({"e":"USER_LIABILITY_CHANGE","E":126,"a":"ETH","t":"BORROW","p":"3","i":"0"})
+                    .to_string(),
+            ))
+            .await
+            .unwrap();
             finish(ws).await;
         });
         let config = margin::WsConfig::with_pools(&binance_client::WeightPools::new())
@@ -753,8 +761,13 @@ mod sockets {
             assert_eq!(value.a.as_str(), "ETH");
         }
         assert!(
-            matches!(risk.recv().await,Some(margin::RiskEvent::Gap{generation:g,error:Error::Gap("malformed Margin user event"),})if g==generation)
+            matches!(risk.recv().await,Some(margin::RiskEvent::RecordLoss{generation:g,error:Error::Gap("malformed Margin user event"),})if g==generation)
         );
+        continue_tx.send(()).unwrap();
+        assert!(
+            matches!(risk.recv().await, Some(margin::RiskEvent::Data { generation: g, payload: margin::event_payloads::UserPayload::UserLiabilityChange(value) }) if g == generation && value.upper_e == 126 && value.p == Decimal::new(3, 0))
+        );
+        risk.close().await.unwrap();
         assert!(matches!(risk.recv().await,Some(margin::RiskEvent::Retired(g))if g==generation));
         assert!(risk.recv().await.is_none());
         driver.await.unwrap().unwrap();

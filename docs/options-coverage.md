@@ -97,7 +97,8 @@ uses `/private/ws/<listenKey>`. Distinct routes use distinct sockets. The curren
 Options contract allows 200 streams per socket and 10 incoming control messages
 per second. The driver answers received pings, preserves accepted ingress in source
 order without a fixed queue cutoff, exposes queue lag diagnostics, and reports
-transport/malformed-data gaps and socket generation boundaries. The caller runs
+nonterminal `RecordLoss` for malformed complete messages, terminal transport/session
+`Gap` notices and socket generation boundaries. The caller runs
 and joins the driver, closes it explicitly, and drains its terminal boundary.
 
 Private events are `ACCOUNT_UPDATE`, `BALANCE_POSITION_UPDATE`,

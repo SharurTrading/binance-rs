@@ -227,7 +227,16 @@ pub enum ApiEvent<P: ApiProduct> {
         /// Redacted provider payload.
         payload: UnknownMessage,
     },
-    /// A real transport or malformed-data gap.
+    /// One complete message could not be decoded; the generation remains open.
+    ///
+    /// Later data is delivered in source order without consumer acknowledgement.
+    RecordLoss {
+        /// Source socket generation.
+        generation: u64,
+        /// Safe typed cause, without raw message contents.
+        error: Error,
+    },
+    /// Terminal transport, session or control failure; retirement follows.
     Gap {
         /// Socket generation.
         generation: u64,
@@ -256,12 +265,18 @@ impl<P: ApiProduct> ApiEvents<P> {
             }
             SocketEvent::Established(g) => ApiEvent::Established(g),
             SocketEvent::Retired(g) => ApiEvent::Retired(g),
+            SocketEvent::RecordLoss { generation, error } => {
+                ApiEvent::RecordLoss { generation, error }
+            }
             SocketEvent::Gap { generation, error } => ApiEvent::Gap { generation, error },
             // This connection never sends stream control messages.
-            SocketEvent::ControlLate { generation, .. } => ApiEvent::Gap {
-                generation,
-                error: Error::Gap("unexpected stream control answer"),
-            },
+            SocketEvent::ControlLate { generation, .. } => {
+                self.inner.stop();
+                ApiEvent::Gap {
+                    generation,
+                    error: Error::Gap("unexpected stream control answer"),
+                }
+            }
             SocketEvent::Data { generation, value } => ApiEvent::Unknown {
                 generation,
                 payload: value.into(),

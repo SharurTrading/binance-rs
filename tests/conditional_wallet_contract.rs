@@ -326,7 +326,7 @@ macro_rules! conditional_wallet_socket {
             assert_eq!(positions[0].iw, None);
             assert_eq!(positions[0].mt, "cross");
             assert_eq!(positions[0].pa, binance_client::Decimal::ONE);
-            assert!(matches!(stream.recv().await, Some(StreamEvent::Gap { generation: g, error: binance_client::Error::Gap(_) }) if g == generation));
+            assert!(matches!(stream.recv().await, Some(StreamEvent::RecordLoss { generation: g, error: binance_client::Error::Gap(_) }) if g == generation));
             stream.close().await.unwrap();
             assert!(matches!(stream.recv().await, Some(StreamEvent::Retired(g)) if g == generation));
             driver.await.unwrap().unwrap();

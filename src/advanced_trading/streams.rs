@@ -82,7 +82,16 @@ pub enum StreamEvent<P> {
         /// Product-local event.
         payload: P,
     },
-    /// Actual transport or decode loss; ordinary silence and lag are not gaps.
+    /// One complete message could not be decoded; the generation remains open.
+    ///
+    /// Later data is delivered in source order without consumer acknowledgement.
+    RecordLoss {
+        /// Source socket generation.
+        generation: u64,
+        /// Safe typed cause, without raw message contents.
+        error: Error,
+    },
+    /// Terminal transport, session or control failure; retirement follows.
     Gap {
         /// Generation that detected loss.
         generation: u64,
@@ -269,11 +278,14 @@ impl<P: StreamingProduct> Streams<P> {
             .ok_or(Error::Gap("native subscription list required"))
     }
     /// Receive the next accepted native event or explicit lifecycle boundary.
-    /// Malformed known data stops further ingress, then drains the accepted prefix.
+    /// Malformed complete records report loss without stopping later ingress.
     pub async fn recv(&mut self) -> Option<StreamEvent<P::Payload>> {
         Some(match self.events.recv().await? {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
+            SocketEvent::RecordLoss { generation, error } => {
+                StreamEvent::RecordLoss { generation, error }
+            }
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
             SocketEvent::NativeBinary { generation, .. } => {
                 self.events.stop();
@@ -298,8 +310,7 @@ impl<P: StreamingProduct> Streams<P> {
                         value["data"].take(),
                     )
                 } else if value.get("stream").is_some() {
-                    self.events.stop();
-                    return Some(StreamEvent::Gap {
+                    return Some(StreamEvent::RecordLoss {
                         generation,
                         error: Error::Gap("malformed native combined-stream envelope"),
                     });
@@ -312,10 +323,7 @@ impl<P: StreamingProduct> Streams<P> {
                         stream,
                         payload,
                     },
-                    Err(error) => {
-                        self.events.stop();
-                        StreamEvent::Gap { generation, error }
-                    }
+                    Err(error) => StreamEvent::RecordLoss { generation, error },
                 }
             }
             SocketEvent::ControlLate {

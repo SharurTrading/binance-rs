@@ -144,7 +144,16 @@ pub enum StreamEvent {
         /// Native event timestamp in microseconds.
         event_time: i64,
     },
-    /// Malformed record or actual transport loss.
+    /// One complete message could not be decoded; the generation remains open.
+    ///
+    /// Later data is delivered in source order without consumer acknowledgement.
+    RecordLoss {
+        /// Source socket generation.
+        generation: u64,
+        /// Safe typed cause, without raw message contents.
+        error: Error,
+    },
+    /// Terminal transport, session or control failure; retirement follows.
     Gap {
         /// Source socket generation.
         generation: u64,
@@ -213,16 +222,25 @@ impl MarketStreams {
         Some(match self.events.recv().await? {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
+            SocketEvent::RecordLoss { generation, error } => {
+                StreamEvent::RecordLoss { generation, error }
+            }
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
             // This connection never sends stream control messages.
-            SocketEvent::ControlLate { generation, .. } => StreamEvent::Gap {
-                generation,
-                error: Error::Gap("unexpected stream control answer"),
-            },
-            SocketEvent::Late { generation, .. } => StreamEvent::Gap {
-                generation,
-                error: Error::Gap("unexpected SBE market reply"),
-            },
+            SocketEvent::ControlLate { generation, .. } => {
+                self.events.stop();
+                StreamEvent::Gap {
+                    generation,
+                    error: Error::Gap("unexpected stream control answer"),
+                }
+            }
+            SocketEvent::Late { generation, .. } => {
+                self.events.stop();
+                StreamEvent::Gap {
+                    generation,
+                    error: Error::Gap("unexpected SBE market reply"),
+                }
+            }
             SocketEvent::NativeBinary {
                 generation,
                 payload,
@@ -245,8 +263,7 @@ impl MarketStreams {
                             event_time,
                         }
                     } else {
-                        self.events.stop();
-                        StreamEvent::Gap {
+                        StreamEvent::RecordLoss {
                             generation,
                             error: Error::Gap("malformed SBE shutdown notice"),
                         }
@@ -258,8 +275,7 @@ impl MarketStreams {
                             payload,
                         }
                     } else {
-                        self.events.stop();
-                        StreamEvent::Gap {
+                        StreamEvent::RecordLoss {
                             generation,
                             error: Error::Gap("unexpected SBE market text"),
                         }

@@ -223,7 +223,7 @@ fn all_download_kinds_admit_the_full_calendar_quota_and_reset_together() {
         * 1000;
     let february = january + 86_400_000;
     let budgets = Budgets::new(BudgetLimits::usdm()).unwrap();
-    for (kind, capacity) in [(1, 10), (2, 5), (3, 5)] {
+    for (kind, capacity) in [(1, 10), (2, 5), (3, 100)] {
         let cost = Cost {
             download: kind,
             ..Cost::default()
@@ -241,6 +241,31 @@ fn all_download_kinds_admit_the_full_calendar_quota_and_reset_together() {
         ));
     }
 }
+#[test]
+fn transaction_history_jobs_of_both_futures_markets_share_one_monthly_quota() {
+    let budgets = Budgets::new(BudgetLimits::usdm()).unwrap();
+    let job = |kind| Cost {
+        download: kind,
+        ..Cost::default()
+    };
+    for _ in 0..60 {
+        budgets.admit(job(3), 1000).unwrap();
+    }
+    for _ in 0..40 {
+        budgets.admit(job(6), 1000).unwrap();
+    }
+    for kind in [3, 6] {
+        assert!(matches!(
+            budgets.admit(job(kind), 1000),
+            Err(Error::Admission { .. })
+        ));
+    }
+    // Order and trade history jobs of either market keep their own quotas.
+    for kind in [1, 2, 4, 5] {
+        budgets.admit(job(kind), 1000).unwrap();
+    }
+}
+
 #[test]
 fn spot_full_weight_raw_and_connection_budgets_share_an_ip_owner() {
     let budgets = Budgets::new(BudgetLimits::spot()).unwrap();

@@ -48,7 +48,9 @@ async fn native_binary_and_json_shutdown_keep_one_generation_and_source_order() 
             .unwrap();
         socket.send(Message::binary(quote())).await.unwrap();
         socket
-            .send(Message::text(r#"{"data":{"e":"serverShutdown","E":456}}"#))
+            .send(Message::text(
+                r#"{"data":{"e":"serverShutdown","E":456,"T":789}}"#,
+            ))
             .await
             .unwrap();
         socket.send(Message::binary(quote())).await.unwrap();
@@ -83,7 +85,7 @@ async fn native_binary_and_json_shutdown_keep_one_generation_and_source_order() 
         let event = events.recv().await.unwrap();
         if index == 1 {
             assert!(
-                matches!(event, StreamEvent::ServerShutdown { generation: g, event_time: 456 } if g == generation)
+                matches!(event, StreamEvent::ServerShutdown { generation: g, event_time: 456, shutdown_time: Ok(Some(789)) } if g == generation)
             );
         } else {
             let StreamEvent::Data {

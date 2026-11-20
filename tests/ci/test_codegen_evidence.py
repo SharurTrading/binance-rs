@@ -15,16 +15,48 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 
+def load_generate():
+    sys.path.insert(0, str(ROOT/'scripts/codegen'))
+    try:
+        import generate
+    finally:
+        sys.path.pop(0)
+    return generate
+
+
+def shared_filter(setter_doc, field_type='string'):
+    return {'type': 'object', 'x-rust-type-name': 'SharedFilterInput', 'x-setter-doc': setter_doc,
+            'x-evidence': [{'source': setter_doc}],
+            'properties': {'side': {'type': field_type, 'description': setter_doc}}}
+
+
 class CodegenEvidence(unittest.TestCase):
     def test_provider_description_formats_identifiers_without_changing_markdown(self):
-        sys.path.insert(0, str(ROOT/'scripts/codegen'))
-        try:
-            import generate
-        finally:
-            sys.path.pop(0)
+        generate = load_generate()
         text = 'BNBBurn, marginLevel and MARGIN_CALL; `orderId` [wire](https://example.test/orderId).'
         rendered = generate.description_docs(text)
         self.assertEqual(rendered, '`BNBBurn`, `marginLevel` and `MARGIN_CALL`; `orderId` [wire](https://example.test/orderId).')
+
+    def test_setter_doc_replaces_stock_setter_line_and_keeps_wire_key(self):
+        generate = load_generate()
+        rendered = generate.setter_summary('filter', {'x-setter-doc': 'Matches executionReport only.'}, 'optional')
+        self.assertEqual(rendered, 'Matches `executionReport` only.\n    /// Wire key: `filter`; optional.')
+        stock = generate.setter_summary('filter', {}, 'required')
+        self.assertEqual(stock, 'Set the provider `filter` parameter (required).')
+
+    def test_shared_request_type_name_ignores_documentation_differences(self):
+        generate = load_generate()
+        models = generate.Models({})
+        first = models.type(shared_filter('First caveat.'), 'FirstFilter', response=False)
+        second = models.type(shared_filter('Second caveat.'), 'SecondFilter', response=False)
+        self.assertEqual((first, second), ('SharedFilterInput', 'SharedFilterInput'))
+
+    def test_shared_request_type_name_with_different_properties_is_refused(self):
+        generate = load_generate()
+        models = generate.Models({})
+        models.type(shared_filter('Caveat.'), 'FirstFilter', response=False)
+        with self.assertRaisesRegex(ValueError, 'shared request type name with different properties'):
+            models.type(shared_filter('Caveat.', field_type='integer'), 'SecondFilter', response=False)
 
     def test_repeated_aliases_and_multiline_nested_types_keep_unknown_checks(self):
         source = '''pub enum Member {

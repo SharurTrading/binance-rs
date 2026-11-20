@@ -4347,7 +4347,9 @@
       "cases": [
         "json-0033",
         "json-0034",
-        "json-0035"
+        "json-0035",
+        "json-0980",
+        "json-0981"
       ]
     },
     {
@@ -7827,7 +7829,7 @@
     }
   ],
   "count": 624,
-  "cases": 979,
+  "cases": 981,
   "streams": {
     "fixture": "tests/fixtures/stream-shapes.json",
     "operations": [
@@ -9140,7 +9142,8 @@
         "cases": [
           "stream-0235",
           "stream-0242",
-          "stream-0243"
+          "stream-0243",
+          "stream-0246"
         ]
       },
       {
@@ -9181,7 +9184,7 @@
         ]
       }
     ],
-    "cases": 245
+    "cases": 246
   },
   "binary": {
     "fixture": "tests/fixtures/binary-shapes.json"

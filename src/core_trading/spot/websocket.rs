@@ -332,6 +332,12 @@ pub enum ApiEvent {
     ServerShutdown {
         /// Source generation.
         generation: u64,
+        /// When the venue will end this session, in the session's time unit;
+        /// `Ok(None)` when the notice does not state it.
+        ///
+        /// A stated time that is not an integer is `Err(Error::Gap)`; the notice
+        /// itself is still delivered.
+        shutdown_time: Result<Option<i64>, Error>,
         /// Exact shutdown notice, retained without a continuity assertion.
         payload: UnknownMessage,
     },
@@ -452,15 +458,11 @@ impl ApiEvents {
 fn decode_data(generation: u64, mut value: serde_json::Value) -> Result<ApiEvent, Error> {
     let notice = value.get("event").unwrap_or(&value);
     if notice.get("e").and_then(serde_json::Value::as_str) == Some("serverShutdown") {
-        if notice
-            .get("E")
-            .and_then(serde_json::Value::as_i64)
-            .is_none()
-        {
-            return Err(Error::Gap("malformed shutdown notice"));
-        }
+        let (_, shutdown_time) = super::streams::shutdown_notice(notice)
+            .ok_or(Error::Gap("malformed shutdown notice"))?;
         return Ok(ApiEvent::ServerShutdown {
             generation,
+            shutdown_time,
             payload: value.into(),
         });
     }

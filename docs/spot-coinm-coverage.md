@@ -5,7 +5,9 @@ SPDX-License-Identifier: MIT-0
 
 # Spot and COIN-M coverage and protocol evidence
 
-Checked **2026-09-27**. These are initial JSON implementations, with working
+Checked **2026-09-27**; the Spot catalog snapshots were compared again on
+**2026-11-20** for the [2026-11-11 Spot changelog](#spot-changelog-2026-11-11).
+These are initial JSON implementations, with working
 transport and deterministic fixtures. Catalog bindings do not establish complete
 product coverage or live execution readiness. Separately authorized demo probes on
 2026-09-27 passed signed REST account/balance and WebSocket account/balance reads
@@ -179,6 +181,36 @@ or retry, and expired queued commands cannot send late. Both products report the
 pool through `pool_usage()` and each REST request's admission weight through
 `weight()`, as USDⓈ-M does; the report decides nothing.
 
+## Spot changelog 2026-11-11
+
+The [official Spot changelog](https://github.com/binance/binance-spot-api-docs/blob/master/CHANGELOG.md#2026-11-11)
+entries dated after the previous review, and what each changed here:
+
+| Entry | What the venue changed | In this client |
+| --- | --- | --- |
+| 2026-11-11 | [`quoteNotionalLimit`](https://github.com/binance/binance-spot-api-docs/blob/master/faqs/quoteNotionalLimit.md) on BUY orders, with `above`/`below` and `working`/`pending` spellings on order lists | Exact `Decimal` setters on REST and WebSocket API `newOrder`, `orderTest`, `orderCancelReplace` and the OCO, OTO, OTOCO, OPO and OPOCO lists, each list offering only the legs its page documents. A builder refuses the limit on a SELL order or leg, beside a quote spend, on `LIMIT_MAKER`, and when it is not positive. SOR and the legacy OCO requests keep no such setter |
+| 2026-11-11 | Order responses echo `quoteNotionalLimit`; exchange information states `marketQuoteNotionalLimitAllowed` and `limitQuoteNotionalLimitAllowed` | Optional exact `Decimal` on every order-shaped response the FAQ lists (placement, status, open and all orders, cancel, cancel-replace, amend and list reports); two optional booleans on each symbol, absent until the venue states them |
+| 2026-11-11 | `preventedMatches[]` of a `FULL` response and `eV` on `executionReport` state the [self-trade prevention mode applied](https://github.com/binance/binance-spot-api-docs/blob/master/faqs/stp_faq.md) when it differs from the order's own | `prevented_matches` is typed on REST `newOrder`, WebSocket API `orderPlace`, the cancel-replace new-order leg and every order-list placement's `orderReports`, with exact prices and quantities and the applied mode as `SelfTradePreventionMode`; `executionReport` gains `Qq` and `eV` |
+| 2026-11-11 | [Expiry reasons](https://github.com/binance/binance-spot-api-docs/blob/master/enums.md#expiry-reasons) `INSUFFICIENT_QUOTE_NOTIONAL_LIMIT` and `EXHAUSTED` | `expiryReason` and `eR` stay exact strings, so both arrive unchanged. REST `newOrder`, `deleteOpenOrders`, `sorOrder` and the OCO and legacy OCO reports now type the field as the other order responses did, and the WebSocket API cancel-replace new-order leg types its `fills` as REST does |
+| 2026-11-11 | `userDataStream.subscribe` and `userDataStream.subscribe.signature` accept a [`filter`](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#user-data-stream-subscription-filters) | `ws_models::UserDataFilterInput` carries assets, event types, symbols and execution types. It refuses what the page's validation table refuses: an empty filter, an empty or repeated list, and an event type the page does not list. Execution types are sent as given, since the table refuses none. A signature subscription signs the filter as compact JSON with sorted keys. Symbols and assets are text checked when the request is built; typing them is tracked in [#182](https://github.com/SharurTrading/binance-rs/issues/182) |
+| 2026-11-11 | `serverShutdown` states the shutdown time `T` | `ServerShutdown` on the JSON and SBE market sockets and on the WebSocket API carries `shutdown_time`: `Ok(None)` when the notice omits it, and `Err` when `T` is not an integer, with the notice still delivered. The WebSocket API event also retains the whole notice |
+| 2026-11-11 | `PARAM_OVERFLOW` is `-1018`; `-1108` is `BAD_ASSET` | Neither classifies an outcome: a mutation refused with either stays `Outcome::Unknown`. The [error page](https://github.com/binance/binance-spot-api-docs/blob/master/errors.md#-1018-param_overflow) states for neither, as it does for `-1013`, that the request did not reach the matching engine, and its neighbours `-1014` and `-1020` are not classified either |
+| 2026-11-11 | New `-1015` message text; BUY limit orders release surplus lock when they rest; SBE order-list cancel replies carry the original `listClientOrderId` | No wire change. Error text is never matched, balances arrive as the venue pushes them, and identities are decoded as sent |
+| 2026-11-11 | FIX order entry gains `QuoteNotionalLimit (25057)`, `EffectiveSelfTradePreventionMode (25058)` and two `ExpiryReason (25056)` values | See [FIX and SBE](core-protocols.md#sources-and-pinned-facts) |
+| 2026-11-11 | API SBE schema 3:6 and FIX SBE schema 1:2 | Not adopted: the pinned 3:4 and 1:1 schemas stay until [#178](https://github.com/SharurTrading/binance-rs/issues/178) moves them; see [FIX and SBE](core-protocols.md#sources-and-pinned-facts) |
+| 2026-10-30 | SBE 3:3 retired on 2026-11-09 | None; 3:3 was never pinned |
+| 2026-10-27 | FIX `ExpiryReason (25056)` documented | Already in the pinned order-entry dictionary |
+
+The catalog now lists `CANCEL_ONLY` among the `symbolStatus` values a market-data
+request may filter by, so those builders accept it. The catalog lists the request
+parameters, the two exchange information booleans and `Qq` and `eV`. It does not yet
+list the `quoteNotionalLimit` echo or `preventedMatches[]` on order responses, nor
+`expiryReason` and `fills` on the few responses that gained them here; those follow
+the official Markdown pages cited in the table, and each such fact in
+`schema/spot-{rest,ws}.json` carries an `x-evidence` entry naming its page and check date.
+Whether a symbol accepts a quote notional limit is the venue's statement in exchange
+information; the builders do not consult it.
+
 ## Verification and remaining work
 
 `tests/product_contract.rs`, `tests/product_http_contract.rs`, and
@@ -200,6 +232,9 @@ bodies. A known accepted leg requires valid financial evidence; unknown codes,
 contradictory statuses, malformed bodies, and timeouts remain ambiguous. Late
 WebSocket replies retain the original operation, generation, and caller identity.
 `tests/advanced_spot_contract.rs` reproduces these outcomes and truncated responses.
+`tests/spot_quote_notional_contract.rs` and `tests/spot_user_data_filter_contract.rs`
+cover quote notional limits, applied prevention modes, subscription filters and
+shutdown times.
 
 COIN-M's post-migration conditional surface is now bound from the integration
 notice plus an operator-authorized demo probe (2026-10-03, tracked by

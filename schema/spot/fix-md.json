@@ -1,6 +1,6 @@
 {
   "source": "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/fix/schemas/spot-fix-md.xml",
-  "sha256": "1da0b3d618f72c2c9a3634d6fafc92cda5866a7642d9daf228b4391f71c83bfc",
+  "sha256": "919977b0a66b1107cd7e7eddc8c7762a0d3566f4c693ec3cda61ee3dcb0b253f",
   "schema": {
     "kind": "fix",
     "major": "4",
@@ -1208,46 +1208,6 @@
             "number": "25052",
             "name": "SBESchemaVersionDeprecated",
             "type": "INT"
-          },
-          {
-            "kind": "field",
-            "number": "25056",
-            "name": "ExpiryReason",
-            "type": "INT",
-            "children": [
-              {
-                "kind": "value",
-                "enum": "1"
-              },
-              {
-                "kind": "value",
-                "enum": "2"
-              },
-              {
-                "kind": "value",
-                "enum": "3"
-              },
-              {
-                "kind": "value",
-                "enum": "4"
-              },
-              {
-                "kind": "value",
-                "enum": "5"
-              },
-              {
-                "kind": "value",
-                "enum": "6"
-              },
-              {
-                "kind": "value",
-                "enum": "7"
-              },
-              {
-                "kind": "value",
-                "enum": "8"
-              }
-            ]
           }
         ]
       }

@@ -143,6 +143,12 @@ pub enum StreamEvent {
         generation: u64,
         /// Native event timestamp in microseconds.
         event_time: i64,
+        /// When the venue will end this session, in microseconds; `Ok(None)` when
+        /// the notice does not state it.
+        ///
+        /// A stated time that is not an integer is `Err(Error::Gap)`; the notice
+        /// itself is still delivered.
+        shutdown_time: Result<Option<i64>, Error>,
     },
     /// One complete message could not be decoded; the generation remains open.
     ///
@@ -257,10 +263,13 @@ impl MarketStreams {
             SocketEvent::Data { generation, value } => {
                 let data = value.get("data").unwrap_or(&value);
                 if data.get("e").and_then(serde_json::Value::as_str) == Some("serverShutdown") {
-                    if let Some(event_time) = data.get("E").and_then(serde_json::Value::as_i64) {
+                    if let Some((event_time, shutdown_time)) =
+                        crate::core_trading::spot::streams::shutdown_notice(data)
+                    {
                         StreamEvent::ServerShutdown {
                             generation,
                             event_time,
+                            shutdown_time,
                         }
                     } else {
                         StreamEvent::RecordLoss {

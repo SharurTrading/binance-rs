@@ -1,7 +1,7 @@
 {
-  "checked": "2026-09-27",
+  "checked": "2026-11-20",
   "source": "https://developers.binance.info/en/docs/catalog/core-trading-spot-trading/api/ws-streams/1.0.0/schema.yaml",
-  "sha256": "64b1b7ffd8e0756497fbe5fc801fb4ae954f6dac03778090fcefebe78521074f",
+  "sha256": "ba7bee7fe632dee4a6f90be12351e2426af1008123a7ab9c69412338ea63f8bc",
   "operations": [
     {
       "operationId": "aggTrade",
@@ -3676,6 +3676,15 @@
           "pY": {
             "type": "string",
             "x-decimal": true
+          },
+          "Qq": {
+            "type": "string",
+            "x-decimal": true,
+            "description": "Quote notional limit of the order; present only when the order was placed with one."
+          },
+          "eV": {
+            "$ref": "#/components/schemas/SelfTradePreventionMode",
+            "description": "Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the mode the order was placed with (`V`)."
           },
           "b": {
             "$ref": "#/components/schemas/AllocationType"

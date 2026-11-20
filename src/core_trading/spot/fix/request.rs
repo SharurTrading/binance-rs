@@ -250,6 +250,18 @@ fn order(fields: &Fields) -> Result<(), Error> {
     if fields.get("MaxFloor").is_some() {
         positive(fields, "MaxFloor")?;
     }
+    // A quote notional limit caps what a BUY order may spend. The venue refuses it
+    // beside a quote spend, on a post-only order, and with smart order routing.
+    if fields.get("QuoteNotionalLimit").is_some() {
+        positive(fields, "QuoteNotionalLimit")?;
+        if code(fields, "Side") != Some("1")
+            || quote
+            || code(fields, "ExecInst") == Some("6")
+            || matches!(fields.get("SOR"), Some(Value::Boolean(true)))
+        {
+            return Err(Error::Validation("FIX quote notional limit combination"));
+        }
+    }
     match code(fields, "OrdType") {
         Some("1") => (),
         Some("2") => {

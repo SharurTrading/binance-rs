@@ -5,7 +5,8 @@ SPDX-License-Identifier: MIT-0
 
 # Spot FIX and SBE protocols
 
-Checked **2026-09-27** against Binance's production schema pointers. These are
+Checked **2026-09-27** against Binance's production schema pointers; the FIX
+dictionaries and schema lifecycle files were read again on **2026-11-20**. These are
 initial protocol implementations with deterministic synthetic fixtures. Pinned
 schema counts do not prove every template's conformance or live execution readiness.
 No live FIX connection, private read, or mutation probe was run.
@@ -23,8 +24,28 @@ No live FIX connection, private read, or mutation probe was run.
 Behavior comes from the [FIX API contract](https://developers.binance.com/en/docs/products/spot/fix-api),
 [SBE API FAQ](https://github.com/binance/binance-spot-api-docs/blob/master/faqs/sbe_faq.md),
 and [SBE market-stream contract](https://developers.binance.com/en/docs/products/spot/sbe-market-data-streams).
-The API production pointer currently selects `spot_3_4.xml`; the existence of a
-newer schema file does not authorize silently negotiating it.
+The existence of a newer schema file does not authorize silently negotiating it.
+
+> [!IMPORTANT]
+> On 2026-11-20 the [production lifecycle file](https://github.com/binance/binance-spot-api-docs/blob/master/sbe/schemas/sbe_schema_lifecycle_prod.json)
+> lists API schema 3:5 as latest and the pinned 3:4 as deprecated since 2026-07-07;
+> Binance retires a schema six months after deprecating it. The
+> [2026-11-11 changelog](https://github.com/binance/binance-spot-api-docs/blob/master/CHANGELOG.md#2026-11-11)
+> announces API schema 3:6 and FIX SBE schema 1:2 in a gradual rollout that neither
+> lifecycle file lists yet. Replies in the pinned schemas omit what the newer ones
+> add: `quoteNotionalLimit`, `effectiveSelfTradePreventionMode`, the two newest
+> expiry reasons and the shutdown time on `ServerShutdownEvent`. Moving both pins
+> is tracked in [#178](https://github.com/SharurTrading/binance-rs/issues/178).
+
+The ASCII dictionaries follow the 2026-11-11 files. Order entry carries
+`QuoteNotionalLimit (25057)` on new orders, list legs, cancel-replace and execution
+reports, `EffectiveSelfTradePreventionMode (25058)` on execution reports, and
+`ExpiryReason (25056)` values `9` and `10`. The dictionary types tag 25057 as a
+price; it is a quote-asset amount and decodes and encodes as `Value::Amount`. A
+request refuses it on a SELL order, beside `CashOrderQty (152)`, with
+`ExecInst (18)` `6` and with `SOR (25032)`, as the
+[FIX API](https://github.com/binance/binance-spot-api-docs/blob/master/fix-api.md#newordersingle-d)
+documents. The market-data dictionary no longer defines the unused tag 25056.
 
 `schema/spot/*.json` retains normalized protocol facts, original XML SHA-256 and
 source URLs. `scripts/codegen/normalize_binary.py` accepts operator-supplied XML

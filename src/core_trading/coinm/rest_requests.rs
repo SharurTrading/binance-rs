@@ -837,8 +837,6 @@ pub struct GetIncomeHistory {
     start_time: Option<i64>,
     #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
     end_time: Option<i64>,
-    #[serde(rename = "page", skip_serializing_if = "Option::is_none")]
-    page: Option<i64>,
     #[serde(rename = "limit", skip_serializing_if = "Option::is_none")]
     limit: Option<i64>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
@@ -872,12 +870,6 @@ impl GetIncomeHistory {
     #[must_use]
     pub fn end_time(mut self, value: i64) -> Self {
         self.end_time = Some(value);
-        self
-    }
-    /// Set the provider `page` parameter (optional).
-    #[must_use]
-    pub fn page(mut self, value: i64) -> Self {
-        self.page = Some(value);
         self
     }
     /// Set the provider `limit` parameter (optional).

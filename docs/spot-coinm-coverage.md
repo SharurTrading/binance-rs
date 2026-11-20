@@ -174,8 +174,11 @@ REST raw requests, and connection attempts. Successful ordinary submits/cancels
 release only their own admission-interval weight reservation, never observed
 venue usage. Failed/ambiguous responses retain the reservation. UM/CM clients from
 `Config::new` share one futures IP pool per environment; an account shared across
-them still needs one explicit owner. COIN-M download jobs enforce their own eight-per-calendar-month
-endpoint quotas and do not borrow USDⓈ-M download quotas. Clones share budgets; `for_account()` retains a common IP owner.
+them still needs one explicit owner. COIN-M order and trade history download jobs enforce their own
+eight-per-calendar-month quotas and do not borrow USDⓈ-M quotas. Transaction-history jobs draw on one
+quota of 100 a month across both futures markets, as the
+[2026-10-20 change log](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/change-log#2026-10-20)
+states; an account owner shared by both clients counts them together. Clones share budgets; `for_account()` retains a common IP owner.
 Quota evidence/cooldowns survive failed response bodies. Admission does not wait
 or retry, and expired queued commands cannot send late. Both products report their
 pool through `pool_usage()` and each REST request's admission weight through
@@ -210,6 +213,25 @@ the official Markdown pages cited in the table, and each such fact in
 `schema/spot-{rest,ws}.json` carries an `x-evidence` entry naming its page and check date.
 Whether a symbol accepts a quote notional limit is the venue's statement in exchange
 information; the builders do not consult it.
+
+## COIN-M change log 2026-10-15 to 2026-10-20
+
+The REST catalog was compared again on **2026-11-20**; the WebSocket API and stream
+catalogs are unchanged since their check. Two
+[change log](https://developers.binance.com/en/docs/products/derivatives-trading-coin-futures/change-log)
+entries name COIN-M after that check. Since 2026-10-16 `GET /dapi/v1/income` no
+longer takes `page`, so the setter is gone and a read is located by `startTime` and
+`endTime`. Since 2026-10-20 transaction-history download jobs share the monthly
+quota described under [product semantics](#product-semantics). The catalog now
+calls the funding information read `getFundingRateInfo`; the binding keeps its name
+`fundingInfo` and its path, shape and probed weight are unchanged. The raised
+USDⓈ-M trailing ceiling does not name COIN-M, whose algo orders keep 0.1 to 10.
+
+The WebSocket API catalog lists `priceMatch` and `selfTradePreventionMode` on the
+order status reply only. A place, modify or cancel reply that carries them keeps
+them among its unknown fields exactly as sent, and a `GTE_GTC` time in force,
+which no COIN-M page lists, decodes as `TimeInForce::Unknown`. Recording evidence
+for both is tracked in [#181](https://github.com/SharurTrading/binance-rs/issues/181).
 
 ## Verification and remaining work
 

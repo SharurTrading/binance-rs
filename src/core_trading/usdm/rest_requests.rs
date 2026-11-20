@@ -1445,8 +1445,6 @@ pub struct GetIncomeHistory {
     start_time: Option<i64>,
     #[serde(rename = "endTime", skip_serializing_if = "Option::is_none")]
     end_time: Option<i64>,
-    #[serde(rename = "page", skip_serializing_if = "Option::is_none")]
-    page: Option<i64>,
     #[serde(rename = "limit", skip_serializing_if = "Option::is_none")]
     limit: Option<i64>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
@@ -1480,12 +1478,6 @@ impl GetIncomeHistory {
     #[must_use]
     pub fn end_time(mut self, value: i64) -> Self {
         self.end_time = Some(value);
-        self
-    }
-    /// Set the provider `page` parameter (optional).
-    #[must_use]
-    pub fn page(mut self, value: i64) -> Self {
-        self.page = Some(value);
         self
     }
     /// Set the provider `limit` parameter (optional).
@@ -2782,8 +2774,8 @@ impl Request for ContinuousContractKlineCandlestickData {
                 (
                     "interval",
                     &[
-                        "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d",
-                        "3d", "1w", "1M",
+                        "1s", "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h",
+                        "1d", "3d", "1w", "1M",
                     ],
                 ),
             ],
@@ -7041,7 +7033,7 @@ impl Request for ChangeInitialLeverage {
             &["leverage", "symbol"],
             &[],
             &[
-                ("leverage", 1, 125),
+                ("leverage", 1, 9_223_372_036_854_775_807),
                 ("recvWindow", -9_223_372_036_854_775_808, 60_000),
             ],
         )?;

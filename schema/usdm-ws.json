@@ -1,7 +1,7 @@
 {
-  "checked": "2026-09-26",
+  "checked": "2026-11-20",
   "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/ws-api/1.0.0/schema.yaml",
-  "sha256": "292b7fba3dee87c605109afbb9b371099897e1e35b1107e95803a696e14ac922",
+  "sha256": "e7764484e1841b9475c2f8dd9b7627c84ddccaa8b0285de9dcca3d87e2d30a2a",
   "operations": [
     {
       "tags": [
@@ -2134,7 +2134,7 @@
                       "type": "number",
                       "format": "float",
                       "minimum": 0.1,
-                      "maximum": 10,
+                      "maximum": 20,
                       "x-decimal": true
                     },
                     "clientAlgoId": {

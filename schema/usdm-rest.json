@@ -1,7 +1,7 @@
 {
-  "checked": "2026-09-26",
+  "checked": "2026-11-20",
   "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/1.0.0/schema.yaml",
-  "sha256": "e3e8a4b4eccf25d6c3bac5cf9a710d38a3a24bd2b98462de055fe1ad8281c6ab",
+  "sha256": "66c28bbd5ce6a9b454af32e4bcbe9b6271e0bd5241e0af6e77a82396d13a692a",
   "operations": [
     {
       "tags": [
@@ -1754,15 +1754,6 @@
           }
         },
         {
-          "name": "page",
-          "in": "query",
-          "required": false,
-          "schema": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        {
           "name": "limit",
           "in": "query",
           "required": false,
@@ -3000,6 +2991,7 @@
           "schema": {
             "type": "string",
             "enum": [
+              "1s",
               "1m",
               "3m",
               "5m",
@@ -6985,7 +6977,7 @@
                   "type": "number",
                   "format": "float",
                   "minimum": 0.1,
-                  "maximum": 10,
+                  "maximum": 20,
                   "x-decimal": true
                 },
                 "clientAlgoId": {
@@ -8868,8 +8860,7 @@
                 "leverage": {
                   "type": "integer",
                   "format": "int64",
-                  "minimum": 1,
-                  "maximum": 125
+                  "minimum": 1
                 },
                 "recvWindow": {
                   "type": "integer",

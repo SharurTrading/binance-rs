@@ -493,6 +493,90 @@ fn quote_spend_is_distinct_from_base_quantity_and_role_authority() {
     );
 }
 
+/// A quote notional limit is a quote-asset amount a BUY order may spend; the venue
+/// refuses it beside a quote spend, on a post-only order and with order routing.
+#[test]
+fn quote_notional_limit_is_a_quote_amount_for_buy_orders_that_may_take() {
+    use binance_client::{
+        Error, Symbol,
+        spot::fix::{ClientId, Request, RequestKind},
+    };
+    let limit = |side: &str| {
+        Request::builder(Role::OrderEntry, RequestKind::NewOrderSingle)
+            .field("ClOrdID", Value::ClientId(ClientId::new("limit").unwrap()))
+            .unwrap()
+            .field("Symbol", Value::Symbol(Symbol::new("BTCUSDT").unwrap()))
+            .unwrap()
+            .field("Side", Value::Code(side.into()))
+            .unwrap()
+            .field("OrdType", Value::Code("2".into()))
+            .unwrap()
+            .field("OrderQty", Value::Quantity(Decimal::TEN))
+            .unwrap()
+            .field("Price", Value::Price("30".parse().unwrap()))
+            .unwrap()
+    };
+    let notional = Value::Amount("250.5".parse().unwrap());
+    assert!(matches!(
+        limit("1").field("QuoteNotionalLimit", Value::Price("250.5".parse().unwrap())),
+        Err(Error::Validation("FIX field value type"))
+    ));
+    let order = limit("1")
+        .field("TimeInForce", Value::Code("1".into()))
+        .unwrap()
+        .field("QuoteNotionalLimit", notional.clone())
+        .unwrap()
+        .build()
+        .unwrap();
+    assert_eq!(order.fields().get("QuoteNotionalLimit"), Some(&notional));
+    assert!(matches!(
+        limit("2")
+            .field("TimeInForce", Value::Code("1".into()))
+            .unwrap()
+            .field("QuoteNotionalLimit", notional.clone())
+            .unwrap()
+            .build(),
+        Err(Error::Validation("FIX quote notional limit combination"))
+    ));
+    assert!(matches!(
+        limit("1")
+            .field("ExecInst", Value::Code("6".into()))
+            .unwrap()
+            .field("QuoteNotionalLimit", notional.clone())
+            .unwrap()
+            .build(),
+        Err(Error::Validation("FIX quote notional limit combination"))
+    ));
+    assert!(matches!(
+        limit("1")
+            .field("TimeInForce", Value::Code("1".into()))
+            .unwrap()
+            .field("SOR", Value::Boolean(true))
+            .unwrap()
+            .field("QuoteNotionalLimit", notional)
+            .unwrap()
+            .build(),
+        Err(Error::Validation("FIX quote notional limit combination"))
+    ));
+}
+
+/// An execution report states the order's quote notional limit as an exact amount
+/// and the prevention mode the venue applied when it differs from the order's own.
+#[test]
+fn execution_report_keeps_the_notional_limit_and_the_applied_prevention_mode() {
+    let bytes = frame(
+        "35=8|49=SPOT|56=CLIENT|34=2|52=20260927-01:02:03.123456|11=owned_1|37=123|38=0.125|40=2|54=1|44=123.00000001|55=BTCUSDT|150=C|14=0.125|32=0.125|39=C|25056=10|25057=90.00000000|25058=5|",
+    );
+    let report = decode(Role::OrderEntry, &bytes).unwrap();
+    assert!(
+        matches!(report.field("QuoteNotionalLimit"), Some(Value::Amount(v)) if *v == "90.00000000".parse::<Decimal>().unwrap())
+    );
+    assert!(
+        matches!(report.field("EffectiveSelfTradePreventionMode"), Some(Value::Code(code)) if code == "5")
+    );
+    assert!(matches!(report.field("ExpiryReason"), Some(Value::Code(code)) if code == "10"));
+}
+
 async fn read_fix(stream: &mut tokio::net::TcpStream) -> Vec<u8> {
     use tokio::io::AsyncReadExt;
     let mut bytes = vec![];

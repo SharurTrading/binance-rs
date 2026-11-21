@@ -15,8 +15,16 @@ fn text<'a>(p: &'a BTreeMap<String, Value>, key: &str) -> Option<&'a str> {
     p.get(key).and_then(Value::as_str)
 }
 pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error> {
+    if op == "userDataFilter" {
+        return validate_filter(p);
+    }
     crate::core::validate_parameters(p, &[], &[], &[])?;
-    for key in ["quantity", "quoteOrderQty", "icebergQty"] {
+    for key in [
+        "quantity",
+        "quoteOrderQty",
+        "icebergQty",
+        "quoteNotionalLimit",
+    ] {
         if let Some(v) = p.get(key) {
             let d =
                 super::wire::parse_decimal(v).map_err(|_| Error::Validation("Spot magnitude"))?;
@@ -68,6 +76,17 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
     if matches!(op, "newOrder" | "orderPlace" | "orderTest") {
         validate_order(p)?;
     }
+    if matches!(
+        op,
+        "userDataStreamSubscribe" | "userDataStreamSubscribeSignature"
+    ) && let Some(filter) = p.get("filter")
+    {
+        validate_filter(
+            filter
+                .as_object()
+                .ok_or(Error::Validation("user data filter"))?,
+        )?;
+    }
     if let Some(tz) = text(p, "timeZone") {
         let (negative, value) = tz.strip_prefix('-').map_or((false, tz), |v| (true, v));
         let value = value.strip_prefix('+').unwrap_or(value);
@@ -88,6 +107,54 @@ pub(crate) fn validate(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Erro
     }
     validate_advanced(op, p)
 }
+// A subscription filter names events by their own short fields. The venue's
+// validation table refuses an empty filter, an empty or repeated value list, an
+// unknown key and an unrecognized event type; execution types are the venue's to judge:
+// https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#user-data-stream-subscription-filters
+fn validate_filter<'a>(
+    filter: impl IntoIterator<Item = (&'a String, &'a Value)>,
+) -> Result<(), Error> {
+    const EVENT_TYPES: [&str; 5] = [
+        "executionReport",
+        "balanceUpdate",
+        "outboundAccountPosition",
+        "listStatus",
+        "externalLockUpdate",
+    ];
+    let mut filter = filter.into_iter().peekable();
+    if filter.peek().is_none() {
+        return Err(Error::Validation("empty user data filter"));
+    }
+    for (key, values) in filter {
+        let values = values
+            .as_array()
+            .ok_or(Error::Validation("user data filter values"))?;
+        if values.is_empty() {
+            return Err(Error::Validation("empty user data filter values"));
+        }
+        let mut seen = std::collections::BTreeSet::new();
+        for value in values {
+            let value = value
+                .as_str()
+                .ok_or(Error::Validation("user data filter value"))?;
+            if !seen.insert(value) {
+                return Err(Error::Validation("duplicate user data filter value"));
+            }
+            let accepted = match key.as_str() {
+                "a" => crate::Asset::new(value).is_ok(),
+                "e" => EVENT_TYPES.contains(&value),
+                "s" => crate::Symbol::new(value).is_ok(),
+                "x" => true,
+                _ => return Err(Error::Validation("user data filter key")),
+            };
+            if !accepted {
+                return Err(Error::Validation("user data filter value"));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn validate_order(p: &BTreeMap<String, Value>) -> Result<(), Error> {
     required(p, &["symbol", "side", "type", "newClientOrderId"])?;
     let quantity = p.contains_key("quantity");
@@ -96,6 +163,24 @@ fn validate_order(p: &BTreeMap<String, Value>) -> Result<(), Error> {
         return Err(Error::Validation(
             "base quantity conflicts with quote spend",
         ));
+    }
+    // A quote notional limit caps what a BUY order may spend. The venue refuses it
+    // on SELL orders, beside a quote spend, and on LIMIT_MAKER orders:
+    // https://github.com/binance/binance-spot-api-docs/blob/master/faqs/quoteNotionalLimit.md
+    if p.contains_key("quoteNotionalLimit") {
+        if text(p, "side") != Some("BUY") {
+            return Err(Error::Validation("quote notional limit requires BUY"));
+        }
+        if quote {
+            return Err(Error::Validation(
+                "quote notional limit conflicts with quote spend",
+            ));
+        }
+        if text(p, "type") == Some("LIMIT_MAKER") {
+            return Err(Error::Validation(
+                "quote notional limit conflicts with LIMIT_MAKER",
+            ));
+        }
     }
     let pegged = p.contains_key("pegPriceType");
     if p.contains_key("pegOffsetValue") != p.contains_key("pegOffsetType") {
@@ -174,6 +259,8 @@ pub(crate) fn definitive(status: u16, value: &serde_json::Value) -> bool {
         .is_some_and(definitive_code)
 }
 
+// -1018 PARAM_OVERFLOW and -1108 BAD_ASSET are left out: the error page states for
+// neither, as it does for -1013, that the request did not reach the matching engine.
 pub(crate) fn definitive_code(c: i64) -> bool {
     matches!(
         c,
@@ -287,7 +374,7 @@ fn validate_advanced(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Error>
                     .ok_or(Error::Validation("Spot caller identity"))?,
             )?;
         }
-        if ["Qty", "Quantity", "Price"]
+        if ["Qty", "Quantity", "Price", "QuoteNotionalLimit"]
             .iter()
             .any(|suffix| name.ends_with(suffix))
         {

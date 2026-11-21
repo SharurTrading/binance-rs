@@ -5,7 +5,9 @@ SPDX-License-Identifier: MIT-0
 
 # USDⓈ-M coverage and protocol evidence
 
-Catalog checked **2026-09-26**; response shapes reviewed **2026-10-16**. Bindings implement the operations in Binance's official
+Catalog checked **2026-09-26**; response shapes reviewed **2026-10-16**; the REST
+and WebSocket API catalogs were compared again on **2026-11-20** for the
+[change log](#change-log-2026-09-28-to-2026-11-17). Bindings implement the operations in Binance's official
 versioned catalog: 95 REST, 18 WebSocket API, 21 market stream definitions, and
 10 user-data event schemas. Three session methods come from the WebSocket general
 reference. This is source coverage, not a claim that every endpoint has been
@@ -135,6 +137,39 @@ The `!contractInfo` push matches COIN-M: `ct`, `dt`, `ot` and `cs` are required,
 while `bks`, sent only on a bracket update, and `st` stay optional. A `ps` field,
 which the USD-M page does not document, is retained with unknown fields. See the
 [USD-M contract info stream](https://developers.binance.info/docs/derivatives/usds-margined-futures/websocket-market-streams/Contract-Info-Stream).
+
+## Change log 2026-09-28 to 2026-11-17
+
+The [derivatives change log](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log) entries for USDⓈ-M dated after the catalog
+check, and what each changed here:
+
+| Entry | What the venue changed | In this client |
+| --- | --- | --- |
+| [2026-10-23](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log#2026-10-23) | `callbackRate` of a `TRAILING_STOP_MARKET` algo order may reach 20, on REST and the WebSocket API | `newAlgoOrder` accepts 0.1 to 20 on both transports. The validation-only `testOrder` keeps its legacy ceiling of 5 |
+| [2026-10-20](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log#2026-10-20) | Transaction-history download jobs: 100 a month, shared with the download page and between USDⓈ-M and COIN-M | One account owner admits 100 `getDownloadIdForFuturesTransactionHistory` jobs a calendar month across both markets. Jobs started on the download page are the venue's to count |
+| [2026-10-15](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log#2026-10-15) (effective 2026-10-16) | `GET /fapi/v1/income` no longer takes `page` | The setter is gone; a read is located by `startTime` and `endTime` |
+| [2026-10-09](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log#2026-10-09) | `leverage` has no fixed maximum of 125; the symbol's first bracket states it | `changeInitialLeverage` keeps the floor of 1 and leaves the ceiling to the venue |
+| [2026-09-28](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log#2026-09-28) | Error `-4425` when switching to multi-asset mode with an active signal lead portfolio | None. The code reaches the caller in the typed venue error; no `-4xxx` code classifies an outcome |
+
+The entries of 2026-09-10 (`SPECIAL_FUNDING_FEE` income type), 2026-09-15
+(`reduceOnly` on order modification) and 2026-09-21 (FX trading sessions) were
+already in the catalog checked on 2026-09-26. The REST catalog also lists the `1s`
+interval for continuous-contract klines now, so that builder accepts it.
+
+The stream catalog now lists `spt`, `spv` and `splv` on `ALGO_UPDATE` for a
+`CHASE` order that no request page, enum or change-log entry defines. They are not
+typed: the event keeps them among its unknown fields exactly as sent, and the
+stream snapshot keeps its 2026-09-26 source hash. Typing them is tracked in
+[#179](https://github.com/SharurTrading/binance-rs/issues/179).
+
+The [2025-11-06 change log](https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/change-log#2025-11-06) mentions `GTE_GTC` orders, a time in
+force that neither the common definitions nor the catalog list. A reply that
+carries it decodes as `TimeInForce::Unknown`, exactly as sent, and no builder sends
+it. Recording evidence for it is tracked in [#181](https://github.com/SharurTrading/binance-rs/issues/181).
+
+Income history holds [three months](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/account#get-income-history)
+and returns the last seven days when no time is given; older rows come from a
+download job.
 
 ## REST operations
 

@@ -1,6 +1,6 @@
 {
   "source": "https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/fix/schemas/spot-fix-oe.xml",
-  "sha256": "f0fa25633758f0554150a81b1aa922d4b9303bed546369ff5a1df2cb4ee08df6",
+  "sha256": "50402897b2a5a41e09e1e67955f734ebfc5ac3971226e439ee34d22b39a18a26",
   "schema": {
     "kind": "fix",
     "major": "4",
@@ -409,6 +409,16 @@
               {
                 "kind": "field",
                 "name": "ExpiryReason",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "QuoteNotionalLimit",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "EffectiveSelfTradePreventionMode",
                 "required": "N"
               }
             ]
@@ -1178,6 +1188,11 @@
               {
                 "kind": "field",
                 "name": "SelfTradePreventionMode",
+                "required": "N"
+              },
+              {
+                "kind": "field",
+                "name": "QuoteNotionalLimit",
                 "required": "N"
               }
             ]
@@ -2514,6 +2529,48 @@
               {
                 "kind": "value",
                 "enum": "8"
+              },
+              {
+                "kind": "value",
+                "enum": "9"
+              },
+              {
+                "kind": "value",
+                "enum": "10"
+              }
+            ]
+          },
+          {
+            "kind": "field",
+            "number": "25057",
+            "name": "QuoteNotionalLimit",
+            "type": "PRICE"
+          },
+          {
+            "kind": "field",
+            "number": "25058",
+            "name": "EffectiveSelfTradePreventionMode",
+            "type": "CHAR",
+            "children": [
+              {
+                "kind": "value",
+                "enum": "2"
+              },
+              {
+                "kind": "value",
+                "enum": "3"
+              },
+              {
+                "kind": "value",
+                "enum": "4"
+              },
+              {
+                "kind": "value",
+                "enum": "5"
+              },
+              {
+                "kind": "value",
+                "enum": "6"
               }
             ]
           }

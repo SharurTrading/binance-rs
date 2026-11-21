@@ -1245,6 +1245,19 @@ pub struct ExecutionReportEvent {
         skip_serializing_if = "Option::is_none"
     )]
     pub p_y: Option<Decimal>,
+    /// Quote notional limit of the order; present only when the order was placed with one.
+    /// Wire key: `Qq`; optional.
+    #[serde(
+        rename = "Qq",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub qq: Option<Decimal>,
+    /// Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the mode the order was placed with (`V`).
+    /// Wire key: `eV`; optional.
+    #[serde(rename = "eV", skip_serializing_if = "Option::is_none")]
+    pub e_v: Option<super::enums::SelfTradePreventionMode>,
     /// Native `AllocationType` values documented for this product.
     /// Wire key: `b`; optional.
     #[serde(rename = "b", skip_serializing_if = "Option::is_none")]

@@ -1042,19 +1042,15 @@ fn monthly_download(
         .checked_mul(12)
         .and_then(|v| v.checked_add(u64::from(dt.month() as u8)))
         .ok_or(Error::Configuration("calendar overflow"))?;
-    let key = match kind {
-        1 => "downloadOrders",
-        2 => "downloadTrades",
-        3 => "downloadIncome",
-        4 => "downloadCMOrders",
-        5 => "downloadCMTrades",
-        6 => "downloadCMIncome",
+    // Transaction-history jobs draw on one monthly quota across both futures
+    // markets; order and trade history jobs keep a quota per market.
+    let (key, limit) = match kind {
+        1 => ("downloadOrders", 10),
+        2 => ("downloadTrades", 5),
+        3 | 6 => ("downloadIncome", 100),
+        4 => ("downloadCMOrders", 8),
+        5 => ("downloadCMTrades", 8),
         _ => return Err(Error::Configuration("download quota identity")),
-    };
-    let limit = match kind {
-        1 => 10,
-        4..=6 => 8,
-        _ => 5,
     };
     let current = account.counts.get(key).copied().unwrap_or_default();
     if current.0 == bucket && current.1 >= limit {

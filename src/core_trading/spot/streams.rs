@@ -149,11 +149,11 @@ impl Streams {
                 let data = value.get("data").unwrap_or(&value);
                 if data.get("e").and_then(serde_json::Value::as_str) == Some("serverShutdown") {
                     return Some(
-                        if let Some(event_time) = data.get("E").and_then(serde_json::Value::as_i64)
-                        {
+                        if let Some((event_time, shutdown_time)) = shutdown_notice(data) {
                             StreamEvent::ServerShutdown {
                                 generation,
                                 event_time,
+                                shutdown_time,
                             }
                         } else {
                             StreamEvent::RecordLoss {
@@ -344,6 +344,12 @@ pub enum StreamEvent {
         generation: u64,
         /// Provider event timestamp in this generation's `Streams::time_unit`.
         event_time: i64,
+        /// When the venue will end this session, in the same unit; `Ok(None)` when
+        /// the notice does not state it.
+        ///
+        /// A stated time that is not an integer is `Err(Error::Gap)`; the notice
+        /// itself is still delivered.
+        shutdown_time: Result<Option<i64>, Error>,
     },
     /// A control answer that arrived after its caller stopped waiting.
     LateControl {
@@ -359,4 +365,57 @@ pub enum StreamEvent {
     },
     /// Terminal boundary after the generation's accepted prefix.
     Retired(u64),
+}
+
+/// The event time and stated shutdown time of a `serverShutdown` notice.
+///
+/// `None` means the notice has no integer event time. A shutdown time that is
+/// present but not an integer is reported in place, so the notice still arrives.
+pub(crate) fn shutdown_notice(
+    data: &serde_json::Value,
+) -> Option<(i64, Result<Option<i64>, Error>)> {
+    let event_time = data.get("E").and_then(serde_json::Value::as_i64)?;
+    let shutdown_time = match data.get("T") {
+        None => Ok(None),
+        Some(time) => time
+            .as_i64()
+            .map(Some)
+            .ok_or(Error::Gap("malformed shutdown time")),
+    };
+    Some((event_time, shutdown_time))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::shutdown_notice;
+    use crate::Error;
+    use serde_json::json;
+
+    #[test]
+    fn stated_shutdown_time_is_kept_and_an_absent_one_is_not_invented() {
+        assert!(matches!(
+            shutdown_notice(&json!({"e": "serverShutdown", "E": 3, "T": 9})),
+            Some((3, Ok(Some(9))))
+        ));
+        assert!(matches!(
+            shutdown_notice(&json!({"e": "serverShutdown", "E": 3})),
+            Some((3, Ok(None)))
+        ));
+    }
+
+    #[test]
+    fn malformed_shutdown_time_is_reported_without_losing_the_notice() {
+        for time in [json!("soon"), json!(null), json!(1.5)] {
+            assert!(matches!(
+                shutdown_notice(&json!({"e": "serverShutdown", "E": 3, "T": time})),
+                Some((3, Err(Error::Gap(_))))
+            ));
+        }
+    }
+
+    #[test]
+    fn notice_without_an_integer_event_time_is_malformed() {
+        assert!(shutdown_notice(&json!({"e": "serverShutdown", "T": 9})).is_none());
+        assert!(shutdown_notice(&json!({"e": "serverShutdown", "E": "now"})).is_none());
+    }
 }

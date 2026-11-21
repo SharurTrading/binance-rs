@@ -88,7 +88,9 @@ limit. Shared Spot budgets count the documented IP connection attempts. Pongs ec
 ping payloads and count against five control messages per second. The caller runs
 and joins the returned driver, drains accepted ingress in source order and observes
 24-hour/transport retirement. A malformed complete binary message reports
-`RecordLoss` and later messages keep the same generation without acknowledgement.
+`RecordLoss` with no `stream`, since an SBE frame names none; undecodable JSON text
+names the stream its envelope carried. Later messages keep the same generation
+without acknowledgement.
 Consumer lag never drops data or causes renewal.
 Venue best-price auto-culling is distinct from client loss; skipped best-price IDs
 alone do not establish a gap. This module exposes depth evidence and does not claim

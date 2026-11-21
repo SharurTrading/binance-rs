@@ -313,7 +313,7 @@ async fn binary_ingress_drains_in_order_with_ping_and_explicit_retirement() {
         assert_eq!(q.book_update_id, 42);
     }
     assert!(
-        matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation, error: Error::BinaryDecode { .. } }) if generation == g)
+        matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation, stream: None, error: Error::BinaryDecode { .. } }) if generation == g)
     );
     events.close().await.unwrap();
     assert!(

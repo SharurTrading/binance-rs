@@ -88,6 +88,15 @@ pub enum StreamEvent<P> {
     RecordLoss {
         /// Source socket generation.
         generation: u64,
+        /// Native combined-stream name the lost record's envelope carried, redacted
+        /// like [`StreamEvent::Data`]'s because private names can contain tokens.
+        ///
+        /// `Some` when the frame was a JSON object whose `stream` field was a
+        /// string, though its `data` was missing or did not decode. `None` when the
+        /// frame was not JSON, named no stream, or was a raw frame without an
+        /// envelope, such as every execution-socket event. The raw payload is never
+        /// retained.
+        stream: Option<SensitiveString>,
         /// Safe typed cause, without raw message contents.
         error: Error,
     },
@@ -283,9 +292,12 @@ impl<P: StreamingProduct> Streams<P> {
         Some(match self.events.recv().await? {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
-            SocketEvent::RecordLoss { generation, error } => {
-                StreamEvent::RecordLoss { generation, error }
-            }
+            // A frame lost below the envelope (not JSON) names no stream.
+            SocketEvent::RecordLoss { generation, error } => StreamEvent::RecordLoss {
+                generation,
+                stream: None,
+                error,
+            },
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
             SocketEvent::NativeBinary { generation, .. } => {
                 self.events.stop();
@@ -309,9 +321,10 @@ impl<P: StreamingProduct> Streams<P> {
                         self.kinds.get(stream).copied(),
                         value["data"].take(),
                     )
-                } else if value.get("stream").is_some() {
+                } else if let Some(stream) = value.get("stream") {
                     return Some(StreamEvent::RecordLoss {
                         generation,
+                        stream: stream.as_str().map(SensitiveString::new),
                         error: Error::Gap("malformed native combined-stream envelope"),
                     });
                 } else {
@@ -323,7 +336,11 @@ impl<P: StreamingProduct> Streams<P> {
                         stream,
                         payload,
                     },
-                    Err(error) => StreamEvent::RecordLoss { generation, error },
+                    Err(error) => StreamEvent::RecordLoss {
+                        generation,
+                        stream,
+                        error,
+                    },
                 }
             }
             SocketEvent::ControlLate {

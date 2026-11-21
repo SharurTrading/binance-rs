@@ -146,7 +146,8 @@ absent. Subscription IDs, termination events, and shutdown notices remain visibl
 Spot market sockets use the combined `/stream` route. COIN-M keeps its own plain
 combined `/stream` and private `/ws/<listenKey>` routes rather than adopting the
 USDⓈ-M Public/Market/Private prefixes. Socket queue lag does not cause dropping,
-resnapshot, or retirement. Malformed known events and real transport loss are gaps.
+resnapshot, or retirement. A malformed known event is a nonterminal `RecordLoss`
+naming the market stream its envelope carried; real transport loss is a `Gap`.
 
 Both products' market sockets connect with any number of streams, including none,
 and change membership on the open socket through `subscribe`, `unsubscribe` and

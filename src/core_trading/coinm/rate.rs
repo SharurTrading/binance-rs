@@ -196,23 +196,23 @@ mod tests {
         assert_eq!(cost(FundingInfo::OP, &BTreeMap::new()).unwrap().weight, 0);
     }
     #[test]
-    fn each_coinm_download_kind_has_eight_calendar_month_slots() {
+    fn each_coinm_download_kind_admits_its_documented_calendar_month_quota() {
         use super::super::rest_requests::{
             GetDownloadIdForFuturesOrderHistory, GetDownloadIdForFuturesTradeHistory,
             GetDownloadIdForFuturesTransactionHistory,
         };
-        for op in [
-            GetDownloadIdForFuturesOrderHistory::OP,
-            GetDownloadIdForFuturesTradeHistory::OP,
-            GetDownloadIdForFuturesTransactionHistory::OP,
+        for (op, quota) in [
+            (GetDownloadIdForFuturesOrderHistory::OP, 8),
+            (GetDownloadIdForFuturesTradeHistory::OP, 8),
+            (GetDownloadIdForFuturesTransactionHistory::OP, 100),
         ] {
             let b = Budgets::new(BudgetLimits::coinm()).unwrap();
             let c = cost(op, &BTreeMap::new()).unwrap();
-            for minute in 0..8 {
+            for minute in 0..quota {
                 b.admit(c, minute * 60_000).unwrap();
             }
             assert!(matches!(
-                b.admit(c, 8 * 60_000),
+                b.admit(c, quota * 60_000),
                 Err(Error::Admission { .. })
             ));
             b.admit(c, 2_678_400_000).unwrap();

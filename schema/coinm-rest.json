@@ -1,7 +1,7 @@
 {
-  "checked": "2026-10-03",
+  "checked": "2026-11-20",
   "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/1.0.0/schema.yaml",
-  "sha256": "6c78887b0c532913942f358957742268da9762a038487a5b9c6364f6abcad90d",
+  "sha256": "49445622f37444477d481ab221bde7df32210a9a5789407ca3de398c808667b9",
   "operations": [
     {
       "tags": [
@@ -957,15 +957,6 @@
         },
         {
           "name": "endTime",
-          "in": "query",
-          "required": false,
-          "schema": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        {
-          "name": "page",
           "in": "query",
           "required": false,
           "schema": {
@@ -2092,6 +2083,11 @@
         "market-data"
       ],
       "operationId": "fundingInfo",
+      "x-operation-id-evidence": {
+        "source": "https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/1.0.0/schema.yaml",
+        "checked": "2026-11-20",
+        "reason": "The catalog now names this operation getFundingRateInfo. The binding keeps fundingInfo because renaming it changes the public request and method names with no wire effect: the path, parameters, response shape and probed weight are unchanged."
+      },
       "x-ip-weight": 0,
       "x-evidence": "Catalog publishes the response schema but no weight. Read-only probes 2026-10-03 (production dapi.binance.com and demo-dapi): no weight header, X-MBX-USED-WEIGHT-1M unchanged across calls (0 IP weight); live arrays also carry disclaimer and a nullable updateTime.",
       "parameters": [],

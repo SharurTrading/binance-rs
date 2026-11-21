@@ -318,6 +318,15 @@ pub struct AllOrdersResponseItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `workingTime` wire field.
     /// Wire key: `workingTime`; optional.
     #[serde(rename = "workingTime", skip_serializing_if = "Option::is_none")]
@@ -597,6 +606,15 @@ pub struct GetOpenOrdersResponseItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -831,6 +849,15 @@ pub struct DeleteOpenOrdersResponseItemOrder {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -863,6 +890,10 @@ pub struct DeleteOpenOrdersResponseItemOrder {
         skip_serializing_if = "Option::is_none"
     )]
     pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
+    /// Exact `expiryReason` wire field.
+    /// Wire key: `expiryReason`; optional.
+    #[serde(rename = "expiryReason", skip_serializing_if = "Option::is_none")]
+    pub expiry_reason: Option<String>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -960,6 +991,15 @@ pub struct DeleteOpenOrdersResponseItemOrderList {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -992,6 +1032,10 @@ pub struct DeleteOpenOrdersResponseItemOrderList {
         skip_serializing_if = "Option::is_none"
     )]
     pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
+    /// Exact `expiryReason` wire field.
+    /// Wire key: `expiryReason`; optional.
+    #[serde(rename = "expiryReason", skip_serializing_if = "Option::is_none")]
+    pub expiry_reason: Option<String>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -1082,6 +1126,15 @@ pub struct DeleteOpenOrdersResponseItemOrderListOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -1258,6 +1311,15 @@ pub struct GetOrderResponse {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -1489,6 +1551,15 @@ pub struct DeleteOrderResponseOrder {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -1698,6 +1769,15 @@ pub struct DeleteOrderResponseOrderList {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -1900,6 +1980,15 @@ pub struct DeleteOrderResponseOrderListOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -2077,6 +2166,15 @@ pub struct NewOrderResponse {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -2113,10 +2211,73 @@ pub struct NewOrderResponse {
         skip_serializing_if = "Option::is_none"
     )]
     pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
+    /// Exact `preventedMatches` wire field.
+    /// Wire key: `preventedMatches`; optional.
+    #[serde(rename = "preventedMatches", skip_serializing_if = "Option::is_none")]
+    pub prevented_matches: Option<Vec<NewOrderResponsePreventedMatchesItem>>,
     /// Exact `fills` wire field.
     /// Wire key: `fills`; optional.
     #[serde(rename = "fills", skip_serializing_if = "Option::is_none")]
     pub fills: Option<Vec<NewOrderResponseFillsItem>>,
+    /// Exact `expiryReason` wire field.
+    /// Wire key: `expiryReason`; optional.
+    #[serde(rename = "expiryReason", skip_serializing_if = "Option::is_none")]
+    pub expiry_reason: Option<String>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `NewOrderResponsePreventedMatchesItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct NewOrderResponsePreventedMatchesItem {
+    /// Exact `preventedMatchId` wire field.
+    /// Wire key: `preventedMatchId`; required.
+    #[serde(rename = "preventedMatchId")]
+    pub prevented_match_id: i64,
+    /// Exact `makerSymbol` wire field.
+    /// Wire key: `makerSymbol`; optional.
+    #[serde(rename = "makerSymbol", skip_serializing_if = "Option::is_none")]
+    pub maker_symbol: Option<crate::Symbol>,
+    /// Exact `makerOrderId` wire field.
+    /// Wire key: `makerOrderId`; optional.
+    #[serde(rename = "makerOrderId", skip_serializing_if = "Option::is_none")]
+    pub maker_order_id: Option<i64>,
+    /// Exact `price` wire field.
+    /// Wire key: `price`; optional.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `takerPreventedQuantity` wire field.
+    /// Wire key: `takerPreventedQuantity`; optional.
+    #[serde(
+        rename = "takerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub taker_prevented_quantity: Option<Decimal>,
+    /// Exact `makerPreventedQuantity` wire field.
+    /// Wire key: `makerPreventedQuantity`; optional.
+    #[serde(
+        rename = "makerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub maker_prevented_quantity: Option<Decimal>,
+    /// Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode.
+    /// Wire key: `effectiveSelfTradePreventionMode`; optional.
+    #[serde(
+        rename = "effectiveSelfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub effective_self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -2519,6 +2680,20 @@ pub struct ExchangeInfoResponseSymbolsItem {
     /// Wire key: `opoAllowed`; optional.
     #[serde(rename = "opoAllowed", skip_serializing_if = "Option::is_none")]
     pub opo_allowed: Option<bool>,
+    /// Exact `marketQuoteNotionalLimitAllowed` wire field.
+    /// Wire key: `marketQuoteNotionalLimitAllowed`; optional.
+    #[serde(
+        rename = "marketQuoteNotionalLimitAllowed",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub market_quote_notional_limit_allowed: Option<bool>,
+    /// Exact `limitQuoteNotionalLimitAllowed` wire field.
+    /// Wire key: `limitQuoteNotionalLimitAllowed`; optional.
+    #[serde(
+        rename = "limitQuoteNotionalLimitAllowed",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub limit_quote_notional_limit_allowed: Option<bool>,
     /// Exact `quoteOrderQtyMarketAllowed` wire field.
     /// Wire key: `quoteOrderQtyMarketAllowed`; optional.
     #[serde(
@@ -4894,6 +5069,15 @@ pub struct DeleteOrderListResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -6050,6 +6234,15 @@ pub struct OrderAmendKeepPriorityResponseAmendedOrder {
         skip_serializing_if = "Option::is_none"
     )]
     pub qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `executedQty` wire field.
     /// Wire key: `executedQty`; optional.
     #[serde(
@@ -6342,6 +6535,15 @@ pub struct OrderCancelReplaceResponseCancelResponse {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -6519,6 +6721,15 @@ pub struct OrderCancelReplaceResponseNewOrderResponseValue {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -6559,6 +6770,11 @@ pub struct OrderCancelReplaceResponseNewOrderResponseValue {
         skip_serializing_if = "Option::is_none"
     )]
     pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
+    /// Exact `preventedMatches` wire field.
+    /// Wire key: `preventedMatches`; optional.
+    #[serde(rename = "preventedMatches", skip_serializing_if = "Option::is_none")]
+    pub prevented_matches:
+        Option<Vec<OrderCancelReplaceResponseNewOrderResponseValuePreventedMatchesItem>>,
     /// Exact `icebergQty` wire field.
     /// Wire key: `icebergQty`; optional.
     #[serde(
@@ -6683,6 +6899,61 @@ pub struct OrderCancelReplaceResponseNewOrderResponseValueFillsItem {
     /// Wire key: `tradeId`; optional.
     #[serde(rename = "tradeId", skip_serializing_if = "Option::is_none")]
     pub trade_id: Option<i64>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `OrderCancelReplaceResponseNewOrderResponseValuePreventedMatchesItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct OrderCancelReplaceResponseNewOrderResponseValuePreventedMatchesItem {
+    /// Exact `preventedMatchId` wire field.
+    /// Wire key: `preventedMatchId`; required.
+    #[serde(rename = "preventedMatchId")]
+    pub prevented_match_id: i64,
+    /// Exact `makerSymbol` wire field.
+    /// Wire key: `makerSymbol`; optional.
+    #[serde(rename = "makerSymbol", skip_serializing_if = "Option::is_none")]
+    pub maker_symbol: Option<crate::Symbol>,
+    /// Exact `makerOrderId` wire field.
+    /// Wire key: `makerOrderId`; optional.
+    #[serde(rename = "makerOrderId", skip_serializing_if = "Option::is_none")]
+    pub maker_order_id: Option<i64>,
+    /// Exact `price` wire field.
+    /// Wire key: `price`; optional.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `takerPreventedQuantity` wire field.
+    /// Wire key: `takerPreventedQuantity`; optional.
+    #[serde(
+        rename = "takerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub taker_prevented_quantity: Option<Decimal>,
+    /// Exact `makerPreventedQuantity` wire field.
+    /// Wire key: `makerPreventedQuantity`; optional.
+    #[serde(
+        rename = "makerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub maker_prevented_quantity: Option<Decimal>,
+    /// Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode.
+    /// Wire key: `effectiveSelfTradePreventionMode`; optional.
+    #[serde(
+        rename = "effectiveSelfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub effective_self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -6814,6 +7085,15 @@ pub struct OrderListOcoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -6850,6 +7130,10 @@ pub struct OrderListOcoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
+    /// Exact `preventedMatches` wire field.
+    /// Wire key: `preventedMatches`; optional.
+    #[serde(rename = "preventedMatches", skip_serializing_if = "Option::is_none")]
+    pub prevented_matches: Option<Vec<OrderListOcoResponseOrderReportsItemPreventedMatchesItem>>,
     /// Exact `stopPrice` wire field.
     /// Wire key: `stopPrice`; optional.
     #[serde(
@@ -6868,6 +7152,65 @@ pub struct OrderListOcoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub iceberg_qty: Option<Decimal>,
+    /// Exact `expiryReason` wire field.
+    /// Wire key: `expiryReason`; optional.
+    #[serde(rename = "expiryReason", skip_serializing_if = "Option::is_none")]
+    pub expiry_reason: Option<String>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `OrderListOcoResponseOrderReportsItemPreventedMatchesItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct OrderListOcoResponseOrderReportsItemPreventedMatchesItem {
+    /// Exact `preventedMatchId` wire field.
+    /// Wire key: `preventedMatchId`; required.
+    #[serde(rename = "preventedMatchId")]
+    pub prevented_match_id: i64,
+    /// Exact `makerSymbol` wire field.
+    /// Wire key: `makerSymbol`; optional.
+    #[serde(rename = "makerSymbol", skip_serializing_if = "Option::is_none")]
+    pub maker_symbol: Option<crate::Symbol>,
+    /// Exact `makerOrderId` wire field.
+    /// Wire key: `makerOrderId`; optional.
+    #[serde(rename = "makerOrderId", skip_serializing_if = "Option::is_none")]
+    pub maker_order_id: Option<i64>,
+    /// Exact `price` wire field.
+    /// Wire key: `price`; optional.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `takerPreventedQuantity` wire field.
+    /// Wire key: `takerPreventedQuantity`; optional.
+    #[serde(
+        rename = "takerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub taker_prevented_quantity: Option<Decimal>,
+    /// Exact `makerPreventedQuantity` wire field.
+    /// Wire key: `makerPreventedQuantity`; optional.
+    #[serde(
+        rename = "makerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub maker_prevented_quantity: Option<Decimal>,
+    /// Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode.
+    /// Wire key: `effectiveSelfTradePreventionMode`; optional.
+    #[serde(
+        rename = "effectiveSelfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub effective_self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -6990,6 +7333,15 @@ pub struct OrderListOpoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -7026,6 +7378,10 @@ pub struct OrderListOpoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
+    /// Exact `preventedMatches` wire field.
+    /// Wire key: `preventedMatches`; optional.
+    #[serde(rename = "preventedMatches", skip_serializing_if = "Option::is_none")]
+    pub prevented_matches: Option<Vec<OrderListOpoResponseOrderReportsItemPreventedMatchesItem>>,
     /// Exact `origQty` wire field.
     /// Wire key: `origQty`; optional.
     #[serde(
@@ -7115,6 +7471,61 @@ pub struct OrderListOpoResponseOrderReportsItem {
     /// Wire key: `expiryReason`; optional.
     #[serde(rename = "expiryReason", skip_serializing_if = "Option::is_none")]
     pub expiry_reason: Option<String>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `OrderListOpoResponseOrderReportsItemPreventedMatchesItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct OrderListOpoResponseOrderReportsItemPreventedMatchesItem {
+    /// Exact `preventedMatchId` wire field.
+    /// Wire key: `preventedMatchId`; required.
+    #[serde(rename = "preventedMatchId")]
+    pub prevented_match_id: i64,
+    /// Exact `makerSymbol` wire field.
+    /// Wire key: `makerSymbol`; optional.
+    #[serde(rename = "makerSymbol", skip_serializing_if = "Option::is_none")]
+    pub maker_symbol: Option<crate::Symbol>,
+    /// Exact `makerOrderId` wire field.
+    /// Wire key: `makerOrderId`; optional.
+    #[serde(rename = "makerOrderId", skip_serializing_if = "Option::is_none")]
+    pub maker_order_id: Option<i64>,
+    /// Exact `price` wire field.
+    /// Wire key: `price`; optional.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `takerPreventedQuantity` wire field.
+    /// Wire key: `takerPreventedQuantity`; optional.
+    #[serde(
+        rename = "takerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub taker_prevented_quantity: Option<Decimal>,
+    /// Exact `makerPreventedQuantity` wire field.
+    /// Wire key: `makerPreventedQuantity`; optional.
+    #[serde(
+        rename = "makerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub maker_prevented_quantity: Option<Decimal>,
+    /// Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode.
+    /// Wire key: `effectiveSelfTradePreventionMode`; optional.
+    #[serde(
+        rename = "effectiveSelfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub effective_self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -7237,6 +7648,15 @@ pub struct OrderListOpocoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -7273,6 +7693,10 @@ pub struct OrderListOpocoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
+    /// Exact `preventedMatches` wire field.
+    /// Wire key: `preventedMatches`; optional.
+    #[serde(rename = "preventedMatches", skip_serializing_if = "Option::is_none")]
+    pub prevented_matches: Option<Vec<OrderListOpocoResponseOrderReportsItemPreventedMatchesItem>>,
     /// Exact `origQty` wire field.
     /// Wire key: `origQty`; optional.
     #[serde(
@@ -7362,6 +7786,61 @@ pub struct OrderListOpocoResponseOrderReportsItem {
     /// Wire key: `expiryReason`; optional.
     #[serde(rename = "expiryReason", skip_serializing_if = "Option::is_none")]
     pub expiry_reason: Option<String>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `OrderListOpocoResponseOrderReportsItemPreventedMatchesItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct OrderListOpocoResponseOrderReportsItemPreventedMatchesItem {
+    /// Exact `preventedMatchId` wire field.
+    /// Wire key: `preventedMatchId`; required.
+    #[serde(rename = "preventedMatchId")]
+    pub prevented_match_id: i64,
+    /// Exact `makerSymbol` wire field.
+    /// Wire key: `makerSymbol`; optional.
+    #[serde(rename = "makerSymbol", skip_serializing_if = "Option::is_none")]
+    pub maker_symbol: Option<crate::Symbol>,
+    /// Exact `makerOrderId` wire field.
+    /// Wire key: `makerOrderId`; optional.
+    #[serde(rename = "makerOrderId", skip_serializing_if = "Option::is_none")]
+    pub maker_order_id: Option<i64>,
+    /// Exact `price` wire field.
+    /// Wire key: `price`; optional.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `takerPreventedQuantity` wire field.
+    /// Wire key: `takerPreventedQuantity`; optional.
+    #[serde(
+        rename = "takerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub taker_prevented_quantity: Option<Decimal>,
+    /// Exact `makerPreventedQuantity` wire field.
+    /// Wire key: `makerPreventedQuantity`; optional.
+    #[serde(
+        rename = "makerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub maker_prevented_quantity: Option<Decimal>,
+    /// Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode.
+    /// Wire key: `effectiveSelfTradePreventionMode`; optional.
+    #[serde(
+        rename = "effectiveSelfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub effective_self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -7493,6 +7972,15 @@ pub struct OrderListOtoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -7529,6 +8017,10 @@ pub struct OrderListOtoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
+    /// Exact `preventedMatches` wire field.
+    /// Wire key: `preventedMatches`; optional.
+    #[serde(rename = "preventedMatches", skip_serializing_if = "Option::is_none")]
+    pub prevented_matches: Option<Vec<OrderListOtoResponseOrderReportsItemPreventedMatchesItem>>,
     /// Exact `icebergQty` wire field.
     /// Wire key: `icebergQty`; optional.
     #[serde(
@@ -7609,6 +8101,61 @@ pub struct OrderListOtoResponseOrderReportsItem {
     /// Wire key: `expiryReason`; optional.
     #[serde(rename = "expiryReason", skip_serializing_if = "Option::is_none")]
     pub expiry_reason: Option<String>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `OrderListOtoResponseOrderReportsItemPreventedMatchesItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct OrderListOtoResponseOrderReportsItemPreventedMatchesItem {
+    /// Exact `preventedMatchId` wire field.
+    /// Wire key: `preventedMatchId`; required.
+    #[serde(rename = "preventedMatchId")]
+    pub prevented_match_id: i64,
+    /// Exact `makerSymbol` wire field.
+    /// Wire key: `makerSymbol`; optional.
+    #[serde(rename = "makerSymbol", skip_serializing_if = "Option::is_none")]
+    pub maker_symbol: Option<crate::Symbol>,
+    /// Exact `makerOrderId` wire field.
+    /// Wire key: `makerOrderId`; optional.
+    #[serde(rename = "makerOrderId", skip_serializing_if = "Option::is_none")]
+    pub maker_order_id: Option<i64>,
+    /// Exact `price` wire field.
+    /// Wire key: `price`; optional.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `takerPreventedQuantity` wire field.
+    /// Wire key: `takerPreventedQuantity`; optional.
+    #[serde(
+        rename = "takerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub taker_prevented_quantity: Option<Decimal>,
+    /// Exact `makerPreventedQuantity` wire field.
+    /// Wire key: `makerPreventedQuantity`; optional.
+    #[serde(
+        rename = "makerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub maker_prevented_quantity: Option<Decimal>,
+    /// Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode.
+    /// Wire key: `effectiveSelfTradePreventionMode`; optional.
+    #[serde(
+        rename = "effectiveSelfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub effective_self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -7740,6 +8287,15 @@ pub struct OrderListOtocoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub orig_quote_order_qty: Option<Decimal>,
+    /// Most quote asset the order may spend; present only when the order was placed with a quote notional limit.
+    /// Wire key: `quoteNotionalLimit`; optional.
+    #[serde(
+        rename = "quoteNotionalLimit",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub quote_notional_limit: Option<Decimal>,
     /// Exact `cummulativeQuoteQty` wire field.
     /// Wire key: `cummulativeQuoteQty`; optional.
     #[serde(
@@ -7776,6 +8332,10 @@ pub struct OrderListOtocoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
+    /// Exact `preventedMatches` wire field.
+    /// Wire key: `preventedMatches`; optional.
+    #[serde(rename = "preventedMatches", skip_serializing_if = "Option::is_none")]
+    pub prevented_matches: Option<Vec<OrderListOtocoResponseOrderReportsItemPreventedMatchesItem>>,
     /// Exact `icebergQty` wire field.
     /// Wire key: `icebergQty`; optional.
     #[serde(
@@ -7856,6 +8416,61 @@ pub struct OrderListOtocoResponseOrderReportsItem {
     /// Wire key: `expiryReason`; optional.
     #[serde(rename = "expiryReason", skip_serializing_if = "Option::is_none")]
     pub expiry_reason: Option<String>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `OrderListOtocoResponseOrderReportsItemPreventedMatchesItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct OrderListOtocoResponseOrderReportsItemPreventedMatchesItem {
+    /// Exact `preventedMatchId` wire field.
+    /// Wire key: `preventedMatchId`; required.
+    #[serde(rename = "preventedMatchId")]
+    pub prevented_match_id: i64,
+    /// Exact `makerSymbol` wire field.
+    /// Wire key: `makerSymbol`; optional.
+    #[serde(rename = "makerSymbol", skip_serializing_if = "Option::is_none")]
+    pub maker_symbol: Option<crate::Symbol>,
+    /// Exact `makerOrderId` wire field.
+    /// Wire key: `makerOrderId`; optional.
+    #[serde(rename = "makerOrderId", skip_serializing_if = "Option::is_none")]
+    pub maker_order_id: Option<i64>,
+    /// Exact `price` wire field.
+    /// Wire key: `price`; optional.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `takerPreventedQuantity` wire field.
+    /// Wire key: `takerPreventedQuantity`; optional.
+    #[serde(
+        rename = "takerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub taker_prevented_quantity: Option<Decimal>,
+    /// Exact `makerPreventedQuantity` wire field.
+    /// Wire key: `makerPreventedQuantity`; optional.
+    #[serde(
+        rename = "makerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub maker_prevented_quantity: Option<Decimal>,
+    /// Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode.
+    /// Wire key: `effectiveSelfTradePreventionMode`; optional.
+    #[serde(
+        rename = "effectiveSelfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub effective_self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -8023,6 +8638,10 @@ pub struct OrderOcoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
+    /// Exact `preventedMatches` wire field.
+    /// Wire key: `preventedMatches`; optional.
+    #[serde(rename = "preventedMatches", skip_serializing_if = "Option::is_none")]
+    pub prevented_matches: Option<Vec<OrderOcoResponseOrderReportsItemPreventedMatchesItem>>,
     /// Exact `stopPrice` wire field.
     /// Wire key: `stopPrice`; optional.
     #[serde(
@@ -8032,6 +8651,65 @@ pub struct OrderOcoResponseOrderReportsItem {
         skip_serializing_if = "Option::is_none"
     )]
     pub stop_price: Option<Decimal>,
+    /// Exact `expiryReason` wire field.
+    /// Wire key: `expiryReason`; optional.
+    #[serde(rename = "expiryReason", skip_serializing_if = "Option::is_none")]
+    pub expiry_reason: Option<String>,
+    /// Unknown future wire fields, retained without inventing defaults; avoid logging.
+    #[serde(flatten)]
+    pub extra: super::event_payloads::UnknownMessage,
+}
+
+/// Provider-native `OrderOcoResponseOrderReportsItemPreventedMatchesItem` payload.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct OrderOcoResponseOrderReportsItemPreventedMatchesItem {
+    /// Exact `preventedMatchId` wire field.
+    /// Wire key: `preventedMatchId`; required.
+    #[serde(rename = "preventedMatchId")]
+    pub prevented_match_id: i64,
+    /// Exact `makerSymbol` wire field.
+    /// Wire key: `makerSymbol`; optional.
+    #[serde(rename = "makerSymbol", skip_serializing_if = "Option::is_none")]
+    pub maker_symbol: Option<crate::Symbol>,
+    /// Exact `makerOrderId` wire field.
+    /// Wire key: `makerOrderId`; optional.
+    #[serde(rename = "makerOrderId", skip_serializing_if = "Option::is_none")]
+    pub maker_order_id: Option<i64>,
+    /// Exact `price` wire field.
+    /// Wire key: `price`; optional.
+    #[serde(
+        rename = "price",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub price: Option<Decimal>,
+    /// Exact `takerPreventedQuantity` wire field.
+    /// Wire key: `takerPreventedQuantity`; optional.
+    #[serde(
+        rename = "takerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub taker_prevented_quantity: Option<Decimal>,
+    /// Exact `makerPreventedQuantity` wire field.
+    /// Wire key: `makerPreventedQuantity`; optional.
+    #[serde(
+        rename = "makerPreventedQuantity",
+        default,
+        deserialize_with = "super::wire::decimal_option",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub maker_prevented_quantity: Option<Decimal>,
+    /// Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode.
+    /// Wire key: `effectiveSelfTradePreventionMode`; optional.
+    #[serde(
+        rename = "effectiveSelfTradePreventionMode",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub effective_self_trade_prevention_mode: Option<super::enums::SelfTradePreventionMode>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,
@@ -8145,6 +8823,10 @@ pub struct SorOrderResponse {
     /// Wire key: `usedSor`; optional.
     #[serde(rename = "usedSor", skip_serializing_if = "Option::is_none")]
     pub used_sor: Option<bool>,
+    /// Exact `expiryReason` wire field.
+    /// Wire key: `expiryReason`; optional.
+    #[serde(rename = "expiryReason", skip_serializing_if = "Option::is_none")]
+    pub expiry_reason: Option<String>,
     /// Unknown future wire fields, retained without inventing defaults; avoid logging.
     #[serde(flatten)]
     pub extra: super::event_payloads::UnknownMessage,

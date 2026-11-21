@@ -669,6 +669,8 @@ pub struct NewOrder {
     peg_offset_value: Option<i64>,
     #[serde(rename = "pegOffsetType", skip_serializing_if = "Option::is_none")]
     peg_offset_type: Option<String>,
+    #[serde(rename = "quoteNotionalLimit", skip_serializing_if = "Option::is_none")]
+    quote_notional_limit: Option<Decimal>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
     recv_window: Option<Decimal>,
 }
@@ -784,6 +786,12 @@ impl NewOrder {
     #[must_use]
     pub fn peg_offset_type(mut self, value: impl Into<String>) -> Self {
         self.peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `quoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.quote_notional_limit = Some(value);
         self
     }
     /// Set the provider `recvWindow` parameter (optional).
@@ -1160,7 +1168,7 @@ impl Request for ExchangeInfo {
         validate_parameters(
             p,
             &[],
-            &[("symbolStatus", &["TRADING", "HALT", "BREAK"])],
+            &[("symbolStatus", &["TRADING", "HALT", "BREAK", "CANCEL_ONLY"])],
             &[],
         )?;
         super::validation::validate("exchangeInfo", p)
@@ -1249,7 +1257,7 @@ impl Request for ExecutionRules {
         validate_parameters(
             p,
             &[],
-            &[("symbolStatus", &["TRADING", "HALT", "BREAK"])],
+            &[("symbolStatus", &["TRADING", "HALT", "BREAK", "CANCEL_ONLY"])],
             &[],
         )?;
         super::validation::validate("executionRules", p)
@@ -1629,7 +1637,7 @@ impl Request for Depth {
         validate_parameters(
             p,
             &["symbol"],
-            &[("symbolStatus", &["TRADING", "HALT", "BREAK"])],
+            &[("symbolStatus", &["TRADING", "HALT", "BREAK", "CANCEL_ONLY"])],
             &[("limit", -9_223_372_036_854_775_808, 5_000)],
         )?;
         super::validation::validate("depth", p)
@@ -2128,7 +2136,7 @@ impl Request for Ticker {
                     ],
                 ),
                 ("type", &["FULL", "MINI"]),
-                ("symbolStatus", &["TRADING", "HALT", "BREAK"]),
+                ("symbolStatus", &["TRADING", "HALT", "BREAK", "CANCEL_ONLY"]),
             ],
             &[],
         )?;
@@ -2228,7 +2236,7 @@ impl Request for Ticker24hr {
             &[],
             &[
                 ("type", &["FULL", "MINI"]),
-                ("symbolStatus", &["TRADING", "HALT", "BREAK"]),
+                ("symbolStatus", &["TRADING", "HALT", "BREAK", "CANCEL_ONLY"]),
             ],
             &[],
         )?;
@@ -2318,7 +2326,7 @@ impl Request for TickerBookTicker {
         validate_parameters(
             p,
             &[],
-            &[("symbolStatus", &["TRADING", "HALT", "BREAK"])],
+            &[("symbolStatus", &["TRADING", "HALT", "BREAK", "CANCEL_ONLY"])],
             &[],
         )?;
         super::validation::validate("tickerBookTicker", p)
@@ -2407,7 +2415,7 @@ impl Request for TickerPrice {
         validate_parameters(
             p,
             &[],
-            &[("symbolStatus", &["TRADING", "HALT", "BREAK"])],
+            &[("symbolStatus", &["TRADING", "HALT", "BREAK", "CANCEL_ONLY"])],
             &[],
         )?;
         super::validation::validate("tickerPrice", p)
@@ -2514,7 +2522,7 @@ impl Request for TickerTradingDay {
             &[],
             &[
                 ("type", &["FULL", "MINI"]),
-                ("symbolStatus", &["TRADING", "HALT", "BREAK"]),
+                ("symbolStatus", &["TRADING", "HALT", "BREAK", "CANCEL_ONLY"]),
             ],
             &[],
         )?;
@@ -2783,7 +2791,7 @@ impl Request for ReferencePriceCalculation {
         validate_parameters(
             p,
             &["symbol"],
-            &[("symbolStatus", &["TRADING", "HALT", "BREAK"])],
+            &[("symbolStatus", &["TRADING", "HALT", "BREAK", "CANCEL_ONLY"])],
             &[],
         )?;
         super::validation::validate("referencePriceCalculation", p)
@@ -2843,6 +2851,8 @@ pub struct OrderTest {
     peg_offset_value: Option<i64>,
     #[serde(rename = "pegOffsetType", skip_serializing_if = "Option::is_none")]
     peg_offset_type: Option<String>,
+    #[serde(rename = "quoteNotionalLimit", skip_serializing_if = "Option::is_none")]
+    quote_notional_limit: Option<Decimal>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
     recv_window: Option<Decimal>,
 }
@@ -2964,6 +2974,12 @@ impl OrderTest {
     #[must_use]
     pub fn peg_offset_type(mut self, value: impl Into<String>) -> Self {
         self.peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `quoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.quote_notional_limit = Some(value);
         self
     }
     /// Set the provider `recvWindow` parameter (optional).
@@ -3997,6 +4013,8 @@ pub struct OrderCancelReplace {
     peg_offset_value: Option<i64>,
     #[serde(rename = "pegOffsetType", skip_serializing_if = "Option::is_none")]
     peg_offset_type: Option<String>,
+    #[serde(rename = "quoteNotionalLimit", skip_serializing_if = "Option::is_none")]
+    quote_notional_limit: Option<Decimal>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
     recv_window: Option<Decimal>,
 }
@@ -4148,6 +4166,12 @@ impl OrderCancelReplace {
     #[must_use]
     pub fn peg_offset_type(mut self, value: impl Into<String>) -> Self {
         self.peg_offset_type = Some(value.into());
+        self
+    }
+    /// Set the provider `quoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.quote_notional_limit = Some(value);
         self
     }
     /// Set the provider `recvWindow` parameter (optional).
@@ -4315,6 +4339,16 @@ pub struct OrderListOco {
         skip_serializing_if = "Option::is_none"
     )]
     self_trade_prevention_mode: Option<String>,
+    #[serde(
+        rename = "aboveQuoteNotionalLimit",
+        skip_serializing_if = "Option::is_none"
+    )]
+    above_quote_notional_limit: Option<Decimal>,
+    #[serde(
+        rename = "belowQuoteNotionalLimit",
+        skip_serializing_if = "Option::is_none"
+    )]
+    below_quote_notional_limit: Option<Decimal>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
     recv_window: Option<Decimal>,
 }
@@ -4502,6 +4536,18 @@ impl OrderListOco {
     #[must_use]
     pub fn self_trade_prevention_mode(mut self, value: impl Into<String>) -> Self {
         self.self_trade_prevention_mode = Some(value.into());
+        self
+    }
+    /// Set the provider `aboveQuoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn above_quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.above_quote_notional_limit = Some(value);
+        self
+    }
+    /// Set the provider `belowQuoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn below_quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.below_quote_notional_limit = Some(value);
         self
     }
     /// Set the provider `recvWindow` parameter (optional).
@@ -4701,6 +4747,11 @@ pub struct OrderListOpo {
         skip_serializing_if = "Option::is_none"
     )]
     pending_peg_offset_value: Option<i64>,
+    #[serde(
+        rename = "workingQuoteNotionalLimit",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_quote_notional_limit: Option<Decimal>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
     recv_window: Option<Decimal>,
 }
@@ -4882,6 +4933,12 @@ impl OrderListOpo {
     #[must_use]
     pub fn pending_peg_offset_value(mut self, value: i64) -> Self {
         self.pending_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `workingQuoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn working_quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.working_quote_notional_limit = Some(value);
         self
     }
     /// Set the provider `recvWindow` parameter (optional).
@@ -5150,6 +5207,11 @@ pub struct OrderListOpoco {
         skip_serializing_if = "Option::is_none"
     )]
     pending_below_peg_offset_value: Option<i64>,
+    #[serde(
+        rename = "workingQuoteNotionalLimit",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_quote_notional_limit: Option<Decimal>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
     recv_window: Option<Decimal>,
 }
@@ -5405,6 +5467,12 @@ impl OrderListOpoco {
         self.pending_below_peg_offset_value = Some(value);
         self
     }
+    /// Set the provider `workingQuoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn working_quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.working_quote_notional_limit = Some(value);
+        self
+    }
     /// Set the provider `recvWindow` parameter (optional).
     #[must_use]
     pub fn recv_window(mut self, value: Decimal) -> Self {
@@ -5617,6 +5685,16 @@ pub struct OrderListOto {
         skip_serializing_if = "Option::is_none"
     )]
     pending_peg_offset_value: Option<i64>,
+    #[serde(
+        rename = "workingQuoteNotionalLimit",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_quote_notional_limit: Option<Decimal>,
+    #[serde(
+        rename = "pendingQuoteNotionalLimit",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_quote_notional_limit: Option<Decimal>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
     recv_window: Option<Decimal>,
 }
@@ -5804,6 +5882,18 @@ impl OrderListOto {
     #[must_use]
     pub fn pending_peg_offset_value(mut self, value: i64) -> Self {
         self.pending_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `workingQuoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn working_quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.working_quote_notional_limit = Some(value);
+        self
+    }
+    /// Set the provider `pendingQuoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn pending_quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.pending_quote_notional_limit = Some(value);
         self
     }
     /// Set the provider `recvWindow` parameter (optional).
@@ -6075,6 +6165,21 @@ pub struct OrderListOtoco {
         skip_serializing_if = "Option::is_none"
     )]
     pending_below_peg_offset_value: Option<i64>,
+    #[serde(
+        rename = "workingQuoteNotionalLimit",
+        skip_serializing_if = "Option::is_none"
+    )]
+    working_quote_notional_limit: Option<Decimal>,
+    #[serde(
+        rename = "pendingAboveQuoteNotionalLimit",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_above_quote_notional_limit: Option<Decimal>,
+    #[serde(
+        rename = "pendingBelowQuoteNotionalLimit",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pending_below_quote_notional_limit: Option<Decimal>,
     #[serde(rename = "recvWindow", skip_serializing_if = "Option::is_none")]
     recv_window: Option<Decimal>,
 }
@@ -6334,6 +6439,24 @@ impl OrderListOtoco {
     #[must_use]
     pub fn pending_below_peg_offset_value(mut self, value: i64) -> Self {
         self.pending_below_peg_offset_value = Some(value);
+        self
+    }
+    /// Set the provider `workingQuoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn working_quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.working_quote_notional_limit = Some(value);
+        self
+    }
+    /// Set the provider `pendingAboveQuoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn pending_above_quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.pending_above_quote_notional_limit = Some(value);
+        self
+    }
+    /// Set the provider `pendingBelowQuoteNotionalLimit` parameter (optional).
+    #[must_use]
+    pub fn pending_below_quote_notional_limit(mut self, value: Decimal) -> Self {
+        self.pending_below_quote_notional_limit = Some(value);
         self
     }
     /// Set the provider `recvWindow` parameter (optional).

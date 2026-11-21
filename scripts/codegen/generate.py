@@ -66,6 +66,29 @@ def description_docs(text):
     return ''.join(parts).replace('\n', '\n    /// ')
 
 
+# Keys that only document a schema; they never change the generated wire type.
+DOC_ONLY_KEYS = {'description', 'x-setter-doc', 'x-evidence'}
+
+
+def wire_shape(schema):
+    """Return a request schema without its documentation-only keys, for shape comparison."""
+    def strip(value, keep_keys=False):
+        if isinstance(value, dict):
+            # A properties map is keyed by wire field names, which may spell a documentation key.
+            return {k: strip(v, k == 'properties') for k, v in value.items() if keep_keys or k not in DOC_ONLY_KEYS}
+        if isinstance(value, list):
+            return [strip(v) for v in value]
+        return value
+    return strip(schema)
+
+
+def setter_summary(key, schema, presence):
+    """Document a request setter; a caveat its caller must read replaces the stock line."""
+    if schema.get('x-setter-doc'):
+        return description_docs(schema['x-setter-doc'])+f'\n    /// Wire key: `{key}`; {presence}.'
+    return f'Set the provider `{key}` parameter ({presence}).'
+
+
 def field_name(key, schema):
     name = schema.get('x-rust-name', snake(key))
     if not re.fullmatch(r'[a-z_][a-z0-9_]*', name) or name in RESERVED:
@@ -156,6 +179,7 @@ class Models:
     def __init__(self, components):
         self.components = components
         self.defs = {}
+        self.request_shapes = {}
 
     def resolve(self, schema):
         if '$ref' in schema:
@@ -291,17 +315,26 @@ class Models:
             success['required'] = ['orderId']
             return 'super::wire::BatchResult<'+self.type(success,name+'Success',response)+'>'
         if not response and props:
+            # One wire object sent by several requests is one type, named by its facts.
+            name = schema.get('x-rust-type-name', name)
+            if 'x-rust-type-name' in schema:
+                shape = wire_shape(schema)
+                if self.request_shapes.setdefault(name, shape) != shape:
+                    raise ValueError(('shared request type name with different properties', PRODUCT, name))
             if name not in self.defs:
                 self.defs[name] = ''
                 fields=[]; setters=[]
                 for key,field_schema in props.items():
                     typ=request_type(self,field_schema,name+pascal(key),key)
-                    field=snake(key)
+                    field=field_name(key,field_schema)
                     fields += [f'    #[serde(rename = {lit(key)}, skip_serializing_if = "Option::is_none")]',f'    {field}: Option<{typ}>,']
                     arg='impl Into<String>' if typ=='String' else typ
                     value='value.into()' if typ=='String' else 'value'
-                    setters += [f'    /// Set `{key}` ('+('required' if key in schema.get('required', []) else 'optional')+').', '    #[must_use]',f'    pub fn {field}(mut self,value:{arg})->Self {{ self.{field}=Some({value});self }}']
-                op='newOrder' if name.startswith('PlaceMultipleOrders') else 'modifyOrder' if name.startswith('ModifyMultipleOrders') else 'nestedInput'
+                    summary = f'Set `{key}` ('+('required' if key in schema.get('required', []) else 'optional')+').'
+                    if field_schema.get('description'):
+                        summary = description_docs(field_schema['description'])+f'\n    /// Wire key: `{key}`.'
+                    setters += [f'    /// {summary}', '    #[must_use]',f'    pub fn {field}(mut self,value:{arg})->Self {{ self.{field}=Some({value});self }}']
+                op='newOrder' if name.startswith('PlaceMultipleOrders') else 'modifyOrder' if name.startswith('ModifyMultipleOrders') else schema.get('x-validation-op','nestedInput')
                 validation=f'super::validation::validate({lit(op)}, &crate::core::parameters(&self)?)?;'
                 if PRODUCT in ['margin','options']:
                     required='&['+', '.join(lit(k) for k in sorted(schema.get('required',[])))+']'
@@ -461,7 +494,9 @@ def generate(kind):
                     '    #[must_use]',
                     '    pub fn deposit_ids(mut self, value: super::DepositIds) -> Self { self.deposit_id = Some(value); self }']
             else:
-                setters += [f'    /// Set the provider `{key}` parameter ('+('required' if key in required else 'optional')+').',
+                presence = 'required' if key in required else 'optional'
+                summary = setter_summary(key, s, presence)
+                setters += [f'    /// {summary}',
                     '    #[must_use]',f'    pub fn {setter}(mut self, value: {arg}) -> Self {{ self.{field} = Some({val}); self }}']
             if s.get('enum'):
                 enums.append('('+lit(key)+', &['+', '.join(lit(str(v)) for v in s['enum'])+'])')

@@ -156,18 +156,16 @@ fn validate_order_enums(op: &str, p: &BTreeMap<String, Value>) -> Result<(), Err
         ],
         &[],
     )?;
+    // An algo order trails by 0.1 to 20 percent; the validation-only order keeps
+    // its own legacy ceiling of 5.
     if let Some(value) = p.get("callbackRate") {
         let value =
             super::wire::parse_decimal(value).map_err(|_| Error::Validation("callbackRate"))?;
-        if value < crate::Decimal::new(1, 1)
-            || value
-                > if op == "testOrder" {
-                    crate::Decimal::new(5, 0)
-                } else {
-                    crate::Decimal::TEN
-                }
-        {
-            return Err(Error::Validation("callbackRate must be between 0.1 and 10"));
+        let maximum = if op == "testOrder" { 5 } else { 20 };
+        if value < crate::Decimal::new(1, 1) || value > crate::Decimal::from(maximum) {
+            return Err(Error::Validation(
+                "callbackRate outside its documented range",
+            ));
         }
     }
     Ok(())

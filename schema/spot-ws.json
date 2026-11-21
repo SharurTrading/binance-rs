@@ -1,7 +1,7 @@
 {
-  "checked": "2026-09-27",
+  "checked": "2026-11-20",
   "source": "https://developers.binance.info/en/docs/catalog/core-trading-spot-trading/api/ws-api/1.0.0/schema.yaml",
-  "sha256": "6d10b37564733de0f3b37b441a5da9f7d42e45154239024db4ac868d5e8c1fc6",
+  "sha256": "d42545b340c2cea3a21a805e1ef3181000248e72b18d049e5f58992a02ace195",
   "operations": [
     {
       "tags": [
@@ -709,6 +709,16 @@
                           "type": "string",
                           "x-decimal": true
                         },
+                        "quoteNotionalLimit": {
+                          "type": "string",
+                          "x-decimal": true,
+                          "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                          "x-evidence": {
+                            "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                            "checked": "2026-11-20",
+                            "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                          }
+                        },
                         "selfTradePreventionMode": {
                           "$ref": "#/components/schemas/SelfTradePreventionMode"
                         },
@@ -1105,6 +1115,16 @@
                           "type": "string",
                           "x-decimal": true
                         },
+                        "quoteNotionalLimit": {
+                          "type": "string",
+                          "x-decimal": true,
+                          "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                          "x-evidence": {
+                            "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                            "checked": "2026-11-20",
+                            "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                          }
+                        },
                         "cummulativeQuoteQty": {
                           "type": "string",
                           "x-decimal": true
@@ -1353,6 +1373,16 @@
                         "type": "string",
                         "x-decimal": true
                       },
+                      "quoteNotionalLimit": {
+                        "type": "string",
+                        "x-decimal": true,
+                        "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                        "x-evidence": {
+                          "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                          "checked": "2026-11-20",
+                          "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                        }
+                      },
                       "cummulativeQuoteQty": {
                         "type": "string",
                         "x-decimal": true
@@ -1534,7 +1564,8 @@
                       "enum": [
                         "TRADING",
                         "HALT",
-                        "BREAK"
+                        "BREAK",
+                        "CANCEL_ONLY"
                       ]
                     }
                   },
@@ -1617,7 +1648,8 @@
                       "enum": [
                         "TRADING",
                         "HALT",
-                        "BREAK"
+                        "BREAK",
+                        "CANCEL_ONLY"
                       ]
                     }
                   },
@@ -2038,7 +2070,8 @@
                       "enum": [
                         "TRADING",
                         "HALT",
-                        "BREAK"
+                        "BREAK",
+                        "CANCEL_ONLY"
                       ]
                     }
                   },
@@ -2559,7 +2592,8 @@
                       "enum": [
                         "TRADING",
                         "HALT",
-                        "BREAK"
+                        "BREAK",
+                        "CANCEL_ONLY"
                       ]
                     }
                   },
@@ -2848,7 +2882,8 @@
                       "enum": [
                         "TRADING",
                         "HALT",
-                        "BREAK"
+                        "BREAK",
+                        "CANCEL_ONLY"
                       ]
                     }
                   },
@@ -3178,7 +3213,8 @@
                       "enum": [
                         "TRADING",
                         "HALT",
-                        "BREAK"
+                        "BREAK",
+                        "CANCEL_ONLY"
                       ]
                     }
                   },
@@ -3380,7 +3416,8 @@
                       "enum": [
                         "TRADING",
                         "HALT",
-                        "BREAK"
+                        "BREAK",
+                        "CANCEL_ONLY"
                       ]
                     }
                   },
@@ -3568,7 +3605,8 @@
                       "enum": [
                         "TRADING",
                         "HALT",
-                        "BREAK"
+                        "BREAK",
+                        "CANCEL_ONLY"
                       ]
                     }
                   },
@@ -4731,7 +4769,8 @@
                       "enum": [
                         "TRADING",
                         "HALT",
-                        "BREAK"
+                        "BREAK",
+                        "CANCEL_ONLY"
                       ]
                     }
                   },
@@ -4948,6 +4987,16 @@
                               "type": "string",
                               "x-decimal": true
                             },
+                            "quoteNotionalLimit": {
+                              "type": "string",
+                              "x-decimal": true,
+                              "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                              }
+                            },
                             "cummulativeQuoteQty": {
                               "type": "string",
                               "x-decimal": true
@@ -5117,6 +5166,16 @@
                                     "type": "string",
                                     "x-decimal": true
                                   },
+                                  "quoteNotionalLimit": {
+                                    "type": "string",
+                                    "x-decimal": true,
+                                    "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                                    "x-evidence": {
+                                      "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                                      "checked": "2026-11-20",
+                                      "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                                    }
+                                  },
                                   "cummulativeQuoteQty": {
                                     "type": "string",
                                     "x-decimal": true
@@ -5227,6 +5286,16 @@
                             "origQuoteOrderQty": {
                               "type": "string",
                               "x-decimal": true
+                            },
+                            "quoteNotionalLimit": {
+                              "type": "string",
+                              "x-decimal": true,
+                              "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                              }
                             },
                             "cummulativeQuoteQty": {
                               "type": "string",
@@ -5499,6 +5568,16 @@
                             "type": "string",
                             "x-decimal": true
                           },
+                          "quoteNotionalLimit": {
+                            "type": "string",
+                            "x-decimal": true,
+                            "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                            "x-evidence": {
+                              "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                              "checked": "2026-11-20",
+                              "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                            }
+                          },
                           "cummulativeQuoteQty": {
                             "type": "string",
                             "x-decimal": true
@@ -5672,6 +5751,16 @@
                                   "type": "string",
                                   "x-decimal": true
                                 },
+                                "quoteNotionalLimit": {
+                                  "type": "string",
+                                  "x-decimal": true,
+                                  "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                                  "x-evidence": {
+                                    "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                                    "checked": "2026-11-20",
+                                    "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                                  }
+                                },
                                 "cummulativeQuoteQty": {
                                   "type": "string",
                                   "x-decimal": true
@@ -5782,6 +5871,16 @@
                           "origQuoteOrderQty": {
                             "type": "string",
                             "x-decimal": true
+                          },
+                          "quoteNotionalLimit": {
+                            "type": "string",
+                            "x-decimal": true,
+                            "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                            "x-evidence": {
+                              "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                              "checked": "2026-11-20",
+                              "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                            }
                           },
                           "cummulativeQuoteQty": {
                             "type": "string",
@@ -6037,6 +6136,10 @@
                         "PRICE_LEVEL"
                       ]
                     },
+                    "quoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
                     "recvWindow": {
                       "type": "number",
                       "format": "float",
@@ -6123,6 +6226,16 @@
                         "type": "string",
                         "x-decimal": true
                       },
+                      "quoteNotionalLimit": {
+                        "type": "string",
+                        "x-decimal": true,
+                        "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                        "x-evidence": {
+                          "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                          "checked": "2026-11-20",
+                          "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                        }
+                      },
                       "cummulativeQuoteQty": {
                         "type": "string",
                         "x-decimal": true
@@ -6145,6 +6258,50 @@
                       },
                       "selfTradePreventionMode": {
                         "$ref": "#/components/schemas/SelfTradePreventionMode"
+                      },
+                      "preventedMatches": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "preventedMatchId": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "makerSymbol": {
+                              "type": "string",
+                              "x-rust-type": "crate::Symbol"
+                            },
+                            "makerOrderId": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "price": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "takerPreventedQuantity": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "makerPreventedQuantity": {
+                              "type": "string",
+                              "x-decimal": true
+                            },
+                            "effectiveSelfTradePreventionMode": {
+                              "$ref": "#/components/schemas/SelfTradePreventionMode",
+                              "description": "Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode."
+                            }
+                          },
+                          "required": [
+                            "preventedMatchId"
+                          ]
+                        },
+                        "x-evidence": {
+                          "source": "https://github.com/binance/binance-spot-api-docs/blob/master/faqs/stp_faq.md",
+                          "checked": "2026-11-20",
+                          "reason": "The catalog schema does not list this array; the STP FAQ documents its entries on FULL responses and the conditional fields table documents effectiveSelfTradePreventionMode inside them. Only preventedMatchId is required, as SBE schema 3:6 encodes it."
+                        }
                       },
                       "stopPrice": {
                         "type": "string",
@@ -6402,6 +6559,10 @@
                         "PRICE_LEVEL"
                       ]
                     },
+                    "quoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
                     "recvWindow": {
                       "type": "number",
                       "format": "float",
@@ -6648,7 +6809,53 @@
                 },
                 "params": {
                   "type": "object",
-                  "properties": {},
+                  "properties": {
+                    "filter": {
+                      "type": "object",
+                      "x-setter-doc": "Deliver only the events this filter matches on the subscription. An event it excludes is never delivered and raises no gap or loss report, so its absence proves nothing about the account. See [subscription filters](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#user-data-stream-subscription-filters).",
+                      "x-rust-type-name": "UserDataFilterInput",
+                      "x-validation-op": "userDataFilter",
+                      "properties": {
+                        "a": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Deliver only events for these assets; events that carry no asset are still delivered.",
+                          "x-rust-name": "assets"
+                        },
+                        "e": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Deliver only these event types, spelled as each event spells its own type.",
+                          "x-rust-name": "event_types"
+                        },
+                        "s": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Deliver only events for these symbols; events that carry no symbol are still delivered.",
+                          "x-rust-name": "symbols"
+                        },
+                        "x": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Deliver only execution reports of these execution types; every other event is still delivered.",
+                          "x-rust-name": "execution_types"
+                        }
+                      },
+                      "x-evidence": {
+                        "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#user-data-stream-subscription-filters",
+                        "checked": "2026-11-20",
+                        "reason": "The catalog schema types the filter as an object without members; the Markdown page documents its four keys and their value lists."
+                      }
+                    }
+                  },
                   "additionalProperties": false
                 }
               },
@@ -6735,6 +6942,51 @@
                     },
                     "apiKey": {
                       "type": "string"
+                    },
+                    "filter": {
+                      "type": "object",
+                      "x-setter-doc": "Deliver only the events this filter matches on the subscription. An event it excludes is never delivered and raises no gap or loss report, so its absence proves nothing about the account. Subscribing again replaces the active filter with the new one, or with none. See [subscription filters](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#user-data-stream-subscription-filters).",
+                      "x-rust-type-name": "UserDataFilterInput",
+                      "x-validation-op": "userDataFilter",
+                      "properties": {
+                        "a": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Deliver only events for these assets; events that carry no asset are still delivered.",
+                          "x-rust-name": "assets"
+                        },
+                        "e": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Deliver only these event types, spelled as each event spells its own type.",
+                          "x-rust-name": "event_types"
+                        },
+                        "s": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Deliver only events for these symbols; events that carry no symbol are still delivered.",
+                          "x-rust-name": "symbols"
+                        },
+                        "x": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Deliver only execution reports of these execution types; every other event is still delivered.",
+                          "x-rust-name": "execution_types"
+                        }
+                      },
+                      "x-evidence": {
+                        "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#user-data-stream-subscription-filters",
+                        "checked": "2026-11-20",
+                        "reason": "The catalog schema types the filter as an object without members; the Markdown page documents its four keys and their value lists."
+                      }
                     }
                   },
                   "additionalProperties": false,
@@ -8093,6 +8345,16 @@
                             "type": "string",
                             "x-decimal": true
                           },
+                          "quoteNotionalLimit": {
+                            "type": "string",
+                            "x-decimal": true,
+                            "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                            "x-evidence": {
+                              "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                              "checked": "2026-11-20",
+                              "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                            }
+                          },
                           "executedQty": {
                             "type": "string",
                             "x-decimal": true
@@ -8423,6 +8685,10 @@
                         "PRICE_LEVEL"
                       ]
                     },
+                    "quoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
                     "recvWindow": {
                       "type": "number",
                       "format": "float",
@@ -8521,6 +8787,16 @@
                           "origQuoteOrderQty": {
                             "type": "string",
                             "x-decimal": true
+                          },
+                          "quoteNotionalLimit": {
+                            "type": "string",
+                            "x-decimal": true,
+                            "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                            "x-evidence": {
+                              "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                              "checked": "2026-11-20",
+                              "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                            }
                           },
                           "cummulativeQuoteQty": {
                             "type": "string",
@@ -8637,6 +8913,16 @@
                             "type": "string",
                             "x-decimal": true
                           },
+                          "quoteNotionalLimit": {
+                            "type": "string",
+                            "x-decimal": true,
+                            "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                            "x-evidence": {
+                              "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                              "checked": "2026-11-20",
+                              "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                            }
+                          },
                           "cummulativeQuoteQty": {
                             "type": "string",
                             "x-decimal": true
@@ -8655,6 +8941,83 @@
                           },
                           "selfTradePreventionMode": {
                             "$ref": "#/components/schemas/SelfTradePreventionMode"
+                          },
+                          "preventedMatches": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "preventedMatchId": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "makerSymbol": {
+                                  "type": "string",
+                                  "x-rust-type": "crate::Symbol"
+                                },
+                                "makerOrderId": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                },
+                                "price": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "takerPreventedQuantity": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "makerPreventedQuantity": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "effectiveSelfTradePreventionMode": {
+                                  "$ref": "#/components/schemas/SelfTradePreventionMode",
+                                  "description": "Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode."
+                                }
+                              },
+                              "required": [
+                                "preventedMatchId"
+                              ]
+                            },
+                            "x-evidence": {
+                              "source": "https://github.com/binance/binance-spot-api-docs/blob/master/faqs/stp_faq.md",
+                              "checked": "2026-11-20",
+                              "reason": "The catalog schema does not list this array; the STP FAQ documents its entries on FULL responses and the conditional fields table documents effectiveSelfTradePreventionMode inside them. Only preventedMatchId is required, as SBE schema 3:6 encodes it."
+                            }
+                          },
+                          "fills": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "price": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "qty": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "commission": {
+                                  "type": "string",
+                                  "x-decimal": true
+                                },
+                                "commissionAsset": {
+                                  "type": "string",
+                                  "x-rust-type": "crate::Asset"
+                                },
+                                "tradeId": {
+                                  "type": "integer",
+                                  "format": "int64"
+                                }
+                              }
+                            },
+                            "x-evidence": {
+                              "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#cancel-and-replace-order-trade",
+                              "checked": "2026-11-20",
+                              "reason": "The catalog schema omits the fills of the new-order leg here although it lists them on order placement; the Markdown page offers newOrderRespType FULL for the replacement order."
+                            }
                           },
                           "icebergQty": {
                             "type": "string",
@@ -8929,6 +9292,16 @@
                             "origQuoteOrderQty": {
                               "type": "string",
                               "x-decimal": true
+                            },
+                            "quoteNotionalLimit": {
+                              "type": "string",
+                              "x-decimal": true,
+                              "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                              }
                             },
                             "cummulativeQuoteQty": {
                               "type": "string",
@@ -9317,6 +9690,50 @@
                             "selfTradePreventionMode": {
                               "$ref": "#/components/schemas/SelfTradePreventionMode"
                             },
+                            "preventedMatches": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "preventedMatchId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "makerSymbol": {
+                                    "type": "string",
+                                    "x-rust-type": "crate::Symbol"
+                                  },
+                                  "makerOrderId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "price": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "takerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "makerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "effectiveSelfTradePreventionMode": {
+                                    "$ref": "#/components/schemas/SelfTradePreventionMode",
+                                    "description": "Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode."
+                                  }
+                                },
+                                "required": [
+                                  "preventedMatchId"
+                                ]
+                              },
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/faqs/stp_faq.md",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this array; the STP FAQ documents its entries on FULL responses and the conditional fields table documents effectiveSelfTradePreventionMode inside them. Only preventedMatchId is required, as SBE schema 3:6 encodes it."
+                              }
+                            },
                             "icebergQty": {
                               "type": "string",
                               "x-decimal": true
@@ -9598,6 +10015,14 @@
                         "TRANSFER"
                       ]
                     },
+                    "aboveQuoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "belowQuoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
                     "recvWindow": {
                       "type": "number",
                       "format": "float",
@@ -9733,6 +10158,16 @@
                               "type": "string",
                               "x-decimal": true
                             },
+                            "quoteNotionalLimit": {
+                              "type": "string",
+                              "x-decimal": true,
+                              "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                              }
+                            },
                             "cummulativeQuoteQty": {
                               "type": "string",
                               "x-decimal": true
@@ -9755,6 +10190,50 @@
                             },
                             "selfTradePreventionMode": {
                               "$ref": "#/components/schemas/SelfTradePreventionMode"
+                            },
+                            "preventedMatches": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "preventedMatchId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "makerSymbol": {
+                                    "type": "string",
+                                    "x-rust-type": "crate::Symbol"
+                                  },
+                                  "makerOrderId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "price": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "takerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "makerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "effectiveSelfTradePreventionMode": {
+                                    "$ref": "#/components/schemas/SelfTradePreventionMode",
+                                    "description": "Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode."
+                                  }
+                                },
+                                "required": [
+                                  "preventedMatchId"
+                                ]
+                              },
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/faqs/stp_faq.md",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this array; the STP FAQ documents its entries on FULL responses and the conditional fields table documents effectiveSelfTradePreventionMode inside them. Only preventedMatchId is required, as SBE schema 3:6 encodes it."
+                              }
                             },
                             "icebergQty": {
                               "type": "string",
@@ -10036,6 +10515,10 @@
                       "type": "integer",
                       "maximum": 100
                     },
+                    "workingQuoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
                     "recvWindow": {
                       "type": "number",
                       "format": "float",
@@ -10169,6 +10652,16 @@
                               "type": "string",
                               "x-decimal": true
                             },
+                            "quoteNotionalLimit": {
+                              "type": "string",
+                              "x-decimal": true,
+                              "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                              }
+                            },
                             "cummulativeQuoteQty": {
                               "type": "string",
                               "x-decimal": true
@@ -10191,6 +10684,50 @@
                             },
                             "selfTradePreventionMode": {
                               "$ref": "#/components/schemas/SelfTradePreventionMode"
+                            },
+                            "preventedMatches": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "preventedMatchId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "makerSymbol": {
+                                    "type": "string",
+                                    "x-rust-type": "crate::Symbol"
+                                  },
+                                  "makerOrderId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "price": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "takerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "makerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "effectiveSelfTradePreventionMode": {
+                                    "$ref": "#/components/schemas/SelfTradePreventionMode",
+                                    "description": "Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode."
+                                  }
+                                },
+                                "required": [
+                                  "preventedMatchId"
+                                ]
+                              },
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/faqs/stp_faq.md",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this array; the STP FAQ documents its entries on FULL responses and the conditional fields table documents effectiveSelfTradePreventionMode inside them. Only preventedMatchId is required, as SBE schema 3:6 encodes it."
+                              }
                             },
                             "origQty": {
                               "type": "string",
@@ -10508,6 +11045,10 @@
                       "type": "integer",
                       "maximum": 100
                     },
+                    "workingQuoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
                     "recvWindow": {
                       "type": "number",
                       "format": "float",
@@ -10641,6 +11182,16 @@
                               "type": "string",
                               "x-decimal": true
                             },
+                            "quoteNotionalLimit": {
+                              "type": "string",
+                              "x-decimal": true,
+                              "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                              }
+                            },
                             "cummulativeQuoteQty": {
                               "type": "string",
                               "x-decimal": true
@@ -10663,6 +11214,50 @@
                             },
                             "selfTradePreventionMode": {
                               "$ref": "#/components/schemas/SelfTradePreventionMode"
+                            },
+                            "preventedMatches": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "preventedMatchId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "makerSymbol": {
+                                    "type": "string",
+                                    "x-rust-type": "crate::Symbol"
+                                  },
+                                  "makerOrderId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "price": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "takerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "makerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "effectiveSelfTradePreventionMode": {
+                                    "$ref": "#/components/schemas/SelfTradePreventionMode",
+                                    "description": "Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode."
+                                  }
+                                },
+                                "required": [
+                                  "preventedMatchId"
+                                ]
+                              },
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/faqs/stp_faq.md",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this array; the STP FAQ documents its entries on FULL responses and the conditional fields table documents effectiveSelfTradePreventionMode inside them. Only preventedMatchId is required, as SBE schema 3:6 encodes it."
+                              }
                             },
                             "stopPrice": {
                               "type": "string",
@@ -10926,6 +11521,14 @@
                       "type": "integer",
                       "maximum": 100
                     },
+                    "workingQuoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "pendingQuoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
                     "recvWindow": {
                       "type": "number",
                       "format": "float",
@@ -11064,6 +11667,16 @@
                               "type": "string",
                               "x-decimal": true
                             },
+                            "quoteNotionalLimit": {
+                              "type": "string",
+                              "x-decimal": true,
+                              "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                              }
+                            },
                             "cummulativeQuoteQty": {
                               "type": "string",
                               "x-decimal": true
@@ -11086,6 +11699,50 @@
                             },
                             "selfTradePreventionMode": {
                               "$ref": "#/components/schemas/SelfTradePreventionMode"
+                            },
+                            "preventedMatches": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "preventedMatchId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "makerSymbol": {
+                                    "type": "string",
+                                    "x-rust-type": "crate::Symbol"
+                                  },
+                                  "makerOrderId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "price": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "takerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "makerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "effectiveSelfTradePreventionMode": {
+                                    "$ref": "#/components/schemas/SelfTradePreventionMode",
+                                    "description": "Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode."
+                                  }
+                                },
+                                "required": [
+                                  "preventedMatchId"
+                                ]
+                              },
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/faqs/stp_faq.md",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this array; the STP FAQ documents its entries on FULL responses and the conditional fields table documents effectiveSelfTradePreventionMode inside them. Only preventedMatchId is required, as SBE schema 3:6 encodes it."
+                              }
                             },
                             "icebergQty": {
                               "type": "string",
@@ -11429,6 +12086,18 @@
                       "type": "integer",
                       "maximum": 100
                     },
+                    "workingQuoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "pendingAboveQuoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "pendingBelowQuoteNotionalLimit": {
+                      "type": "number",
+                      "format": "float"
+                    },
                     "recvWindow": {
                       "type": "number",
                       "format": "float",
@@ -11567,6 +12236,16 @@
                               "type": "string",
                               "x-decimal": true
                             },
+                            "quoteNotionalLimit": {
+                              "type": "string",
+                              "x-decimal": true,
+                              "description": "Most quote asset the order may spend; present only when the order was placed with a quote notional limit.",
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-api.md#conditional-fields-in-order-responses",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this conditional response field; the Markdown table and faqs/quoteNotionalLimit.md document it on order placement, status, open and all orders, cancel, cancel-replace, amend and order-list reports."
+                              }
+                            },
                             "cummulativeQuoteQty": {
                               "type": "string",
                               "x-decimal": true
@@ -11589,6 +12268,50 @@
                             },
                             "selfTradePreventionMode": {
                               "$ref": "#/components/schemas/SelfTradePreventionMode"
+                            },
+                            "preventedMatches": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "preventedMatchId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "makerSymbol": {
+                                    "type": "string",
+                                    "x-rust-type": "crate::Symbol"
+                                  },
+                                  "makerOrderId": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                  },
+                                  "price": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "takerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "makerPreventedQuantity": {
+                                    "type": "string",
+                                    "x-decimal": true
+                                  },
+                                  "effectiveSelfTradePreventionMode": {
+                                    "$ref": "#/components/schemas/SelfTradePreventionMode",
+                                    "description": "Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the order's own mode."
+                                  }
+                                },
+                                "required": [
+                                  "preventedMatchId"
+                                ]
+                              },
+                              "x-evidence": {
+                                "source": "https://github.com/binance/binance-spot-api-docs/blob/master/faqs/stp_faq.md",
+                                "checked": "2026-11-20",
+                                "reason": "The catalog schema does not list this array; the STP FAQ documents its entries on FULL responses and the conditional fields table documents effectiveSelfTradePreventionMode inside them. Only preventedMatchId is required, as SBE schema 3:6 encodes it."
+                              }
                             },
                             "icebergQty": {
                               "type": "string",
@@ -13047,6 +13770,12 @@
                 "opoAllowed": {
                   "type": "boolean"
                 },
+                "marketQuoteNotionalLimitAllowed": {
+                  "type": "boolean"
+                },
+                "limitQuoteNotionalLimitAllowed": {
+                  "type": "boolean"
+                },
                 "quoteOrderQtyMarketAllowed": {
                   "type": "boolean"
                 },
@@ -13343,6 +14072,15 @@
           "pY": {
             "type": "string",
             "x-decimal": true
+          },
+          "Qq": {
+            "type": "string",
+            "x-decimal": true,
+            "description": "Quote notional limit of the order; present only when the order was placed with one."
+          },
+          "eV": {
+            "$ref": "#/components/schemas/SelfTradePreventionMode",
+            "description": "Self-trade prevention mode the venue applied to this prevented match; present only when it differs from the mode the order was placed with (`V`)."
           },
           "b": {
             "$ref": "#/components/schemas/AllocationType"

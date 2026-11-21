@@ -354,7 +354,11 @@ pub(super) fn scalar(meta: &Node, text: &str) -> Result<Value, Error> {
         }
         Decimal::from_str_exact(text).map_err(|_| invalid())
     };
-    if matches!(meta.name.as_str(), "MiscFeeAmt" | "CashOrderQty") {
+    // Quote-asset amounts, whatever numeric type the dictionary gives their tags.
+    if matches!(
+        meta.name.as_str(),
+        "MiscFeeAmt" | "CashOrderQty" | "QuoteNotionalLimit"
+    ) {
         return number().map(Value::Amount);
     }
     if matches!(

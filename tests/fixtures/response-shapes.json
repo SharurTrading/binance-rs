@@ -34714,6 +34714,85 @@
         "subscriptionId": 7,
         "expirationTime": 1758792204196
       }
+    },
+    {
+      "product": "spot",
+      "transport": "rest",
+      "operation": "newOrder",
+      "source": "https://github.com/binance/binance-spot-api-docs/blob/master/faqs/quoteNotionalLimit.md",
+      "variant": "official-markdown.lines.139-166",
+      "response": {
+        "symbol": "BTCUSDT",
+        "orderId": 42,
+        "orderListId": -1,
+        "clientOrderId": "P8hJx3kN9rT2vL6qY4wB1z",
+        "transactTime": 1750313780050,
+        "price": "30.00000000",
+        "origQty": "10.00000000",
+        "executedQty": "5.00000000",
+        "origQuoteOrderQty": "0.00000000",
+        "quoteNotionalLimit": "250.00000000",
+        "cummulativeQuoteQty": "100.00000000",
+        "status": "PARTIALLY_FILLED",
+        "timeInForce": "GTC",
+        "type": "LIMIT",
+        "side": "BUY",
+        "workingTime": 1750313780050,
+        "fills": [
+          {
+            "price": "20.00000000",
+            "qty": "5.00000000",
+            "commission": "0.00000000",
+            "commissionAsset": "BTC",
+            "tradeId": 7
+          }
+        ],
+        "selfTradePreventionMode": "NONE"
+      },
+      "source_line": 139,
+      "source_sha256": "3772f6c6ec460bed628c0f7b10156b15d8bb8a0a22d4835ae6d6e0773ac2a273",
+      "source_heading": "Using quoteNotionalLimit",
+      "id": "json-0980"
+    },
+    {
+      "product": "spot",
+      "transport": "rest",
+      "operation": "newOrder",
+      "source": "https://github.com/binance/binance-spot-api-docs/blob/master/faqs/quoteNotionalLimit.md",
+      "variant": "official-markdown.lines.197-225",
+      "response": {
+        "symbol": "BTCUSDT",
+        "orderId": 1,
+        "orderListId": -1,
+        "clientOrderId": "notional_example",
+        "transactTime": 1792059013310530,
+        "price": "0.0000",
+        "origQty": "1.0000",
+        "executedQty": "0.6000",
+        "origQuoteOrderQty": "0.0000",
+        "quoteNotionalLimit": "60000.0000",
+        "cummulativeQuoteQty": "60000.0000",
+        "status": "EXPIRED",
+        "expiryReason": "INSUFFICIENT_QUOTE_NOTIONAL_LIMIT",
+        "timeInForce": "GTC",
+        "type": "MARKET",
+        "side": "BUY",
+        "workingTime": 1792059013310530,
+        "fills": [
+          {
+            "price": "100000.0000",
+            "qty": "0.6000",
+            "commission": "0.0000",
+            "commissionAsset": "BTC",
+            "tradeId": 0
+          }
+        ],
+        "selfTradePreventionMode": "NONE"
+      },
+      "source_line": 197,
+      "source_sha256": "3772f6c6ec460bed628c0f7b10156b15d8bb8a0a22d4835ae6d6e0773ac2a273",
+      "source_heading": "Using quoteNotionalLimit",
+      "id": "json-0981"
     }
   ]
 }

@@ -170,7 +170,9 @@ drain through `StreamEvent::Retired`, and join the driver. Ingress is unbounded
 and source ordered, with lag diagnostics and explicit gaps. No reconnect,
 resubscription, renewal, mutation replay or background runtime is hidden.
 Known malformed financial evidence fails; future events/fields remain redacted
-native evidence. Raw frames carry no fabricated combined-stream identity.
+native evidence. Raw frames carry no fabricated combined-stream identity. A
+`RecordLoss` names the redacted combined-stream name its envelope carried, and
+none for a raw or execution frame.
 
 `tests/advanced_trading_contract.rs`, `tests/advanced_streams_contract.rs` and
 `core::rate::rolling` fixtures cover native routes, exact financial parsing,

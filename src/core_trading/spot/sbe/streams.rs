@@ -8,6 +8,7 @@ use crate::core::{
 };
 use crate::core_trading::spot::{Config, ConnectionDriver, Environment};
 use crate::{Budgets, Clock, Credentials, Error, Symbol, TimeUnit};
+use serde::Deserialize;
 use std::{collections::BTreeSet, sync::Arc, time::Duration};
 
 /// Caller-owned SBE market configuration. Only Ed25519 API keys are supported.
@@ -156,6 +157,14 @@ pub enum StreamEvent {
     RecordLoss {
         /// Source socket generation.
         generation: u64,
+        /// Combined-stream name the lost record's envelope carried, exactly as
+        /// received.
+        ///
+        /// `Some` only for a JSON frame whose `stream` field was a string. `None`
+        /// for a binary SBE frame, which names no stream, and for text that was not
+        /// JSON or named no stream. The name is public market-data identity;
+        /// the raw payload is never retained.
+        stream: Option<String>,
         /// Safe typed cause, without raw message contents.
         error: Error,
     },
@@ -228,9 +237,12 @@ impl MarketStreams {
         Some(match self.events.recv().await? {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
-            SocketEvent::RecordLoss { generation, error } => {
-                StreamEvent::RecordLoss { generation, error }
-            }
+            // A binary frame or non-JSON text names no stream.
+            SocketEvent::RecordLoss { generation, error } => StreamEvent::RecordLoss {
+                generation,
+                stream: None,
+                error,
+            },
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
             // This connection never sends stream control messages.
             SocketEvent::ControlLate { generation, .. } => {
@@ -274,11 +286,14 @@ impl MarketStreams {
                     } else {
                         StreamEvent::RecordLoss {
                             generation,
+                            stream: envelope_stream(&value),
                             error: Error::Gap("malformed SBE shutdown notice"),
                         }
                     }
                 } else {
-                    if let Ok(payload) = serde_json::from_value(value) {
+                    // Decoded from a borrow so a failure can still name the
+                    // envelope's stream without cloning every text frame.
+                    if let Ok(payload) = MarketEvent::deserialize(&value) {
                         StreamEvent::Data {
                             generation,
                             payload,
@@ -286,6 +301,7 @@ impl MarketStreams {
                     } else {
                         StreamEvent::RecordLoss {
                             generation,
+                            stream: envelope_stream(&value),
                             error: Error::Gap("unexpected SBE market text"),
                         }
                     }
@@ -307,6 +323,14 @@ impl MarketStreams {
     pub async fn close(&self) -> Result<(), Error> {
         self.socket.close().await
     }
+}
+
+/// The `stream` an undecodable JSON frame's envelope named, if any.
+fn envelope_stream(value: &serde_json::Value) -> Option<String> {
+    value
+        .get("stream")
+        .and_then(serde_json::Value::as_str)
+        .map(str::to_owned)
 }
 
 fn native_market_payload(payload: Box<dyn std::any::Any + Send>) -> Result<MarketEvent, Error> {

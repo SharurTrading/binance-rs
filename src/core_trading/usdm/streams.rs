@@ -144,9 +144,12 @@ impl Streams {
         Some(match self.inner.events.recv().await? {
             SocketEvent::Established(g) => StreamEvent::Established(g),
             SocketEvent::Retired(g) => StreamEvent::Retired(g),
-            SocketEvent::RecordLoss { generation, error } => {
-                StreamEvent::RecordLoss { generation, error }
-            }
+            // A frame lost below the envelope (not JSON) names no stream.
+            SocketEvent::RecordLoss { generation, error } => StreamEvent::RecordLoss {
+                generation,
+                stream: None,
+                error,
+            },
             SocketEvent::Gap { generation, error } => StreamEvent::Gap { generation, error },
             SocketEvent::NativeBinary { generation, .. } => {
                 self.inner.events.stop();
@@ -160,17 +163,27 @@ impl Streams {
                 mut value,
             } => {
                 let decoded = if self.inner.private {
-                    user_payload(value).map(StreamPayload::User)
+                    user_payload(value)
+                        .map(StreamPayload::User)
+                        // User data arrives without a combined-stream envelope.
+                        .map_err(|error| (None, error))
                 } else {
                     let name = value.get("stream").and_then(serde_json::Value::as_str);
                     let kind = name.and_then(|name| self.inner.membership.kind(name));
                     let name = name.map(str::to_owned);
                     match (name, kind, value.get_mut("data")) {
-                        (Some(name), Some(kind), Some(data)) => market_payload(kind, data.take())
-                            .map(|payload| StreamPayload::Market {
-                                stream: name,
-                                payload,
-                            }),
+                        // A payload that does not decode is attributed to the
+                        // stream its envelope named; the name is handed back with
+                        // the error rather than cloned for every record.
+                        (Some(name), Some(kind), Some(data)) => {
+                            match market_payload(kind, data.take()) {
+                                Ok(payload) => Ok(StreamPayload::Market {
+                                    stream: name,
+                                    payload,
+                                }),
+                                Err(error) => Err((Some(name), error)),
+                            }
+                        }
                         // A stream name this build did not subscribe or model is
                         // retained evidence on a live socket, not a continuity
                         // break; only a malformed envelope of a known kind gaps.
@@ -178,7 +191,12 @@ impl Streams {
                             stream: name,
                             payload: MarketPayload::Unknown(data.take().into()),
                         }),
-                        _ => Err(Error::Gap("unexpected combined stream envelope")),
+                        // An envelope without a string `stream` names nothing; one
+                        // that named a stream but carried no `data` lost that
+                        // stream's record.
+                        (name, _, _) => {
+                            Err((name, Error::Gap("unexpected combined stream envelope")))
+                        }
                     }
                 };
                 match decoded {
@@ -186,7 +204,11 @@ impl Streams {
                         generation,
                         payload,
                     },
-                    Err(error) => StreamEvent::RecordLoss { generation, error },
+                    Err((stream, error)) => StreamEvent::RecordLoss {
+                        generation,
+                        stream,
+                        error,
+                    },
                 }
             }
             SocketEvent::Late { generation, .. } => {
@@ -321,6 +343,15 @@ pub enum StreamEvent {
     RecordLoss {
         /// Source socket generation.
         generation: u64,
+        /// Combined-stream name the lost record's envelope carried, exactly as
+        /// received.
+        ///
+        /// `Some` when the frame was a JSON object whose `stream` field was a
+        /// string, though its `data` was missing or did not decode. `None` when the
+        /// frame was not JSON, its envelope named no stream, or it arrived on a
+        /// user-data socket, whose events carry no envelope. The name is public
+        /// market-data identity; the raw payload is never retained.
+        stream: Option<String>,
         /// Safe typed cause, without raw message contents.
         error: Error,
     },

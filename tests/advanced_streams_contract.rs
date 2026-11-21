@@ -84,7 +84,7 @@ macro_rules! user_stream {
                     ..
                 })
             ));
-            assert!(matches!(stream.recv().await, Some(StreamEvent::RecordLoss { error: binance_client::Error::Gap(_), .. })));
+            assert!(matches!(stream.recv().await, Some(StreamEvent::RecordLoss { stream: None, error: binance_client::Error::Gap(_), .. })));
             assert!(matches!(stream.recv().await, Some(StreamEvent::Data { payload: $product::event_payloads::Payload::$variant(_), .. })));
             assert!(matches!(
                 stream.recv().await,
@@ -215,6 +215,92 @@ async fn alpha_subscription_retains_full_depth_continuity_without_building_a_boo
         streams.list_subscriptions(deadline()).await.unwrap(),
         vec!["alpha_173usdt@fulldepth@500ms"]
     );
+    streams.close().await.unwrap();
+    while !matches!(streams.recv().await, Some(StreamEvent::Retired(_))) {}
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+
+#[tokio::test]
+async fn alpha_record_loss_names_the_redacted_stream_its_envelope_carried() {
+    use advanced_trading::alpha;
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    let server = tokio::spawn(async move {
+        let (tcp, _) = listener.accept().await.unwrap();
+        let (_, mut ws) = ServerBuilder::new().accept(tcp).await.unwrap();
+        let request: serde_json::Value =
+            serde_json::from_str(ws.next().await.unwrap().unwrap().as_text().unwrap()).unwrap();
+        let answer = serde_json::json!({"result":null,"id":request["id"]});
+        for frame in [
+            answer.to_string(),
+            r#"{"stream":"alpha_173usdt@fulldepth@500ms","data":{"e":"depthUpdate","E":1,"T":1,"s":"ALPHA_173USDT","U":10,"u":12,"pu":9,"b":[["bad","1"]],"a":[]}}"#.to_owned(),
+            r#"{"stream":"alpha_173usdt@fulldepth@500ms"}"#.to_owned(),
+            r#"{"stream":7,"data":{}}"#.to_owned(),
+            "{not-json".to_owned(),
+        ] {
+            ws.send(Message::text(frame)).await.unwrap();
+        }
+        while let Some(m) = ws.next().await {
+            if m.unwrap().is_close() {
+                break;
+            }
+        }
+    });
+    let (mut streams, driver) = alpha::Streams::connect(
+        config()
+            .streams_url(&format!("ws://{addr}/w3w/wsa/stream"))
+            .unwrap(),
+    )
+    .await
+    .unwrap();
+    let driver = tokio::spawn(driver.run());
+    assert!(matches!(
+        streams.recv().await,
+        Some(StreamEvent::Established(_))
+    ));
+    let symbol = binance_client::Symbol::new("ALPHA_173USDT").unwrap();
+    let name = alpha::Stream::full_depth_stream(&symbol, "500ms").unwrap();
+    streams.subscribe(&[name], deadline()).await.unwrap();
+    // A lost depth record names its stream, still redacted as `Data` names are.
+    let Some(StreamEvent::RecordLoss {
+        stream: Some(lost),
+        error: binance_client::Error::Gap(_),
+        ..
+    }) = streams.recv().await
+    else {
+        panic!("depth record loss naming its stream")
+    };
+    assert_eq!(lost.as_str(), "alpha_173usdt@fulldepth@500ms");
+    assert!(!format!("{lost:?}").contains("alpha_173usdt"));
+    // An envelope that names a stream but carries no `data` lost that stream's record.
+    let Some(StreamEvent::RecordLoss {
+        stream: Some(named),
+        error: binance_client::Error::Gap("malformed native combined-stream envelope"),
+        ..
+    }) = streams.recv().await
+    else {
+        panic!("envelope without data naming its stream")
+    };
+    assert_eq!(named.as_str(), "alpha_173usdt@fulldepth@500ms");
+    assert!(!format!("{named:?}").contains("alpha_173usdt"));
+    // A non-string name, or a frame that is not JSON, names nothing.
+    assert!(matches!(
+        streams.recv().await,
+        Some(StreamEvent::RecordLoss {
+            stream: None,
+            error: binance_client::Error::Gap("malformed native combined-stream envelope"),
+            ..
+        })
+    ));
+    assert!(matches!(
+        streams.recv().await,
+        Some(StreamEvent::RecordLoss {
+            stream: None,
+            error: binance_client::Error::Gap("malformed JSON event"),
+            ..
+        })
+    ));
     streams.close().await.unwrap();
     while !matches!(streams.recv().await, Some(StreamEvent::Retired(_))) {}
     driver.await.unwrap().unwrap();

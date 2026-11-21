@@ -46,16 +46,17 @@ async fn native_binary_and_json_shutdown_keep_one_generation_and_source_order() 
             .accept(stream)
             .await
             .unwrap();
-        socket.send(Message::binary(quote())).await.unwrap();
-        socket
-            .send(Message::text(
-                r#"{"data":{"e":"serverShutdown","E":456,"T":789}}"#,
-            ))
-            .await
-            .unwrap();
-        socket.send(Message::binary(quote())).await.unwrap();
-        socket.send(Message::binary(vec![0])).await.unwrap();
-        socket.send(Message::binary(quote())).await.unwrap();
+        for frame in [
+            Message::binary(quote()),
+            Message::text(r#"{"data":{"e":"serverShutdown","E":456,"T":789}}"#),
+            Message::binary(quote()),
+            Message::binary(vec![0]),
+            Message::text(r#"{"stream":"btcusdt@bestBidAsk","data":{"e":"futureSbeText"}}"#),
+            Message::text(r#"{"e":"serverShutdown","T":1}"#),
+            Message::binary(quote()),
+        ] {
+            socket.send(frame).await.unwrap();
+        }
         continue_rx.await.unwrap();
         socket.send(Message::binary(quote())).await.unwrap();
         while let Some(frame) = socket.next().await {
@@ -100,7 +101,14 @@ async fn native_binary_and_json_shutdown_keep_one_generation_and_source_order() 
         }
     }
     assert!(
-        matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation:g, error:Error::BinaryDecode { .. } }) if g == generation)
+        matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation:g, stream: None, error:Error::BinaryDecode { .. } }) if g == generation)
+    );
+    // A binary SBE frame names no stream; JSON text names the one its envelope carried.
+    assert!(
+        matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation: g, stream: Some(name), error: Error::Gap("unexpected SBE market text") }) if g == generation && name == "btcusdt@bestBidAsk")
+    );
+    assert!(
+        matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation: g, stream: None, error: Error::Gap("malformed SBE shutdown notice") }) if g == generation)
     );
     assert!(
         matches!(events.recv().await, Some(StreamEvent::Data { generation: g, payload: MarketEvent::BestBidAsk(q) }) if g == generation && q.book_update_id == 42)

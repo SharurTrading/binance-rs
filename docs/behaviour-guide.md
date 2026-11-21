@@ -163,8 +163,8 @@ resolve the received evidence before explicitly releasing the unknown timing hol
 ### Socket lifecycle and failure causes
 
 Each socket generation reports `Established`, then source-ordered data and loss
-notices, then `Retired`. `RecordLoss { generation, error }` reports a malformed
-complete WebSocket message or known event. The same generation keeps accepting
+notices, then `Retired`. `RecordLoss { generation, stream, error }` reports a
+malformed complete WebSocket message or known event. The same generation keeps accepting
 and delivering later messages; there is no acknowledgement or data-discard gate.
 A JSON array or native SBE payload is decoded atomically as one message, so a
 malformed member does not produce a partially decoded success.
@@ -179,6 +179,25 @@ malformed member does not produce a partially decoded success.
 
 A record-loss notice does not prove account or depth completeness. Consumers
 retain the valid suffix while deciding which authoritative reads they need.
+
+On a market socket, `stream` names the subscription whose record was lost: the
+combined-stream name its envelope carried, exactly as received, even when the
+envelope had no `data`. A depth consumer can therefore tell which book lost a
+frame; whether that book's chain still holds is the consumer's check of the next
+diff's `U`, `u` and Futures `pu`, which the client keeps. `stream` is `None` when
+there is nothing to attribute: a frame that is not JSON, an envelope without a
+string `stream`, a native SBE binary frame, an unenveloped notice, or any
+user-data socket, whose envelope name could carry a listen key. Advanced trading
+products return the name as a redacted `SensitiveString`, as their `Data` does.
+The raw payload is never retained.
+
+| Lost frame | `stream` |
+| --- | --- |
+| Not JSON, or binary SBE | `None` |
+| JSON envelope without a string `stream` | `None` |
+| Envelope naming a stream whose `data` is missing or does not decode | `Some(name)` |
+| Unenveloped shutdown notice, or any user-data record | `None` |
+
 An unreadable unsolicited message cannot identify a pending request; that request
 retains its own deadline and ambiguity rather than receiving an invented answer.
 FIX framing, checksum, header, sequence and session failures remain terminal:

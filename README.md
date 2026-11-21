@@ -211,8 +211,12 @@ lot, notional, and other symbol-dependent rules; precision digits are not tick s
   the received quota evidence, then explicitly call `release_unknown_ban()`;
   waiting for a quota window or changing the reserve does not clear that hold.
 - Ingress is unbounded and source ordered. Queue depth, oldest age, and counts
-  distinguish lag from actual loss. `RecordLoss { generation, error }` reports one
-  malformed complete WebSocket message without closing the generation. Later
+  distinguish lag from actual loss. `RecordLoss { generation, stream, error }`
+  reports one malformed complete WebSocket message without closing the
+  generation. On market sockets `stream` is the combined-stream name the lost
+  record's envelope carried, such as `btcusdt@depth@100ms`, and `None` when the
+  frame was not JSON, named no stream, was binary SBE, or came from a user-data
+  socket; the raw payload is never exposed. Later
   messages remain deliverable in source order without acknowledgement. Terminal
   transport/session/control faults still report `Gap` followed by `Retired`.
 - Market and execution connections are separate. Mixed market routes are refused.

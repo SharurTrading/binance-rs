@@ -10,8 +10,10 @@
 #[cfg(test)]
 mod support;
 use binance_client::usdm::{
-    ApiEvent, Route, Stream, StreamEvent, Streams, WsClient, event_payloads::ApiPayload,
-    streams::StreamPayload, ws_requests::NewOrder,
+    ApiEvent, Route, Stream, StreamEvent, Streams, WsClient,
+    event_payloads::{ApiPayload, MarketPayload},
+    streams::StreamPayload,
+    ws_requests::NewOrder,
 };
 use binance_client::{ClientOrderId, Decimal, Error, Outcome, RequestId, SensitiveString, Symbol};
 use futures_util::{FutureExt, SinkExt, StreamExt};
@@ -905,6 +907,11 @@ mod tests {
                     .contains("btcusdt%40depth%40100ms")
             );
             ws.send(Message::text("not-json".to_owned())).await.unwrap();
+            // A depth diff whose price is not a decimal loses only that record.
+            let lost = json!({"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":1,"T":1,"s":"BTCUSDT","U":10,"u":12,"pu":9,"b":[["bad","1"]],"a":[]}});
+            ws.send(Message::text(lost.to_string())).await.unwrap();
+            let next = json!({"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":2,"T":2,"s":"BTCUSDT","U":13,"u":15,"pu":12,"b":[["1.5","2"]],"a":[]}});
+            ws.send(Message::text(next.to_string())).await.unwrap();
             finish_server(ws).await;
         });
         let (mut streams, driver) =
@@ -912,11 +919,39 @@ mod tests {
                 .await
                 .unwrap();
         let driver = tokio::spawn(driver.run());
+        let generation = streams.generation();
         streams.recv().await.unwrap();
         assert!(matches!(
             streams.recv().await,
-            Some(StreamEvent::RecordLoss { .. })
+            Some(StreamEvent::RecordLoss { generation: g, stream: None, error: Error::Gap("malformed JSON event") }) if g == generation
         ));
+        // The lost depth record names its book's stream, so only that frame is
+        // reported lost; the next diff on the same generation keeps its chain ids.
+        assert!(matches!(
+            streams.recv().await,
+            Some(StreamEvent::RecordLoss { generation: g, stream: Some(name), error: Error::Gap(_) }) if g == generation && name == "btcusdt@depth@100ms"
+        ));
+        let Some(StreamEvent::Data {
+            generation: g,
+            payload:
+                StreamPayload::Market {
+                    stream,
+                    payload: MarketPayload::DiffBookDepthStreams(depth),
+                },
+        }) = streams.recv().await
+        else {
+            panic!("depth after a lost record");
+        };
+        assert_eq!(g, generation);
+        assert_eq!(stream, "btcusdt@depth@100ms");
+        assert_eq!(
+            (
+                depth.first_update_id,
+                depth.final_update_id,
+                depth.previous_final_update_id
+            ),
+            (13, 15, 12)
+        );
         streams.close().await.unwrap();
         assert!(matches!(
             streams.recv().await,

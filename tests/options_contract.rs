@@ -302,8 +302,9 @@ async fn options_socket_preserves_new_input_after_a_malformed_record() {
             ..
         })
     ));
+    // A user-data envelope's name is never surfaced: it can carry the listen key.
     assert!(
-        matches!(streams.recv().await,Some(options::StreamEvent::RecordLoss{generation:g,..}) if g==generation)
+        matches!(streams.recv().await,Some(options::StreamEvent::RecordLoss{generation:g,stream:None,..}) if g==generation)
     );
     continue_tx.send(()).unwrap();
     assert!(
@@ -312,6 +313,72 @@ async fn options_socket_preserves_new_input_after_a_malformed_record() {
     streams.close().await.unwrap();
     assert!(matches!(streams.recv().await,Some(options::StreamEvent::Retired(g)) if g==generation));
     assert!(streams.recv().await.is_none());
+    driver.await.unwrap().unwrap();
+    server.await.unwrap();
+}
+
+#[tokio::test]
+async fn options_market_record_loss_names_the_stream_its_envelope_carried() {
+    use futures_util::{SinkExt, StreamExt};
+    use options::streams::StreamPayload;
+    use tokio_websockets::{Message, ServerBuilder};
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let url = format!("ws://{}", listener.local_addr().unwrap());
+    let server = tokio::spawn(async move {
+        let (tcp, _) = listener.accept().await.unwrap();
+        let (request, mut peer) = ServerBuilder::new().accept(tcp).await.unwrap();
+        assert_eq!(request.uri().path(), "/public/stream");
+        let trade = |price: &str| {
+            json!({"stream":"btc-261030-90000-c@optionTrade","data":{"e":"trade","E":1,"T":1,"s":"BTC-261030-90000-C","t":1,"p":price,"q":"1"}})
+                .to_string()
+        };
+        for frame in [
+            "{not-json".to_owned(),
+            trade("bad"),
+            json!({"data":{"e":"trade","E":1,"T":1,"s":"BTC-261030-90000-C","p":"1","q":"1"}})
+                .to_string(),
+            json!({"stream":"btc-261030-90000-c@optionTrade"}).to_string(),
+            trade("10.5"),
+        ] {
+            peer.send(Message::text(frame)).await.unwrap();
+        }
+        while let Some(message) = peer.next().await {
+            if message.unwrap().is_close() {
+                peer.flush().await.unwrap();
+                break;
+            }
+        }
+    });
+    let stream =
+        options::Stream::trade_streams(&options::Symbol::new("BTC-261030-90000-C").unwrap())
+            .unwrap();
+    let (mut streams, driver) =
+        options::Streams::connect(config().streams_url(&url).unwrap(), &[stream])
+            .await
+            .unwrap();
+    let driver = tokio::spawn(driver.run());
+    let generation = streams.generation();
+    assert!(
+        matches!(streams.recv().await,Some(options::StreamEvent::Established(g)) if g==generation)
+    );
+    assert!(
+        matches!(streams.recv().await,Some(options::StreamEvent::RecordLoss{generation:g,stream:None,error:Error::Gap("malformed JSON event")}) if g==generation)
+    );
+    assert!(
+        matches!(streams.recv().await,Some(options::StreamEvent::RecordLoss{generation:g,stream:Some(name),error:Error::Gap(_)}) if g==generation && name=="btc-261030-90000-c@optionTrade")
+    );
+    assert!(
+        matches!(streams.recv().await,Some(options::StreamEvent::RecordLoss{generation:g,stream:None,error:Error::Gap("unexpected combined stream envelope")}) if g==generation)
+    );
+    // An envelope that names a stream but carries no `data` lost that stream's record.
+    assert!(
+        matches!(streams.recv().await,Some(options::StreamEvent::RecordLoss{generation:g,stream:Some(name),error:Error::Gap("unexpected combined stream envelope")}) if g==generation && name=="btc-261030-90000-c@optionTrade")
+    );
+    assert!(
+        matches!(streams.recv().await,Some(options::StreamEvent::Data{generation:g,payload:StreamPayload::Market{stream,payload:options::event_payloads::MarketPayload::TradeStreams(trade)}}) if g==generation && stream=="btc-261030-90000-c@optionTrade" && trade.p==Decimal::new(105, 1))
+    );
+    streams.close().await.unwrap();
+    assert!(matches!(streams.recv().await,Some(options::StreamEvent::Retired(g)) if g==generation));
     driver.await.unwrap().unwrap();
     server.await.unwrap();
 }

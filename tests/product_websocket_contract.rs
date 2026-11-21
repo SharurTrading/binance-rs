@@ -728,7 +728,8 @@ macro_rules! membership_contract {
         $path:literal,
         $incoming_limit:literal,
         $symbol_a:literal,
-        $symbol_b:literal
+        $symbol_b:literal,
+        $wire_a:literal
     ) => {
         mod $suite {
             use super::*;
@@ -774,6 +775,7 @@ macro_rules! membership_contract {
                 let stream = stream($symbol_a);
                 let name = stream.name().to_owned();
                 let wire = name.clone();
+                assert_eq!(name, $wire_a);
                 let (continue_tx, continue_rx) = oneshot::channel();
                 let server = tokio::spawn(async move {
                     let mut peer = accept(l).await;
@@ -783,6 +785,11 @@ macro_rules! membership_contract {
                     let bad = json!({"stream":wire,"data":{"e":"aggTrade","E":1,"a":5,"s":$symbol_a,"p":"bad","q":"2","f":100,"l":101,"T":1,"m":true,"M":true}});
                     peer.send(Message::text(bad.to_string())).await.unwrap();
                     peer.send(agg_trade_frame(&wire, $symbol_a)).await.unwrap();
+                    // Unreadable envelopes: no stream name, and a name without data.
+                    let unnamed = json!({"data":{"e":"aggTrade","E":1,"a":5,"s":$symbol_a,"p":"10.5","q":"2","f":100,"l":101,"T":1,"m":true,"M":true}});
+                    peer.send(Message::text(unnamed.to_string())).await.unwrap();
+                    peer.send(Message::text(json!({"stream":wire}).to_string())).await.unwrap();
+                    peer.send(agg_trade_frame(&wire, $symbol_a)).await.unwrap();
                     continue_rx.await.unwrap();
                     peer.send(agg_trade_frame(&wire, $symbol_a)).await.unwrap();
                     finish(peer).await;
@@ -791,9 +798,14 @@ macro_rules! membership_contract {
                 let driver = tokio::spawn(driver.run());
                 let generation = established(&mut events).await;
                 expect_trade(&mut events, generation, &name).await;
-                assert!(matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation: g, error: Error::Gap("malformed JSON event") }) if g == generation));
+                // A frame that is not JSON names no stream.
+                assert!(matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation: g, stream: None, error: Error::Gap("malformed JSON event") }) if g == generation));
                 expect_trade(&mut events, generation, &name).await;
-                assert!(matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation: g, error: Error::Gap(_) }) if g == generation));
+                // A readable envelope whose payload does not decode names its stream.
+                assert!(matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation: g, stream: Some(s), error: Error::Gap(_) }) if g == generation && s == $wire_a));
+                expect_trade(&mut events, generation, &name).await;
+                assert!(matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation: g, stream: None, error: Error::Gap("unexpected combined stream envelope") }) if g == generation));
+                assert!(matches!(events.recv().await, Some(StreamEvent::RecordLoss { generation: g, stream: Some(s), error: Error::Gap("unexpected combined stream envelope") }) if g == generation && s == $wire_a));
                 expect_trade(&mut events, generation, &name).await;
                 continue_tx.send(()).unwrap();
                 expect_trade(&mut events, generation, &name).await;
@@ -1113,7 +1125,8 @@ membership_contract!(
     "/stream",
     5,
     "BTCUSDT",
-    "ETHUSDT"
+    "ETHUSDT",
+    "btcusdt@aggTrade"
 );
 membership_contract!(
     usdm_membership,
@@ -1124,7 +1137,8 @@ membership_contract!(
     "/market/stream",
     10,
     "BTCUSDT",
-    "ETHUSDT"
+    "ETHUSDT",
+    "btcusdt@aggTrade"
 );
 membership_contract!(
     coinm_membership,
@@ -1135,7 +1149,8 @@ membership_contract!(
     "/stream",
     10,
     "BTCUSD_PERP",
-    "ETHUSD_PERP"
+    "ETHUSD_PERP",
+    "btcusd_perp@aggTrade"
 );
 
 #[tokio::test]

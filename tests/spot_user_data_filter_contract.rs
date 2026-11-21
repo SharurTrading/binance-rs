@@ -179,6 +179,7 @@ async fn market_stream_delivers_every_shutdown_notice_with_what_it_states() {
             json!({"e":"serverShutdown","E":5}),
             json!({"e":"serverShutdown","E":6,"T":"soon"}),
             json!({"e":"serverShutdown","T":7}),
+            json!({"stream":"!serverShutdown","data":{"e":"serverShutdown","T":8}}),
         ] {
             peer.send(Message::text(notice.to_string())).await.unwrap();
         }
@@ -220,9 +221,14 @@ async fn market_stream_delivers_every_shutdown_notice_with_what_it_states() {
             shutdown_time: Err(Error::Gap(_)),
         }) if g == generation
     ));
+    // An unenveloped notice names no stream; an enveloped one names its own.
     assert!(matches!(
         events.recv().await,
-        Some(spot::StreamEvent::RecordLoss { generation: g, error: Error::Gap(_) }) if g == generation
+        Some(spot::StreamEvent::RecordLoss { generation: g, stream: None, error: Error::Gap("malformed shutdown notice") }) if g == generation
+    ));
+    assert!(matches!(
+        events.recv().await,
+        Some(spot::StreamEvent::RecordLoss { generation: g, stream: Some(s), error: Error::Gap("malformed shutdown notice") }) if g == generation && s == "!serverShutdown"
     ));
     events.close().await.unwrap();
     assert!(matches!(events.recv().await, Some(spot::StreamEvent::Retired(g)) if g == generation));

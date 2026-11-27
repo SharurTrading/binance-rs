@@ -18,6 +18,7 @@ publish = false
 include = ["/src/**", "/tests/**", "!/tests/**/__pycache__/**", "/examples/**", "/Cargo.toml", "/Cargo.lock", "/LICENSE", "/README.md", "/SECURITY.md", "/docs/**", "/schema/**", "/scripts/codegen/*.py", "/clippy.toml", "/rust-toolchain.toml", "/AGENTS.md", "/CONTRIBUTING.md"]
 
 [dependencies]
+jiff = { version = "1.0.3", default-features = false, features = ["std"] }
 aws-lc-rs = "1.18.1"
 base64 = "0.23.1"
 futures-util = { version = "0.3.34", features = ["sink"] }
@@ -34,7 +35,6 @@ tokio-websockets = { version = "0.13.3", features = ["client", "aws_lc_rs", "get
 rustls = { version = "0.23.45", default-features = false, features = ["aws_lc_rs", "std", "tls12"] }
 tokio-rustls = { version = "0.26.5", default-features = false }
 webpki-roots = "1.0.9"
-time = { version = "0.3.55", default-features = false, features = ["std"] }
 tokio-util = { version = "0.7.19", features = ["rt"] }
 url = "2.5.8"
 zeroize = { version = "1.9.0", features = ["derive"] }

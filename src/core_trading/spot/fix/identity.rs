@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT-0
 
 use crate::Error;
+use jiff::{
+    SignedDuration,
+    civil::{Date, DateTime, Time},
+};
 macro_rules! identity {
     ($name:ident, $doc:literal, $valid:expr) => {
         #[doc=$doc]
@@ -49,6 +53,15 @@ identity!(
     |s: &str| !s.is_empty() && s.bytes().all(|b| b.is_ascii_graphic())
 );
 
+const UNIX_EPOCH_UTC: DateTime = DateTime::constant(1970, 1, 1, 0, 0, 0, 0);
+
+// FIX uses UTC and permits every four-digit year, including the end of 9999.
+fn civil_from_micros(micros: i64) -> Result<DateTime, Error> {
+    UNIX_EPOCH_UTC
+        .checked_add(SignedDuration::from_micros(micros))
+        .map_err(|_| Error::Validation("FIX timestamp range"))
+}
+
 /// Checked native FIX timestamp, represented as UTC microseconds.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Timestamp(i64);
@@ -58,9 +71,7 @@ impl Timestamp {
     /// # Errors
     /// Refuses out-of-range calendar values.
     pub fn from_micros(micros: i64) -> Result<Self, Error> {
-        let dt = time::OffsetDateTime::from_unix_timestamp_nanos(i128::from(micros) * 1000)
-            .map_err(|_| Error::Validation("FIX timestamp range"))?;
-        if !(0..=9999).contains(&dt.year()) {
+        if civil_from_micros(micros)?.year() < 0 {
             return Err(Error::Validation("FIX timestamp year"));
         }
         Ok(Self(micros))
@@ -71,7 +82,7 @@ impl Timestamp {
         self.0
     }
     pub(super) fn parse(text: &str) -> Result<Self, Error> {
-        fn n(s: &str) -> Result<u32, Error> {
+        fn n(s: &str) -> Result<i32, Error> {
             if !s.bytes().all(|b| b.is_ascii_digit()) {
                 return Err(Error::Validation("FIX timestamp digits"));
             }
@@ -89,52 +100,68 @@ impl Timestamp {
             return Err(Error::Validation("FIX timestamp separators"));
         }
         let year =
-            i32::try_from(n(&text[..4])?).map_err(|_| Error::Validation("FIX timestamp year"))?;
-        let month = time::Month::try_from(
-            u8::try_from(n(&text[4..6])?).map_err(|_| Error::Validation("FIX timestamp month"))?,
-        )
-        .map_err(|_| Error::Validation("FIX timestamp month"))?;
-        let date = time::Date::from_calendar_date(
-            year,
-            month,
-            u8::try_from(n(&text[6..8])?).map_err(|_| Error::Validation("FIX timestamp day"))?,
-        )
-        .map_err(|_| Error::Validation("FIX timestamp date"))?;
-        let micros = if text.len() == 17 {
-            0
-        } else {
-            let v = n(&text[18..])?;
-            if text.len() == 21 { v * 1000 } else { v }
+            i16::try_from(n(&text[..4])?).map_err(|_| Error::Validation("FIX timestamp year"))?;
+        let month =
+            i8::try_from(n(&text[4..6])?).map_err(|_| Error::Validation("FIX timestamp month"))?;
+        let day =
+            i8::try_from(n(&text[6..8])?).map_err(|_| Error::Validation("FIX timestamp day"))?;
+        let date =
+            Date::new(year, month, day).map_err(|_| Error::Validation("FIX timestamp date"))?;
+        let nanos = match text.len() {
+            17 => 0,
+            21 => n(&text[18..])? * 1_000_000,
+            _ => n(&text[18..])? * 1_000,
         };
-        let datetime = date
-            .with_hms_micro(
-                u8::try_from(n(&text[9..11])?)
-                    .map_err(|_| Error::Validation("FIX timestamp hour"))?,
-                u8::try_from(n(&text[12..14])?)
-                    .map_err(|_| Error::Validation("FIX timestamp minute"))?,
-                u8::try_from(n(&text[15..17])?)
-                    .map_err(|_| Error::Validation("FIX timestamp second"))?,
-                micros,
-            )
-            .map_err(|_| Error::Validation("FIX timestamp time"))?
-            .assume_utc();
-        Self::from_micros(
-            i64::try_from(datetime.unix_timestamp_nanos() / 1000)
-                .map_err(|_| Error::Validation("FIX timestamp range"))?,
+        let time = Time::new(
+            i8::try_from(n(&text[9..11])?).map_err(|_| Error::Validation("FIX timestamp hour"))?,
+            i8::try_from(n(&text[12..14])?)
+                .map_err(|_| Error::Validation("FIX timestamp minute"))?,
+            i8::try_from(n(&text[15..17])?)
+                .map_err(|_| Error::Validation("FIX timestamp second"))?,
+            nanos,
         )
+        .map_err(|_| Error::Validation("FIX timestamp time"))?;
+        let elapsed = date.to_datetime(time).duration_since(UNIX_EPOCH_UTC);
+        let micros = i64::try_from(elapsed.as_micros())
+            .map_err(|_| Error::Validation("FIX timestamp range"))?;
+        Ok(Self(micros))
     }
     pub(super) fn wire(self) -> Result<String, Error> {
-        let dt = time::OffsetDateTime::from_unix_timestamp_nanos(i128::from(self.0) * 1000)
-            .map_err(|_| Error::Validation("FIX timestamp range"))?;
-        Ok(format!(
-            "{:04}{:02}{:02}-{:02}:{:02}:{:02}.{:06}",
-            dt.year(),
-            u8::from(dt.month()),
-            dt.day(),
-            dt.hour(),
-            dt.minute(),
-            dt.second(),
-            dt.microsecond()
-        ))
+        Ok(civil_from_micros(self.0)?
+            .strftime("%Y%m%d-%H:%M:%S%.6f")
+            .to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Timestamp;
+    use crate::Error;
+
+    #[test]
+    fn fix_utc_fields_preserve_microseconds_through_the_last_four_digit_year() {
+        for (text, micros, wire) in [
+            ("19691231-23:59:59.999999", -1, "19691231-23:59:59.999999"),
+            ("19700101-00:00:00.123", 123_000, "19700101-00:00:00.123000"),
+            (
+                "99991231-23:59:59.999999",
+                253_402_300_799_999_999,
+                "99991231-23:59:59.999999",
+            ),
+        ] {
+            assert_eq!(Timestamp::parse(text).unwrap().micros(), micros);
+            assert_eq!(
+                Timestamp::from_micros(micros).unwrap().wire().unwrap(),
+                wire
+            );
+        }
+    }
+
+    #[test]
+    fn fix_seconds_reject_leap_second_spelling() {
+        assert!(matches!(
+            Timestamp::parse("20161231-23:59:60.000001"),
+            Err(Error::Validation("FIX timestamp time"))
+        ));
     }
 }

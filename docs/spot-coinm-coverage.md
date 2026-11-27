@@ -7,6 +7,8 @@ SPDX-License-Identifier: MIT-0
 
 Checked **2026-09-27**; the Spot catalog snapshots were compared again on
 **2026-11-20** for the [2026-11-11 Spot changelog](#spot-changelog-2026-11-11).
+The Spot depth changes were reviewed on **2026-11-27** against the
+[2026-11-24 Spot changelog](#spot-changelog-2026-11-24).
 These are initial JSON implementations, with working
 transport and deterministic fixtures. Catalog bindings do not establish complete
 product coverage or live execution readiness. Separately authorized demo probes on
@@ -184,6 +186,19 @@ Quota evidence/cooldowns survive failed response bodies. Admission does not wait
 or retry, and expired queued commands cannot send late. Both products report their
 pool through `pool_usage()` and each REST request's admission weight through
 `weight()`, as USDⓈ-M does; the report decides nothing.
+
+## Spot changelog 2026-11-24
+
+Binance expanded Spot order-book snapshots across the REST API, WebSocket API,
+and FIX Market Data.
+[Official Binance change](https://github.com/binance/binance-spot-api-docs/commit/d0ff69f3fb08dfe1bedc293a014a17e342c78099)
+
+| Surface | Venue contract | In this client |
+| --- | --- | --- |
+| REST `GET /api/v3/depth` and WebSocket API `depth` | Up to 7,500 levels per side, with request weight 500 for 5,001–7,500. Defaults to 100 and truncates requests above 7,500 to 7,500 levels per side | Both request builders cap depth at 5,000. The shared admission weight table ends at 250 for 1,001–5,000 |
+| FIX Market Data `MarketDataRequest <V>` | `MarketDepth (264)` accepts 2–7,500 for the initial diff-depth snapshot and 1 for book ticker | The existing integer field can encode 7,500. The request builder leaves the depth range unvalidated, and fixtures do not cover the expanded snapshot |
+
+SDK adoption is tracked in [#192](https://github.com/SharurTrading/binance-rs/issues/192).
 
 ## Spot changelog 2026-11-11
 

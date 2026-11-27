@@ -212,15 +212,7 @@ fn counter_overflow_is_refused_without_spending_other_budgets() {
 
 #[test]
 fn all_download_kinds_admit_the_full_calendar_quota_and_reset_together() {
-    let january = u64::try_from(
-        time::Date::from_calendar_date(2026, time::Month::January, 31)
-            .unwrap()
-            .midnight()
-            .assume_utc()
-            .unix_timestamp(),
-    )
-    .unwrap()
-        * 1000;
+    let january = 1_769_817_600_000; // 2026-01-31T00:00:00Z
     let february = january + 86_400_000;
     let budgets = Budgets::new(BudgetLimits::usdm()).unwrap();
     for (kind, capacity) in [(1, 10), (2, 5), (3, 100)] {

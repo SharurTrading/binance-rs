@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 use super::{Error, RateEvidence};
+use jiff::{Timestamp, ToSpan, tz::TimeZone};
 use std::{
     collections::{BTreeMap, VecDeque},
     sync::{Arc, Mutex, OnceLock},
@@ -1035,12 +1036,15 @@ fn monthly_download(
     }
     let seconds =
         i64::try_from(now / 1000).map_err(|_| Error::Configuration("calendar timestamp"))?;
-    let dt = time::OffsetDateTime::from_unix_timestamp(seconds)
-        .map_err(|_| Error::Configuration("calendar timestamp"))?;
-    let bucket = u64::try_from(dt.year())
+    let date = Timestamp::from_second(seconds)
+        .map_err(|_| Error::Configuration("calendar timestamp"))?
+        .to_zoned_datetime(TimeZone::UTC)
+        .date();
+    let month = u64::try_from(date.month()).map_err(|_| Error::Configuration("calendar month"))?;
+    let bucket = u64::try_from(date.year())
         .map_err(|_| Error::Configuration("calendar year"))?
         .checked_mul(12)
-        .and_then(|v| v.checked_add(u64::from(dt.month() as u8)))
+        .and_then(|v| v.checked_add(month))
         .ok_or(Error::Configuration("calendar overflow"))?;
     // Transaction-history jobs draw on one monthly quota across both futures
     // markets; order and trade history jobs keep a quota per market.
@@ -1054,21 +1058,13 @@ fn monthly_download(
     };
     let current = account.counts.get(key).copied().unwrap_or_default();
     if current.0 == bucket && current.1 >= limit {
-        let (year, month) = if dt.month() == time::Month::December {
-            (
-                dt.year()
-                    .checked_add(1)
-                    .ok_or(Error::Configuration("calendar overflow"))?,
-                time::Month::January,
-            )
-        } else {
-            (dt.year(), dt.month().next())
-        };
-        let next = time::Date::from_calendar_date(year, month, 1)
+        let next = date
+            .first_of_month()
+            .checked_add(1.month())
+            .and_then(|date| date.to_zoned_datetime(TimeZone::UTC))
             .map_err(|_| Error::Configuration("calendar"))?
-            .midnight()
-            .assume_utc()
-            .unix_timestamp();
+            .timestamp()
+            .as_second();
         let delay = u64::try_from(
             next.checked_sub(seconds)
                 .ok_or(Error::Configuration("calendar overflow"))?,
@@ -1501,15 +1497,7 @@ mod tests {
     #[test]
     fn monthly_download_jobs_reset_at_calendar_month_not_elapsed_30_days() {
         let budgets = Budgets::new(BudgetLimits::usdm()).unwrap();
-        let january = u64::try_from(
-            time::Date::from_calendar_date(2026, time::Month::January, 31)
-                .unwrap()
-                .midnight()
-                .assume_utc()
-                .unix_timestamp(),
-        )
-        .unwrap()
-            * 1000;
+        let january = 1_769_817_600_000; // 2026-01-31T00:00:00Z
         let february = january + 86_400_000;
         for _ in 0..10 {
             budgets

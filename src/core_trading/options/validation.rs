@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 use crate::{Decimal, Error};
+use jiff::{Timestamp, ToSpan, tz::TimeZone};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 fn required(p: &BTreeMap<String, Value>, keys: &[&str]) -> Result<(), Error> {
@@ -146,30 +147,23 @@ pub(crate) fn validate_three_month_history(
     p: &BTreeMap<String, Value>,
     now: u64,
 ) -> Result<(), Error> {
-    let current = time::OffsetDateTime::from_unix_timestamp_nanos(i128::from(now) * 1_000_000)
+    let millis =
+        i64::try_from(now).map_err(|_| Error::Validation("Options history clock range"))?;
+    let current = Timestamp::from_millisecond(millis)
         .map_err(|_| Error::Validation("Options history clock range"))?;
-    let (year, month, _) = current.date().to_calendar_date();
-    let ordinal = year
-        .checked_mul(12)
-        .and_then(|v| v.checked_add(i32::from(u8::from(month)) - 1))
-        .and_then(|v| v.checked_sub(3))
-        .ok_or(Error::Validation("Options history calendar range"))?;
-    let year = ordinal.div_euclid(12);
-    let month = time::Month::try_from(
-        u8::try_from(ordinal.rem_euclid(12) + 1)
-            .map_err(|_| Error::Validation("Options history month"))?,
-    )
-    .map_err(|_| Error::Validation("Options history month"))?;
     // Binance documents months without a month-end day convention. Refuse only
     // dates certainly older than three months; the venue owns the boundary day.
     // Preserve the supplied timestamp exactly, with no operator-input rounding.
-    let date = time::Date::from_calendar_date(year, month, 1)
-        .map_err(|_| Error::Validation("Options history calendar date"))?;
-    let oldest_nanos = date
-        .with_time(time::Time::MIDNIGHT)
-        .assume_utc()
-        .unix_timestamp_nanos();
-    let oldest = u64::try_from(oldest_nanos.max(0) / 1_000_000)
+    let oldest = current
+        .to_zoned_datetime(TimeZone::UTC)
+        .date()
+        .first_of_month()
+        .checked_sub(3.months())
+        .and_then(|date| date.to_zoned_datetime(TimeZone::UTC))
+        .map_err(|_| Error::Validation("Options history calendar range"))?
+        .timestamp()
+        .as_millisecond();
+    let oldest = u64::try_from(oldest.max(0))
         .map_err(|_| Error::Validation("Options history timestamp range"))?;
     validate_history_window(p, oldest, now)
 }
@@ -332,9 +326,22 @@ fn validate_common(p: &BTreeMap<String, Value>) -> Result<(), Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::validate_cancel_batch;
+    use super::{validate_cancel_batch, validate_three_month_history};
+    use crate::Error;
     use serde_json::json;
     use std::collections::BTreeMap;
+
+    #[test]
+    fn three_month_lookback_keeps_the_full_earliest_calendar_month() {
+        const MAY_31_NOON: u64 = 1_717_156_800_000;
+        const FEBRUARY_1: u64 = 1_706_745_600_000;
+        let at = |value| BTreeMap::from([("startTime".to_owned(), json!(value))]);
+        assert!(validate_three_month_history(&at(FEBRUARY_1), MAY_31_NOON).is_ok());
+        assert!(matches!(
+            validate_three_month_history(&at(1_706_745_599_999), MAY_31_NOON),
+            Err(Error::Validation("Options documented history lookback"))
+        ));
+    }
 
     #[test]
     fn cancellation_members_require_native_identity_evidence() {
